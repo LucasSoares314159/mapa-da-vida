@@ -4,16 +4,17 @@ import { Button } from '@/components/ui/button'
 
 export default function PreparacaoPage() {
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-6 py-16">
+    <main className="relative flex min-h-screen flex-col items-center justify-center px-6 py-16" style={{ backgroundColor: '#2A3F45' }}>
       <Link
         href="/dashboard"
-        className="absolute left-6 top-6 flex items-center gap-1.5 text-sm text-zinc-600 transition-colors hover:text-zinc-400"
+        className="absolute left-6 top-6 flex items-center gap-1.5 text-sm transition-colors duration-200"
+        style={{ color: '#6f8f87' }}
       >
         <ArrowLeft className="size-4" />
         Voltar
       </Link>
       <div className="w-full max-w-sm">
-        <p className="mb-6 text-xs font-medium uppercase tracking-widest text-zinc-500">
+        <p className="mb-6 text-xs font-medium uppercase tracking-widest" style={{ color: '#6f8f87' }}>
           Antes de começar
         </p>
 
@@ -23,7 +24,7 @@ export default function PreparacaoPage() {
           É uma pausa.
         </h1>
 
-        <div className="space-y-6 text-[15px] leading-relaxed text-zinc-400">
+        <div className="space-y-6 text-[15px] leading-relaxed" style={{ color: '#a8c4bc' }}>
           <p>
             Você vai responder 9 perguntas sobre a sua vida — uma de cada vez, com honestidade.
             Não existe resposta certa. Existe só o que é real agora.
@@ -32,7 +33,7 @@ export default function PreparacaoPage() {
             Reserve 10 minutos. Feche outras abas. Responda pelo que é verdade hoje, não pelo que
             você quer que seja.
           </p>
-          <p className="text-zinc-600">
+          <p style={{ color: '#6f8f87' }}>
             A maioria das pessoas nunca para para olhar para a própria vida dessa forma. Você está
             prestes a fazer isso.
           </p>

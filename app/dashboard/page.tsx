@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, FileText } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { logout } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
+import { AuthLayout } from '@/components/AuthLayout'
 import type { Mapa } from '@/types'
 
 export default async function DashboardPage() {
@@ -24,31 +24,13 @@ export default async function DashboardPage() {
   ])
 
   const mapas = (mapasRaw ?? []) as Mapa[]
+  const nomeUsuario = profile?.nome ?? user.email ?? ''
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50">
-      <header className="flex items-center justify-between border-b bg-white px-6 py-4">
-        <h1 className="text-lg font-semibold">Mapa da Vida</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">{profile?.nome ?? user.email}</span>
-          <form action={logout}>
-            <Button variant="outline" size="sm" type="submit">
-              Sair
-            </Button>
-          </form>
-        </div>
-      </header>
-
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-lg font-medium">Seus mapas</h2>
-          <Button asChild>
-            <Link href="/mapa/preparacao">+ Novo mapa</Link>
-          </Button>
-        </div>
-
+    <AuthLayout titulo="Seus mapas" nomeUsuario={nomeUsuario}>
+      <div className="mx-auto w-full max-w-2xl px-6 py-8">
         {mapas.length === 0 ? (
-          <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed bg-white py-16 text-center">
+          <div className="flex flex-col items-center gap-4 rounded-card border bg-white py-16 text-center" style={{ borderColor: '#c8d8d2', borderWidth: '0.5px' }}>
             <p className="text-muted-foreground">Você ainda não tem nenhum mapa.</p>
             <Button asChild>
               <Link href="/mapa/preparacao">Criar meu primeiro mapa</Link>
@@ -62,7 +44,7 @@ export default async function DashboardPage() {
               const data = new Date(mapa.criado_em).toLocaleDateString('pt-BR')
 
               return (
-                <div key={mapa.id} className="rounded-xl border bg-white px-5 py-4 shadow-sm">
+                <div key={mapa.id} className="rounded-card bg-white px-9 py-8" style={{ border: '0.5px solid #c8d8d2' }}>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">{mapa.titulo || 'Mapa da Vida'}</p>
@@ -74,17 +56,17 @@ export default async function DashboardPage() {
                       <span title="Urgente">🔴 {totais.vermelho}</span>
                     </div>
                   </div>
-                  <div className="mt-3 flex gap-4 border-t pt-3">
+                  <div className="mt-3 flex gap-4 border-t pt-3" style={{ borderColor: '#c8d8d2' }}>
                     <Link
                       href={`/mapa/${mapa.id}`}
-                      className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
                     >
                       <Eye className="size-4" />
                       Ver Mapa
                     </Link>
                     <Link
                       href={`/diagnostico/${mapa.id}`}
-                      className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
                     >
                       <FileText className="size-4" />
                       Ver Diagnóstico Completo
@@ -95,7 +77,7 @@ export default async function DashboardPage() {
             })}
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </AuthLayout>
   )
 }
