@@ -26,9 +26,9 @@ type Props = {
 
 function StatusPill({ count, tipo }: { count: number; tipo: 'verde' | 'amarelo' | 'vermelho' }) {
   const estilos = {
-    verde: { bg: '#E8F5F1', cor: '#2A8F6F', ponto: '#57AA8F' },
-    amarelo: { bg: '#FBF5E6', cor: '#A07820', ponto: '#D4A843' },
-    vermelho: { bg: '#FAECEC', cor: '#903030', ponto: '#C05050' },
+    verde:    { bg: 'rgba(87,170,143,0.15)',  cor: '#57AA8F', ponto: '#57AA8F' },
+    amarelo:  { bg: 'rgba(212,168,67,0.15)',  cor: '#D4A843', ponto: '#D4A843' },
+    vermelho: { bg: 'rgba(192,80,80,0.15)',   cor: '#C05050', ponto: '#C05050' },
   }
   const e = estilos[tipo]
   return (

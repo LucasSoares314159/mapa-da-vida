@@ -57,22 +57,25 @@ export default async function DiagnosticoPage({ params }: Props) {
           <p className="text-[1.05rem] font-medium leading-relaxed text-mt-black">{analise}</p>
         </div>
 
-        <div className="flex justify-around rounded-card bg-white px-9 py-6" style={{ border: '0.5px solid #c8d8d2' }}>
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-2xl">🟢</span>
-            <span className="text-xl font-semibold">{totais.verde}</span>
-            <span className="text-xs text-muted-foreground">Bem</span>
-          </div>
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-2xl">🟡</span>
-            <span className="text-xl font-semibold">{totais.amarelo}</span>
-            <span className="text-xs text-muted-foreground">Atenção</span>
-          </div>
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-2xl">🔴</span>
-            <span className="text-xl font-semibold">{totais.vermelho}</span>
-            <span className="text-xs text-muted-foreground">Urgente</span>
-          </div>
+        <div className="flex items-center gap-2 rounded-card bg-white px-9 py-6" style={{ border: '0.5px solid #c8d8d2' }}>
+          {(
+            [
+              { tipo: 'verde',    bg: 'rgba(87,170,143,0.15)', cor: '#57AA8F', count: totais.verde },
+              { tipo: 'amarelo',  bg: 'rgba(212,168,67,0.15)', cor: '#D4A843', count: totais.amarelo },
+              { tipo: 'vermelho', bg: 'rgba(192,80,80,0.15)',  cor: '#C05050', count: totais.vermelho },
+            ] as const
+          ).map(({ tipo, bg, cor, count }) => (
+            <span
+              key={tipo}
+              className="flex items-center text-sm font-medium"
+              style={{ backgroundColor: bg, color: cor, borderRadius: 20, padding: '4px 10px', gap: 5 }}
+            >
+              <span
+                style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: cor, flexShrink: 0, display: 'inline-block' }}
+              />
+              {count}
+            </span>
+          ))}
         </div>
 
         {areasComObservacao.length > 0 && (

@@ -131,16 +131,25 @@ export function RevelacaoMapa({ mapa, analise }: Props) {
           </p>
 
           {/* Pills de cores centralizadas */}
-          <div className="flex items-center justify-center gap-6">
-            <span className="flex items-center gap-2 text-sm" style={{ color: '#a8c4bc' }}>
-              🟢 <span className="font-semibold text-white">{totais.verde}</span>
-            </span>
-            <span className="flex items-center gap-2 text-sm" style={{ color: '#a8c4bc' }}>
-              🟡 <span className="font-semibold text-white">{totais.amarelo}</span>
-            </span>
-            <span className="flex items-center gap-2 text-sm" style={{ color: '#a8c4bc' }}>
-              🔴 <span className="font-semibold text-white">{totais.vermelho}</span>
-            </span>
+          <div className="flex items-center justify-center gap-2">
+            {(
+              [
+                { tipo: 'verde',    bg: 'rgba(87,170,143,0.15)', cor: '#57AA8F', count: totais.verde },
+                { tipo: 'amarelo',  bg: 'rgba(212,168,67,0.15)', cor: '#D4A843', count: totais.amarelo },
+                { tipo: 'vermelho', bg: 'rgba(192,80,80,0.15)',  cor: '#C05050', count: totais.vermelho },
+              ] as const
+            ).map(({ tipo, bg, cor, count }) => (
+              <span
+                key={tipo}
+                className="flex items-center text-sm font-medium"
+                style={{ backgroundColor: bg, color: cor, borderRadius: 20, padding: '4px 10px', gap: 5 }}
+              >
+                <span
+                  style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: cor, flexShrink: 0, display: 'inline-block' }}
+                />
+                {count}
+              </span>
+            ))}
           </div>
 
           {/* Botão Ver diagnóstico completo */}
