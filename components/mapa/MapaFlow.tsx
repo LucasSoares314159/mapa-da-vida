@@ -27,9 +27,11 @@ const H_GAP_AREA   = 120  // gap horizontal entre nós de área
 const V_ROOT_PILAR = 100  // vertical root → pilar
 const V_PILAR_AREA = 100  // vertical pilar → área
 
-function buildFlow(mapa: Mapa): { nodes: Node[]; edges: Edge[] } {
+type FlowEdge = Edge & { pathOptions?: { borderRadius: number } }
+
+function buildFlow(mapa: Mapa): { nodes: Node[]; edges: FlowEdge[] } {
   const nodes: Node[] = []
-  const edges: Edge[] = []
+  const edges: FlowEdge[] = []
   const areaMap = new Map<string, Area>()
 
   for (const area of mapa.areas ?? []) areaMap.set(area.area, area)
@@ -96,6 +98,8 @@ function buildFlow(mapa: Mapa): { nodes: Node[]; edges: Edge[] } {
       id: `root-${pilar}`,
       source: 'root',
       target: pilar,
+      type: 'smoothstep',
+      pathOptions: { borderRadius: 8 },
       style: { stroke: '#c8d8d2', strokeWidth: 1.5 },
     })
 
@@ -163,6 +167,8 @@ function buildFlow(mapa: Mapa): { nodes: Node[]; edges: Edge[] } {
         id: `${pilar}-${nodeId}`,
         source: pilar,
         target: nodeId,
+        type: 'smoothstep',
+        pathOptions: { borderRadius: 8 },
         style: { stroke: '#c8d8d2', strokeWidth: 1.5 },
       })
     })

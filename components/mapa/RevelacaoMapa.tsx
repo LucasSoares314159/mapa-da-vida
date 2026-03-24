@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, FileText } from 'lucide-react'
+import { ArrowLeft, ArrowUp, FileText } from 'lucide-react'
 import { MapaFlow } from './MapaFlow'
 import { cn } from '@/lib/utils'
 import type { Mapa } from '@/types'
@@ -39,82 +39,83 @@ export function RevelacaoMapa({ mapa, analise }: Props) {
     }
   }, [])
 
+  function voltarAoMapa() {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <div>
-      {/* Área do mapa — full screen */}
-      <div className="relative" style={{ height: '100svh' }}>
-        {/* Header fixo sobre o mapa */}
-        <header
-          className="absolute top-0 left-0 right-0 z-10 bg-white"
-          style={{ borderBottom: '0.5px solid #c8d8d2' }}
-        >
-          <div
-            className="mx-auto grid max-w-5xl items-center px-5"
-            style={{ gridTemplateColumns: '1fr auto 1fr', height: 52 }}
-          >
-            {/* Botão Dashboard */}
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-1.5 text-sm font-medium transition-colors"
-              style={{ color: '#57AA8F' }}
-            >
-              <ArrowLeft className="size-4" />
-              Dashboard
-            </Link>
-
-            {/* Título central */}
-            <h1
-              className="text-center text-sm font-semibold whitespace-nowrap"
-              style={{
-                fontFamily: 'var(--font-space-grotesk), Space Grotesk, sans-serif',
-                color: '#2A3F45',
-              }}
-            >
-              Mapa da Vida
-            </h1>
-
-            {/* Botão Ver diagnóstico */}
-            <div className="flex justify-end">
-              <Link
-                href={`/diagnostico/${mapa.id}`}
-                className="flex items-center gap-1.5 text-xs font-medium transition-opacity hover:opacity-80"
-                style={{
-                  backgroundColor: '#2A3F45',
-                  color: '#EDF2EF',
-                  borderRadius: 8,
-                  padding: '6px 12px',
-                }}
-              >
-                <FileText className="size-3.5" />
-                Ver diagnóstico
-              </Link>
-            </div>
-          </div>
-        </header>
-
-        {/* React Flow — ocupa a área abaixo do header */}
-        <div style={{ paddingTop: 52, height: '100%' }}>
-          <MapaFlow mapa={mapa} minimal />
-        </div>
-      </div>
-
-      {/* Card de análise */}
-      <div
-        ref={analiseRef}
-        className={cn(
-          'px-6 py-16 transition-opacity duration-700',
-          revealed ? 'opacity-100' : 'opacity-0'
-        )}
-        style={{ backgroundColor: '#f7faf9' }}
+      {/* Header sticky — permanece visível durante o scroll */}
+      <header
+        className="sticky top-0 z-50 bg-white"
+        style={{ borderBottom: '0.5px solid #c8d8d2' }}
       >
         <div
-          className="mx-auto flex max-w-lg flex-col items-center gap-8"
-          style={{
-            backgroundColor: '#2A3F45',
-            borderRadius: 12,
-            padding: '40px 32px',
-          }}
+          className="mx-auto grid max-w-5xl items-center px-5"
+          style={{ gridTemplateColumns: '1fr auto 1fr', height: 52 }}
         >
+          {/* Botão Dashboard */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 text-sm font-medium transition-colors"
+            style={{ color: '#57AA8F' }}
+          >
+            <ArrowLeft className="size-4" />
+            Dashboard
+          </Link>
+
+          {/* Título central */}
+          <h1
+            className="text-center text-sm font-semibold whitespace-nowrap"
+            style={{
+              fontFamily: 'var(--font-space-grotesk), Space Grotesk, sans-serif',
+              color: '#2A3F45',
+            }}
+          >
+            Mapa da Vida
+          </h1>
+
+          {/* Botão Ver diagnóstico */}
+          <div className="flex justify-end">
+            <Link
+              href={`/diagnostico/${mapa.id}`}
+              className="flex items-center gap-1.5 text-xs font-medium transition-opacity hover:opacity-80"
+              style={{
+                backgroundColor: '#2A3F45',
+                color: '#EDF2EF',
+                borderRadius: 8,
+                padding: '6px 12px',
+              }}
+            >
+              <FileText className="size-3.5" />
+              Ver diagnóstico
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* React Flow — altura fixa para não interferir no scroll da página */}
+      <div style={{ height: 'calc(100vh - 52px)' }}>
+        <MapaFlow mapa={mapa} minimal />
+      </div>
+
+      {/* Seção de análise — largura total, fundo escuro */}
+      <div
+        ref={analiseRef}
+        className={cn('transition-opacity duration-700', revealed ? 'opacity-100' : 'opacity-0')}
+        style={{ backgroundColor: '#2A3F45', padding: '48px 32px' }}
+      >
+        <div className="mx-auto flex max-w-lg flex-col items-center gap-8">
+          {/* Botão discreto para voltar ao mapa */}
+          <button
+            onClick={voltarAoMapa}
+            className="flex items-center gap-1.5 transition-opacity hover:opacity-70"
+            style={{ color: '#a8c4bc', fontSize: 13 }}
+          >
+            <ArrowUp className="size-3.5" />
+            Ver mapa
+          </button>
+
           {/* Texto da análise em Lora itálico */}
           <p
             className="text-center leading-relaxed"
