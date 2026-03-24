@@ -6,7 +6,11 @@
       "Bash(curl -s -L -o /dev/null -w \"%{http_code}\" http://localhost:3001)",
       "Bash(curl -s http://localhost:3001/dashboard -o /dev/null -w \"%{http_code}\")",
       "Bash(npx tsc:*)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3001)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3001)",
+      "Bash(npm install:*)",
+      "Bash(curl -s -o /dev/null -w \"/ → %{http_code}\\\\n\" http://localhost:3001/)",
+      "Bash(curl -s -o /dev/null -w \"/mapa/preparacao → %{http_code}\\\\n\" http://localhost:3001/mapa/preparacao)",
+      "Bash(curl -s -o /dev/null -w \"/mapa/novo → %{http_code}\\\\n\" http://localhost:3001/mapa/novo)"
     ]
   }
 }
