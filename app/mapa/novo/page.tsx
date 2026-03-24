@@ -2,30 +2,53 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
 import { criarMapa, type AreaInput } from '@/app/actions/mapa'
-import { PILARES, COR_STATUS } from '@/types'
+import { PILARES } from '@/types'
 import type { NomePilar, NomeArea, StatusArea } from '@/types'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { cn } from '@/lib/utils'
 
 type Respostas = Partial<Record<NomeArea, { status: StatusArea; observacao: string }>>
 
 const ORDEM_PILARES: NomePilar[] = ['corpo', 'mente', 'espirito']
 
-const STATUS_OPTIONS: { value: StatusArea; emoji: string }[] = [
-  { value: 'verde', emoji: '🟢' },
-  { value: 'amarelo', emoji: '🟡' },
-  { value: 'vermelho', emoji: '🔴' },
+// Configuração visual de cada opção de status
+const STATUS_OPTIONS: {
+  value: StatusArea
+  titulo: string
+  sublabel: string
+  ponto: string
+  bgSelecionado: string
+  bordaSelecionada: string
+  corCheck: string
+}[] = [
+  {
+    value: 'verde',
+    titulo: 'Está bem',
+    sublabel: 'Me sinto bem nessa área hoje',
+    ponto: '#57AA8F',
+    bgSelecionado: '#E8F5F1',
+    bordaSelecionada: '#57AA8F',
+    corCheck: '#57AA8F',
+  },
+  {
+    value: 'amarelo',
+    titulo: 'Precisa de atenção',
+    sublabel: 'Não está mal, mas poderia ser melhor',
+    ponto: '#D4A843',
+    bgSelecionado: '#FBF5E6',
+    bordaSelecionada: '#D4A843',
+    corCheck: '#D4A843',
+  },
+  {
+    value: 'vermelho',
+    titulo: 'Precisa mudar',
+    sublabel: 'Está impactando minha vida negativamente',
+    ponto: '#C05050',
+    bgSelecionado: '#FAECEC',
+    bordaSelecionada: '#C05050',
+    corCheck: '#C05050',
+  },
 ]
-
-const PILAR_STYLE: Record<NomePilar, { bg: string; border: string; badge: string }> = {
-  corpo: { bg: 'bg-blue-50', border: 'border-blue-200', badge: 'bg-blue-100 text-blue-700' },
-  mente: { bg: 'bg-purple-50', border: 'border-purple-200', badge: 'bg-purple-100 text-purple-700' },
-  espirito: { bg: 'bg-orange-50', border: 'border-orange-200', badge: 'bg-orange-100 text-orange-700' },
-}
 
 export default function NovoMapaPage() {
   const [step, setStep] = useState(0)
@@ -35,12 +58,11 @@ export default function NovoMapaPage() {
 
   const pilarAtual = ORDEM_PILARES[step]
   const infosPilar = PILARES[pilarAtual]
-  const estilosPilar = PILAR_STYLE[pilarAtual]
   const areasDoStep = infosPilar.areas
   const totalSteps = ORDEM_PILARES.length
 
-  const respostasDoStep = areasDoStep.map((area) => respostas[area])
-  const stepCompleto = respostasDoStep.every((r) => r?.status)
+  const stepCompleto = areasDoStep.every((area) => respostas[area]?.status)
+  const ehUltimoPilar = step === totalSteps - 1
 
   function setStatus(area: NomeArea, status: StatusArea) {
     setRespostas((prev) => ({
@@ -57,7 +79,7 @@ export default function NovoMapaPage() {
   }
 
   function avancar() {
-    if (step < totalSteps - 1) {
+    if (!ehUltimoPilar) {
       setStep((s) => s + 1)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } else {
@@ -88,108 +110,257 @@ export default function NovoMapaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <header className="sticky top-0 z-10 border-b bg-white px-6 py-4">
-        <div className="mx-auto grid max-w-xl grid-cols-3 items-center">
-          <Link
-            href="/mapa/preparacao"
-            className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+    <div className="min-h-screen" style={{ backgroundColor: '#F7FAF9' }}>
+      {/* Header fixo */}
+      <header
+        className="sticky top-0 z-10 bg-white"
+        style={{ borderBottom: '0.5px solid #c8d8d2' }}
+      >
+        <div
+          className="mx-auto grid max-w-xl items-center px-6"
+          style={{ gridTemplateColumns: '1fr auto 1fr', height: 52 }}
+        >
+          {/* Botão voltar */}
+          {step === 0 ? (
+            <Link
+              href="/mapa/preparacao"
+              className="flex items-center gap-1.5 text-sm font-medium transition-colors"
+              style={{ color: '#57AA8F' }}
+            >
+              <ArrowLeft className="size-4" />
+              Voltar
+            </Link>
+          ) : (
+            <button
+              onClick={voltar}
+              disabled={isPending}
+              className="flex items-center gap-1.5 text-sm font-medium transition-colors"
+              style={{ color: '#57AA8F' }}
+            >
+              <ArrowLeft className="size-4" />
+              Voltar
+            </button>
+          )}
+
+          {/* Título central */}
+          <h1
+            className="text-center text-sm font-semibold whitespace-nowrap"
+            style={{ color: '#2A3F45' }}
           >
-            <ArrowLeft className="size-4" />
-            Voltar
-          </Link>
-          <h1 className="text-center text-base font-semibold">Novo Mapa da Vida</h1>
-          <span className="text-right text-sm text-muted-foreground">
-            {step + 1} / {totalSteps}
+            Novo Mapa da Vida
+          </h1>
+
+          {/* Indicador de pilar */}
+          <span className="text-right text-sm" style={{ color: '#6f8f87' }}>
+            {step + 1} de {totalSteps} pilares
           </span>
         </div>
-        <div className="mx-auto mt-3 max-w-xl">
-          <div className="flex gap-1.5">
-            {ORDEM_PILARES.map((p, i) => (
-              <div
-                key={p}
-                className={cn(
-                  'h-1.5 flex-1 rounded-full transition-colors',
-                  i < step ? 'bg-primary' : i === step ? 'bg-primary/50' : 'bg-zinc-200'
-                )}
-              />
-            ))}
-          </div>
+
+        {/* Barra de progresso */}
+        <div className="mx-auto flex max-w-xl gap-1 px-6 pb-3">
+          {ORDEM_PILARES.map((_, i) => (
+            <div
+              key={i}
+              className="flex-1 transition-colors duration-300"
+              style={{
+                height: 3,
+                borderRadius: 2,
+                backgroundColor: i <= step ? '#57AA8F' : '#c8d8d2',
+              }}
+            />
+          ))}
         </div>
       </header>
 
       <main className="mx-auto max-w-xl px-4 py-8">
-        <div className={cn('mb-6 rounded-xl border p-4', estilosPilar.bg, estilosPilar.border)}>
-          <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-medium', estilosPilar.badge)}>
-            Pilar
+        {/* Badge do pilar */}
+        <div className="mb-4 flex items-center gap-2">
+          <span
+            className="flex items-center gap-1.5 text-xs font-medium"
+            style={{
+              backgroundColor: '#E8F5F1',
+              color: '#2A8F6F',
+              borderRadius: 20,
+              padding: '4px 10px',
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                backgroundColor: '#57AA8F',
+                display: 'inline-block',
+                flexShrink: 0,
+              }}
+            />
+            Pilar {step + 1} de {totalSteps}
           </span>
-          <h2 className="mt-1 text-2xl font-semibold">{infosPilar.label}</h2>
-          <p className="text-sm text-muted-foreground">
-            Avalie cada área escolhendo um status e adicionando uma observação opcional.
-          </p>
         </div>
 
-        <div className="flex flex-col gap-4">
+        {/* Título e subtítulo do pilar */}
+        <h2
+          className="mb-1"
+          style={{
+            fontFamily: 'var(--font-space-grotesk), Space Grotesk, sans-serif',
+            fontSize: 28,
+            fontWeight: 500,
+            color: '#2A3F45',
+          }}
+        >
+          {infosPilar.label}
+        </h2>
+        <p className="mb-8 text-sm" style={{ color: '#6f8f87' }}>
+          Responda com o que é verdade hoje — não com o que você gostaria que fosse.
+        </p>
+
+        {/* Cards de área */}
+        <div className="flex flex-col gap-5">
           {areasDoStep.map((area) => {
             const resposta = respostas[area]
             const statusSelecionado = resposta?.status
 
             return (
-              <div key={area} className="rounded-xl border bg-white p-4 shadow-sm">
-                <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">{area}</p>
-                <h3 className="mb-3 text-[15px] font-medium leading-snug">{infosPilar.perguntas[area]}</h3>
+              <div
+                key={area}
+                className="bg-white"
+                style={{
+                  border: '0.5px solid #c8d8d2',
+                  borderRadius: 12,
+                  padding: 24,
+                }}
+              >
+                {/* Label da área */}
+                <p
+                  className="mb-2 uppercase"
+                  style={{
+                    color: '#57AA8F',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    letterSpacing: '0.8px',
+                  }}
+                >
+                  {area}
+                </p>
 
-                <div className="mb-3 flex gap-2">
-                  {STATUS_OPTIONS.map(({ value, emoji }) => {
-                    const cor = COR_STATUS[value]
-                    const selecionado = statusSelecionado === value
+                {/* Pergunta reflexiva */}
+                <p
+                  className="mb-5"
+                  style={{ color: '#2A3F45', fontSize: 16, lineHeight: 1.65 }}
+                >
+                  {infosPilar.perguntas[area]}
+                </p>
+
+                {/* Botões de status em lista vertical */}
+                <div className="flex flex-col gap-2 mb-4">
+                  {STATUS_OPTIONS.map((opt) => {
+                    const selecionado = statusSelecionado === opt.value
                     return (
                       <button
-                        key={value}
+                        key={opt.value}
                         type="button"
-                        onClick={() => setStatus(area, value)}
-                        className={cn(
-                          'flex flex-1 flex-col items-center gap-1 rounded-lg border-2 py-2.5 text-xs font-medium transition-all',
-                          selecionado
-                            ? cn(cor.bg, cor.border, 'scale-[1.03] shadow-sm')
-                            : 'border-zinc-200 bg-white hover:border-zinc-300'
-                        )}
+                        onClick={() => setStatus(area, opt.value)}
+                        className="flex items-center gap-3 w-full text-left transition-colors duration-150"
+                        style={{
+                          border: selecionado
+                            ? `1.5px solid ${opt.bordaSelecionada}`
+                            : '0.5px solid #c8d8d2',
+                          backgroundColor: selecionado ? opt.bgSelecionado : '#fff',
+                          borderRadius: 10,
+                          padding: '12px 14px',
+                        }}
                       >
-                        <span className="text-xl">{emoji}</span>
-                        <span className="text-center leading-tight">{cor.label}</span>
+                        {/* Ponto colorido */}
+                        <span
+                          style={{
+                            width: 9,
+                            height: 9,
+                            borderRadius: '50%',
+                            backgroundColor: opt.ponto,
+                            flexShrink: 0,
+                            display: 'inline-block',
+                          }}
+                        />
+
+                        {/* Textos */}
+                        <span className="flex flex-col gap-0.5 flex-1">
+                          <span
+                            className="text-sm"
+                            style={{ color: '#2A3F45', fontWeight: 500 }}
+                          >
+                            {opt.titulo}
+                          </span>
+                          <span className="text-xs" style={{ color: '#6f8f87' }}>
+                            {opt.sublabel}
+                          </span>
+                        </span>
+
+                        {/* Ícone de check quando selecionado */}
+                        {selecionado && (
+                          <Check
+                            className="size-4 flex-shrink-0"
+                            style={{ color: opt.corCheck }}
+                          />
+                        )}
                       </button>
                     )
                   })}
                 </div>
 
-                <Textarea
-                  placeholder="O que está por trás dessa escolha?"
+                {/* Campo de observação */}
+                <textarea
+                  placeholder="O que está por trás dessa escolha? (opcional)"
                   value={resposta?.observacao ?? ''}
                   onChange={(e) => setObservacao(area, e.target.value)}
-                  className="min-h-0 resize-none text-sm"
                   rows={2}
+                  className="w-full resize-none text-sm outline-none transition-colors placeholder:text-[#a8c4bc]"
+                  style={{
+                    border: '1.5px solid #c8d8d2',
+                    borderRadius: 10,
+                    padding: '10px 14px',
+                    color: '#2A3F45',
+                    height: 68,
+                    lineHeight: 1.5,
+                    fontFamily: 'inherit',
+                  }}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = '#57AA8F')}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = '#c8d8d2')}
                 />
               </div>
             )
           })}
         </div>
 
+        {/* Mensagem de erro */}
         {erro && (
-          <Alert variant="destructive" className="mt-4">
-            <AlertDescription>{erro}</AlertDescription>
-          </Alert>
+          <div
+            className="mt-4 rounded-lg px-4 py-3 text-sm"
+            style={{ backgroundColor: '#FAECEC', color: '#903030', border: '1px solid #C05050' }}
+          >
+            {erro}
+          </div>
         )}
 
-        <div className="mt-6 flex gap-3">
-          {step > 0 && (
-            <Button variant="outline" onClick={voltar} disabled={isPending} className="flex-1">
-              Voltar
-            </Button>
-          )}
-          <Button onClick={avancar} disabled={!stepCompleto || isPending} className="flex-1">
-            {isPending ? 'Salvando…' : step === totalSteps - 1 ? 'Gerar mapa' : 'Próximo'}
-          </Button>
-        </div>
+        {/* Botão de avanço no rodapé */}
+        <button
+          onClick={avancar}
+          disabled={!stepCompleto || isPending}
+          className="mt-8 flex w-full items-center justify-center gap-2 text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+          style={{
+            backgroundColor: '#57AA8F',
+            borderRadius: 10,
+            padding: '16px 24px',
+            fontSize: 16,
+            fontWeight: 500,
+          }}
+        >
+          {isPending
+            ? 'Salvando…'
+            : ehUltimoPilar
+            ? 'Ver meu mapa →'
+            : `Próximo pilar →`}
+          {!isPending && <ArrowRight className="size-4" />}
+        </button>
       </main>
     </div>
   )
