@@ -8,6 +8,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans:      ['DM Sans', 'sans-serif'],
+        heading:   ['Space Grotesk', 'sans-serif'],
+        editorial: ['Lora', 'serif'],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -42,11 +47,22 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        'mt-green':      '#57AA8F',
+        'mt-green-dark': '#2A3F45',
+        'mt-off-white':  '#EDF2EF',
+        'mt-black':      '#0C0F0F',
+        'mt-border':     '#c8d8d2',
+        'mt-surface':    '#ffffff',
+        'mt-yellow':     '#D4A843',
+        'mt-red':        '#C05050',
+        'mt-muted':      '#6f8f87',
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        card:  '16px',
+        badge: '20px',
       },
     },
   },

@@ -230,6 +230,49 @@ Tela dark, impactante, sem distrações:
 
 ---
 
+## Convenções de Frontend
+
+### Hierarquia de responsabilidade
+- **Páginas** (`/app`) — orquestram apenas. Buscam dados, passam props, definem layout. Sem lógica de negócio.
+- **Componentes** (`/components`) — só renderizam. Recebem props, mostram UI. Sem chamadas ao Supabase.
+- **Actions/Lib** (`/app/actions`, `/lib`) — toda lógica de negócio, validações e chamadas ao banco.
+
+### Quando criar um componente
+Só vira componente o que aparece em mais de um lugar. Exemplos:
+- ✅ Card de mapa (dashboard + comparativos futuros)
+- ✅ Indicador de status verde/amarelo/vermelho
+- ✅ Header/navegação autenticada
+- ❌ Tela de preparação (aparece só uma vez)
+- ❌ Texto de diagnóstico (específico de cada contexto)
+
+### Convenção de nomes
+- `PaginaNome.tsx` → páginas específicas
+- `ComponenteNome.tsx` → componentes reutilizáveis
+- `useNome.ts` → hooks customizados
+- `nomeFuncao.ts` → utilitários e actions
+
+### Estado: onde guardar o quê
+- `useState` → formulários, UI temporária (modais, toggles)
+- Supabase → tudo que precisa persistir
+- URL/params → identificadores de recursos (id do mapa)
+- Server Components → dados que não mudam durante a sessão
+- Nunca usar Redux ou Zustand — desnecessário para este projeto
+
+### Padrão de commits
+- `feat:` nova funcionalidade
+- `fix:` correção de bug
+- `style:` mudança visual sem alterar lógica
+- `refactor:` reorganização de código sem mudar comportamento
+- Exemplos:
+  - `feat: dashboard com listagem de mapas`
+  - `fix: botão voltar na tela de preparação`
+  - `style: design system MindTrail aplicado`
+
+### Regra de ouro para cada sessão
+Antes de começar: qual página estou construindo? O que ela busca do Supabase? O que é reutilizável? Tem commit recente?
+
+---
+
 ## Boas Práticas
 
 - Sempre perguntar antes de refatorar algo que não foi pedido
