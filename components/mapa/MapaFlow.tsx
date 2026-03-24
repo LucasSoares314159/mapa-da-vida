@@ -182,7 +182,7 @@ type Props = {
   minimal?: boolean
 }
 
-export function MapaFlow({ mapa, minimal = false }: Props) {
+export function MapaFlow({ mapa }: Props) {
   const router = useRouter()
   const { nodes, edges } = useMemo(() => buildFlow(mapa), [mapa])
 

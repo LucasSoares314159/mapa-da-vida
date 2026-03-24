@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { AuthLayout } from '@/components/AuthLayout'
 import { DashboardLista } from '@/components/DashboardLista'
