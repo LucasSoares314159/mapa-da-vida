@@ -2,9 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, FileText } from 'lucide-react'
 import { MapaFlow } from './MapaFlow'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { Mapa } from '@/types'
 
@@ -42,47 +41,122 @@ export function RevelacaoMapa({ mapa, analise }: Props) {
 
   return (
     <div>
+      {/* Área do mapa — full screen */}
       <div className="relative" style={{ height: '100svh' }}>
-        <Link
-          href="/dashboard"
-          className="absolute left-5 top-5 z-10 flex items-center gap-1.5 rounded-lg bg-white/80 px-3 py-2 text-sm font-medium backdrop-blur-sm transition-colors duration-200 hover:bg-white"
-          style={{ color: '#2A3F45' }}
+        {/* Header fixo sobre o mapa */}
+        <header
+          className="absolute top-0 left-0 right-0 z-10 bg-white"
+          style={{ borderBottom: '0.5px solid #c8d8d2' }}
         >
-          <ArrowLeft className="size-4" />
-          Voltar
-        </Link>
-        <MapaFlow mapa={mapa} minimal />
+          <div
+            className="mx-auto grid max-w-5xl items-center px-5"
+            style={{ gridTemplateColumns: '1fr auto 1fr', height: 52 }}
+          >
+            {/* Botão Dashboard */}
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-1.5 text-sm font-medium transition-colors"
+              style={{ color: '#57AA8F' }}
+            >
+              <ArrowLeft className="size-4" />
+              Dashboard
+            </Link>
+
+            {/* Título central */}
+            <h1
+              className="text-center text-sm font-semibold whitespace-nowrap"
+              style={{
+                fontFamily: 'var(--font-space-grotesk), Space Grotesk, sans-serif',
+                color: '#2A3F45',
+              }}
+            >
+              Mapa da Vida
+            </h1>
+
+            {/* Botão Ver diagnóstico */}
+            <div className="flex justify-end">
+              <Link
+                href={`/diagnostico/${mapa.id}`}
+                className="flex items-center gap-1.5 text-xs font-medium transition-opacity hover:opacity-80"
+                style={{
+                  backgroundColor: '#2A3F45',
+                  color: '#EDF2EF',
+                  borderRadius: 8,
+                  padding: '6px 12px',
+                }}
+              >
+                <FileText className="size-3.5" />
+                Ver diagnóstico
+              </Link>
+            </div>
+          </div>
+        </header>
+
+        {/* React Flow — ocupa a área abaixo do header */}
+        <div style={{ paddingTop: 52, height: '100%' }}>
+          <MapaFlow mapa={mapa} minimal />
+        </div>
       </div>
 
+      {/* Card de análise */}
       <div
         ref={analiseRef}
         className={cn(
-          'min-h-screen px-6 py-20 transition-opacity duration-700',
+          'px-6 py-16 transition-opacity duration-700',
           revealed ? 'opacity-100' : 'opacity-0'
         )}
-        style={{ backgroundColor: '#2A3F45' }}
+        style={{ backgroundColor: '#f7faf9' }}
       >
-        <div className="mx-auto flex max-w-lg flex-col gap-12">
-          <div className="flex flex-col gap-6">
-            <p className="text-[1.35rem] font-medium leading-relaxed text-white">{analise}</p>
-            <div className="flex gap-6">
-              <span className="flex items-center gap-2 text-sm" style={{ color: '#a8c4bc' }}>🟢 <span className="font-medium text-white">{totais.verde}</span></span>
-              <span className="flex items-center gap-2 text-sm" style={{ color: '#a8c4bc' }}>🟡 <span className="font-medium text-white">{totais.amarelo}</span></span>
-              <span className="flex items-center gap-2 text-sm" style={{ color: '#a8c4bc' }}>🔴 <span className="font-medium text-white">{totais.vermelho}</span></span>
-            </div>
+        <div
+          className="mx-auto flex max-w-lg flex-col items-center gap-8"
+          style={{
+            backgroundColor: '#2A3F45',
+            borderRadius: 12,
+            padding: '40px 32px',
+          }}
+        >
+          {/* Texto da análise em Lora itálico */}
+          <p
+            className="text-center leading-relaxed"
+            style={{
+              fontFamily: 'var(--font-lora), Lora, serif',
+              fontStyle: 'italic',
+              fontSize: '1.1rem',
+              color: '#EDF2EF',
+              lineHeight: 1.75,
+            }}
+          >
+            {analise}
+          </p>
+
+          {/* Pills de cores centralizadas */}
+          <div className="flex items-center justify-center gap-6">
+            <span className="flex items-center gap-2 text-sm" style={{ color: '#a8c4bc' }}>
+              🟢 <span className="font-semibold text-white">{totais.verde}</span>
+            </span>
+            <span className="flex items-center gap-2 text-sm" style={{ color: '#a8c4bc' }}>
+              🟡 <span className="font-semibold text-white">{totais.amarelo}</span>
+            </span>
+            <span className="flex items-center gap-2 text-sm" style={{ color: '#a8c4bc' }}>
+              🔴 <span className="font-semibold text-white">{totais.vermelho}</span>
+            </span>
           </div>
 
-          <div className="flex flex-col gap-6">
-            <p className="text-[15px] leading-relaxed" style={{ color: '#6f8f87' }}>
-              Agora você tem o diagnóstico. A pergunta que fica é: o que você vai fazer com ele?
-            </p>
-            <Button
-              asChild
-              className="h-12 w-full bg-white text-zinc-950 hover:bg-zinc-100 sm:w-auto sm:self-start sm:px-8"
-            >
-              <Link href="/dashboard">Definir meu objetivo</Link>
-            </Button>
-          </div>
+          {/* Botão Ver diagnóstico completo */}
+          <Link
+            href={`/diagnostico/${mapa.id}`}
+            className="flex items-center gap-2 text-white transition-opacity hover:opacity-90"
+            style={{
+              backgroundColor: '#57AA8F',
+              borderRadius: 10,
+              padding: '14px 28px',
+              fontSize: 15,
+              fontWeight: 500,
+              textDecoration: 'none',
+            }}
+          >
+            Ver diagnóstico completo →
+          </Link>
         </div>
       </div>
     </div>

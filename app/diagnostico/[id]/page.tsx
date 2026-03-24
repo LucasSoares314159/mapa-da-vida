@@ -1,4 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { calcularAnalise } from '@/lib/analise'
 import { AuthLayout } from '@/components/AuthLayout'
@@ -42,6 +44,15 @@ export default async function DiagnosticoPage({ params }: Props) {
   return (
     <AuthLayout titulo="Diagnóstico Completo" nomeUsuario={nomeUsuario}>
       <div className="mx-auto flex max-w-xl flex-col gap-4 px-6 py-8">
+        {/* Botão Ver mapa */}
+        <Link
+          href={`/mapa/${id}`}
+          className="flex items-center gap-1.5 text-sm font-medium transition-colors w-fit"
+          style={{ color: '#57AA8F' }}
+        >
+          <ArrowLeft className="size-4" />
+          Ver mapa
+        </Link>
         <div className="rounded-card bg-white px-9 py-8" style={{ border: '0.5px solid #c8d8d2' }}>
           <p className="text-[1.05rem] font-medium leading-relaxed text-mt-black">{analise}</p>
         </div>
