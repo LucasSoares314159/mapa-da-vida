@@ -25,6 +25,9 @@ export default async function DashboardPage() {
   const mapas = (mapasRaw ?? []) as Mapa[]
   const nomeUsuario = profile?.nome ?? user.email ?? ''
 
+  // Redireciona para preparação se o usuário ainda não tem nenhum mapa
+  if (mapas.length === 0) redirect('/mapa/preparacao')
+
   return (
     <AuthLayout titulo="Seus mapas" nomeUsuario={nomeUsuario}>
       <div className="mx-auto w-full max-w-2xl px-6 py-8 flex flex-col gap-6">
