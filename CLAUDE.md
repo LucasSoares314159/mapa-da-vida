@@ -1,7 +1,7 @@
 # Mapa da Vida — CLAUDE.md
 
 ## Visão Geral do Produto
-**Mapa da Vida** é o AHA moment de um programa chamado **Personal System** (MindTrail), que ensina pessoas a construir seu próprio sistema de organização pessoal. O Mapa da Vida é o Módulo 1 — um diagnóstico reflexivo onde o usuário responde perguntas sobre pilares da vida, classifica cada área com um status (verde, amarelo ou vermelho), e recebe um mapa visual em formato de fluxograma com análise diagnóstica. O objetivo é gerar um choque de realidade que motiva a mudança.
+**Mapa da Vida** é o AHA moment de um programa chamado **Trilha da Produtividade** (MindTrail), que ensina pessoas a construir seu próprio sistema de organização pessoal. O Mapa da Vida é o Módulo 1 — um diagnóstico reflexivo onde o usuário responde perguntas sobre pilares da vida, classifica cada área com um status (verde, amarelo ou vermelho), e recebe um mapa visual em formato de fluxograma com análise diagnóstica. O objetivo é gerar um choque de realidade que motiva a mudança.
 
 ---
 

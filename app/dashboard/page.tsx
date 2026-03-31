@@ -31,7 +31,7 @@ export default async function DashboardPage() {
   return (
     <AuthLayout titulo="Seus mapas" nomeUsuario={nomeUsuario}>
       <div className="mx-auto w-full max-w-2xl px-6 py-8 flex flex-col gap-6">
-        {/* Banner Personal System */}
+        {/* Banner Trilha da Produtividade */}
         <div
           className="flex items-center justify-between gap-4 px-5 py-4"
           style={{ backgroundColor: '#2A3F45', borderRadius: 12 }}
@@ -54,7 +54,9 @@ export default async function DashboardPage() {
             className="shrink-0 text-sm font-medium text-white px-4 py-2 transition-opacity hover:opacity-90"
             style={{ backgroundColor: '#57AA8F', borderRadius: 8 }}
           >
-            Conhecer →
+            <a href='https://trilha-da-produtividade-u4l978p.gamma.site/' target='_blank' rel='noopener noreferrer' className="text-white no-underline">
+              Conhecer →
+            </a>
           </button>
         </div>
 
