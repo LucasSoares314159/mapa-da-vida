@@ -11,7 +11,7 @@ export function FeedbackTally() {
       script.async = true
       document.body.appendChild(script)
     } else {
-      // @ts-ignore
+      // @ts-expect-error Tally is loaded dynamically via script tag
       window.Tally?.loadEmbeds()
     }
   }, [])

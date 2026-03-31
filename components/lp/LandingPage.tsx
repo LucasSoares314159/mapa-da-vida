@@ -217,7 +217,7 @@ export function LandingPage() {
                 q: "O que acontece depois do diagnóstico?",
                 a: "Você fica com o mapa salvo para acompanhar sua evolução. Se quiser ir além, pode entrar na newsletter semanal da MindTrail ou conhecer a Trilha da Produtividade — o programa completo de 4 semanas.",
               },
-            ].map((item, i, arr) => (
+            ].map((item, i) => (
               <div
                 key={item.q}
                 className={`py-[18px] ${i === 0 ? "border-t border-mt-border" : ""} border-b border-mt-border`}
