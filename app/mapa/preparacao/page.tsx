@@ -96,10 +96,10 @@ export default function PreparacaoPage() {
         {/* Parágrafos */}
         <div className="flex flex-col gap-6">
           <p style={{ color: '#EDF2EF', fontSize: 17, lineHeight: 1.75 }}>
-            Você vai responder 9 perguntas sobre a sua vida — uma de cada vez, com honestidade.
-            Não existe resposta certa. Existe só o que é real agora.
+            Você vai responder 9 perguntas sobre pilares da sua vida — uma de cada vez, com honestidade.
+            Não existe resposta certa.
           </p>
-          <p style={{ color: '#EDF2EF', fontSize: 17, lineHeight: 1.75 }}>
+          <p style={{ color: '#EDF2EF', fontSize: 17, lineHeight: 1.75, fontWeight: 800 }}>
             Reserve 10 minutos. Feche outras abas. Responda pelo que é verdade hoje, não pelo que
             você quer que seja.
           </p>
@@ -134,7 +134,7 @@ export default function PreparacaoPage() {
             textDecoration: 'none',
           }}
         >
-          Estou pronto
+          Estou pronto(a)
           <ArrowRight className="size-4" />
         </Link>
       </div>

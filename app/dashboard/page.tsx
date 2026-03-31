@@ -41,13 +41,13 @@ export default async function DashboardPage() {
               className="text-xs font-semibold uppercase tracking-widest"
               style={{ color: '#57AA8F' }}
             >
-              Personal System
+              ⛰️Trilha da Produtividade
             </span>
             <p className="font-semibold text-[15px] leading-snug" style={{ color: '#EDF2EF' }}>
               Transforme seu diagnóstico em ação
             </p>
             <p className="text-xs mt-0.5" style={{ color: '#a8c4bc' }}>
-              4 semanas para construir seu sistema pessoal
+              4 semanas para construir seu sistema de organização pessoal
             </p>
           </div>
           <button

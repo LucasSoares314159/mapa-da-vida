@@ -5,6 +5,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { calcularAnalise } from '@/lib/analise'
 import { AuthLayout } from '@/components/AuthLayout'
 import { NewsletterCTA } from '@/components/NewsletterCTA'
+import { FeedbackTally } from '@/components/FeedbackTally'
 import type { Mapa } from '@/types'
 
 type Props = {
@@ -54,6 +55,9 @@ export default async function DiagnosticoPage({ params }: Props) {
           <ArrowLeft className="size-4" />
           Ver mapa
         </Link>
+
+        <FeedbackTally />
+
         <div className="rounded-card bg-white px-9 py-8" style={{ border: '0.5px solid #c8d8d2' }}>
           <p className="text-[1.05rem] font-medium leading-relaxed text-mt-black">{analise}</p>
         </div>

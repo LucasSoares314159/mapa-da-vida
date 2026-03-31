@@ -246,7 +246,7 @@ export default function NovoMapaPage() {
                 {/* Pergunta reflexiva */}
                 <p
                   className="mb-5"
-                  style={{ color: '#2A3F45', fontSize: 16, lineHeight: 1.65 }}
+                  style={{ color: '#2A3F45', fontSize: 17, fontWeight: 500, lineHeight: 1.65 }}
                 >
                   {infosPilar.perguntas[area]}
                 </p>
@@ -358,7 +358,7 @@ export default function NovoMapaPage() {
             ? 'Salvando…'
             : ehUltimoPilar
             ? 'Ver meu mapa →'
-            : `Próximo pilar →`}
+            : `Próximo pilar `}
           {!isPending && <ArrowRight className="size-4" />}
         </button>
       </main>

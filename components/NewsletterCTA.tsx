@@ -18,7 +18,7 @@ export function NewsletterCTA({ utm_campaign, variant = "full" }: NewsletterCTAP
     return (
       <div className="flex items-center gap-3 p-4 rounded-xl border border-[#c8d8d2] bg-white">
         <p className="text-sm text-[#6f8f87] flex-1">
-          Continue evoluindo — receba toda semana.
+          📩 Textos semanais sobre produtividade e sistemas pessoais.
         </p>
         <a
           href={linkUrl}
@@ -26,7 +26,7 @@ export function NewsletterCTA({ utm_campaign, variant = "full" }: NewsletterCTAP
           rel="noopener noreferrer"
           className="text-sm font-medium text-[#57AA8F] whitespace-nowrap hover:underline"
         >
-          Assinar →
+          Newsletter MindTrail →
         </a>
       </div>
     )

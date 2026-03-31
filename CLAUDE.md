@@ -103,7 +103,7 @@
 
 | Pilar | Área | Pergunta Reflexiva |
 |---|---|---|
-| **Corpo** | Exercícios Físicos | Quando foi a última vez que você terminou um dia sentindo que seu corpo trabalhou para você — não contra você? |
+| **Corpo** | Exercícios Físicos | O quanto você sente que o seu corpo é funcional e tem a mobilidade, força e resistência que deveria ter? |
 | **Corpo** | Alimentação | Se alguém filmasse tudo que você comeu nos últimos 7 dias, você ficaria confortável assistindo? |
 | **Corpo** | Hobbies | Você tem algo na sua vida que faz só porque gosta — sem precisar ser produtivo, sem gerar resultado? |
 | **Mente** | Rede de Apoio | Se você recebesse uma notícia muito difícil hoje, quem você ligaria? Essa pessoa sabe o que está acontecendo na sua vida de verdade? |

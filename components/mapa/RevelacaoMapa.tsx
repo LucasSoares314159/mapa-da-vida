@@ -153,11 +153,6 @@ export function RevelacaoMapa({ mapa, analise }: Props) {
             ))}
           </div>
 
-          {/* CTA Newsletter */}
-          <div className="w-full">
-            <NewsletterCTA utm_campaign="pos-mapa" />
-          </div>
-
           {/* Botão Ver diagnóstico completo */}
           <Link
             href={`/diagnostico/${mapa.id}`}
@@ -173,6 +168,11 @@ export function RevelacaoMapa({ mapa, analise }: Props) {
           >
             Ver diagnóstico completo →
           </Link>
+
+          {/* CTA Newsletter */}
+          <div className="w-full">
+            <NewsletterCTA utm_campaign="pos-mapa" />
+          </div>
         </div>
       </div>
     </div>

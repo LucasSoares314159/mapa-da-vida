@@ -40,7 +40,7 @@ export const PILARES: Record<NomePilar, { label: string; areas: NomeArea[]; perg
     label: 'Corpo',
     areas: ['Exercícios Físicos', 'Alimentação', 'Hobbies'],
     perguntas: {
-      'Exercícios Físicos': 'Quando foi a última vez que você terminou um dia sentindo que seu corpo trabalhou para você — não contra você?',
+      'Exercícios Físicos': 'O quanto você sente que o seu corpo tem a mobilidade, força e resistência que você gostaria de ter para viver do jeito que quer hoje e no futuro?',
       'Alimentação': 'Se alguém filmasse tudo que você comeu nos últimos 7 dias, você ficaria confortável assistindo?',
       'Hobbies': 'Você tem algo na sua vida que faz só porque gosta — sem precisar ser produtivo, sem gerar resultado?',
     } as Record<NomeArea, string>,
@@ -49,7 +49,7 @@ export const PILARES: Record<NomePilar, { label: string; areas: NomeArea[]; perg
     label: 'Mente',
     areas: ['Rede de Apoio', 'Trabalho', 'Finanças'],
     perguntas: {
-      'Rede de Apoio': 'Se você recebesse uma notícia muito difícil hoje, quem você ligaria? Essa pessoa sabe o que está acontecendo na sua vida de verdade?',
+      'Rede de Apoio': 'Se você recebesse uma notícia muito difícil hoje, você teria para quem ligar? Teria mais de uma pessoa?',
       'Trabalho': 'Como você se sente no domingo à noite pensando na semana que vem? Esse sentimento é exceção ou regra?',
       'Finanças': 'Sem olhar para nenhum aplicativo agora: você sabe quanto entra, quanto sai e para onde vai o seu dinheiro todo mês?',
     } as Record<NomeArea, string>,
