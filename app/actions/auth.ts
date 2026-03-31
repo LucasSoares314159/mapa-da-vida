@@ -79,7 +79,7 @@ export async function esqueciSenha(state: AuthState, formData: FormData): Promis
 
   const supabase = createServerSupabaseClient()
   const { error } = await supabase.auth.resetPasswordForEmail(result.data.email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?type=recovery`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirmar`,
   })
 
   if (error) {
