@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, ArrowUp, FileText } from 'lucide-react'
 import { MapaFlow } from './MapaFlow'
+import { NewsletterCTA } from '@/components/NewsletterCTA'
 import { cn } from '@/lib/utils'
 import type { Mapa } from '@/types'
 
@@ -150,6 +151,11 @@ export function RevelacaoMapa({ mapa, analise }: Props) {
                 {count}
               </span>
             ))}
+          </div>
+
+          {/* CTA Newsletter */}
+          <div className="w-full">
+            <NewsletterCTA utm_campaign="pos-mapa" />
           </div>
 
           {/* Botão Ver diagnóstico completo */}

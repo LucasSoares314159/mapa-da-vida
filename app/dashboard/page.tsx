@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { AuthLayout } from '@/components/AuthLayout'
 import { DashboardLista } from '@/components/DashboardLista'
+import { NewsletterCTA } from '@/components/NewsletterCTA'
 import type { Mapa } from '@/types'
 
 export default async function DashboardPage() {
@@ -56,6 +57,8 @@ export default async function DashboardPage() {
             Conhecer →
           </button>
         </div>
+
+        <NewsletterCTA utm_campaign="dashboard" variant="compact" />
 
         {/* Lista de mapas */}
         <DashboardLista mapas={mapas} />

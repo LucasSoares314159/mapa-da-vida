@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { calcularAnalise } from '@/lib/analise'
 import { AuthLayout } from '@/components/AuthLayout'
+import { NewsletterCTA } from '@/components/NewsletterCTA'
 import type { Mapa } from '@/types'
 
 type Props = {
@@ -95,6 +96,8 @@ export default async function DiagnosticoPage({ params }: Props) {
             </div>
           </div>
         )}
+
+        <NewsletterCTA utm_campaign="pos-diagnostico" />
       </div>
     </AuthLayout>
   )
