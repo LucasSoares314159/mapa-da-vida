@@ -61,6 +61,11 @@ export function getZonaConfig(zona: 'privilegio' | 'sacrificio') {
       badgeLabel: 'Zona de Privilégio',
       descricao: 'Você tem mais margem do que a média. Use com intenção.',
       cor: 'bg-[rgba(87,170,143,0.1)]',
+      badgeCardBorder: 'rgba(42,63,69,0.6)',
+      badgeCardBg: 'rgba(42,63,69,0.2)',
+      badgeCardText: '#2A3F45',
+      percentualCardCor: '#2A3F45',
+      cardDescricao: 'Você tem margem. Use com intenção para definir objetivos que importam.',
     }
   }
   return {
@@ -71,5 +76,10 @@ export function getZonaConfig(zona: 'privilegio' | 'sacrificio') {
     badgeLabel: 'Zona de Sacrifício',
     descricao: 'Sua rotina já está no limite. Objetivos novos exigem remover algo antes.',
     cor: 'bg-[rgba(192,80,80,0.1)]',
+    badgeCardBorder: 'rgba(192,80,80,0.6)',
+    badgeCardBg: 'rgba(192,80,80,0.25)',
+    badgeCardText: '#FFAAAA',
+    percentualCardCor: '#FFAAAA',
+    cardDescricao: 'Sua rotina já está no limite. Antes de adicionar objetivos, avalie o que pode remover.',
   }
 }

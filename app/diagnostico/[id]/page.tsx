@@ -129,17 +129,17 @@ export default async function DiagnosticoPage({ params }: Props) {
               </p>
               <span
                 className="text-xs font-semibold uppercase tracking-[1px] border rounded-badge px-3 py-1 inline-block"
-                style={{ borderColor: 'rgba(255,255,255,0.5)', backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                style={{ borderColor: zonaConfig.badgeCardBorder, backgroundColor: zonaConfig.badgeCardBg, color: zonaConfig.badgeCardText }}
               >
                 {zonaConfig.badgeLabel}
               </span>
             </div>
             <p className="text-sm leading-relaxed mb-2" style={{ color: 'rgba(255,255,255,0.8)' }}>
-              Você tem <span className="font-semibold" style={{ color: zonaConfig.textColor }}>{rotina.percentual_livre}%</span> de tempo livre por semana
+              Você tem <span className="font-semibold" style={{ color: zonaConfig.percentualCardCor }}>{rotina.percentual_livre}%</span> de tempo livre por semana
               ({Math.round((1 - (rotina.horas_sono + rotina.horas_trabalho + rotina.horas_basicas) / 24) * 168)} horas).
             </p>
-            <p className="text-sm leading-relaxed font-editorial text-white mb-3">
-              Objetivos novos devem ser avaliados com cuidado.
+            <p className="text-sm leading-relaxed font-editorial italic text-white mb-3">
+              {zonaConfig.cardDescricao}
             </p>
             <Link
               href={`/rotina?mapaId=${id}`}
