@@ -185,9 +185,12 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
              style={{ color: zonaConfig.percentualCor }}>
           {resultado.percentualLivre}%
         </div>
-        <p className="text-sm text-mt-muted -mt-1">da sua semana está livre</p>
+        <p className="text-sm text-mt-muted -mt-1">do seu tempo acordado está livre</p>
         <p className="text-base font-medium text-[#EDF2EF]">
           ≈ {resultado.horasLivresSemana} horas livres por semana
+        </p>
+        <p className="text-xs text-mt-muted text-center leading-[1.6] max-w-[340px]">
+          Calculado sobre as horas que você está acordado durante a jornada — descontando sono, trabalho e necessidades básicas.
         </p>
         <span
           className={`rounded-badge px-4 py-1.5 text-xs font-medium uppercase tracking-[1px] border ${zonaConfig.badgeClass}`}

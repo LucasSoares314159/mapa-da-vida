@@ -17,21 +17,29 @@ export type ResultadoRotina = {
 export function calcularRotina(input: InputRotina): ResultadoRotina {
   const { horasSono, horasTrabalho, horasBasicas, diasTrabalho } = input
 
-  const consumidaSemana = (horasSono + horasTrabalho + horasBasicas) / 24
-  const consumidaFDS = (horasSono + horasBasicas) / 24
-  const mediaConsumida =
-    (consumidaSemana * diasTrabalho + consumidaFDS * (7 - diasTrabalho)) / 7
+  const horasAcordadasDia = 24 - horasSono
+  const totalAcordadasSemana = horasAcordadasDia * 7
 
-  const percentualLivre = Math.round((1 - mediaConsumida) * 100)
-  const horasLivresSemana = Math.round((1 - mediaConsumida) * 168)
-  const horasLivresDiaUtil = Math.round((1 - consumidaSemana) * 24 * 10) / 10
-  const horasLivresDiaFDS = Math.round((1 - consumidaFDS) * 24 * 10) / 10
+  const consumidaUtilAcordado = horasTrabalho + horasBasicas
+  const consumidaFDSAcordado = horasBasicas
+
+  const totalConsumidoSemana =
+    consumidaUtilAcordado * diasTrabalho + consumidaFDSAcordado * (7 - diasTrabalho)
+
+  const horasLivresSemana = Math.round(totalAcordadasSemana - totalConsumidoSemana)
+  const percentualLivre = Math.round(
+    ((totalAcordadasSemana - totalConsumidoSemana) / totalAcordadasSemana) * 100
+  )
+
+  const horasLivresDiaUtil = Math.round((horasAcordadasDia - consumidaUtilAcordado) * 10) / 10
+  const horasLivresDiaFDS = Math.round((horasAcordadasDia - consumidaFDSAcordado) * 10) / 10
 
   const zona = percentualLivre >= 40 ? 'privilegio' : 'sacrificio'
+  const fatorHora = totalAcordadasSemana / 100
   const horasZona =
     percentualLivre >= 40
-      ? Math.round((percentualLivre - 40) * 1.68)
-      : Math.round((40 - percentualLivre) * 1.68)
+      ? Math.round((percentualLivre - 40) * fatorHora)
+      : Math.round((40 - percentualLivre) * fatorHora)
 
   return {
     percentualLivre,
