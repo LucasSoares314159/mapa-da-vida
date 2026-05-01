@@ -54,7 +54,7 @@ export function getZonaConfig(zona: 'privilegio' | 'sacrificio') {
     }
   }
   return {
-    badgeClass: 'bg-[rgba(192,80,80,0.15)] border-mt-red text-mt-red',
+    badgeClass: 'bg-[rgba(192,80,80,0.15)] border-[#C05050] text-[#C05050]',
     percentualCor: '#C05050',
     badgeLabel: 'Zona de Sacrifício',
     descricao: 'Sua rotina já está no limite. Objetivos novos exigem remover algo antes.',
