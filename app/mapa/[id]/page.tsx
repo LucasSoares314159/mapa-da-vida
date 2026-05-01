@@ -36,7 +36,7 @@ export default async function MapaPage({ params }: Props) {
     .from('rotinas')
     .select('id')
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
 
   if (!rotina) {
     redirect(`/rotina?mapaId=${id}`)

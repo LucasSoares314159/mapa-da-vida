@@ -22,7 +22,7 @@ export default async function PaginaRotina({
     .from('rotinas')
     .select('*')
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
 
   // Fetch user's mapas for linking dropdown
   const { data: mapasUser } = await supabase

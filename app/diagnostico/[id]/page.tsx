@@ -34,7 +34,7 @@ export default async function DiagnosticoPage({ params }: Props) {
       .from('rotinas')
       .select('*')
       .eq('user_id', user.id)
-      .single(),
+      .maybeSingle(),
   ])
 
   if (!mapaRaw) notFound()
