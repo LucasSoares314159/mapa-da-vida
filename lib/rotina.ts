@@ -10,7 +10,7 @@ export type ResultadoRotina = {
   horasLivresSemana: number
   horasLivresDiaUtil: number
   horasLivresDiaFDS: number
-  zona: 'privilegio' | 'base' | 'sacrificio'
+  zona: 'privilegio' | 'sacrificio'
   horasZona: number
 }
 
@@ -27,7 +27,7 @@ export function calcularRotina(input: InputRotina): ResultadoRotina {
   const horasLivresDiaUtil = Math.round((1 - consumidaSemana) * 24 * 10) / 10
   const horasLivresDiaFDS = Math.round((1 - consumidaFDS) * 24 * 10) / 10
 
-  const zona = percentualLivre > 45 ? 'privilegio' : percentualLivre >= 35 ? 'base' : 'sacrificio'
+  const zona = percentualLivre >= 40 ? 'privilegio' : 'sacrificio'
   const horasZona =
     percentualLivre >= 40
       ? Math.round((percentualLivre - 40) * 1.68)
@@ -43,7 +43,7 @@ export function calcularRotina(input: InputRotina): ResultadoRotina {
   }
 }
 
-export function getZonaConfig(zona: 'privilegio' | 'base' | 'sacrificio') {
+export function getZonaConfig(zona: 'privilegio' | 'sacrificio') {
   if (zona === 'privilegio') {
     return {
       badgeClass: 'bg-[rgba(87,170,143,0.15)] border-mt-green text-mt-green',
@@ -51,15 +51,6 @@ export function getZonaConfig(zona: 'privilegio' | 'base' | 'sacrificio') {
       badgeLabel: 'Zona de Privilégio',
       descricao: 'Você tem mais margem do que a média. Use com intenção.',
       cor: 'bg-[rgba(87,170,143,0.1)]',
-    }
-  }
-  if (zona === 'base') {
-    return {
-      badgeClass: 'bg-[rgba(212,168,67,0.15)] border-mt-yellow text-mt-yellow',
-      percentualCor: '#D4A843',
-      badgeLabel: 'Zona Base',
-      descricao: 'Você está na média. Cada objetivo precisa caber aqui dentro.',
-      cor: 'bg-[rgba(212,168,67,0.1)]',
     }
   }
   return {
