@@ -35,16 +35,13 @@ export default async function DiagnosticoPage({ params }: Props) {
   if (!mapaRaw) notFound()
 
   let rotinaRaw = null
-  try {
-    const { data } = await supabase
-      .from('rotinas')
-      .select('*')
-      .eq('user_id', user.id)
-      .maybeSingle()
-    rotinaRaw = data
-  } catch {
-    // rotina é opcional — não quebra a página
-  }
+  const { data: rotinaData, error: rotinaError } = await supabase
+    .from('rotinas')
+    .select('*')
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (rotinaError) console.error('[diagnostico] erro ao buscar rotina:', rotinaError)
+  rotinaRaw = rotinaData
 
   const mapa = mapaRaw as Mapa
   const areas = mapa.areas ?? []
