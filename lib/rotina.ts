@@ -46,15 +46,17 @@ export function calcularRotina(input: InputRotina): ResultadoRotina {
 export function getZonaConfig(zona: 'privilegio' | 'sacrificio') {
   return zona === 'privilegio'
     ? {
-        cor: 'bg-mt-green-light',
-        textoCor: 'text-mt-green-dark',
+        cor: 'bg-mt-green-dark',
+        percentualCor: 'text-[#7EC8A8]',
+        textoCor: 'text-white',
         descricao:
-          'Você tem espaço na sua agenda. O desafio é escolher com sabedoria o que preenche esse tempo.',
+          'Você tem espaço na agenda. O desafio é escolher com sabedoria o que preenche esse tempo.',
       }
     : {
-        cor: 'bg-mt-destructive-light',
-        textoCor: 'text-mt-destructive-dark',
+        cor: 'bg-mt-green-dark',
+        percentualCor: 'text-[#C07A6A]',
+        textoCor: 'text-white',
         descricao:
-          'Sua semana está apertada. O que está ocupando seu tempo não está deixando margem para o importante.',
+          'Sua rotina já está no limite. Objetivos novos exigem remover algo antes.',
       }
 }

@@ -79,26 +79,25 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
       {/* Intro */}
       <section className="border-b border-mt-border px-6 py-12 sm:px-8 md:py-16">
         <div className="mx-auto max-w-2xl">
-          <span className="inline-block text-[11px] font-semibold tracking-[0.09em] uppercase text-mt-green bg-[#E8F5F1] px-[14px] py-[5px] rounded-badge mb-6">
-            Calculadora de Rotina
+          <span className="inline-block text-[11px] font-semibold tracking-[0.09em] uppercase text-mt-muted mb-6">
+            — Calculadora de Rotina
           </span>
-          <h1 className="font-heading text-[clamp(28px,4vw,42px)] font-semibold leading-[1.15] mb-4">
-            Quanto tempo você realmente tem?
+          <h1 className="font-heading text-[clamp(28px,4vw,42px)] font-semibold leading-[1.15] mb-6">
+            Antes de definir objetivos, veja quanto tempo você realmente tem.
           </h1>
-          <p className="text-base leading-relaxed text-mt-muted italic font-editorial mb-2">
-            "A maioria das pessoas sabe quanto dinheiro gasta. Mas ninguém sabe quanto tempo gasta até
-            perder."
-          </p>
-          <p className="text-sm text-mt-muted">
-            Essa calculadora transforma as horas da sua rotina em um número simples: o percentual de tempo
-            livre que você realmente tem. Sem essa clareza, objetivos realistas viram pura ficção.
+          <p className="text-base leading-relaxed text-mt-muted italic font-editorial">
+            "Essa não é uma verdade absoluta. É uma convenção — como o metro, que é um pedaço de madeira que serve de balizador. O objetivo é só te mostrar com o que você está trabalhando."
           </p>
         </div>
       </section>
 
       {/* Inputs Section */}
       <section className="border-b border-mt-border px-6 py-12 sm:px-8">
-        <div className="mx-auto max-w-2xl space-y-8">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="text-[11px] font-semibold tracking-[0.09em] uppercase text-mt-muted mb-8">
+            Ajuste para a sua realidade
+          </h2>
+          <div className="space-y-8">
           <div>
             <div className="flex items-end justify-between mb-4">
               <label className="text-sm font-medium text-mt-green-dark">Horas de sono</label>
@@ -155,7 +154,7 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
           <div>
             <div className="flex items-end justify-between mb-4">
               <label className="text-sm font-medium text-mt-green-dark">Dias de trabalho</label>
-              <span className="text-lg font-semibold text-mt-green">{diasTrabalho}d</span>
+              <span className="text-lg font-semibold text-mt-green">{diasTrabalho} dias</span>
             </div>
             <input
               type="range"
@@ -167,6 +166,7 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
               className="w-full h-2 bg-mt-border rounded-lg appearance-none cursor-pointer accent-mt-green"
             />
           </div>
+          </div>
         </div>
       </section>
 
@@ -175,43 +175,43 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
         <div className="mx-auto max-w-2xl">
           <div className={`rounded-card p-8 ${zonaConfig.cor}`}>
             <div className="text-center mb-6">
-              <div className="text-6xl font-bold font-heading text-mt-green-dark mb-2">
+              <div className={`text-6xl font-bold font-heading mb-2 ${zonaConfig.percentualCor}`}>
                 {resultado.percentualLivre}%
               </div>
-              <p className="text-sm font-medium text-mt-green-dark">da sua semana está livre</p>
-              <p className="text-base font-medium text-mt-green-dark mt-3">
+              <p className="text-sm font-medium text-white">da sua semana está livre</p>
+              <p className="text-base font-medium text-white mt-3">
                 ≈ <span className="font-semibold">{resultado.horasLivresSemana}</span> horas livres por semana
               </p>
             </div>
 
             <div className="flex justify-center mb-6">
               <span
-                className={`inline-block text-xs font-semibold uppercase tracking-[0.09em] px-4 py-2 rounded-badge ${zonaConfig.textoCor} bg-white bg-opacity-40`}
+                className="inline-block text-xs font-semibold uppercase tracking-[0.09em] px-4 py-2 rounded-badge border border-white border-opacity-40 text-white"
               >
                 {resultado.zona === 'privilegio' ? 'Zona de Privilégio' : 'Zona de Sacrifício'}
               </span>
             </div>
 
-            <p className="text-center text-sm leading-relaxed text-mt-green-dark mb-6">
+            <p className="text-center text-sm leading-relaxed text-white mb-6 italic font-editorial">
               {zonaConfig.descricao}
             </p>
 
-            <div className="h-px bg-mt-border opacity-50 my-6" />
+            <div className="h-px bg-white opacity-20 my-6" />
 
             <div className="grid grid-cols-2 gap-6">
               <div className="text-center">
-                <p className="text-xs uppercase font-semibold text-mt-muted tracking-[0.09em] mb-2">
+                <p className="text-xs uppercase font-semibold text-white text-opacity-60 tracking-[0.09em] mb-2">
                   Dia útil
                 </p>
-                <p className="text-3xl font-bold font-heading text-mt-green-dark">
+                <p className="text-3xl font-bold font-heading text-white">
                   {resultado.horasLivresDiaUtil}h
                 </p>
               </div>
-              <div className="text-center border-l border-mt-border border-opacity-50">
-                <p className="text-xs uppercase font-semibold text-mt-muted tracking-[0.09em] mb-2">
+              <div className="text-center border-l border-white border-opacity-20">
+                <p className="text-xs uppercase font-semibold text-white text-opacity-60 tracking-[0.09em] mb-2">
                   Fim de semana
                 </p>
-                <p className="text-3xl font-bold font-heading text-mt-green-dark">
+                <p className="text-3xl font-bold font-heading text-white">
                   {resultado.horasLivresDiaFDS}h
                 </p>
               </div>
@@ -221,31 +221,24 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
       </section>
 
       {/* Save Section */}
-      <section className="border-b border-mt-border px-6 py-8 sm:px-8">
-        <div className="mx-auto max-w-2xl flex gap-3">
+      <section className="border-b border-mt-border px-6 py-12 sm:px-8">
+        <div className="mx-auto max-w-2xl">
           <Button
             onClick={handleSalvar}
             disabled={isSaving}
-            className="flex-1 bg-mt-green hover:bg-mt-green-dark text-white font-medium h-12"
+            className="w-full bg-mt-green hover:bg-mt-green-dark text-white font-medium h-12 text-base"
           >
-            {isSaving ? 'Salvando...' : 'Salvar rotina'}
+            {isSaving ? 'Salvando...' : 'Continuar para objetivos →'}
           </Button>
-          {!mapaId && (
-            <Link href="/dashboard" className="flex-1">
-              <Button
-                variant="outline"
-                className="w-full border-mt-border text-mt-green-dark hover:bg-mt-off-white h-12"
-              >
-                Voltar
-              </Button>
-            </Link>
+          <p className="text-center text-xs text-mt-muted mt-4">
+            Você pode ajustar isso a qualquer momento
+          </p>
+          {saveSuccess && (
+            <p className="text-center text-sm text-mt-green font-medium mt-4">
+              ✓ Rotina salva com sucesso!
+            </p>
           )}
         </div>
-        {saveSuccess && (
-          <p className="text-center text-sm text-mt-green font-medium mt-3">
-            ✓ Rotina salva com sucesso!
-          </p>
-        )}
       </section>
 
       {/* Link to Map Section - only show if not already linked to a map */}
