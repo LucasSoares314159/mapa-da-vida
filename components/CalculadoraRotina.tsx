@@ -7,6 +7,7 @@ import { calcularRotina, getZonaConfig } from '@/lib/rotina'
 import type { InputRotina } from '@/lib/rotina'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 
 type Mapa = {
   id: string
@@ -81,8 +82,18 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
 
   return (
     <div className="w-full min-h-screen bg-[#2A3F45] font-sans">
-      {/* Intro */}
-      <div className="mx-auto max-w-[560px] px-4 py-12 flex flex-col gap-10">
+      <div className="mx-auto max-w-[560px] px-4 py-8 flex flex-col gap-10">
+        {/* Botão Dashboard */}
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-1.5 text-sm font-medium transition-colors w-fit"
+          style={{ color: '#57AA8F' }}
+        >
+          <ArrowLeft className="size-4" />
+          Dashboard
+        </Link>
+
+        {/* Intro */}
         <div className="flex flex-col gap-5">
           <span className="flex items-center gap-2 text-[11px] font-medium tracking-[1.2px] uppercase text-mt-green">
             <span className="inline-block w-5 h-[2px] bg-mt-green rounded" />
@@ -96,8 +107,8 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
           </p>
         </div>
 
-      {/* Inputs Section */}
-      <div className="flex flex-col gap-6">
+        {/* Inputs Section */}
+        <div className="flex flex-col gap-6">
         <h2 className="text-[13px] uppercase tracking-[1px] text-mt-muted font-normal font-heading">
           Ajuste para a sua realidade
         </h2>
@@ -221,10 +232,10 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
             <div className="text-[10px] uppercase tracking-[0.8px] text-mt-muted font-medium mt-1.5">Fim de semana</div>
           </div>
         </div>
-      </div>
+        </div>
 
-      {/* Save Section */}
-      <div className="flex flex-col gap-2.5">
+        {/* Save Section */}
+        <div className="flex flex-col gap-2.5">
         <Button
           onClick={handleSalvar}
           disabled={isSaving}
@@ -238,10 +249,10 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
             ✓ Rotina salva com sucesso!
           </p>
         )}
-      </div>
+        </div>
 
-      {/* Link to Map Section - only show if not already linked to a map */}
-      {!mapaId && !linkedMapId && mapas.length > 0 && (
+        {/* Link to Map Section - only show if not already linked to a map */}
+        {!mapaId && !linkedMapId && mapas.length > 0 && (
         <div className="flex flex-col gap-3">
           <h2 className="text-base font-medium font-heading text-[#EDF2EF]">
             Vincular a um mapa
@@ -271,10 +282,10 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
             </Button>
           </div>
         </div>
-      )}
+        )}
 
-      {/* No maps message */}
-      {!mapaId && !linkedMapId && mapas.length === 0 && (
+        {/* No maps message */}
+        {!mapaId && !linkedMapId && mapas.length === 0 && (
         <div className="text-center">
           <p className="text-sm text-mt-muted mb-4">
             Você ainda não tem mapas. Crie seu primeiro diagnóstico para vincular a rotina.
@@ -285,10 +296,10 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
             </Button>
           </Link>
         </div>
-      )}
+        )}
 
-      {/* Linked confirmation */}
-      {linkedMapId && (
+        {/* Linked confirmation */}
+        {linkedMapId && (
         <div className="text-center">
           <p className="text-sm text-mt-green font-medium mb-4">
             ✓ Rotina vinculada ao mapa com sucesso!
@@ -299,18 +310,18 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
             </Button>
           </Link>
         </div>
-      )}
+        )}
 
-      {/* CTA */}
-      {saveSuccess && mapaId && (
-        <div className="text-center">
-          <Link href={`/diagnostico/${mapaId}`}>
-            <Button className="bg-mt-green hover:bg-[#68bfa0] text-[#0C0F0F] font-medium w-full">
-              Continuar para diagnóstico →
-            </Button>
-          </Link>
-        </div>
-      )}
+        {/* CTA */}
+        {saveSuccess && mapaId && (
+          <div className="text-center">
+            <Link href={`/diagnostico/${mapaId}`}>
+              <Button className="bg-mt-green hover:bg-[#68bfa0] text-[#0C0F0F] font-medium w-full">
+                Continuar para diagnóstico →
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   )

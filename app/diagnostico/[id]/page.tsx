@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { calcularAnalise } from '@/lib/analise'
 import { getZonaConfig } from '@/lib/rotina'
@@ -74,31 +74,12 @@ export default async function DiagnosticoPage({ params }: Props) {
           Ver mapa
         </Link>
 
-        {/* Resumo da Rotina */}
-        {rotina && zonaConfig && (
-          <div className={`rounded-card p-6 ${zonaConfig.cor}`} style={{ border: '0.5px solid #c8d8d2' }}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-mt-green-dark">Sua Rotina</h3>
-              <span className="text-xs font-semibold uppercase tracking-[0.09em] text-mt-green-dark opacity-70">
-                {rotina.percentual_livre}% livre
-              </span>
-            </div>
-            <p className="text-sm leading-relaxed text-mt-muted mb-3">
-              Você tem <span className="font-semibold text-mt-green-dark">{rotina.percentual_livre}%</span> de tempo livre por semana
-              ({Math.round((1 - (rotina.horas_sono + rotina.horas_trabalho + rotina.horas_basicas) / 24) * 168)} horas).
-            </p>
-            <div className="text-xs text-mt-muted italic">
-              {zonaConfig.descricao}
-            </div>
-          </div>
-        )}
-
-        <FeedbackTally />
-
+        {/* Análise Diagnóstica */}
         <div className="rounded-card bg-white px-9 py-8" style={{ border: '0.5px solid #c8d8d2' }}>
           <p className="text-[1.05rem] font-medium leading-relaxed text-mt-black">{analise}</p>
         </div>
 
+        {/* Status Badges - Faróis */}
         <div className="flex items-center gap-2 rounded-card bg-white px-9 py-6" style={{ border: '0.5px solid #c8d8d2' }}>
           {(
             [
@@ -120,6 +101,7 @@ export default async function DiagnosticoPage({ params }: Props) {
           ))}
         </div>
 
+        {/* Suas Observações */}
         {areasComObservacao.length > 0 && (
           <div className="flex flex-col gap-4 rounded-card bg-white px-9 py-6" style={{ border: '0.5px solid #c8d8d2' }}>
             <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -138,6 +120,44 @@ export default async function DiagnosticoPage({ params }: Props) {
           </div>
         )}
 
+        {/* Sua Rotina */}
+        {rotina && zonaConfig && (
+          <div className="flex flex-col gap-3">
+            <span className="text-xs font-semibold uppercase tracking-[0.09em] text-mt-green-dark opacity-70">
+              Calculadora de Rotina
+            </span>
+            <div className={`rounded-card p-6 ${zonaConfig.cor}`} style={{ border: '0.5px solid #c8d8d2' }}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-mt-green-dark">Sua Rotina</h3>
+                <span
+                  className="text-xs font-semibold uppercase tracking-[1px] border rounded-badge px-3 py-1"
+                  style={{ borderColor: zonaConfig.borderColor, color: zonaConfig.textColor }}
+                >
+                  {zonaConfig.badgeLabel}
+                </span>
+              </div>
+              <p className="text-sm leading-relaxed text-mt-muted mb-3">
+                Você tem <span className="font-semibold text-mt-green-dark">{rotina.percentual_livre}%</span> de tempo livre por semana
+                ({Math.round((1 - (rotina.horas_sono + rotina.horas_trabalho + rotina.horas_basicas) / 24) * 168)} horas).
+              </p>
+              <div className="text-xs text-mt-muted italic mb-3">
+                {zonaConfig.descricao}
+              </div>
+              <Link
+                href={`/rotina?mapaId=${id}`}
+                className="flex items-center gap-1 text-xs text-mt-green-dark opacity-70 hover:opacity-100 transition-opacity"
+              >
+                <ArrowRight className="size-3" />
+                Editar calculadora
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* NPS Feedback */}
+        <FeedbackTally />
+
+        {/* Newsletter CTA */}
         <NewsletterCTA utm_campaign="pos-diagnostico" />
       </div>
     </AuthLayout>
