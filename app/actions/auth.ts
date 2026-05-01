@@ -56,7 +56,10 @@ export async function cadastro(state: AuthState, formData: FormData): Promise<Au
   })
 
   if (error) {
-    return { message: error.message }
+    if (error.message.toLowerCase().includes('already registered') || error.message.toLowerCase().includes('user already exists')) {
+      return { message: 'Este email já está cadastrado. Tente fazer login.' }
+    }
+    return { message: 'Não foi possível criar a conta. Tente novamente.' }
   }
 
   redirect('/auth/verificar-email')

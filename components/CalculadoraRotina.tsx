@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { salvarRotina, vincularRotina } from '@/app/actions/rotina'
 import { calcularRotina, getZonaConfig } from '@/lib/rotina'
-import type { InputRotina, ResultadoRotina } from '@/lib/rotina'
+import type { InputRotina } from '@/lib/rotina'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Clock } from 'lucide-react'
 
 type Mapa = {
   id: string
@@ -21,6 +21,7 @@ type Props = {
 }
 
 export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }: Props) {
+  const router = useRouter()
   const [horasSono, setHorasSono] = useState(defaultValues?.horasSono ?? 8)
   const [horasTrabalho, setHorasTrabalho] = useState(defaultValues?.horasTrabalho ?? 8)
   const [horasBasicas, setHorasBasicas] = useState(defaultValues?.horasBasicas ?? 4)
@@ -43,23 +44,21 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
   const handleSalvar = useCallback(async () => {
     setIsSaving(true)
     const result = await salvarRotina(
-      {
-        horasSono,
-        horasTrabalho,
-        horasBasicas,
-        diasTrabalho,
-      },
+      { horasSono, horasTrabalho, horasBasicas, diasTrabalho },
       mapaId
     )
 
-    if (!result || !('error' in result)) {
-      setSaveSuccess(true)
-      setIsSaving(false)
+    setIsSaving(false)
+
+    if ('redirectTo' in result) {
+      router.push(result.redirectTo)
       return
     }
 
-    setIsSaving(false)
-  }, [horasSono, horasTrabalho, horasBasicas, diasTrabalho, mapaId])
+    if ('success' in result) {
+      setSaveSuccess(true)
+    }
+  }, [horasSono, horasTrabalho, horasBasicas, diasTrabalho, mapaId, router])
 
   const handleVincularMapa = useCallback(async () => {
     if (!selectedMapId) return

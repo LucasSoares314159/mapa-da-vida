@@ -1,21 +1,19 @@
 'use server'
 
-import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import type { InputRotina } from '@/lib/rotina'
 
 export async function salvarRotina(
   input: InputRotina,
   mapaId?: string
-): Promise<{ error: string } | never> {
+): Promise<{ error: string } | { redirectTo: string } | { success: true }> {
   const supabase = createServerSupabaseClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) redirect('/auth/login')
+  if (!user) return { redirectTo: '/auth/login' }
 
-  // Calcular percentual livre
   const consumidaSemana = (input.horasSono + input.horasTrabalho + input.horasBasicas) / 24
   const consumidaFDS = (input.horasSono + input.horasBasicas) / 24
   const mediaConsumida =
@@ -41,8 +39,10 @@ export async function salvarRotina(
   }
 
   if (mapaId) {
-    redirect(`/diagnostico/${mapaId}`)
+    return { redirectTo: `/diagnostico/${mapaId}` }
   }
+
+  return { success: true }
 }
 
 export async function vincularRotina(

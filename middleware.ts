@@ -35,8 +35,9 @@ export async function middleware(request: NextRequest) {
   }
 
   const isRedefinirSenha = request.nextUrl.pathname === '/auth/redefinir-senha'
+  const isVerificarEmail = request.nextUrl.pathname === '/auth/verificar-email'
 
-  if (user && isAuthRoute && !isRedefinirSenha) {
+  if (user && isAuthRoute && !isRedefinirSenha && !isVerificarEmail) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
