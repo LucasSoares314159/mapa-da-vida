@@ -46,7 +46,9 @@ export function calcularRotina(input: InputRotina): ResultadoRotina {
 export function getZonaConfig(zona: 'privilegio' | 'sacrificio') {
   if (zona === 'privilegio') {
     return {
-      badgeClass: 'bg-[rgba(87,170,143,0.15)] border-mt-green text-mt-green',
+      badgeClass: 'bg-[rgba(87,170,143,0.15)]',
+      borderColor: '#57AA8F',
+      textColor: '#57AA8F',
       percentualCor: '#57AA8F',
       badgeLabel: 'Zona de Privilégio',
       descricao: 'Você tem mais margem do que a média. Use com intenção.',
@@ -54,7 +56,9 @@ export function getZonaConfig(zona: 'privilegio' | 'sacrificio') {
     }
   }
   return {
-    badgeClass: 'bg-[rgba(192,80,80,0.15)] border-[#C05050] text-[#C05050]',
+    badgeClass: 'bg-[rgba(192,80,80,0.15)]',
+    borderColor: '#C05050',
+    textColor: '#C05050',
     percentualCor: '#C05050',
     badgeLabel: 'Zona de Sacrifício',
     descricao: 'Sua rotina já está no limite. Objetivos novos exigem remover algo antes.',

@@ -189,7 +189,10 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
         <p className="text-base font-medium text-[#EDF2EF]">
           ≈ {resultado.horasLivresSemana} horas livres por semana
         </p>
-        <span className={`rounded-badge px-4 py-1.5 text-xs font-medium uppercase tracking-[1px] border ${zonaConfig.badgeClass}`}>
+        <span
+          className={`rounded-badge px-4 py-1.5 text-xs font-medium uppercase tracking-[1px] border ${zonaConfig.badgeClass}`}
+          style={{ borderColor: zonaConfig.borderColor, color: zonaConfig.textColor }}
+        >
           {zonaConfig.badgeLabel}
         </span>
         <p className="font-editorial italic text-sm text-[#a8c4bc] text-center leading-[1.7] max-w-[380px]">
