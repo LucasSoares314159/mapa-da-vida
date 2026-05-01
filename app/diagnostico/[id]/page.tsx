@@ -122,25 +122,29 @@ export default async function DiagnosticoPage({ params }: Props) {
 
         {/* Sua Rotina */}
         {rotina && zonaConfig && (
-          <div className="rounded-card p-6 bg-mt-off-white" style={{ border: '0.5px solid #c8d8d2' }}>
-            <div className="flex items-center justify-between mb-4">
+          <div className="rounded-card p-6" style={{ backgroundColor: '#57AA8F', border: '0.5px solid #57AA8F' }}>
+            <div className="mb-3">
+              <p className="text-xs font-semibold uppercase tracking-[1px] text-white mb-3">
+                Sua Rotina
+              </p>
               <span
-                className="text-xs font-semibold uppercase tracking-[1px] border rounded-badge px-3 py-1"
-                style={{ borderColor: zonaConfig.borderColor, color: zonaConfig.textColor }}
+                className="text-xs font-semibold uppercase tracking-[1px] border rounded-badge px-3 py-1 inline-block"
+                style={{ borderColor: 'rgba(255,255,255,0.5)', backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }}
               >
                 {zonaConfig.badgeLabel}
               </span>
             </div>
-            <p className="text-sm leading-relaxed text-mt-muted mb-2">
-              Você tem <span className="font-semibold text-mt-green-dark">{rotina.percentual_livre}%</span> de tempo livre por semana
+            <p className="text-sm leading-relaxed mb-2" style={{ color: 'rgba(255,255,255,0.8)' }}>
+              Você tem <span className="font-semibold" style={{ color: zonaConfig.textColor }}>{rotina.percentual_livre}%</span> de tempo livre por semana
               ({Math.round((1 - (rotina.horas_sono + rotina.horas_trabalho + rotina.horas_basicas) / 24) * 168)} horas).
             </p>
-            <p className="text-sm leading-relaxed text-mt-green-dark font-medium mb-3">
+            <p className="text-sm leading-relaxed font-editorial text-white mb-3">
               Objetivos novos devem ser avaliados com cuidado.
             </p>
             <Link
               href={`/rotina?mapaId=${id}`}
-              className="flex items-center gap-1 text-xs text-mt-green-dark opacity-70 hover:opacity-100 transition-opacity"
+              className="flex items-center gap-1 text-xs transition-colors"
+              style={{ color: 'rgba(255,255,255,0.7)' }}
             >
               <ArrowRight className="size-3" />
               Editar rotina
