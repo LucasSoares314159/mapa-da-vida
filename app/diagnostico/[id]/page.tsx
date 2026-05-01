@@ -56,6 +56,7 @@ export default async function DiagnosticoPage({ params }: Props) {
 
   const areasComObservacao = areas.filter((a) => a.observacao?.trim())
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rotina = rotinaRaw as any
   const percentualLivre = typeof rotina?.percentual_livre === 'number' ? rotina.percentual_livre : 0
 
