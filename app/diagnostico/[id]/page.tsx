@@ -22,7 +22,7 @@ export default async function DiagnosticoPage({ params }: Props) {
   } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const [{ data: profile }, { data: mapaRaw }, { data: rotinaRaw }] = await Promise.all([
+  const [{ data: profile }, { data: mapaRaw }] = await Promise.all([
     supabase.from('profiles').select('nome').eq('id', user.id).single(),
     supabase
       .from('mapas')
@@ -30,14 +30,21 @@ export default async function DiagnosticoPage({ params }: Props) {
       .eq('id', id)
       .eq('user_id', user.id)
       .single(),
-    supabase
-      .from('rotinas')
-      .select('*')
-      .eq('user_id', user.id)
-      .maybeSingle(),
   ])
 
   if (!mapaRaw) notFound()
+
+  let rotinaRaw = null
+  try {
+    const { data } = await supabase
+      .from('rotinas')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    rotinaRaw = data
+  } catch {
+    // rotina é opcional — não quebra a página
+  }
 
   const mapa = mapaRaw as Mapa
   const areas = mapa.areas ?? []
@@ -50,8 +57,9 @@ export default async function DiagnosticoPage({ params }: Props) {
   const areasComObservacao = areas.filter((a) => a.observacao?.trim())
 
   const rotina = rotinaRaw as any
+  const percentualLivre = typeof rotina?.percentual_livre === 'number' ? rotina.percentual_livre : 0
 
-  const zonaConfig = rotina ? getZonaConfig(rotina.percentual_livre >= 40 ? 'privilegio' : 'sacrificio') : null
+  const zonaConfig = rotina ? getZonaConfig(percentualLivre >= 40 ? 'privilegio' : 'sacrificio') : null
 
   return (
     <AuthLayout titulo="Diagnóstico Completo" nomeUsuario={nomeUsuario}>
