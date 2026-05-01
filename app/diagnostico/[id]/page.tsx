@@ -122,7 +122,7 @@ export default async function DiagnosticoPage({ params }: Props) {
 
         {/* Sua Rotina */}
         {rotina && zonaConfig && (
-          <div className="rounded-card p-6 bg-[rgba(87,170,143,0.1)]" style={{ border: '0.5px solid #c8d8d2' }}>
+          <div className="rounded-card p-6 bg-mt-off-white" style={{ border: '0.5px solid #c8d8d2' }}>
             <div className="flex items-center justify-between mb-4">
               <span
                 className="text-xs font-semibold uppercase tracking-[1px] border rounded-badge px-3 py-1"
