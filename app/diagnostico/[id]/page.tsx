@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { calcularAnalise } from '@/lib/analise'
+import { getZonaConfig } from '@/lib/rotina'
 import { AuthLayout } from '@/components/AuthLayout'
 import { NewsletterCTA } from '@/components/NewsletterCTA'
 import { FeedbackTally } from '@/components/FeedbackTally'
@@ -21,12 +22,17 @@ export default async function DiagnosticoPage({ params }: Props) {
   } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const [{ data: profile }, { data: mapaRaw }] = await Promise.all([
+  const [{ data: profile }, { data: mapaRaw }, { data: rotinaRaw }] = await Promise.all([
     supabase.from('profiles').select('nome').eq('id', user.id).single(),
     supabase
       .from('mapas')
       .select('*, areas(*)')
       .eq('id', id)
+      .eq('user_id', user.id)
+      .single(),
+    supabase
+      .from('rotinas')
+      .select('*')
       .eq('user_id', user.id)
       .single(),
   ])
@@ -43,6 +49,10 @@ export default async function DiagnosticoPage({ params }: Props) {
 
   const areasComObservacao = areas.filter((a) => a.observacao?.trim())
 
+  const rotina = rotinaRaw as any
+
+  const zonaConfig = rotina ? getZonaConfig(rotina.percentual_livre >= 40 ? 'privilegio' : 'sacrificio') : null
+
   return (
     <AuthLayout titulo="Diagnóstico Completo" nomeUsuario={nomeUsuario}>
       <div className="mx-auto flex max-w-xl flex-col gap-4 px-6 py-8">
@@ -55,6 +65,25 @@ export default async function DiagnosticoPage({ params }: Props) {
           <ArrowLeft className="size-4" />
           Ver mapa
         </Link>
+
+        {/* Resumo da Rotina */}
+        {rotina && zonaConfig && (
+          <div className={`rounded-card p-6 ${zonaConfig.cor}`} style={{ border: '0.5px solid #c8d8d2' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-mt-green-dark">Sua Rotina</h3>
+              <span className="text-xs font-semibold uppercase tracking-[0.09em] text-mt-green-dark opacity-70">
+                {rotina.percentual_livre}% livre
+              </span>
+            </div>
+            <p className="text-sm leading-relaxed text-mt-muted mb-3">
+              Você tem <span className="font-semibold text-mt-green-dark">{rotina.percentual_livre}%</span> de tempo livre por semana
+              ({Math.round((1 - (rotina.horas_sono + rotina.horas_trabalho + rotina.horas_basicas) / 24) * 168)} horas).
+            </p>
+            <div className="text-xs text-mt-muted italic">
+              {zonaConfig.descricao}
+            </div>
+          </div>
+        )}
 
         <FeedbackTally />
 

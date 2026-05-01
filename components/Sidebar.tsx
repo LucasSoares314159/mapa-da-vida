@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, LogOut, Map } from 'lucide-react'
+import { Home, LogOut, Map, Clock } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
 import { cn } from '@/lib/utils'
 
@@ -13,6 +13,7 @@ type Props = {
 export function Sidebar({ onClose }: Props) {
   const pathname = usePathname()
   const isDashboard = pathname === '/dashboard'
+  const isRotina = pathname === '/rotina'
 
   return (
     <aside className="flex h-full w-[220px] shrink-0 flex-col bg-white" style={{ borderRight: '0.5px solid #c8d8d2' }}>
@@ -38,6 +39,20 @@ export function Sidebar({ onClose }: Props) {
         >
           <Home className="size-4 shrink-0" />
           Início
+        </Link>
+
+        <Link
+          href="/rotina"
+          onClick={onClose}
+          className={cn(
+            'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200',
+            isRotina
+              ? 'bg-mt-off-white text-mt-green-dark'
+              : 'text-mt-muted hover:bg-mt-off-white hover:text-mt-green-dark'
+          )}
+        >
+          <Clock className="size-4 shrink-0" />
+          Minha Rotina
         </Link>
 
         <Link
