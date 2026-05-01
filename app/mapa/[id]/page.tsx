@@ -31,17 +31,6 @@ export default async function MapaPage({ params }: Props) {
 
   if (!mapaRaw) notFound()
 
-  // Check if user has a rotina — if not, redirect to calculator
-  const { data: rotina } = await supabase
-    .from('rotinas')
-    .select('id')
-    .eq('user_id', user.id)
-    .maybeSingle()
-
-  if (!rotina) {
-    redirect(`/rotina?mapaId=${id}`)
-  }
-
   const mapa = mapaRaw as Mapa
   const analise = calcularAnalise(mapa.areas ?? [])
 
