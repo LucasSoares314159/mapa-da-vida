@@ -17,29 +17,21 @@ export type ResultadoRotina = {
 export function calcularRotina(input: InputRotina): ResultadoRotina {
   const { horasSono, horasTrabalho, horasBasicas, diasTrabalho } = input
 
-  const horasAcordadasDia = 24 - horasSono
-  const totalAcordadasSemana = horasAcordadasDia * 7
+  const consumidaSemana = (horasSono + horasTrabalho + horasBasicas) / 24
+  const consumidaFDS = (horasSono + horasBasicas) / 24
+  const mediaConsumida =
+    (consumidaSemana * diasTrabalho + consumidaFDS * (7 - diasTrabalho)) / 7
 
-  const consumidaUtilAcordado = horasTrabalho + horasBasicas
-  const consumidaFDSAcordado = horasBasicas
-
-  const totalConsumidoSemana =
-    consumidaUtilAcordado * diasTrabalho + consumidaFDSAcordado * (7 - diasTrabalho)
-
-  const horasLivresSemana = Math.round(totalAcordadasSemana - totalConsumidoSemana)
-  const percentualLivre = Math.round(
-    ((totalAcordadasSemana - totalConsumidoSemana) / totalAcordadasSemana) * 100
-  )
-
-  const horasLivresDiaUtil = Math.round((horasAcordadasDia - consumidaUtilAcordado) * 10) / 10
-  const horasLivresDiaFDS = Math.round((horasAcordadasDia - consumidaFDSAcordado) * 10) / 10
+  const percentualLivre = Math.round((1 - mediaConsumida) * 100)
+  const horasLivresSemana = Math.round((1 - mediaConsumida) * 168)
+  const horasLivresDiaUtil = Math.round((1 - consumidaSemana) * 24 * 10) / 10
+  const horasLivresDiaFDS = Math.round((1 - consumidaFDS) * 24 * 10) / 10
 
   const zona = percentualLivre >= 40 ? 'privilegio' : 'sacrificio'
-  const fatorHora = totalAcordadasSemana / 100
   const horasZona =
     percentualLivre >= 40
-      ? Math.round((percentualLivre - 40) * fatorHora)
-      : Math.round((40 - percentualLivre) * fatorHora)
+      ? Math.round((percentualLivre - 40) * 1.68)
+      : Math.round((40 - percentualLivre) * 1.68)
 
   return {
     percentualLivre,
@@ -61,7 +53,7 @@ export function getZonaConfig(zona: 'privilegio' | 'sacrificio') {
       badgeLabel: 'Zona de Privilégio',
       descricao: 'Você tem mais margem do que a média. Use com intenção.',
       cor: 'bg-[rgba(87,170,143,0.1)]',
-      badgeCardBorder: 'rgba(42,63,69,0.6)',
+      badgeCardBorder: 'rgba(42,63,69,0.5)',
       badgeCardBg: 'rgba(42,63,69,0.2)',
       badgeCardText: '#2A3F45',
       percentualCardCor: '#2A3F45',
@@ -76,7 +68,7 @@ export function getZonaConfig(zona: 'privilegio' | 'sacrificio') {
     badgeLabel: 'Zona de Sacrifício',
     descricao: 'Sua rotina já está no limite. Objetivos novos exigem remover algo antes.',
     cor: 'bg-[rgba(192,80,80,0.1)]',
-    badgeCardBorder: 'rgba(192,80,80,0.6)',
+    badgeCardBorder: 'rgba(192,80,80,0.7)',
     badgeCardBg: 'rgba(192,80,80,0.25)',
     badgeCardText: '#FFAAAA',
     percentualCardCor: '#FFAAAA',

@@ -122,29 +122,43 @@ export default async function DiagnosticoPage({ params }: Props) {
 
         {/* Sua Rotina */}
         {rotina && zonaConfig && (
-          <div className="rounded-card p-6" style={{ backgroundColor: '#57AA8F', border: '0.5px solid #57AA8F' }}>
-            <div className="mb-3">
-              <p className="text-xs font-semibold uppercase tracking-[1px] text-white mb-3">
+          <div className="rounded-card px-7 py-6 flex flex-col gap-4" style={{ backgroundColor: '#57AA8F', border: '0.5px solid #57AA8F' }}>
+            {/* Eyebrow + Badge */}
+            <div className="flex flex-col gap-2">
+              <p className="text-[10px] font-semibold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
                 Sua Rotina
               </p>
               <span
-                className="text-xs font-semibold uppercase tracking-[1px] border rounded-badge px-3 py-1 inline-block"
+                className="text-[11px] font-bold uppercase tracking-[1px] border rounded-badge px-3 py-1 w-fit"
                 style={{ borderColor: zonaConfig.badgeCardBorder, backgroundColor: zonaConfig.badgeCardBg, color: zonaConfig.badgeCardText }}
               >
                 {zonaConfig.badgeLabel}
               </span>
             </div>
-            <p className="text-sm leading-relaxed mb-2" style={{ color: 'rgba(255,255,255,0.8)' }}>
-              Você tem <span className="font-semibold" style={{ color: zonaConfig.percentualCardCor }}>{rotina.percentual_livre}%</span> de tempo livre por semana
-              ({Math.round((1 - (rotina.horas_sono + rotina.horas_trabalho + rotina.horas_basicas) / 24) * 168)} horas).
-            </p>
-            <p className="text-sm leading-relaxed font-editorial italic text-white mb-3">
+
+            {/* Percentual em destaque */}
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-baseline gap-2">
+                <span className="text-[2.5rem] font-bold leading-none tracking-tight" style={{ color: zonaConfig.percentualCardCor }}>
+                  {rotina.percentual_livre}%
+                </span>
+                <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.75)' }}>de tempo livre</span>
+              </div>
+              <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                ≈ {Math.round((1 - ((rotina.horas_sono ?? 0) + (rotina.horas_trabalho ?? 0) + (rotina.horas_basicas ?? 0)) / 24) * 168)} horas por semana
+              </p>
+            </div>
+
+            {/* Mensagem da zona */}
+            <p className="text-sm leading-relaxed font-editorial italic" style={{ color: 'rgba(255,255,255,0.85)' }}>
               {zonaConfig.cardDescricao}
             </p>
+
+            {/* Link */}
             <Link
               href={`/rotina?mapaId=${id}`}
-              className="flex items-center gap-1 text-xs transition-colors"
-              style={{ color: 'rgba(255,255,255,0.7)' }}
+              className="flex items-center gap-1 text-xs w-fit transition-colors"
+              style={{ color: 'rgba(255,255,255,0.55)' }}
             >
               <ArrowRight className="size-3" />
               Editar rotina
