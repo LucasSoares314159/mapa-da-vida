@@ -51,7 +51,7 @@ export default async function DiagnosticoPage({ params }: Props) {
 
   const rotina = rotinaRaw as any
 
-  const zonaConfig = rotina ? getZonaConfig(rotina.percentual_livre >= 40 ? 'privilegio' : 'sacrificio') : null
+  const zonaConfig = rotina ? getZonaConfig(rotina.percentual_livre > 45 ? 'privilegio' : rotina.percentual_livre >= 35 ? 'base' : 'sacrificio') : null
 
   return (
     <AuthLayout titulo="Diagnóstico Completo" nomeUsuario={nomeUsuario}>
