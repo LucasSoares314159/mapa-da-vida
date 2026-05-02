@@ -2,9 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { MoreVertical, Check } from 'lucide-react'
+import { Pencil, Trash2, Pause, RotateCcw, CalendarDays, Target } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -17,7 +16,7 @@ import {
 } from '@/app/actions/objetivos'
 import type { Objetivo, PrazoObjetivo, NomePilar, StatusObjetivo } from '@/types'
 
-const LIMITE_CURTO = 3
+const LIMITE = 3
 
 const PILAR_COR: Record<NomePilar, string> = {
   corpo: '#57AA8F',
@@ -31,30 +30,33 @@ const PILAR_LABEL: Record<NomePilar, string> = {
   espirito: 'Espírito',
 }
 
-const STATUS_CONFIG: Record<StatusObjetivo, { label: string; bg: string; color: string }> = {
-  ativo: { label: 'Ativo', bg: 'rgba(87,170,143,0.12)', color: '#57AA8F' },
-  pausado: { label: 'Pausado', bg: 'rgba(212,168,67,0.15)', color: '#b88a30' },
-  concluido: { label: 'Concluído', bg: 'rgba(111,143,135,0.12)', color: '#6f8f87' },
-  arquivado: { label: 'Arquivado', bg: 'rgba(192,80,80,0.12)', color: '#C05050' },
+const STATUS_CONCLUIDO = {
+  border: '1px solid #a8d5c2',
+  color: '#3d8f72',
+  background: '#f0faf5',
 }
 
-const PRAZOS: { value: PrazoObjetivo; label: string }[] = [
-  { value: 'curto', label: 'Curto' },
-  { value: 'medio', label: 'Médio' },
-  { value: 'longo', label: 'Longo' },
+const PRAZOS: { value: PrazoObjetivo; label: string; sublabel: string }[] = [
+  { value: 'curto', label: 'Curto', sublabel: 'até 90 dias' },
+  { value: 'medio', label: 'Médio', sublabel: '6–12 meses' },
+  { value: 'longo', label: 'Longo', sublabel: '1–3 anos' },
 ]
 
+const PILAR_OPTIONS = ['corpo', 'mente', 'espirito'] as const
+
+const EMPTY_SUBTEXTO: Record<PrazoObjetivo, string> = {
+  curto: 'O que você quer mudar nos próximos 90 dias?',
+  medio: 'O que você quer construir até o fim do ano?',
+  longo: 'Onde você quer estar daqui a 1–3 anos?',
+}
+
 const getMesAtual = () => {
-  const meses = [
-    'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-    'jul', 'ago', 'set', 'out', 'nov', 'dez',
-  ]
+  const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
   return meses[new Date().getMonth()]
 }
 
-const getZonaLabel = (zona: 'privilegio' | 'sacrificio') => {
-  return zona === 'sacrificio' ? 'Zona Sacrifício' : 'Zona Privilégio'
-}
+const getZonaLabel = (zona: 'privilegio' | 'sacrificio') =>
+  zona === 'sacrificio' ? 'Zona Sacrifício' : 'Zona Privilégio'
 
 type Props = {
   objetivos: Objetivo[]
@@ -78,19 +80,17 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
   const [formLoading, setFormLoading] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
-  const [toast, setToast] = useState({ mensagem: '', visivel: false })
+  const [toast, setToast] = useState<{ mensagem: string; visivel: boolean }>({ mensagem: '', visivel: false })
 
   const porPrazo = (prazo: PrazoObjetivo) => lista.filter((o) => o.prazo === prazo)
-  const curtos = porPrazo('curto')
-  const medios = porPrazo('medio')
-  const longos = porPrazo('longo')
 
-  const curtosAtivos = curtos.filter((o) => o.status === 'ativo').length
-  const atingiuLimite = curtosAtivos >= LIMITE_CURTO
+  // Badge conta ativos + pausados (não concluídos nem arquivados)
+  const contarAtivos = (prazo: PrazoObjetivo) =>
+    porPrazo(prazo).filter((o) => o.status === 'ativo' || o.status === 'pausado').length
 
   function mostrarToast(mensagem: string) {
     setToast({ mensagem, visivel: true })
-    setTimeout(() => setToast((t) => ({ ...t, visivel: false })), 3000)
+    setTimeout(() => setToast((t) => ({ ...t, visivel: false })), 2800)
   }
 
   function handleAbrirModal(prazo: PrazoObjetivo, objetivo?: Objetivo) {
@@ -124,58 +124,37 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
       setFormError('Descreva o objetivo com clareza.')
       return
     }
-
-    if (
-      !editandoObjetivo &&
-      formPrazo === 'curto' &&
-      curtosAtivos >= LIMITE_CURTO
-    ) {
-      setFormError('Limite de 3 objetivos curtos atingido.')
+    if (!editandoObjetivo && contarAtivos(formPrazo) >= LIMITE) {
+      setFormError(`Limite de ${LIMITE} objetivos por prazo atingido.`)
       return
     }
-
     setFormLoading(true)
     setFormError(null)
-
     try {
-      let result
+      const result = editandoObjetivo
+        ? await editarObjetivo(editandoObjetivo.id, {
+            texto: formTexto.trim(),
+            pilar: formPilar,
+            prazo: formPrazo,
+            data_alvo: formDataAlvo || null,
+            motivo: formMotivo.trim() || null,
+          })
+        : await criarObjetivo({
+            texto: formTexto.trim(),
+            pilar: formPilar,
+            prazo: formPrazo,
+            data_alvo: formDataAlvo || null,
+            motivo: formMotivo.trim() || null,
+          })
 
-      if (editandoObjetivo) {
-        result = await editarObjetivo(editandoObjetivo.id, {
-          texto: formTexto.trim(),
-          pilar: formPilar,
-          prazo: formPrazo,
-          data_alvo: formDataAlvo || null,
-          motivo: formMotivo.trim() || null,
-        })
-      } else {
-        result = await criarObjetivo({
-          texto: formTexto.trim(),
-          pilar: formPilar,
-          prazo: formPrazo,
-          data_alvo: formDataAlvo || null,
-          motivo: formMotivo.trim() || null,
-        })
-      }
-
-      if ('redirectTo' in result) {
-        router.push(result.redirectTo)
-        return
-      }
-
-      if ('error' in result) {
-        setFormError(result.error)
-        return
-      }
-
+      if ('redirectTo' in result) { router.push(result.redirectTo); return }
+      if ('error' in result) { setFormError(result.error); return }
       if ('data' in result) {
-        if (editandoObjetivo) {
-          setLista((prev) =>
-            prev.map((o) => (o.id === editandoObjetivo.id ? result.data : o))
-          )
-        } else {
-          setLista((prev) => [result.data, ...prev])
-        }
+        setLista((prev) =>
+          editandoObjetivo
+            ? prev.map((o) => (o.id === editandoObjetivo.id ? result.data : o))
+            : [result.data, ...prev]
+        )
         handleFecharModal()
       }
     } finally {
@@ -186,197 +165,198 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
   async function handleConcluir(id: string) {
     const original = lista.find((o) => o.id === id)
     if (!original) return
-
+    // Optimistic: se já concluído → retomar; se ativo/pausado → concluir
+    const novoStatus: StatusObjetivo = original.status === 'concluido' ? 'ativo' : 'concluido'
+    const agora = new Date().toISOString()
     setLista((prev) =>
       prev.map((o) =>
-        o.id === id ? { ...o, status: 'concluido', concluido_em: new Date().toISOString() } : o
+        o.id === id
+          ? { ...o, status: novoStatus, concluido_em: novoStatus === 'concluido' ? agora : null }
+          : o
       )
     )
-
-    const result = await atualizarStatusObjetivo(id, 'concluido')
-
-    if ('redirectTo' in result) {
-      router.push(result.redirectTo)
-      return
-    }
-
+    const result = await atualizarStatusObjetivo(id, novoStatus)
+    if ('redirectTo' in result) { router.push(result.redirectTo); return }
     if ('error' in result) {
       setLista((prev) => prev.map((o) => (o.id === id ? original : o)))
-      mostrarToast('Erro ao concluir objetivo.')
+      mostrarToast('Erro ao atualizar objetivo.')
       return
     }
-
-    mostrarToast('🎯 Objetivo concluído. Bom trabalho.')
+    if (novoStatus === 'concluido') {
+      mostrarToast('🎯 Objetivo concluído. Bom trabalho.')
+    } else {
+      mostrarToast('↩︎ Objetivo retomado. Sem julgamento.')
+    }
   }
 
   async function handlePausar(id: string) {
     const original = lista.find((o) => o.id === id)
     if (!original) return
-
-    setLista((prev) =>
-      prev.map((o) =>
-        o.id === id ? { ...o, status: 'pausado' } : o
-      )
-    )
-
+    setLista((prev) => prev.map((o) => o.id === id ? { ...o, status: 'pausado' } : o))
     const result = await atualizarStatusObjetivo(id, 'pausado')
-
-    if ('redirectTo' in result) {
-      router.push(result.redirectTo)
-      return
-    }
-
+    if ('redirectTo' in result) { router.push(result.redirectTo); return }
     if ('error' in result) {
       setLista((prev) => prev.map((o) => (o.id === id ? original : o)))
       mostrarToast('Erro ao pausar objetivo.')
-      return
     }
-
-    mostrarToast('⏸ Objetivo pausado.')
   }
 
   async function handleRetomar(id: string) {
     const original = lista.find((o) => o.id === id)
     if (!original) return
-
-    setLista((prev) =>
-      prev.map((o) =>
-        o.id === id ? { ...o, status: 'ativo', concluido_em: null } : o
-      )
-    )
-
+    setLista((prev) => prev.map((o) => o.id === id ? { ...o, status: 'ativo', concluido_em: null } : o))
     const result = await atualizarStatusObjetivo(id, 'ativo')
-
-    if ('redirectTo' in result) {
-      router.push(result.redirectTo)
-      return
-    }
-
+    if ('redirectTo' in result) { router.push(result.redirectTo); return }
     if ('error' in result) {
       setLista((prev) => prev.map((o) => (o.id === id ? original : o)))
       mostrarToast('Erro ao retomar objetivo.')
       return
     }
-
     mostrarToast('↩︎ Objetivo retomado. Sem julgamento.')
   }
 
   async function handleArquivar(id: string) {
     const original = lista.find((o) => o.id === id)
     if (!original) return
-
     setLista((prev) => prev.filter((o) => o.id !== id))
-
     const result = await arquivarObjetivo(id)
-
-    if ('redirectTo' in result) {
-      router.push(result.redirectTo)
-      return
-    }
-
+    if ('redirectTo' in result) { router.push(result.redirectTo); return }
     if ('error' in result) {
       setLista((prev) => [...prev, original])
       mostrarToast('Erro ao arquivar objetivo.')
-      return
     }
-  }
-
-  const renderizar = (prazo: PrazoObjetivo) => {
-    const items = porPrazo(prazo)
-
-    if (items.length === 0) {
-      return (
-        <EmptyState
-          prazo={prazo}
-          onAdicionar={() => handleAbrirModal(prazo)}
-        />
-      )
-    }
-
-    return (
-      <>
-        {items.map((obj) => (
-          <ObjetivoCard
-            key={obj.id}
-            objetivo={obj}
-            onConcluir={handleConcluir}
-            onPausar={handlePausar}
-            onRetomar={handleRetomar}
-            onEditar={() => handleAbrirModal(obj.prazo, obj)}
-            onArquivar={handleArquivar}
-          />
-        ))}
-      </>
-    )
   }
 
   return (
-    <div className="min-h-screen bg-gray-200 py-8">
+    <div className="min-h-screen py-8">
       <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 flex flex-col gap-4">
-        {/* Header meta */}
-        <p className="text-xs font-medium text-mt-muted">
+        {/* Título */}
+        <h1 className="font-heading text-2xl font-semibold text-mt-black">
+          Meus Objetivos
+        </h1>
+
+        {/* Meta */}
+        <p className="text-xs font-medium text-mt-muted -mt-2">
           Mapa de {getMesAtual()} · {getZonaLabel(zona)} · {percentualLivre}% livre
         </p>
 
-        {/* Zona banner */}
-        {percentualLivre < 50 && (
-          <Card className="border-mt-red/30 bg-mt-red/10">
-            <div className="p-4">
-              <p className="text-sm text-mt-red">
-                <strong>Rotina sobrecarregada.</strong> Sua agenda já está no limite.
-                Antes de adicionar novos objetivos, considere pausar ou concluir
-                os existentes para criar espaço real.
-              </p>
-            </div>
-          </Card>
+        {/* Banner Zona Sacrifício */}
+        {zona === 'sacrificio' && (
+          <div style={{
+            background: 'rgba(192, 80, 80, 0.07)',
+            borderLeft: '3px solid #C05050',
+            borderRadius: '8px',
+            padding: '12px 16px',
+          }}>
+            <p style={{
+              fontFamily: "'Lora', serif",
+              fontStyle: 'italic',
+              fontSize: '14px',
+              color: '#C05050',
+              lineHeight: '1.7',
+              margin: 0,
+            }}>
+              Sua rotina já está no limite. Antes de adicionar um objetivo novo, considere o que você vai remover.
+            </p>
+          </div>
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 rounded-md border border-mt-border bg-white p-1">
+        <div className="flex gap-1 rounded-[10px] border border-mt-border bg-white p-1">
           {PRAZOS.map((pz) => {
-            const count = porPrazo(pz.value).filter(
-              (o) => o.status === 'ativo'
-            ).length
-            const isLimiteCurto =
-              pz.value === 'curto' && zona === 'sacrificio' && curtosAtivos >= LIMITE_CURTO
+            const count = contarAtivos(pz.value)
+            const noLimite = count >= LIMITE
+            const ativa = tabAtiva === pz.value
 
             return (
               <button
                 key={pz.value}
                 onClick={() => setTabAtiva(pz.value)}
                 className={cn(
-                  'flex flex-1 items-center justify-center gap-2 px-3 py-2 text-sm font-medium transition-colors rounded-lg',
-                  tabAtiva === pz.value
-                    ? 'bg-mt-off-white text-mt-black'
-                    : 'bg-transparent text-mt-muted hover:bg-mt-off-white/50'
+                  'flex flex-1 flex-col items-center justify-center gap-0.5 px-3 py-2 text-sm font-medium transition-colors rounded-lg',
+                  ativa ? 'bg-mt-green text-white' : 'bg-transparent text-mt-muted hover:bg-mt-green/10 hover:text-mt-green-dark'
                 )}
               >
-                {pz.label}
-                <span
-                  className={cn(
-                    'rounded-full px-2 py-0.5 text-[11px] font-medium',
-                    isLimiteCurto
-                      ? 'bg-mt-red text-white'
-                      : 'bg-mt-off-white text-mt-black'
-                  )}
-                >
-                  {count}
-                </span>
+                <div className="flex items-center gap-1 uppercase tracking-wide text-xs">
+                  {pz.label}
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '9px',
+                      fontWeight: 500,
+                      borderRadius: '100px',
+                      padding: '1px 5px',
+                      lineHeight: '1.5',
+                      background: noLimite
+                        ? ativa ? 'rgba(255,255,255,0.25)' : 'rgba(192,80,80,0.15)'
+                        : ativa ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.08)',
+                      color: noLimite
+                        ? ativa ? '#fff' : '#C05050'
+                        : ativa ? '#fff' : 'inherit',
+                    }}
+                  >
+                    {noLimite ? `${count}/${LIMITE}` : count}
+                  </span>
+                </div>
+                <span className={cn('text-[10px] font-normal', ativa ? 'text-white/70' : 'text-mt-muted')}>{pz.sublabel}</span>
               </button>
             )
           })}
         </div>
 
-        {/* Lista */}
+        {/* Lista + empty state + botão */}
         <div className="flex flex-col gap-3">
-          {renderizar(tabAtiva)}
-          <Button
+          {porPrazo(tabAtiva).length === 0
+            ? <EmptyState prazo={tabAtiva} />
+            : porPrazo(tabAtiva).map((obj) => (
+                <ObjetivoCard
+                  key={obj.id}
+                  objetivo={obj}
+                  onConcluir={handleConcluir}
+                  onPausar={handlePausar}
+                  onRetomar={handleRetomar}
+                  onEditar={() => handleAbrirModal(obj.prazo, obj)}
+                  onArquivar={handleArquivar}
+                />
+              ))
+          }
+
+          {/* Botão adicionar — sempre visível */}
+          <button
             onClick={() => handleAbrirModal(tabAtiva)}
-            variant="ghost"
-            className="justify-start gap-2 text-mt-green hover:bg-transparent hover:text-mt-green"
+            style={{
+              background: 'transparent',
+              border: '1px dashed #c8d8d2',
+              color: '#6f8f87',
+              borderRadius: '10px',
+              padding: '12px 24px',
+              fontFamily: "'DM Sans', sans-serif",
+              fontWeight: 500,
+              fontSize: '14px',
+              cursor: 'pointer',
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              transition: 'border-color 0.15s, color 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#57AA8F'
+              e.currentTarget.style.borderStyle = 'solid'
+              e.currentTarget.style.color = '#57AA8F'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#c8d8d2'
+              e.currentTarget.style.borderStyle = 'dashed'
+              e.currentTarget.style.color = '#6f8f87'
+            }}
           >
-            + Adicionar objetivo
-          </Button>
+            <span style={{ fontSize: '16px', lineHeight: 1 }}>+</span>
+            Adicionar objetivo
+          </button>
         </div>
       </div>
 
@@ -402,10 +382,14 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
       )}
 
       {/* Toast */}
-      {toast.visivel && <Toast mensagem={toast.mensagem} />}
+      <Toast mensagem={toast.mensagem} visivel={toast.visivel} />
     </div>
   )
 }
+
+// ---------------------------------------------------------------------------
+// ObjetivoCard
+// ---------------------------------------------------------------------------
 
 interface ObjetivoCardProps {
   objetivo: Objetivo
@@ -416,173 +400,293 @@ interface ObjetivoCardProps {
   onArquivar: (id: string) => void
 }
 
-function ObjetivoCard({
-  objetivo,
-  onConcluir,
-  onPausar,
-  onRetomar,
-  onEditar,
-  onArquivar,
-}: ObjetivoCardProps) {
-  const [menuAberto, setMenuAberto] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
+function ObjetivoCard({ objetivo, onConcluir, onPausar, onRetomar, onEditar, onArquivar }: ObjetivoCardProps) {
+  const [confirmandoArquivar, setConfirmandoArquivar] = useState(false)
+  const confirmRef = useRef<HTMLDivElement>(null)
+  const concluido = objetivo.status === 'concluido'
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuAberto(false)
+      if (confirmRef.current && !confirmRef.current.contains(event.target as Node)) {
+        setConfirmandoArquivar(false)
       }
     }
-
-    if (menuAberto) {
+    if (confirmandoArquivar) {
       document.addEventListener('mousedown', handleClickOutside)
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [menuAberto])
+  }, [confirmandoArquivar])
 
   return (
-    <Card
-      className={cn(
-        'flex flex-col gap-3 p-5 transition-opacity duration-200',
-        objetivo.status === 'concluido' ? 'opacity-60' : ''
-      )}
+    <div
+      style={{
+        background: concluido ? '#f9fdfb' : '#ffffff',
+        borderRadius: '16px',
+        border: concluido ? '1px solid #d4e8df' : '1px solid #e2ece8',
+        padding: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        opacity: concluido ? 0.58 : 1,
+        transition: 'opacity 0.3s, border-color 0.3s, background 0.3s',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+      }}
     >
-      <div className="flex items-start gap-3">
-        {/* Checkbox circle */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+        {/* Checkbox */}
         <button
           onClick={() => onConcluir(objetivo.id)}
-          className={cn(
-            'shrink-0 mt-0.5 w-5.5 h-5.5 rounded-full flex items-center justify-center border-[1.5px] transition-all',
-            objetivo.status === 'concluido'
-              ? 'border-mt-green bg-mt-green'
-              : 'border-mt-border hover:border-mt-green'
-          )}
+          style={{
+            flexShrink: 0,
+            marginTop: '2px',
+            width: '22px',
+            height: '22px',
+            borderRadius: '50%',
+            border: concluido ? '1.5px solid #57AA8F' : '1.5px solid #c8d8d2',
+            background: concluido ? '#57AA8F' : 'transparent',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'border-color 0.2s, background 0.2s',
+          }}
+          onMouseEnter={(e) => {
+            if (!concluido) e.currentTarget.style.borderColor = '#57AA8F'
+          }}
+          onMouseLeave={(e) => {
+            if (!concluido) e.currentTarget.style.borderColor = '#c8d8d2'
+          }}
         >
-          {objetivo.status === 'concluido' && (
-            <Check size={11} className="text-white animate-check-spring" strokeWidth={2.2} />
-          )}
+          {/* SVG check com animação via keyframes inline */}
+          <svg
+            width="11"
+            height="9"
+            viewBox="0 0 12 10"
+            fill="none"
+            style={{
+              opacity: concluido ? 1 : 0,
+              transform: concluido ? 'scale(1)' : 'scale(0.4)',
+              transition: 'opacity 0.2s, transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            }}
+          >
+            <polyline
+              points="1.5,5.5 4.5,8.5 10.5,2"
+              stroke="white"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
 
         {/* Conteúdo */}
-        <div className="flex-1 flex flex-col gap-2">
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <span
-            className={cn(
-              'text-[15px] font-normal text-mt-black',
-              objetivo.status === 'concluido' ? 'line-through' : ''
-            )}
+            style={{
+              fontSize: '15px',
+              fontWeight: 400,
+              color: concluido ? '#6f8f87' : '#0C0F0F',
+              lineHeight: '1.4',
+              textDecoration: concluido ? 'line-through' : 'none',
+              transition: 'color 0.3s',
+            }}
           >
             {objetivo.texto}
           </span>
-          {objetivo.data_alvo && (
-            <div className="flex items-center gap-1 text-[11px] text-mt-muted">
-              📅 Até {new Date(objetivo.data_alvo).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+
+          {/* Data alvo */}
+          {(objetivo.data_alvo || concluido) && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#6f8f87' }}>
+              <CalendarDays size={11} />
+              {concluido
+                ? 'Concluído agora'
+                : `Até ${new Date(objetivo.data_alvo!).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}`
+              }
             </div>
           )}
-          <div className="flex flex-wrap items-center gap-2">
+
+          {/* Chips de status */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' }}>
             <span
-              className="px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide text-white"
-              style={{ background: PILAR_COR[objetivo.pilar] }}
+              style={{
+                padding: '2px 8px',
+                borderRadius: '100px',
+                fontSize: '10px',
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                color: '#fff',
+                background: PILAR_COR[objetivo.pilar],
+              }}
             >
               {PILAR_LABEL[objetivo.pilar]}
             </span>
-            <span
-              className="px-2.5 py-0.5 rounded-full text-[11px] font-normal border"
-              style={{
-                borderColor: STATUS_CONFIG[objetivo.status].color,
-                color: STATUS_CONFIG[objetivo.status].color,
-                background: STATUS_CONFIG[objetivo.status].bg,
-              }}
-            >
-              {STATUS_CONFIG[objetivo.status].label}
-            </span>
-            {objetivo.status === 'ativo' && (
-              <Button
-                onClick={() => onPausar(objetivo.id)}
-                variant="ghost"
-                className="ml-auto h-auto px-2.5 py-0.5 text-[11px] font-medium border border-mt-muted text-mt-muted bg-mt-off-white/50 hover:bg-mt-off-white"
-              >
-                ⏸ Pausar
-              </Button>
-            )}
-            {objetivo.status === 'pausado' && (
-              <Button
-                onClick={() => onRetomar(objetivo.id)}
-                variant="ghost"
-                className="ml-auto h-auto px-2.5 py-0.5 text-[11px] font-medium border border-mt-yellow text-mt-yellow bg-mt-yellow/10 hover:bg-mt-yellow/20"
-              >
-                ↩︎ Retomar
-              </Button>
+
+            {concluido ? (
+              <span style={{ ...STATUS_CONCLUIDO, borderRadius: '100px', fontSize: '11px', padding: '3px 10px' }}>
+                Concluído
+              </span>
+            ) : (
+              <>
+                {objetivo.status === 'pausado' && (
+                  <span style={{
+                    border: '1px solid #b88a30',
+                    color: '#b88a30',
+                    background: 'rgba(212,168,67,0.15)',
+                    borderRadius: '100px',
+                    fontSize: '11px',
+                    padding: '3px 10px',
+                  }}>
+                    Pausado
+                  </span>
+                )}
+                {objetivo.status === 'ativo' && (
+                  <button
+                    onClick={() => onPausar(objetivo.id)}
+                    style={{
+                      marginLeft: 'auto',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '3px 10px',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                      border: '1px solid #c8d8d2',
+                      color: '#6f8f87',
+                      borderRadius: '100px',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Pause size={10} />
+                    Pausar
+                  </button>
+                )}
+                {objetivo.status === 'pausado' && (
+                  <button
+                    onClick={() => onRetomar(objetivo.id)}
+                    style={{
+                      marginLeft: 'auto',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '3px 10px',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                      border: '1px solid #D4A843',
+                      color: '#D4A843',
+                      borderRadius: '100px',
+                      background: 'rgba(212,168,67,0.1)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <RotateCcw size={10} />
+                    Retomar
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
 
-        {/* Menu */}
-        <div className="relative" ref={menuRef}>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 hover:bg-gray-100"
-            onClick={() => setMenuAberto(!menuAberto)}
+        {/* Ações inline */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexShrink: 0 }}>
+          <button
+            onClick={onEditar}
+            className="flex items-center justify-center w-7 h-7 rounded-md text-mt-muted hover:bg-mt-off-white hover:text-mt-black transition-colors"
           >
-            <MoreVertical size={14} className="text-mt-muted" />
-          </Button>
-          {menuAberto && (
-            <div className="absolute top-full right-0 mt-0 w-32 bg-white border border-mt-border rounded-lg py-1 shadow-lg z-10">
-              <button
-                onClick={() => {
-                  onEditar()
-                  setMenuAberto(false)
-                }}
-                className="w-full px-4 py-2 text-left text-sm text-mt-black hover:bg-gray-100 transition-colors"
-              >
-                Editar
-              </button>
-              <button
-                onClick={() => {
-                  onArquivar(objetivo.id)
-                  setMenuAberto(false)
-                }}
-                className="w-full px-4 py-2 text-left text-sm text-mt-red hover:bg-gray-100 transition-colors"
-              >
-                Arquivar
-              </button>
-            </div>
-          )}
+            <Pencil size={13} />
+          </button>
+          <div className="relative" ref={confirmRef}>
+            <button
+              onClick={() => setConfirmandoArquivar(true)}
+              className="flex items-center justify-center w-7 h-7 rounded-md text-mt-muted hover:bg-red-50 hover:text-mt-red transition-colors"
+            >
+              <Trash2 size={13} />
+            </button>
+            {confirmandoArquivar && (
+              <div className="absolute top-full right-0 mt-1 w-40 bg-white border border-mt-border rounded-lg py-2 px-3 shadow-lg z-10 flex flex-col gap-2">
+                <p className="text-[11px] text-mt-muted leading-snug">Arquivar este objetivo?</p>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => { onArquivar(objetivo.id); setConfirmandoArquivar(false) }}
+                    className="flex-1 py-1 text-[11px] font-medium bg-mt-red text-white rounded-md hover:opacity-90 transition-opacity"
+                  >
+                    Arquivar
+                  </button>
+                  <button
+                    onClick={() => setConfirmandoArquivar(false)}
+                    className="flex-1 py-1 text-[11px] font-medium border border-mt-border text-mt-muted rounded-md hover:bg-mt-off-white transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </Card>
+    </div>
   )
 }
 
-interface EmptyStateProps {
-  prazo: PrazoObjetivo
-  onAdicionar: () => void
-}
+// ---------------------------------------------------------------------------
+// EmptyState
+// ---------------------------------------------------------------------------
 
-function EmptyState({ prazo, onAdicionar }: EmptyStateProps) {
-  const isMensagemLongo = prazo === 'longo'
+function EmptyState({ prazo }: { prazo: PrazoObjetivo }) {
+  const titulos: Record<PrazoObjetivo, string> = {
+    curto: 'Nenhum objetivo de curto prazo ainda.',
+    medio: 'Nenhum objetivo de médio prazo ainda.',
+    longo: 'Nenhum objetivo de longo prazo ainda.',
+  }
 
   return (
-    <Card className="flex flex-col items-center gap-4 px-6 py-14 text-center">
-      <p className={cn(
-        'text-[15px] text-mt-muted leading-relaxed',
-        isMensagemLongo ? 'font-editorial italic' : 'font-serif italic'
-      )}>
-        {isMensagemLongo
-          ? 'O longo prazo é onde as vidas mudam. Que grande objetivo você quer alcançar nos próximos anos?'
-          : prazo === 'curto'
-            ? 'Nenhum objetivo ≤ 90 dias ainda.'
-            : 'Nenhum objetivo 6–12 meses ainda.'}
+    <div style={{
+      background: '#fff',
+      borderRadius: '16px',
+      padding: '40px 24px',
+      border: '0.5px solid #c8d8d2',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '10px',
+      textAlign: 'center',
+    }}>
+      <div style={{
+        width: '40px',
+        height: '40px',
+        borderRadius: '12px',
+        background: '#e5e7eb',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#6f8f87',
+      }}>
+        <Target size={18} />
+      </div>
+      <p style={{ fontSize: '14px', fontWeight: 500, color: '#6f8f87', margin: 0 }}>
+        {titulos[prazo]}
       </p>
-      <Button
-        onClick={onAdicionar}
-        className="bg-mt-green hover:bg-mt-green-dark text-white"
-      >
-        + Adicionar objetivo
-      </Button>
-    </Card>
+      <p style={{
+        fontFamily: "'Lora', serif",
+        fontStyle: 'italic',
+        fontSize: '14px',
+        color: '#6f8f87',
+        lineHeight: '1.8',
+        margin: 0,
+        maxWidth: '280px',
+      }}>
+        {EMPTY_SUBTEXTO[prazo]}
+      </p>
+    </div>
   )
 }
+
+// ---------------------------------------------------------------------------
+// ObjetivoModal
+// ---------------------------------------------------------------------------
 
 interface ObjetivoModalProps {
   editando: Objetivo | null
@@ -603,30 +707,23 @@ interface ObjetivoModalProps {
 }
 
 function ObjetivoModal({
-  editando,
-  formTexto,
-  onChangeTexto,
-  formPilar,
-  onChangePilar,
-  formPrazo,
-  onChangePrazo,
-  formMotivo,
-  onChangeMotivo,
-  formDataAlvo,
-  onChangeDataAlvo,
-  formError,
-  formLoading,
-  onSalvar,
-  onFechar,
+  editando, formTexto, onChangeTexto, formPilar, onChangePilar,
+  formPrazo, onChangePrazo, formMotivo, onChangeMotivo, formDataAlvo,
+  onChangeDataAlvo, formError, formLoading, onSalvar, onFechar,
 }: ObjetivoModalProps) {
   return (
     <div
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onFechar()
-      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onFechar() }}
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-5"
     >
-      <Card className="w-full max-w-[440px] p-8">
+      <div style={{
+        background: '#fff',
+        borderRadius: '16px',
+        padding: '32px',
+        width: '100%',
+        maxWidth: '440px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+      }}>
         <div className="flex flex-col gap-5">
           <h2 className="text-lg font-medium text-mt-black">
             {editando ? 'Editar objetivo' : 'Novo objetivo'}
@@ -651,19 +748,18 @@ function ObjetivoModal({
             </Label>
             <div className="flex flex-wrap gap-2">
               {PRAZOS.map((p) => (
-                <Button
+                <button
                   key={p.value}
                   onClick={() => onChangePrazo(p.value)}
-                  variant={formPrazo === p.value ? 'default' : 'outline'}
                   className={cn(
-                    'px-3.5 py-1.5 text-sm font-medium',
+                    'px-3.5 py-1.5 text-sm font-medium rounded-lg border transition-colors',
                     formPrazo === p.value
-                      ? 'bg-mt-green text-white hover:bg-mt-green-dark'
+                      ? 'bg-mt-green text-white border-mt-green'
                       : 'border-mt-border text-mt-muted hover:bg-gray-50'
                   )}
                 >
                   {p.label}
-                </Button>
+                </button>
               ))}
             </div>
           </div>
@@ -673,30 +769,26 @@ function ObjetivoModal({
               Pilar
             </Label>
             <div className="flex flex-wrap gap-2">
-              {(['corpo', 'mente', 'espirito'] as const).map((p) => (
-                <Button
+              {PILAR_OPTIONS.map((p) => (
+                <button
                   key={p}
                   onClick={() => onChangePilar(p)}
-                  className={cn(
-                    'px-3.5 py-1.5 text-sm font-medium rounded-full border',
-                    formPilar === p
-                      ? 'text-white'
-                      : 'border-mt-border text-mt-muted hover:bg-gray-50'
-                  )}
+                  className="px-3.5 py-1.5 text-sm font-medium rounded-full border transition-colors"
                   style={{
                     background: formPilar === p ? PILAR_COR[p] : 'transparent',
-                    borderColor: formPilar === p ? PILAR_COR[p] : undefined,
+                    borderColor: formPilar === p ? PILAR_COR[p] : '#c8d8d2',
+                    color: formPilar === p ? '#fff' : '#6f8f87',
                   }}
                 >
                   {PILAR_LABEL[p]}
-                </Button>
+                </button>
               ))}
             </div>
           </div>
 
           <div className="flex flex-col gap-2">
             <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
-              Data alvo (opcional)
+              Data alvo <span className="text-[10px] font-normal normal-case tracking-normal">(opcional)</span>
             </Label>
             <Input
               type="date"
@@ -708,9 +800,7 @@ function ObjetivoModal({
           <div className="flex flex-col gap-2">
             <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
               Por que esse objetivo importa para você?{' '}
-              <span className="text-[10px] font-normal normal-case tracking-normal">
-                (opcional)
-              </span>
+              <span className="text-[10px] font-normal normal-case tracking-normal">(opcional)</span>
             </Label>
             <Textarea
               value={formMotivo}
@@ -721,15 +811,13 @@ function ObjetivoModal({
             />
           </div>
 
-          {formError && (
-            <p className="text-sm text-mt-red">{formError}</p>
-          )}
+          {formError && <p className="text-sm text-mt-red">{formError}</p>}
 
           <div className="flex flex-col gap-2.5 pt-1">
             <Button
               onClick={onSalvar}
               disabled={formLoading}
-              className="bg-mt-green text-mt-black hover:bg-mt-green-dark disabled:opacity-60"
+              className="bg-mt-green text-white hover:bg-mt-green-dark disabled:opacity-60"
             >
               {formLoading ? 'Salvando...' : editando ? 'Atualizar objetivo' : 'Salvar objetivo'}
             </Button>
@@ -742,18 +830,40 @@ function ObjetivoModal({
             </Button>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   )
 }
 
-interface ToastProps {
-  mensagem: string
-}
+// ---------------------------------------------------------------------------
+// Toast
+// ---------------------------------------------------------------------------
 
-function Toast({ mensagem }: ToastProps) {
+function Toast({ mensagem, visivel }: { mensagem: string; visivel: boolean }) {
   return (
-    <div className="fixed bottom-7 left-1/2 -translate-x-1/2 z-[200] bg-mt-black text-mt-off-white text-sm font-medium px-5 py-2.5 rounded-full shadow-lg">
+    <div
+      style={{
+        position: 'fixed',
+        bottom: '28px',
+        left: '50%',
+        transform: visivel
+          ? 'translateX(-50%) translateY(0)'
+          : 'translateX(-50%) translateY(16px)',
+        background: '#2A3F45',
+        color: '#fff',
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: '13px',
+        fontWeight: 500,
+        padding: '10px 20px',
+        borderRadius: '100px',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+        whiteSpace: 'nowrap',
+        zIndex: 200,
+        opacity: visivel ? 1 : 0,
+        transition: 'opacity 0.25s, transform 0.25s',
+        pointerEvents: 'none',
+      }}
+    >
       {mensagem}
     </div>
   )
