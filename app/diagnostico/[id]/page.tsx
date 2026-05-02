@@ -42,6 +42,9 @@ export default async function DiagnosticoPage({ params }: Props) {
     .select('*')
     .eq('user_id', user.id)
     .maybeSingle()
+  console.log('[diagnostico] user_id:', user.id)
+  console.log('[diagnostico] rotinaData:', rotinaData)
+  console.log('[diagnostico] rotinaError:', rotinaError)
   if (rotinaError) console.error('[diagnostico] erro ao buscar rotina:', rotinaError)
   rotinaRaw = rotinaData
 
