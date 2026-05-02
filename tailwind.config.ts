@@ -65,6 +65,16 @@ const config: Config = {
         card:  '16px',
         badge: '20px',
       },
+      animation: {
+        'check-spring': 'check-spring 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+      },
+      keyframes: {
+        'check-spring': {
+          '0%': { transform: 'scale(0)' },
+          '50%': { transform: 'scale(1.2)' },
+          '100%': { transform: 'scale(1)' },
+        },
+      },
     },
   },
   plugins: [require('tailwindcss-animate')],

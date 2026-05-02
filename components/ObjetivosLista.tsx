@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { MoreVertical, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -209,6 +209,32 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
     mostrarToast('🎯 Objetivo concluído. Bom trabalho.')
   }
 
+  async function handlePausar(id: string) {
+    const original = lista.find((o) => o.id === id)
+    if (!original) return
+
+    setLista((prev) =>
+      prev.map((o) =>
+        o.id === id ? { ...o, status: 'pausado' } : o
+      )
+    )
+
+    const result = await atualizarStatusObjetivo(id, 'pausado')
+
+    if ('redirectTo' in result) {
+      router.push(result.redirectTo)
+      return
+    }
+
+    if ('error' in result) {
+      setLista((prev) => prev.map((o) => (o.id === id ? original : o)))
+      mostrarToast('Erro ao pausar objetivo.')
+      return
+    }
+
+    mostrarToast('⏸ Objetivo pausado.')
+  }
+
   async function handleRetomar(id: string) {
     const original = lista.find((o) => o.id === id)
     if (!original) return
@@ -274,6 +300,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
             key={obj.id}
             objetivo={obj}
             onConcluir={handleConcluir}
+            onPausar={handlePausar}
             onRetomar={handleRetomar}
             onEditar={() => handleAbrirModal(obj.prazo, obj)}
             onArquivar={handleArquivar}
@@ -308,10 +335,10 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
         <div className="flex gap-1 rounded-md border border-mt-border bg-white p-1">
           {PRAZOS.map((pz) => {
             const count = porPrazo(pz.value).filter(
-              (o) => o.status !== 'concluido'
+              (o) => o.status === 'ativo'
             ).length
             const isLimiteCurto =
-              pz.value === 'curto' && curtosAtivos >= LIMITE_CURTO
+              pz.value === 'curto' && zona === 'sacrificio' && curtosAtivos >= LIMITE_CURTO
 
             return (
               <button
@@ -383,6 +410,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
 interface ObjetivoCardProps {
   objetivo: Objetivo
   onConcluir: (id: string) => void
+  onPausar: (id: string) => void
   onRetomar: (id: string) => void
   onEditar: () => void
   onArquivar: (id: string) => void
@@ -391,11 +419,26 @@ interface ObjetivoCardProps {
 function ObjetivoCard({
   objetivo,
   onConcluir,
+  onPausar,
   onRetomar,
   onEditar,
   onArquivar,
 }: ObjetivoCardProps) {
   const [menuAberto, setMenuAberto] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuAberto(false)
+      }
+    }
+
+    if (menuAberto) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [menuAberto])
 
   return (
     <Card
@@ -416,7 +459,7 @@ function ObjetivoCard({
           )}
         >
           {objetivo.status === 'concluido' && (
-            <Check size={11} className="text-white" strokeWidth={2.2} />
+            <Check size={11} className="text-white animate-check-spring" strokeWidth={2.2} />
           )}
         </button>
 
@@ -452,6 +495,15 @@ function ObjetivoCard({
             >
               {STATUS_CONFIG[objetivo.status].label}
             </span>
+            {objetivo.status === 'ativo' && (
+              <Button
+                onClick={() => onPausar(objetivo.id)}
+                variant="ghost"
+                className="ml-auto h-auto px-2.5 py-0.5 text-[11px] font-medium border border-mt-muted text-mt-muted bg-mt-off-white/50 hover:bg-mt-off-white"
+              >
+                ⏸ Pausar
+              </Button>
+            )}
             {objetivo.status === 'pausado' && (
               <Button
                 onClick={() => onRetomar(objetivo.id)}
@@ -465,7 +517,7 @@ function ObjetivoCard({
         </div>
 
         {/* Menu */}
-        <div className="relative">
+        <div className="relative" ref={menuRef}>
           <Button
             variant="ghost"
             size="icon"
@@ -508,16 +560,19 @@ interface EmptyStateProps {
 }
 
 function EmptyState({ prazo, onAdicionar }: EmptyStateProps) {
-  const labels: Record<PrazoObjetivo, string> = {
-    curto: '≤ 90 dias',
-    medio: '6–12 meses',
-    longo: '1–3 anos',
-  }
+  const isMensagemLongo = prazo === 'longo'
 
   return (
     <Card className="flex flex-col items-center gap-4 px-6 py-14 text-center">
-      <p className="font-serif italic text-[15px] text-mt-muted leading-relaxed">
-        Nenhum objetivo {labels[prazo]} ainda.
+      <p className={cn(
+        'text-[15px] text-mt-muted leading-relaxed',
+        isMensagemLongo ? 'font-editorial italic' : 'font-serif italic'
+      )}>
+        {isMensagemLongo
+          ? 'O longo prazo é onde as vidas mudam. Que grande objetivo você quer alcançar nos próximos anos?'
+          : prazo === 'curto'
+            ? 'Nenhum objetivo ≤ 90 dias ainda.'
+            : 'Nenhum objetivo 6–12 meses ainda.'}
       </p>
       <Button
         onClick={onAdicionar}
