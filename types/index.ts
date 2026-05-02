@@ -1,6 +1,22 @@
 export type StatusArea = 'verde' | 'amarelo' | 'vermelho'
 export type NomePilar = 'corpo' | 'mente' | 'espirito'
 
+export type PrazoObjetivo = 'curto' | 'medio' | 'longo'
+export type StatusObjetivo = 'ativo' | 'pausado' | 'concluido' | 'arquivado'
+
+export interface Objetivo {
+  id: string
+  user_id: string
+  texto: string
+  pilar: NomePilar
+  prazo: PrazoObjetivo
+  status: StatusObjetivo
+  data_alvo?: string | null
+  motivo?: string | null
+  criado_em: string
+  concluido_em?: string | null
+}
+
 export type NomeArea =
   | 'Exercícios Físicos'
   | 'Alimentação'
