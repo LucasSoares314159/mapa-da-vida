@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { salvarRotina, vincularRotina } from '@/app/actions/rotina'
 import { calcularRotina, getZonaConfig } from '@/lib/rotina'
 import type { InputRotina } from '@/lib/rotina'
@@ -22,11 +21,11 @@ type Props = {
 }
 
 export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }: Props) {
-  const router = useRouter()
   const [horasSono, setHorasSono] = useState(defaultValues?.horasSono ?? 8)
   const [horasTrabalho, setHorasTrabalho] = useState(defaultValues?.horasTrabalho ?? 8)
   const [horasBasicas, setHorasBasicas] = useState(defaultValues?.horasBasicas ?? 4)
   const [diasTrabalho, setDiasTrabalho] = useState(defaultValues?.diasTrabalho ?? 5)
+  const [horasTela, setHorasTela] = useState(defaultValues?.horasTela ?? 2)
   const [isSaving, setIsSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [linkedMapId, setLinkedMapId] = useState<string | null>(null)
@@ -38,6 +37,7 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
     horasTrabalho,
     horasBasicas,
     diasTrabalho,
+    horasTela,
   })
 
   const zonaConfig = getZonaConfig(resultado.zona)
@@ -45,39 +45,51 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
   const handleSalvar = useCallback(async () => {
     setIsSaving(true)
     const result = await salvarRotina(
-      { horasSono, horasTrabalho, horasBasicas, diasTrabalho },
+      { horasSono, horasTrabalho, horasBasicas, diasTrabalho, horasTela },
       mapaId
     )
 
     setIsSaving(false)
 
-    if ('redirectTo' in result) {
-      router.push(result.redirectTo)
-      return
-    }
-
-    if ('success' in result) {
+    if ('success' in result || 'redirectTo' in result) {
       setSaveSuccess(true)
     }
-  }, [horasSono, horasTrabalho, horasBasicas, diasTrabalho, mapaId, router])
+  }, [horasSono, horasTrabalho, horasBasicas, diasTrabalho, horasTela, mapaId])
 
   const handleVincularMapa = useCallback(async () => {
     if (!selectedMapId) return
 
     setIsLinking(true)
+
+    // garante que a rotina existe no banco antes de vincular
+    await salvarRotina(
+      { horasSono, horasTrabalho, horasBasicas, diasTrabalho, horasTela },
+      selectedMapId
+    )
+
     const result = await vincularRotina(selectedMapId)
 
-    if ('success' in result) {
+    if ('success' in result || 'redirectTo' in result) {
       setLinkedMapId(selectedMapId)
       setSelectedMapId('')
+      setSaveSuccess(true)
     }
 
     setIsLinking(false)
-  }, [selectedMapId])
+  }, [selectedMapId, horasSono, horasTrabalho, horasBasicas, diasTrabalho, horasTela])
 
   const sliderStyle = (value: number, min: number, max: number) => {
     const pct = ((value - min) / (max - min)) * 100
     return { background: `linear-gradient(to right, #57AA8F ${pct}%, #57AA8F ${pct}%, #3d5a62 ${pct}%)` }
+  }
+
+  const sliderStyleTela = (value: number) => {
+    const pct = (value / 12) * 100
+    const t = value / 12
+    const r = Math.round(192 + (255 - 192) * t)
+    const g = Math.round(80 * (1 - t))
+    const b = Math.round(80 * (1 - t))
+    return { background: `linear-gradient(to right, rgb(${r},${g},${b}) ${pct}%, #3d5a62 ${pct}%)` }
   }
 
   return (
@@ -170,6 +182,27 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
             />
           </div>
 
+          {/* Horas na tela */}
+          <div className="flex flex-col gap-2.5 pb-5 border-b border-[#3d5a62]">
+            <div className="flex items-end justify-between">
+              <div>
+                <label className="text-sm text-[#EDF2EF]">Horas na tela por dia</label>
+                <p className="text-xs text-mt-muted mt-1 italic">redes sociais, jogos e entretenimento improdutivo</p>
+              </div>
+              <span className="font-heading font-medium text-base" style={{ color: horasTela === 0 ? '#a8c4bc' : `rgb(${Math.round(192 + (255 - 192) * horasTela / 12)},${Math.round(80 * (1 - horasTela / 12))},${Math.round(80 * (1 - horasTela / 12))})` }}>{horasTela}h</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="12"
+              step="0.5"
+              value={horasTela}
+              onChange={(e) => setHorasTela(parseFloat(e.target.value))}
+              style={sliderStyleTela(horasTela)}
+              className="w-full h-1 rounded-lg appearance-none cursor-pointer"
+            />
+          </div>
+
           {/* Dias de trabalho */}
           <div className="flex flex-col gap-2.5">
             <div className="flex items-end justify-between">
@@ -241,7 +274,7 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
           disabled={isSaving}
           className="w-full py-[18px] bg-mt-green hover:bg-[#68bfa0] text-[#0C0F0F] font-medium text-base rounded-[10px] h-auto"
         >
-          {isSaving ? 'Salvando...' : 'Continuar para objetivos →'}
+          {isSaving ? 'Salvando...' : 'Salvar rotina'}
         </Button>
         <p className="text-xs text-mt-muted text-center">Você pode ajustar isso a qualquer momento</p>
         {saveSuccess && (
@@ -312,16 +345,6 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
         </div>
         )}
 
-        {/* CTA */}
-        {saveSuccess && mapaId && (
-          <div className="text-center">
-            <Link href={`/diagnostico/${mapaId}`}>
-              <Button className="bg-mt-green hover:bg-[#68bfa0] text-[#0C0F0F] font-medium w-full">
-                Continuar para diagnóstico →
-              </Button>
-            </Link>
-          </div>
-        )}
       </div>
     </div>
   )

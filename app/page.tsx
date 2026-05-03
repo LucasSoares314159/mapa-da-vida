@@ -14,7 +14,18 @@ export default async function HomePage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (user) redirect('/dashboard')
+  if (user) {
+    const { count } = await supabase
+      .from('mapas')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+
+    if (count && count > 0) {
+      redirect('/objetivos')
+    } else {
+      redirect('/mapa/preparacao')
+    }
+  }
 
   return <LandingPage />
 }

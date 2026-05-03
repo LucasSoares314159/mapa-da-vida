@@ -14,8 +14,8 @@ export async function salvarRotina(
 
   if (!user) return { redirectTo: '/auth/login' }
 
-  const consumidaSemana = (input.horasSono + input.horasTrabalho + input.horasBasicas) / 24
-  const consumidaFDS = (input.horasSono + input.horasBasicas) / 24
+  const consumidaSemana = (input.horasSono + input.horasTrabalho + input.horasBasicas + input.horasTela) / 24
+  const consumidaFDS = (input.horasSono + input.horasBasicas + input.horasTela) / 24
   const mediaConsumida =
     (consumidaSemana * input.diasTrabalho + consumidaFDS * (7 - input.diasTrabalho)) / 7
   const percentualLivre = Math.round((1 - mediaConsumida) * 100)
@@ -27,6 +27,7 @@ export async function salvarRotina(
       horas_trabalho: input.horasTrabalho,
       horas_basicas: input.horasBasicas,
       dias_trabalho: input.diasTrabalho,
+      horas_tela: input.horasTela,
       percentual_livre: percentualLivre,
       mapa_id: mapaId || null,
       atualizado_em: new Date().toISOString(),

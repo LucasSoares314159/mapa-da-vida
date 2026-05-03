@@ -31,7 +31,7 @@ export async function login(state: AuthState, formData: FormData): Promise<AuthS
     return { message: 'Email ou senha incorretos.' }
   }
 
-  redirect('/dashboard')
+  redirect('/objetivos')
 }
 
 export async function cadastro(state: AuthState, formData: FormData): Promise<AuthState> {
@@ -109,5 +109,5 @@ export async function redefinirSenha(state: AuthState, formData: FormData): Prom
     return { message: 'Não foi possível redefinir a senha. O link pode ter expirado.' }
   }
 
-  redirect('/dashboard')
+  redirect('/objetivos')
 }

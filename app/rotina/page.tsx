@@ -37,6 +37,7 @@ export default async function PaginaRotina({
         horasTrabalho: rotinaExistente.horas_trabalho,
         horasBasicas: rotinaExistente.horas_basicas,
         diasTrabalho: rotinaExistente.dias_trabalho,
+        horasTela: rotinaExistente.horas_tela ?? 2,
         mapaId: rotinaExistente.mapa_id,
       }
     : undefined

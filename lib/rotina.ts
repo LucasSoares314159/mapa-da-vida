@@ -3,6 +3,7 @@ export type InputRotina = {
   horasTrabalho: number
   horasBasicas: number
   diasTrabalho: number
+  horasTela: number
 }
 
 export type ResultadoRotina = {
@@ -15,10 +16,10 @@ export type ResultadoRotina = {
 }
 
 export function calcularRotina(input: InputRotina): ResultadoRotina {
-  const { horasSono, horasTrabalho, horasBasicas, diasTrabalho } = input
+  const { horasSono, horasTrabalho, horasBasicas, diasTrabalho, horasTela } = input
 
-  const consumidaSemana = (horasSono + horasTrabalho + horasBasicas) / 24
-  const consumidaFDS = (horasSono + horasBasicas) / 24
+  const consumidaSemana = (horasSono + horasTrabalho + horasBasicas + horasTela) / 24
+  const consumidaFDS = (horasSono + horasBasicas + horasTela) / 24
   const mediaConsumida =
     (consumidaSemana * diasTrabalho + consumidaFDS * (7 - diasTrabalho)) / 7
 
