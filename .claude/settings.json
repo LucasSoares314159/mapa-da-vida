@@ -17,7 +17,9 @@
       "Bash(./node_modules/.bin/tsc --noEmit)",
       "Bash(rm /Users/danilo/Documents/mapa-da-vida-clone/.git/index.lock && git add app/actions/auth.ts && git commit -m \"fix: redirecionar para mapa/preparacao quando confirm email está desativado *)",
       "Bash(pkill -9 -f git)",
-      "Bash(rm -f /Users/danilo/Documents/mapa-da-vida-clone/.git/index.lock)"
+      "Bash(rm -f /Users/danilo/Documents/mapa-da-vida-clone/.git/index.lock)",
+      "Bash(kill 12360)",
+      "Bash(xattr -cr \"/Users/danilo/Library/Mobile Documents/com~apple~CloudDocs/Documents/mapa-da-vida-clone/\")"
     ],
     "additionalDirectories": [
       "/Users/danilo/Documents/mapa-da-vida-clone/.git"
