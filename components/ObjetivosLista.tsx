@@ -81,6 +81,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
   const [formError, setFormError] = useState<string | null>(null)
 
   const [toast, setToast] = useState<{ mensagem: string; visivel: boolean }>({ mensagem: '', visivel: false })
+  const [processingId, setProcessingId] = useState<string | null>(null)
 
   const porPrazo = (prazo: PrazoObjetivo) => lista.filter((o) => o.prazo === prazo)
 
@@ -163,8 +164,10 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
   }
 
   async function handleConcluir(id: string) {
+    if (processingId) return
     const original = lista.find((o) => o.id === id)
     if (!original) return
+    setProcessingId(id)
     // Optimistic: se já concluído → retomar; se ativo/pausado → concluir
     const novoStatus: StatusObjetivo = original.status === 'concluido' ? 'ativo' : 'concluido'
     const agora = new Date().toISOString()
@@ -176,6 +179,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
       )
     )
     const result = await atualizarStatusObjetivo(id, novoStatus)
+    setProcessingId(null)
     if ('redirectTo' in result) { router.push(result.redirectTo); return }
     if ('error' in result) {
       setLista((prev) => prev.map((o) => (o.id === id ? original : o)))
@@ -190,10 +194,13 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
   }
 
   async function handlePausar(id: string) {
+    if (processingId) return
     const original = lista.find((o) => o.id === id)
     if (!original) return
+    setProcessingId(id)
     setLista((prev) => prev.map((o) => o.id === id ? { ...o, status: 'pausado' } : o))
     const result = await atualizarStatusObjetivo(id, 'pausado')
+    setProcessingId(null)
     if ('redirectTo' in result) { router.push(result.redirectTo); return }
     if ('error' in result) {
       setLista((prev) => prev.map((o) => (o.id === id ? original : o)))
@@ -202,10 +209,13 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
   }
 
   async function handleRetomar(id: string) {
+    if (processingId) return
     const original = lista.find((o) => o.id === id)
     if (!original) return
+    setProcessingId(id)
     setLista((prev) => prev.map((o) => o.id === id ? { ...o, status: 'ativo', concluido_em: null } : o))
     const result = await atualizarStatusObjetivo(id, 'ativo')
+    setProcessingId(null)
     if ('redirectTo' in result) { router.push(result.redirectTo); return }
     if ('error' in result) {
       setLista((prev) => prev.map((o) => (o.id === id ? original : o)))
@@ -216,10 +226,13 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
   }
 
   async function handleArquivar(id: string) {
+    if (processingId) return
     const original = lista.find((o) => o.id === id)
     if (!original) return
+    setProcessingId(id)
     setLista((prev) => prev.filter((o) => o.id !== id))
     const result = await arquivarObjetivo(id)
+    setProcessingId(null)
     if ('redirectTo' in result) { router.push(result.redirectTo); return }
     if ('error' in result) {
       setLista((prev) => [...prev, original])
@@ -314,6 +327,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
                 <ObjetivoCard
                   key={obj.id}
                   objetivo={obj}
+                  processingId={processingId}
                   onConcluir={handleConcluir}
                   onPausar={handlePausar}
                   onRetomar={handleRetomar}
@@ -393,6 +407,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
 
 interface ObjetivoCardProps {
   objetivo: Objetivo
+  processingId: string | null
   onConcluir: (id: string) => void
   onPausar: (id: string) => void
   onRetomar: (id: string) => void
@@ -400,10 +415,11 @@ interface ObjetivoCardProps {
   onArquivar: (id: string) => void
 }
 
-function ObjetivoCard({ objetivo, onConcluir, onPausar, onRetomar, onEditar, onArquivar }: ObjetivoCardProps) {
+function ObjetivoCard({ objetivo, processingId, onConcluir, onPausar, onRetomar, onEditar, onArquivar }: ObjetivoCardProps) {
   const [confirmandoArquivar, setConfirmandoArquivar] = useState(false)
   const confirmRef = useRef<HTMLDivElement>(null)
   const concluido = objetivo.status === 'concluido'
+  const isProcessing = processingId !== null
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -436,6 +452,7 @@ function ObjetivoCard({ objetivo, onConcluir, onPausar, onRetomar, onEditar, onA
         {/* Checkbox */}
         <button
           onClick={() => onConcluir(objetivo.id)}
+          disabled={isProcessing}
           style={{
             flexShrink: 0,
             marginTop: '2px',
@@ -444,14 +461,15 @@ function ObjetivoCard({ objetivo, onConcluir, onPausar, onRetomar, onEditar, onA
             borderRadius: '50%',
             border: concluido ? '1.5px solid #57AA8F' : '1.5px solid #c8d8d2',
             background: concluido ? '#57AA8F' : 'transparent',
-            cursor: 'pointer',
+            cursor: isProcessing ? 'not-allowed' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             transition: 'border-color 0.2s, background 0.2s',
+            opacity: isProcessing && processingId !== objetivo.id ? 0.6 : 1,
           }}
           onMouseEnter={(e) => {
-            if (!concluido) e.currentTarget.style.borderColor = '#57AA8F'
+            if (!concluido && !isProcessing) e.currentTarget.style.borderColor = '#57AA8F'
           }}
           onMouseLeave={(e) => {
             if (!concluido) e.currentTarget.style.borderColor = '#c8d8d2'
@@ -543,6 +561,7 @@ function ObjetivoCard({ objetivo, onConcluir, onPausar, onRetomar, onEditar, onA
                 {objetivo.status === 'ativo' && (
                   <button
                     onClick={() => onPausar(objetivo.id)}
+                    disabled={isProcessing}
                     style={{
                       marginLeft: 'auto',
                       display: 'flex',
@@ -555,7 +574,8 @@ function ObjetivoCard({ objetivo, onConcluir, onPausar, onRetomar, onEditar, onA
                       color: '#6f8f87',
                       borderRadius: '100px',
                       background: 'transparent',
-                      cursor: 'pointer',
+                      cursor: isProcessing ? 'not-allowed' : 'pointer',
+                      opacity: isProcessing && processingId !== objetivo.id ? 0.6 : 1,
                     }}
                   >
                     <Pause size={10} />
@@ -565,6 +585,7 @@ function ObjetivoCard({ objetivo, onConcluir, onPausar, onRetomar, onEditar, onA
                 {objetivo.status === 'pausado' && (
                   <button
                     onClick={() => onRetomar(objetivo.id)}
+                    disabled={isProcessing}
                     style={{
                       marginLeft: 'auto',
                       display: 'flex',
@@ -577,7 +598,8 @@ function ObjetivoCard({ objetivo, onConcluir, onPausar, onRetomar, onEditar, onA
                       color: '#D4A843',
                       borderRadius: '100px',
                       background: 'rgba(212,168,67,0.1)',
-                      cursor: 'pointer',
+                      cursor: isProcessing ? 'not-allowed' : 'pointer',
+                      opacity: isProcessing && processingId !== objetivo.id ? 0.6 : 1,
                     }}
                   >
                     <RotateCcw size={10} />
@@ -593,14 +615,18 @@ function ObjetivoCard({ objetivo, onConcluir, onPausar, onRetomar, onEditar, onA
         <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexShrink: 0 }}>
           <button
             onClick={onEditar}
-            className="flex items-center justify-center w-7 h-7 rounded-md text-mt-muted hover:bg-mt-off-white hover:text-mt-black transition-colors"
+            disabled={isProcessing}
+            style={{ cursor: isProcessing ? 'not-allowed' : 'pointer', opacity: isProcessing && processingId !== objetivo.id ? 0.6 : 1 }}
+            className="flex items-center justify-center w-7 h-7 rounded-md text-mt-muted hover:bg-mt-off-white hover:text-mt-black transition-colors disabled:hover:bg-transparent"
           >
             <Pencil size={13} />
           </button>
           <div className="relative" ref={confirmRef}>
             <button
               onClick={() => setConfirmandoArquivar(true)}
-              className="flex items-center justify-center w-7 h-7 rounded-md text-mt-muted hover:bg-red-50 hover:text-mt-red transition-colors"
+              disabled={isProcessing}
+              style={{ cursor: isProcessing ? 'not-allowed' : 'pointer', opacity: isProcessing && processingId !== objetivo.id ? 0.6 : 1 }}
+              className="flex items-center justify-center w-7 h-7 rounded-md text-mt-muted hover:bg-red-50 hover:text-mt-red transition-colors disabled:hover:bg-transparent"
             >
               <Trash2 size={13} />
             </button>

@@ -14,7 +14,13 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3001/)",
       "Bash(git push:*)",
       "Bash(wait)",
-      "Bash(./node_modules/.bin/tsc --noEmit)"
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(rm /Users/danilo/Documents/mapa-da-vida-clone/.git/index.lock && git add app/actions/auth.ts && git commit -m \"fix: redirecionar para mapa/preparacao quando confirm email está desativado *)",
+      "Bash(pkill -9 -f git)",
+      "Bash(rm -f /Users/danilo/Documents/mapa-da-vida-clone/.git/index.lock)"
+    ],
+    "additionalDirectories": [
+      "/Users/danilo/Documents/mapa-da-vida-clone/.git"
     ]
   }
 }

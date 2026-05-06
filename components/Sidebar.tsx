@@ -2,12 +2,28 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useFormStatus } from 'react-dom'
 import { LogOut, Map, Clock, Target } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
 import { cn } from '@/lib/utils'
 
 type Props = {
   onClose?: () => void
+}
+
+function LogoutButton() {
+  const { pending } = useFormStatus()
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-colors duration-200 hover:bg-mt-off-white disabled:opacity-60"
+      style={{ color: '#6f8f87' }}
+    >
+      <LogOut className="size-4 shrink-0" />
+      {pending ? 'Saindo…' : 'Sair'}
+    </button>
+  )
 }
 
 export function Sidebar({ onClose }: Props) {
@@ -82,14 +98,7 @@ export function Sidebar({ onClose }: Props) {
       {/* Footer */}
       <div className="p-3" style={{ borderTop: '0.5px solid #c8d8d2' }}>
         <form action={logout}>
-          <button
-            type="submit"
-            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-colors duration-200 hover:bg-mt-off-white"
-            style={{ color: '#6f8f87' }}
-          >
-            <LogOut className="size-4 shrink-0" />
-            Sair
-          </button>
+          <LogoutButton />
         </form>
       </div>
     </aside>

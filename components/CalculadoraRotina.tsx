@@ -311,7 +311,7 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
               disabled={!selectedMapId || isLinking}
               className="bg-mt-green hover:bg-[#68bfa0] text-[#0C0F0F] font-medium px-6"
             >
-              {isLinking ? '...' : 'Vincular'}
+              {isLinking ? 'Vinculando…' : 'Vincular'}
             </Button>
           </div>
         </div>
