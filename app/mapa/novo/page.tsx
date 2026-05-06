@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
 import { criarMapa, type AreaInput } from '@/app/actions/mapa'
@@ -64,6 +64,10 @@ export default function NovoMapaPage() {
   const stepCompleto = areasDoStep.every((area) => respostas[area]?.status)
   const ehUltimoPilar = step === totalSteps - 1
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [step])
+
   function setStatus(area: NomeArea, status: StatusArea) {
     setRespostas((prev) => ({
       ...prev,
@@ -81,7 +85,6 @@ export default function NovoMapaPage() {
   function avancar() {
     if (!ehUltimoPilar) {
       setStep((s) => s + 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
     } else {
       handleSubmit()
     }
@@ -89,7 +92,6 @@ export default function NovoMapaPage() {
 
   function voltar() {
     setStep((s) => s - 1)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   function handleSubmit() {
