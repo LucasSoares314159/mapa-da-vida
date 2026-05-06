@@ -47,7 +47,7 @@ export async function cadastro(state: AuthState, formData: FormData): Promise<Au
   }
 
   const supabase = createServerSupabaseClient()
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: result.data.email,
     password: result.data.senha,
     options: {
@@ -60,6 +60,14 @@ export async function cadastro(state: AuthState, formData: FormData): Promise<Au
       return { message: 'Este email já está cadastrado. Tente fazer login.' }
     }
     return { message: 'Não foi possível criar a conta. Tente novamente.' }
+  }
+
+  if (data.user && data.user.identities?.length === 0) {
+    return { message: 'Este email já está cadastrado. Tente fazer login.' }
+  }
+
+  if (data.session) {
+    redirect('/mapa/preparacao')
   }
 
   redirect('/auth/verificar-email')
