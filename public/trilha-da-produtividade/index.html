@@ -205,10 +205,14 @@
     font-family: 'Lora', serif;
     font-style: italic;
     color: var(--off-white);
-    text-decoration: underline;
-    text-decoration-color: var(--verde);
-    text-underline-offset: 4px;
-    text-decoration-thickness: 1.5px;
+    background: linear-gradient(to right, var(--verde) 0%, var(--verde) 0%) no-repeat bottom;
+    background-size: 0% 1.5px;
+    transition: background-size 0.5s ease;
+    background-position: left bottom;
+  }
+
+  .preco-destaque.visivel {
+    background-size: 100% 1.5px;
   }
 
   .btn-cta {
@@ -285,12 +289,16 @@
     font-family: 'Lora', serif;
     font-style: italic;
     color: var(--verde-escuro);
-    text-decoration: underline;
-    text-decoration-color: var(--verde);
-    text-underline-offset: 4px;
-    text-decoration-thickness: 2px;
-    background: linear-gradient(120deg, rgba(232, 245, 241, 0.6), transparent);
+    background-image: linear-gradient(120deg, rgba(232, 245, 241, 0.6), transparent), linear-gradient(to right, var(--verde) 0%, var(--verde) 0%);
+    background-size: 100% 100%, 0% 2px;
+    background-position: 0 0, left bottom;
+    background-repeat: no-repeat, no-repeat;
+    transition: background-size 0.5s ease;
     padding: 2px 6px;
+  }
+
+  .destaque-key.visivel {
+    background-size: 100% 100%, 100% 2px;
   }
 
   /* DOR */
@@ -1622,7 +1630,6 @@ function toggleFaq(el) {
 function animarDestaques(container) {
   const spans = container.querySelectorAll('.destaque');
   spans.forEach(el => el.classList.remove('visivel'));
-  // rAF garante que o browser processa o remove antes de adicionar (ativa a transição)
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       spans.forEach(el => el.classList.add('visivel'));
@@ -1651,12 +1658,39 @@ window.addEventListener('DOMContentLoaded', () => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           animarDestaques(atoInicial);
-          obs.disconnect();
+          obs.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.2 });
+    }, { threshold: 0 });
     observer.observe(atoInicial);
+
+    // Força animação se já está visível no carregamento
+    const rect = atoInicial.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      setTimeout(() => animarDestaques(atoInicial), 100);
+      observer.disconnect();
+    }
   }
+
+  // Observer para .preco-destaque e .destaque-key
+  const destaqueObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visivel');
+        destaqueObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.preco-destaque, .destaque-key').forEach(el => {
+    // Verifica se já está visível no carregamento
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      el.classList.add('visivel');
+    } else {
+      destaqueObserver.observe(el);
+    }
+  });
 });
 </script>
 
