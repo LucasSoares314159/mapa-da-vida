@@ -1619,6 +1619,17 @@ function toggleFaq(el) {
   item.classList.toggle('open');
 }
 
+function animarDestaques(container) {
+  const spans = container.querySelectorAll('.destaque');
+  spans.forEach(el => el.classList.remove('visivel'));
+  // rAF garante que o browser processa o remove antes de adicionar (ativa a transição)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      spans.forEach(el => el.classList.add('visivel'));
+    });
+  });
+}
+
 function mostrarAto(index, btn) {
   document.querySelectorAll('.atos-content').forEach((el, i) => {
     el.classList.toggle('active', i === index);
@@ -1628,23 +1639,25 @@ function mostrarAto(index, btn) {
   });
   btn.classList.add('active');
 
-  // Anima os .destaque do ato exibido
-  document.querySelectorAll('.atos-content.active .destaque').forEach(el => {
-    el.classList.add('visivel');
-  });
+  const atoAtivo = document.querySelector('.atos-content.active');
+  if (atoAtivo) animarDestaques(atoAtivo);
 }
 
-// IntersectionObserver para animar .destaque ao entrar na viewport
-const destaqueObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visivel');
-      destaqueObserver.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.3 });
-
-document.querySelectorAll('.destaque').forEach(el => destaqueObserver.observe(el));
+// Anima o ato inicial (ato-0 já está active ao carregar)
+window.addEventListener('DOMContentLoaded', () => {
+  const atoInicial = document.querySelector('.atos-content.active');
+  if (atoInicial) {
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animarDestaques(atoInicial);
+          obs.disconnect();
+        }
+      });
+    }, { threshold: 0.2 });
+    observer.observe(atoInicial);
+  }
+});
 </script>
 
 </body>
