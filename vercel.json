@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/trilha-da-produtividade",
+      "destination": "/trilha-da-produtividade/index.html"
+    }
+  ]
+}
