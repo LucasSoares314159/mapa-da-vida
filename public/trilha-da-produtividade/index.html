@@ -276,8 +276,8 @@
   }
 
   h2 {
-    font-size: 34px;
-    font-weight: 400;
+    font-size: 36px;
+    font-weight: 500;
     line-height: 1.25;
     margin-bottom: 20px;
   }
@@ -355,15 +355,9 @@
   .feature-row.invertido .feature-imagem { order: 1; }
 
   .feature-imagem {
-    background: var(--verde);
-    border: 0.5px solid var(--borda);
     border-radius: 14px;
-    height: 240px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 13px;
+    overflow: hidden;
+    line-height: 0;
   }
 
   .feature-row h3 {
@@ -375,7 +369,7 @@
 
   .feature-row p {
     font-size: 16px;
-    color: #444;
+    color: #333;
     line-height: 1.75;
     margin-bottom: 16px;
   }
@@ -440,58 +434,17 @@
   }
 
   /* JORNADA */
-  .jornada-steps {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+  .jornada-img-wrap {
     margin-top: 48px;
-    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
   }
 
-  .jornada-step {
-    position: relative;
-  }
-
-  .step-num {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 48px;
-    font-weight: 300;
-    color: rgba(87, 170, 143, 0.25);
-    line-height: 1;
-    margin-bottom: 12px;
-  }
-
-  .step-visual {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(87,170,143,0.15);
-    border-radius: 12px;
-    height: 140px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 24px;
-    color: var(--texto-sec);
-    font-size: 12px;
-  }
-
-  .jornada-step h3 {
-    font-size: 20px;
-    font-weight: 500;
-    color: var(--off-white);
-    margin-bottom: 10px;
-  }
-
-  .jornada-step p {
-    font-size: 15px;
-    color: #a8c4bc;
-    line-height: 1.7;
-    margin-bottom: 16px;
-  }
-
-  .step-marcador {
-    font-size: 14px;
-    color: var(--verde);
-    font-weight: 500;
+  .jornada-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 16px;
   }
 
   /* TRILHAS */
@@ -670,17 +623,9 @@
   }
 
   .lucas-foto {
-    background: var(--verde-sup);
-    border: 0.5px solid var(--borda);
     border-radius: 14px;
+    overflow: hidden;
     height: 280px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--texto-sec);
-    font-size: 13px;
-    text-align: center;
-    padding: 20px;
   }
 
   .lucas-texto h3 {
@@ -700,7 +645,7 @@
   .lucas-links {
     display: flex;
     gap: 12px;
-    margin-top: 24px;
+    margin-top: 16px;
   }
 
   .btn-ghost {
@@ -766,7 +711,7 @@
 
   .atos-content p {
     font-family: 'Lora', serif;
-    font-size: 18px;
+    font-size: 17px;
     font-style: italic;
     color: #333;
     line-height: 1.8;
@@ -848,9 +793,9 @@
   .prova-nums-bar {
     display: flex;
     gap: 40px;
-    margin-top: 40px;
-    padding-top: 32px;
-    border-top: 0.5px solid var(--borda);
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
     justify-content: center;
   }
 
@@ -946,7 +891,7 @@
   }
 
   .preco-checklist li {
-    font-size: 15px;
+    font-size: 16px;
     padding: 8px 0;
     border-bottom: 0.5px solid rgba(255,255,255,0.12);
     display: flex;
@@ -994,7 +939,7 @@
 
   .faq-resposta {
     display: none;
-    font-size: 15px;
+    font-size: 16px;
     color: #444;
     line-height: 1.75;
     padding-top: 16px;
@@ -1134,6 +1079,17 @@
     border-radius: 8px;
   }
 
+  /* UTILITÁRIOS LP */
+  .nav-logo-link      { display: flex; text-decoration: none; }
+  .sec-subtitulo-dark { color: #a8c4bc; max-width: 480px; }
+  .sec-subtitulo      { color: var(--texto-sec); margin-bottom: 32px; }
+  .sec-subtitulo-sec  { color: var(--texto-sec); }
+  .feature-img        { width: 100%; height: auto; display: block; }
+  .lucas-foto-img     { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+  .text-center        { text-align: center; }
+  .sec-label-center   { text-align: center; display: block; }
+  .btn-cta-full       { width: 100%; display: block; text-align: center; }
+
   /* RESPONSIVE */
   @media (max-width: 768px) {
     nav { padding: 14px 20px; }
@@ -1141,24 +1097,50 @@
     .nav-sep { display: none; }
     .btn-nav { margin-left: 0; }
     .nav-hamburger { display: flex; }
-    .hero { min-height: 560px; }
+
+    /* Hero */
+    .hero { min-height: 560px; background: var(--verde-escuro); }
+    .hero-bg { display: none; }
+    .hero::after { display: none; }
     .hero-container { padding: 70px 20px 80px; }
     .hero-texto { max-width: 100%; }
     .hero h1 { font-size: 32px; }
     .hero h1 .prefixo { font-size: 16px; }
+
+    /* Tipografia */
+    h2 { font-size: 28px; }
+
+    /* Seções */
     .sec-clara, .sec-branca, .sec-escura { padding: 60px 20px; }
+    .sec-elegibilidade { padding: 60px 20px; }
+    .cta-final { padding: 60px 20px; }
+
+    /* Grids */
     .dor-cards { grid-template-columns: 1fr; }
     .feature-row { grid-template-columns: 1fr; }
     .feature-row.invertido .feature-texto { order: 1; }
     .feature-row.invertido .feature-imagem { order: 2; }
     .sec-features-grid { grid-template-columns: repeat(2, 1fr); }
-    .jornada-steps { grid-template-columns: 1fr; }
+    /* .jornada-steps { grid-template-columns: 1fr; } */
     .para-quem-grid { grid-template-columns: 1fr; }
     .lucas-grid { grid-template-columns: 1fr; }
-    .atos-label { font-size: 9px; }
+
+    /* Foto Lucas */
+    .lucas-foto { height: auto; aspect-ratio: 4/3; }
+
+    /* Tabs trilha */
+    .trilha-tab { font-size: 12px; padding: 8px 14px; }
+
+    /* Prova social */
     .prova-grid { grid-template-columns: 1fr; }
-    .prova-nums-bar { flex-wrap: wrap; gap: 20px; }
+    .prova-nums-bar { flex-wrap: wrap; gap: 20px; justify-content: center; }
+    .prova-num-item { text-align: center; }
+
+    /* Preço */
     .preco-box { padding: 32px 24px; }
+    .btn-cta { padding: 16px 24px; font-size: 15px; }
+
+    /* Footer */
     .footer-links { flex-wrap: wrap; gap: 16px; }
   }
 </style>
@@ -1168,7 +1150,7 @@
 <!-- NAV -->
 <nav>
   <div class="nav-logo">
-    <a href="#" style="display: flex; text-decoration: none;">
+    <a href="#" class="nav-logo-link">
       <img src="logo-mindtrail.png" alt="MindTrail">
     </a>
   </div>
@@ -1197,7 +1179,7 @@
 <!-- HERO -->
 <section class="hero">
   <div class="hero-bg">
-    <img src="lucas-hero.JPG" alt="Lucas Soares">
+    <img src="lucas-hero-2.png" alt="Lucas Soares" width="3024" height="1615">
   </div>
   <div class="hero-container">
     <div class="hero-texto">
@@ -1232,43 +1214,27 @@
 <section class="sec-branca">
   <div class="container-texto">
     <span class="sec-label">pensamento sistêmico aplicado a rotina</span>
-    <h2>A Trilha não te ensina <span class="destaque-key">um método</span>.<br>te ensina a <span class="destaque-key">construir o seu próprio sistema de organização pessoal</span>.</h2>
+    <h2>A Trilha não te ensina <span class="destaque-key">um método</span>. te ensina a <span class="destaque-key">construir o seu próprio sistema de organização pessoal</span>.</h2>
   </div>
 </section>
 
 <!-- JORNADA -->
 <section class="sec-escura">
   <div class="container">
-    <span class="sec-label sec-label-dark">a jornada</span>
-    <h2 class="dark">a trilha te mostra o caminho</h2>
-    <p style="color: #a8c4bc; max-width: 480px;">três momentos. um sistema que é seu no final.</p>
+    <span class="sec-label sec-label-dark">a trilha</span>
+    <h2 class="dark">Nós te mostramos o caminho </h2>
+    <p class="sec-subtitulo-dark">uma jornada única que conecta diferentes objetivos</p>
 
-    <div class="jornada-steps">
-
-      <div class="jornada-step">
-        <div class="step-num">01</div>
-        <div class="step-visual">[ ilustração diagnóstico ]</div>
-        <h3>o mapa da vida</h3>
-        <p>a primeira coisa que você faz quando entra na trilha é parar de achar e começar a ver. você vai saber exatamente onde está e o que está pesando mais. diagnóstico antes de qualquer ação.</p>
-        <span class="step-marcador">→ você sai sabendo onde estão os buracos.</span>
-      </div>
-
-      <div class="jornada-step">
-        <div class="step-num">02</div>
-        <div class="step-visual">[ ilustração construção ]</div>
-        <h3>o seu sistema</h3>
-        <p>com o diagnóstico em mãos, você constrói a estrutura que vai sustentar a sua semana — não a semana de um influenciador de produtividade. simples por design. funciona no Apple Notes, no Notion básico.</p>
-        <span class="step-marcador">→ você sai com um sistema que é seu.</span>
-      </div>
-
-      <div class="jornada-step">
-        <div class="step-num">03</div>
-        <div class="step-visual">[ ilustração retomada ]</div>
-        <h3>a retomada</h3>
-        <p>todo mundo falha. todo plano vai por água abaixo. a diferença entre quem mantém e quem para não é disciplina — é ter um protocolo de retomada que não exige recomeçar do zero.</p>
-        <span class="step-marcador">→ você sai sabendo como voltar. sempre.</span>
-      </div>
-
+    <div class="jornada-img-wrap">
+      <img
+        src="journey.png"
+        alt="A jornada: mapa da vida, seu sistema e a retomada"
+        class="jornada-img"
+        loading="lazy"
+        decoding="async"
+        width="2316"
+        height="965"
+      >
     </div>
   </div>
 </section>
@@ -1277,8 +1243,8 @@
 <section id="plataforma" class="sec-clara">
   <div class="container">
     <span class="sec-label">ferramentas</span>
-    <h2>plataforma da trilha</h2>
-    <p style="color: var(--texto-sec);">mapa da vida + calculadora de rotina + definidor de objetivos</p>
+    <h2>nossa plataforma</h2>
+    <p class="sec-subtitulo-sec">mapa da vida + calculadora de rotina + definidor de objetivos + aulas</p>
 
     <div class="features-list">
 
@@ -1288,7 +1254,17 @@
           <p>essa é a primeira coisa que você faz na trilha. baseado nos estudos das bluezones ele avalia 3 pilares fundamentais: corpo, mente e espírito. tem coragem?</p>
           <span class="feature-marcador">→ você enxerga onde vai chegar no futuro se continuar assim.</span>
         </div>
-        <div class="feature-imagem">[ screenshot do mapa da vida ]</div>
+        <div class="feature-imagem">
+          <img
+            src="mapa-da-vida.png"
+            alt="Screenshot do Mapa da Vida"
+            class="feature-img"
+            loading="lazy"
+            decoding="async"
+            width="2816"
+            height="1536"
+          >
+        </div>
       </div>
 
       <div class="feature-row invertido">
@@ -1297,7 +1273,17 @@
           <p>você descobre onde o seu tempo realmente tem para definir os seus objetivos baseado na sua rotina real - e não na rotina dos outros..</p>
           <span class="feature-marcador">→ entenda se você está numa zona de sacrifício ou privilégio.</span>
         </div>
-        <div class="feature-imagem">[ screenshot da calculadora de rotina ]</div>
+        <div class="feature-imagem">
+          <img
+            src="calculadora-rotina.png"
+            alt="Screenshot da Calculadora de Rotina"
+            class="feature-img"
+            loading="lazy"
+            decoding="async"
+            width="1984"
+            height="1536"
+          >
+        </div>
       </div>
 
       <div class="feature-row">
@@ -1306,7 +1292,36 @@
           <p>crie e acompanhe os seus objetivos de acordo com a sua rotina real e pare de abadonar seus projetos no meio do caminho.</p>
           <span class="feature-marcador">→ não engavete mais seus projetos depois de 2 semanas.</span>
         </div>
-        <div class="feature-imagem">[ screenshot do definidor de objetivos ]</div>
+        <div class="feature-imagem">
+          <img
+            src="definidor-objetivos.png"
+            alt="Screenshot do Definidor de Objetivos"
+            class="feature-img"
+            loading="lazy"
+            decoding="async"
+            width="2500"
+            height="1344"
+          >
+        </div>
+      </div>
+
+      <div class="feature-row invertido">
+        <div class="feature-texto">
+          <h3>aulas</h3>
+          <p>para aplicar a jornada e construir o seu sistema de organização pessoal.</p>
+          <span class="feature-marcador">→ acesse quando quiser para revisar o método</span>
+        </div>
+        <div class="feature-imagem">
+          <img
+            src="aulas.png"
+            alt="Screenshot das Aulas"
+            class="feature-img"
+            loading="lazy"
+            decoding="async"
+            width="1250"
+            height="650"
+          >
+        </div>
       </div>
 
     </div>
@@ -1317,7 +1332,7 @@
 <section id="aulas" class="sec-verde">
   <div class="container">
     <span class="sec-label">Um ecossistema completo</span>
-    <h2>além disso</h2>
+    <h2>para seguir contigo</h2>
 
     <div class="sec-features-grid">
       <div class="sec-feature">
@@ -1351,7 +1366,7 @@
   <div class="container">
     <span class="sec-label">seu momento de vida</span>
     <h2>onde você está agora?</h2>
-    <p style="color: var(--texto-sec); margin-bottom: 32px;">aulas variadas que acompanham cada fase da sua jornada.</p>
+    <p class="sec-subtitulo">aulas variadas que acompanham cada fase da sua jornada.</p>
 
     <div class="trilhas-tabs">
       <button class="trilha-tab active" onclick="showTrilha('consistencia', this)">SER CONSISTENTE</button>
@@ -1419,8 +1434,18 @@
 
     <div class="lucas-grid">
       <div>
-        <div class="lucas-foto">[ foto do Lucas<br>ambiente natural,<br>sem palco ]</div>
-        <div class="lucas-links" style="margin-top: 16px;">
+        <div class="lucas-foto">
+          <img
+            src="lucas-hero.JPG"
+            alt="Lucas Soares"
+            class="lucas-foto-img"
+            loading="lazy"
+            decoding="async"
+            width="2048"
+            height="1024"
+          >
+        </div>
+        <div class="lucas-links">
           <a href="https://www.linkedin.com/in/lucas-soares/" class="btn-ghost" target="_blank">LinkedIn</a>
           <a href="https://www.instagram.com/mindtrail.co/" class="btn-ghost" target="_blank">Instagram</a>
         </div>
@@ -1461,15 +1486,6 @@
 <!-- PROVA SOCIAL -->
 <section class="sec-clara">
   <div class="container">
-    <span class="sec-label">prova social</span>
-    <h2>o que dizem quem já usa o método</h2>
-
-    <div class="prova-grid">
-      <div class="prova-item">[ print real de DM ou resposta de newsletter ]</div>
-      <div class="prova-item">[ print real de DM ou resposta de newsletter ]</div>
-      <div class="prova-item">[ print real de DM ou resposta de newsletter ]</div>
-    </div>
-
     <div class="prova-nums-bar">
       <div class="prova-num-item">
         <div class="prova-num-valor">5.000+</div>
@@ -1490,8 +1506,8 @@
 <!-- PREÇO -->
 <section id="comprar" class="sec-branca">
   <div class="container-texto">
-    <span class="sec-label" style="text-align: center; display: block;">turma 1</span>
-    <h2 style="text-align: center;">acesso antecipado</h2>
+    <span class="sec-label sec-label-center">turma 1</span>
+    <h2 class="text-center">acesso antecipado</h2>
 
     <div class="preco-box">
       <span class="preco-tag">turma fundadores · acesso antecipado</span>
@@ -1512,7 +1528,7 @@
         <li><span class="check-icon">✓</span> garantia de 7 dias</li>
       </ul>
 
-      <a href="https://pay.kiwify.com.br/cZ3CIOK" class="btn-cta" style="width: 100%; display: block; text-align: center;" target="_blank">QUERO ENTRAR NA TURMA DE FUNDADORES</a>
+      <a href="https://pay.kiwify.com.br/cZ3CIOK" class="btn-cta btn-cta-full" target="_blank">QUERO ENTRAR NA TURMA DE FUNDADORES</a>
       <p class="garantia">sem estresse. se em 7 dias você sentir que não é para você, devolvemos tudo — sem burocracia, sem pergunta.</p>
     </div>
   </div>
@@ -1521,8 +1537,8 @@
 <!-- FAQ -->
 <section class="sec-clara">
   <div class="container">
-    <span class="sec-label" style="text-align: center; display: block;">dúvidas</span>
-    <h2 style="text-align: center;">perguntas frequentes</h2>
+    <span class="sec-label sec-label-center">dúvidas</span>
+    <h2 class="text-center">perguntas frequentes</h2>
 
     <div class="faq-list">
 
