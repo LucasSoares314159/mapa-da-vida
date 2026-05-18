@@ -1667,6 +1667,23 @@ function mostrarAto(index, btn) {
   if (atoAtivo) animarDestaques(atoAtivo);
 }
 
+// Repassa UTMs da URL atual para todos os links do Kiwify
+(function forwardUTMs() {
+  var utmParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+  var search = new URLSearchParams(window.location.search);
+  var utms = new URLSearchParams();
+  utmParams.forEach(function(key) {
+    var val = search.get(key);
+    if (val) utms.set(key, val);
+  });
+  if (!utms.toString()) return;
+  document.querySelectorAll('a[href*="pay.kiwify.com.br"]').forEach(function(link) {
+    var url = new URL(link.href);
+    utms.forEach(function(val, key) { url.searchParams.set(key, val); });
+    link.href = url.toString();
+  });
+})();
+
 // Anima o ato inicial (ato-0 já está active ao carregar)
 window.addEventListener('DOMContentLoaded', () => {
   const atoInicial = document.querySelector('.atos-content.active');
