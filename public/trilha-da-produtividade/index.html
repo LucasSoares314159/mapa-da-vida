@@ -1191,7 +1191,7 @@
         <span class="linha">definir objetivos</span>
         <span class="linha"><em>e ser consistente</em></span>
       </h1>
-      <p class="hero-sub">apenas <span class="preco-destaque">R$ 30,71</span> por mês no plano anual</p>
+      <p class="hero-sub">apenas <span class="preco-destaque">12x de R$ 41,66</span> por mês no plano anual</p>
       <a href="#comprar" class="btn-cta" onclick="smoothScroll(event)">QUERO ENTRAR NA TRILHA</a>
     </div>
   </div>
@@ -1507,18 +1507,18 @@
 <!-- PREÇO -->
 <section id="comprar" class="sec-branca">
   <div class="container-texto">
-    <span class="sec-label sec-label-center">turma 1</span>
+    <span class="sec-label sec-label-center">turma 2</span>
     <h2 class="text-center">acesso antecipado</h2>
 
     <div class="preco-box">
-      <span class="preco-tag">turma fundadores · acesso antecipado</span>
+      <span class="preco-tag">turma 2 · acesso antecipado</span>
       <div class="vagas-aviso">
         <span class="vagas-dot"></span>
-        vagas limitadas — turma fundadores
+        vagas limitadas — turma 2
       </div>
-      <p class="preco-de">R$497</p>
-      <p class="preco-por">R$299</p>
-      <p class="preco-parcelamento">ou 12x de R$30,71</p>
+      <p class="preco-de">R$799,99</p>
+      <p class="preco-por">R$499,99</p>
+      <p class="preco-parcelamento">ou 12x de R$41,66</p>
 
       <ul class="preco-checklist">
         <li><span class="check-icon">✓</span> programa completo de 4 semanas com módulos gravados</li>
@@ -1529,7 +1529,7 @@
         <li><span class="check-icon">✓</span> garantia de 7 dias</li>
       </ul>
 
-      <a href="https://pay.kiwify.com.br/cZ3CIOK" class="btn-cta btn-cta-full" target="_blank">QUERO ENTRAR NA TURMA DE FUNDADORES</a>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSd71sLBUp6co--CB6GlFU6Dj9DBticd66TKaYQ6AxUpk0LrJw/viewform?usp=pp_url&entry.XXXXXXXXX=Landing+Page" class="btn-cta btn-cta-full" target="_blank">LISTA DE ESPERA TURMA 2</a>
       <p class="garantia">sem estresse. se em 7 dias você sentir que não é para você, devolvemos tudo — sem burocracia, sem pergunta.</p>
     </div>
   </div>
@@ -1585,7 +1585,7 @@
 
       <div class="faq-item">
         <div class="faq-pergunta" onclick="toggleFaq(this)">
-          quando começa a turma 1?
+          quando começa a turma 2?
           <span class="faq-seta">+</span>
         </div>
         <div class="faq-resposta">a data será comunicada para quem entrar primeiro.</div>
@@ -1598,7 +1598,7 @@
 <!-- CTA FINAL -->
 <section class="cta-final">
   <h2>pronto para construir o seu sistema?</h2>
-  <a href="https://pay.kiwify.com.br/cZ3CIOK" class="btn-cta" target="_blank">quero entrar na turma de fundadores</a>
+  <a href="https://docs.google.com/forms/d/e/1FAIpQLSd71sLBUp6co--CB6GlFU6Dj9DBticd66TKaYQ6AxUpk0LrJw/viewform?usp=pp_url&entry.XXXXXXXXX=Landing+Page" class="btn-cta" target="_blank">LISTA DE ESPERA TURMA 2</a>
   <p class="cta-suporte">tem dúvida antes de decidir? <a href="https://wa.me/5561982425139" target="_blank">me manda uma mensagem.</a></p>
 </section>
 
@@ -1677,7 +1677,7 @@ function mostrarAto(index, btn) {
     if (val) utms.set(key, val);
   });
   if (!utms.toString()) return;
-  document.querySelectorAll('a[href*="pay.kiwify.com.br"]').forEach(function(link) {
+  document.querySelectorAll('a[href*="docs.google.com/forms"]').forEach(function(link) {
     var url = new URL(link.href);
     utms.forEach(function(val, key) { url.searchParams.set(key, val); });
     link.href = url.toString();
