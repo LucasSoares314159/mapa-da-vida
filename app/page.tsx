@@ -1,11 +1,10 @@
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { LandingPage } from '@/components/lp/LandingPage'
+import Link from 'next/link'
 
 export const metadata = {
-  title: 'Mapa da Vida — Diagnóstico gratuito das áreas da sua vida',
-  description:
-    'Responda 9 perguntas e receba um diagnóstico personalizado sobre o que está sustentando — e o que está consumindo — a sua energia.',
+  title: 'MindTrail — Em breve',
+  description: 'Estamos construindo algo novo.',
 }
 
 export default async function HomePage() {
@@ -27,5 +26,21 @@ export default async function HomePage() {
     }
   }
 
-  return <LandingPage />
+  return (
+    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6">
+      <div className="text-center max-w-sm">
+        <p className="text-sm uppercase tracking-widest text-zinc-500 mb-6">MindTrail</p>
+        <h1 className="text-2xl font-bold mb-4">Estamos construindo algo novo.</h1>
+        <p className="text-zinc-400 text-sm mb-8">
+          Em breve este espaço vai contar toda a história.
+        </p>
+        <Link
+          href="/lista-espera"
+          className="text-sm text-zinc-400 underline underline-offset-4 hover:text-white transition-colors"
+        >
+          Entrar na lista de espera →
+        </Link>
+      </div>
+    </main>
+  )
 }

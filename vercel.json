@@ -1,8 +1,15 @@
 {
   "rewrites": [
     {
+      "source": "/trilha",
+      "destination": "/trilha/index.html"
+    }
+  ],
+  "redirects": [
+    {
       "source": "/trilha-da-produtividade",
-      "destination": "/trilha-da-produtividade/index.html"
+      "destination": "/trilha",
+      "permanent": true
     }
   ]
 }

@@ -43,3 +43,25 @@ export type EsqueciSenhaFormData = z.infer<typeof esqueciSenhaSchema>
 export type RedefinirSenhaFormData = z.infer<typeof redefinirSenhaSchema>
 export type AreaFormData = z.infer<typeof areaSchema>
 export type MapaFormData = z.infer<typeof mapaSchema>
+
+export const listaEsperaSchema = z.object({
+  nome: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres'),
+  email: z.string().email('Email inválido'),
+  whatsapp: z.string().optional(),
+  profissao: z.enum([
+    'Tecnologia (Produto, Design, TI)',
+    'Marketing (creator, analista, growth, social media)',
+    'Executivos (founder, CMO, CPO, COO)',
+    'Autônomos (empreendedor, artista, artesão)',
+    'Saúde (medicina, fisioterapia, psicologia, enfermagem)',
+    'Outro',
+  ]).refine(Boolean, { message: 'Selecione sua profissão' }),
+  canal: z.enum(['LinkedIn', 'Newsletter', 'Instagram', 'Outro'])
+    .refine(Boolean, { message: 'Selecione por onde nos conheceu' }),
+  disponibilidade_horas: z.enum(['Sim', 'Não', 'Talvez'])
+    .refine(Boolean, { message: 'Responda sobre disponibilidade de horas' }),
+  disponibilidade_encontros: z.enum(['Sim', 'Não', 'Talvez'])
+    .refine(Boolean, { message: 'Responda sobre disponibilidade de encontros' }),
+})
+
+export type ListaEsperaFormData = z.infer<typeof listaEsperaSchema>
