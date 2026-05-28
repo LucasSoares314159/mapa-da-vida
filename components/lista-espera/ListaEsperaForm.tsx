@@ -123,7 +123,7 @@ export function ListaEsperaForm() {
         return
       }
       trackEvent('Lead')
-      router.push('/obrigado')
+      setTimeout(() => router.push('/obrigado'), 300)
     } catch {
       setServerError('Erro de conexão. Verifique sua internet e tente novamente.')
     } finally {
