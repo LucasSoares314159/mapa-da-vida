@@ -122,8 +122,8 @@ export function ListaEsperaForm() {
         setServerError(json.error ?? 'Ocorreu um erro. Tente novamente.')
         return
       }
-      trackEvent('Lead')
-      setTimeout(() => router.push('/obrigado'), 300)
+      await trackEvent('Lead')
+      router.push('/obrigado')
     } catch {
       setServerError('Erro de conexão. Verifique sua internet e tente novamente.')
     } finally {
