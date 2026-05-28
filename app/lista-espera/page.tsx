@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { ListaEsperaForm } from '@/components/lista-espera/ListaEsperaForm'
 import { MetaPixelListaEspera } from '@/components/MetaPixelListaEspera'
 import { CheckCircle } from 'lucide-react'
@@ -65,7 +66,9 @@ export default function ListaEsperaPage() {
             <p className="text-gray-500 text-sm mb-8">
               Preencha o formulário e avise você assim que as vagas abrirem.
             </p>
-            <ListaEsperaForm />
+            <Suspense>
+              <ListaEsperaForm />
+            </Suspense>
           </div>
         </div>
       </section>
