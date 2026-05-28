@@ -1,4 +1,5 @@
 import { ListaEsperaForm } from '@/components/lista-espera/ListaEsperaForm'
+import { MetaPixelListaEspera } from '@/components/MetaPixelListaEspera'
 import { CheckCircle } from 'lucide-react'
 
 export const metadata = {
@@ -17,6 +18,7 @@ const INCLUSOS = [
 export default function ListaEsperaPage() {
   return (
     <main className="min-h-screen bg-gray-50">
+      <MetaPixelListaEspera />
       {/* Hero */}
       <section className="bg-white border-b border-gray-200 py-12 px-6">
         <div className="max-w-2xl mx-auto text-center">

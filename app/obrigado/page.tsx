@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { CheckCircle } from 'lucide-react'
 import { useMetaPixel } from '@/hooks/useMetaPixel'
+import { MetaPixelListaEspera } from '@/components/MetaPixelListaEspera'
 
 export default function ObrigadoPage() {
   const { trackEvent } = useMetaPixel()
@@ -14,6 +15,7 @@ export default function ObrigadoPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
+      <MetaPixelListaEspera />
       <div className="max-w-md w-full text-center">
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-10">
           <CheckCircle className="w-14 h-14 text-emerald-500 mx-auto mb-6" />
