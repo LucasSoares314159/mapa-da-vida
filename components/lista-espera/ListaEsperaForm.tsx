@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useMetaPixel } from '@/hooks/useMetaPixel'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -19,7 +19,6 @@ const PROFISSOES = [
   'Outro',
 ] as const
 
-const CANAIS = ['LinkedIn', 'Newsletter', 'Instagram', 'Outro'] as const
 const DISPONIBILIDADE = ['Sim', 'Não', 'Talvez'] as const
 
 function RadioGroup({
@@ -80,9 +79,14 @@ function formatWhatsApp(value: string) {
 
 export function ListaEsperaForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { trackEvent } = useMetaPixel()
   const [submitting, setSubmitting] = useState(false)
   const [serverError, setServerError] = useState('')
+
+  const utm_source = searchParams.get('utm_source') ?? 'direto'
+  const utm_medium = searchParams.get('utm_medium') ?? 'direto'
+  const utm_campaign = searchParams.get('utm_campaign') ?? 'direto'
 
   const {
     register,
@@ -97,14 +101,12 @@ export function ListaEsperaForm() {
       email: '',
       whatsapp: '',
       profissao: undefined,
-      canal: undefined,
       disponibilidade_horas: undefined,
       disponibilidade_encontros: undefined,
     },
   })
 
   const profissao = watch('profissao')
-  const canal = watch('canal')
   const disponibilidade_horas = watch('disponibilidade_horas')
   const disponibilidade_encontros = watch('disponibilidade_encontros')
 
@@ -115,7 +117,7 @@ export function ListaEsperaForm() {
       const res = await fetch('/api/lista-espera', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, utm_source, utm_medium, utm_campaign }),
       })
       if (!res.ok) {
         const json = await res.json()
@@ -179,18 +181,6 @@ export function ListaEsperaForm() {
           value={profissao ?? ''}
           onChange={(v) => setValue('profissao', v as ListaEsperaFormData['profissao'], { shouldValidate: true })}
           error={errors.profissao?.message}
-        />
-      </div>
-
-      {/* Canal */}
-      <div className="space-y-2">
-        <Label>Por onde conheceu a MindTrail? *</Label>
-        <RadioGroup
-          name="canal"
-          options={CANAIS}
-          value={canal ?? ''}
-          onChange={(v) => setValue('canal', v as ListaEsperaFormData['canal'], { shouldValidate: true })}
-          error={errors.canal?.message}
         />
       </div>
 

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<base href="/trilha-da-produtividade/">
+<base href="/trilha/">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trilha da Produtividade — MindTrail</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1529,7 +1529,7 @@
         <li><span class="check-icon">✓</span> garantia de 7 dias</li>
       </ul>
 
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSd71sLBUp6co--CB6GlFU6Dj9DBticd66TKaYQ6AxUpk0LrJw/viewform?usp=pp_url&entry.XXXXXXXXX=Landing+Page" class="btn-cta btn-cta-full" target="_blank">LISTA DE ESPERA TURMA 2</a>
+      <a href="/lista-espera" class="btn-cta btn-cta-full">LISTA DE ESPERA TURMA 2</a>
       <p class="garantia">sem estresse. se em 7 dias você sentir que não é para você, devolvemos tudo — sem burocracia, sem pergunta.</p>
     </div>
   </div>
@@ -1598,7 +1598,7 @@
 <!-- CTA FINAL -->
 <section class="cta-final">
   <h2>pronto para construir o seu sistema?</h2>
-  <a href="https://docs.google.com/forms/d/e/1FAIpQLSd71sLBUp6co--CB6GlFU6Dj9DBticd66TKaYQ6AxUpk0LrJw/viewform?usp=pp_url&entry.XXXXXXXXX=Landing+Page" class="btn-cta" target="_blank">LISTA DE ESPERA TURMA 2</a>
+  <a href="/lista-espera" class="btn-cta">LISTA DE ESPERA TURMA 2</a>
   <p class="cta-suporte">tem dúvida antes de decidir? <a href="https://wa.me/5561982425139" target="_blank">me manda uma mensagem.</a></p>
 </section>
 
@@ -1677,7 +1677,7 @@ function mostrarAto(index, btn) {
     if (val) utms.set(key, val);
   });
   if (!utms.toString()) return;
-  document.querySelectorAll('a[href*="docs.google.com/forms"]').forEach(function(link) {
+  document.querySelectorAll('a[href*="/lista-espera"]').forEach(function(link) {
     var url = new URL(link.href);
     utms.forEach(function(val, key) { url.searchParams.set(key, val); });
     link.href = url.toString();

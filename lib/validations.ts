@@ -56,12 +56,13 @@ export const listaEsperaSchema = z.object({
     'Saúde (medicina, fisioterapia, psicologia, enfermagem)',
     'Outro',
   ]).refine(Boolean, { message: 'Selecione sua profissão' }),
-  canal: z.enum(['LinkedIn', 'Newsletter', 'Instagram', 'Outro'])
-    .refine(Boolean, { message: 'Selecione por onde nos conheceu' }),
   disponibilidade_horas: z.enum(['Sim', 'Não', 'Talvez'])
     .refine(Boolean, { message: 'Responda sobre disponibilidade de horas' }),
   disponibilidade_encontros: z.enum(['Sim', 'Não', 'Talvez'])
     .refine(Boolean, { message: 'Responda sobre disponibilidade de encontros' }),
+  utm_source: z.string().optional(),
+  utm_medium: z.string().optional(),
+  utm_campaign: z.string().optional(),
 })
 
 export type ListaEsperaFormData = z.infer<typeof listaEsperaSchema>
