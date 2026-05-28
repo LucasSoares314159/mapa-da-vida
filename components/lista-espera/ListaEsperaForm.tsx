@@ -19,7 +19,6 @@ const PROFISSOES = [
   'Outro',
 ] as const
 
-const DISPONIBILIDADE = ['Sim', 'Não', 'Talvez'] as const
 
 function RadioGroup({
   name,
@@ -41,13 +40,13 @@ function RadioGroup({
           key={opt}
           className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
             value === opt
-              ? 'border-emerald-500 bg-emerald-50'
-              : 'border-gray-200 hover:border-gray-300 bg-white'
+              ? 'border-mt-green bg-mt-off-white'
+              : 'border-mt-border hover:border-mt-green bg-white'
           }`}
         >
           <div
             className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
-              value === opt ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300'
+              value === opt ? 'border-mt-green bg-mt-green' : 'border-mt-border'
             }`}
           >
             {value === opt && (
@@ -62,7 +61,7 @@ function RadioGroup({
             onChange={() => onChange(opt)}
             className="sr-only"
           />
-          <span className="text-sm text-gray-700">{opt}</span>
+          <span className="text-sm text-mt-black">{opt}</span>
         </label>
       ))}
       {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
@@ -101,14 +100,10 @@ export function ListaEsperaForm() {
       email: '',
       whatsapp: '',
       profissao: undefined,
-      disponibilidade_horas: undefined,
-      disponibilidade_encontros: undefined,
     },
   })
 
   const profissao = watch('profissao')
-  const disponibilidade_horas = watch('disponibilidade_horas')
-  const disponibilidade_encontros = watch('disponibilidade_encontros')
 
   async function onSubmit(data: ListaEsperaFormData) {
     setSubmitting(true)
@@ -162,14 +157,16 @@ export function ListaEsperaForm() {
 
       {/* WhatsApp */}
       <div className="space-y-1.5">
-        <Label htmlFor="whatsapp">WhatsApp (opcional)</Label>
+        <Label htmlFor="whatsapp">WhatsApp *</Label>
         <Input
           id="whatsapp"
           type="tel"
           placeholder="(00) 00000-0000"
           value={watch('whatsapp') ?? ''}
-          onChange={(e) => setValue('whatsapp', formatWhatsApp(e.target.value))}
+          onChange={(e) => setValue('whatsapp', formatWhatsApp(e.target.value), { shouldValidate: true })}
+          className={errors.whatsapp ? 'border-red-400' : ''}
         />
+        {errors.whatsapp && <p className="text-red-500 text-xs">{errors.whatsapp.message}</p>}
       </div>
 
       {/* Profissão */}
@@ -184,33 +181,6 @@ export function ListaEsperaForm() {
         />
       </div>
 
-      {/* Disponibilidade horas */}
-      <div className="space-y-2">
-        <Label>
-          Você teria disponibilidade de 2 horas semanais por 4 semanas para concluir o produto?{' '}
-          <span className="text-gray-400 font-normal">(8 horas totais em média)</span> *
-        </Label>
-        <RadioGroup
-          name="disponibilidade_horas"
-          options={DISPONIBILIDADE}
-          value={disponibilidade_horas ?? ''}
-          onChange={(v) => setValue('disponibilidade_horas', v as ListaEsperaFormData['disponibilidade_horas'], { shouldValidate: true })}
-          error={errors.disponibilidade_horas?.message}
-        />
-      </div>
-
-      {/* Disponibilidade encontros */}
-      <div className="space-y-2">
-        <Label>Você teria disponibilidade para 3 encontros online em grupo de 1 hora durante o programa? *</Label>
-        <RadioGroup
-          name="disponibilidade_encontros"
-          options={DISPONIBILIDADE}
-          value={disponibilidade_encontros ?? ''}
-          onChange={(v) => setValue('disponibilidade_encontros', v as ListaEsperaFormData['disponibilidade_encontros'], { shouldValidate: true })}
-          error={errors.disponibilidade_encontros?.message}
-        />
-      </div>
-
       {serverError && (
         <p className="text-red-500 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
           {serverError}
@@ -220,7 +190,7 @@ export function ListaEsperaForm() {
       <Button
         type="submit"
         disabled={submitting}
-        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 text-base font-semibold rounded-xl"
+        className="w-full bg-mt-green hover:bg-mt-green-dark text-white py-3 text-base font-semibold rounded-xl"
       >
         {submitting ? 'Enviando...' : 'Entrar na lista de espera'}
       </Button>

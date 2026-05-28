@@ -47,7 +47,7 @@ export type MapaFormData = z.infer<typeof mapaSchema>
 export const listaEsperaSchema = z.object({
   nome: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres'),
   email: z.string().email('Email inválido'),
-  whatsapp: z.string().optional(),
+  whatsapp: z.string().min(14, 'Informe seu WhatsApp'),
   profissao: z.enum([
     'Tecnologia (Produto, Design, TI)',
     'Marketing (creator, analista, growth, social media)',
@@ -56,10 +56,6 @@ export const listaEsperaSchema = z.object({
     'Saúde (medicina, fisioterapia, psicologia, enfermagem)',
     'Outro',
   ]).refine(Boolean, { message: 'Selecione sua profissão' }),
-  disponibilidade_horas: z.enum(['Sim', 'Não', 'Talvez'])
-    .refine(Boolean, { message: 'Responda sobre disponibilidade de horas' }),
-  disponibilidade_encontros: z.enum(['Sim', 'Não', 'Talvez'])
-    .refine(Boolean, { message: 'Responda sobre disponibilidade de encontros' }),
   utm_source: z.string().optional(),
   utm_medium: z.string().optional(),
   utm_campaign: z.string().optional(),
