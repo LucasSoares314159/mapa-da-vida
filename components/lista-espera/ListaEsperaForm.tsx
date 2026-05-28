@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useMetaPixel } from '@/hooks/useMetaPixel'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { listaEsperaSchema, ListaEsperaFormData } from '@/lib/validations'
@@ -79,6 +80,7 @@ function formatWhatsApp(value: string) {
 
 export function ListaEsperaForm() {
   const router = useRouter()
+  const { trackEvent } = useMetaPixel()
   const [submitting, setSubmitting] = useState(false)
   const [serverError, setServerError] = useState('')
 
@@ -120,6 +122,7 @@ export function ListaEsperaForm() {
         setServerError(json.error ?? 'Ocorreu um erro. Tente novamente.')
         return
       }
+      trackEvent('Lead')
       router.push('/obrigado')
     } catch {
       setServerError('Erro de conexão. Verifique sua internet e tente novamente.')

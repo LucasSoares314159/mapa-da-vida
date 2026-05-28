@@ -3,18 +3,13 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { CheckCircle } from 'lucide-react'
-
-declare global {
-  interface Window {
-    fbq?: (...args: unknown[]) => void
-  }
-}
+import { useMetaPixel } from '@/hooks/useMetaPixel'
 
 export default function ObrigadoPage() {
+  const { trackEvent } = useMetaPixel()
+
   useEffect(() => {
-    if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
-      window.fbq('track', 'Lead')
-    }
+    trackEvent('CompleteRegistration')
   }, [])
 
   return (
