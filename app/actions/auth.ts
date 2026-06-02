@@ -56,6 +56,7 @@ export async function cadastro(state: AuthState, formData: FormData): Promise<Au
   })
 
   if (error) {
+    console.error('[cadastro] Supabase error:', error.message, error.status)
     if (error.message.toLowerCase().includes('already registered') || error.message.toLowerCase().includes('user already exists')) {
       return { message: 'Este email já está cadastrado. Tente fazer login.' }
     }
