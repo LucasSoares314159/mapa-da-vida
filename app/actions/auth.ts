@@ -52,6 +52,7 @@ export async function cadastro(state: AuthState, formData: FormData): Promise<Au
     password: result.data.senha,
     options: {
       data: { nome: result.data.nome },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
     },
   })
 
