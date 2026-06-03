@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
 
   if (user && isAuthRoute && !isRedefinirSenha && !isVerificarEmail) {
     const url = request.nextUrl.clone()
-    url.pathname = '/objetivos'
+    url.pathname = '/content'
     return NextResponse.redirect(url)
   }
 
@@ -47,5 +47,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/mapa/:path*', '/auth/:path*', '/rotina/:path*', '/rotina', '/diagnostico/:path*', '/objetivos', '/objetivos/:path*'],
+  matcher: ['/dashboard/:path*', '/mapa/:path*', '/auth/:path*', '/rotina/:path*', '/rotina', '/diagnostico/:path*', '/objetivos', '/objetivos/:path*', '/content', '/content/:path*'],
 }

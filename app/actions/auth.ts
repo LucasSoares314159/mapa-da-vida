@@ -31,7 +31,13 @@ export async function login(state: AuthState, formData: FormData): Promise<AuthS
     return { message: 'Email ou senha incorretos.' }
   }
 
-  redirect('/objetivos')
+  const { data: { user } } = await supabase.auth.getUser()
+  const { count } = await supabase
+    .from('mapas')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user!.id)
+
+  redirect(count && count > 0 ? '/objetivos' : '/content')
 }
 
 export async function cadastro(state: AuthState, formData: FormData): Promise<AuthState> {
@@ -69,7 +75,7 @@ export async function cadastro(state: AuthState, formData: FormData): Promise<Au
   }
 
   if (data.session) {
-    redirect('/mapa/preparacao')
+    redirect('/content')
   }
 
   redirect('/auth/verificar-email')
@@ -92,7 +98,7 @@ export async function esqueciSenha(state: AuthState, formData: FormData): Promis
 
   const supabase = createServerSupabaseClient()
   const { error } = await supabase.auth.resetPasswordForEmail(result.data.email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?type=recovery`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/auth/redefinir-senha`,
   })
 
   if (error) {
@@ -119,5 +125,11 @@ export async function redefinirSenha(state: AuthState, formData: FormData): Prom
     return { message: 'Não foi possível redefinir a senha. O link pode ter expirado.' }
   }
 
-  redirect('/objetivos')
+  const { data: { user } } = await supabase.auth.getUser()
+  const { count } = await supabase
+    .from('mapas')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user!.id)
+
+  redirect(count && count > 0 ? '/objetivos' : '/content')
 }

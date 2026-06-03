@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useFormStatus } from 'react-dom'
-import { LogOut, Map, Clock, Target } from 'lucide-react'
+import { LogOut, Map, Clock, Target, BookOpen } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
 import { cn } from '@/lib/utils'
 
@@ -31,6 +31,7 @@ export function Sidebar({ onClose }: Props) {
   const isDashboard = pathname === '/dashboard'
   const isRotina = pathname === '/rotina'
   const isObjetivos = pathname === '/objetivos'
+  const isContent = pathname === '/content'
 
   return (
     <aside className="flex h-full w-[220px] shrink-0 flex-col bg-white" style={{ borderRight: '0.5px solid #c8d8d2' }}>
@@ -44,6 +45,20 @@ export function Sidebar({ onClose }: Props) {
 
       {/* Nav */}
       <nav className="flex flex-col gap-1 p-3 flex-1">
+        <Link
+          href="/content"
+          onClick={onClose}
+          className={cn(
+            'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200',
+            isContent
+              ? 'bg-mt-off-white text-mt-green-dark'
+              : 'text-mt-muted hover:bg-mt-off-white hover:text-mt-green-dark'
+          )}
+        >
+          <BookOpen className="size-4 shrink-0" />
+          Conteúdo
+        </Link>
+
         <Link
           href="/objetivos"
           onClick={onClose}

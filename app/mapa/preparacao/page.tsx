@@ -51,7 +51,7 @@ export default function PreparacaoPage() {
       style={{ backgroundColor: '#2A3F45' }}
     >
       <Link
-        href="/dashboard"
+        href="/content"
         className="absolute left-6 top-6 flex items-center gap-1.5 text-sm transition-colors duration-200"
         style={{ color: '#6f8f87' }}
       >

@@ -54,7 +54,7 @@ export default async function DashboardPage() {
             className="shrink-0 text-sm font-medium text-white px-4 py-2 transition-opacity hover:opacity-90"
             style={{ backgroundColor: '#57AA8F', borderRadius: 8 }}
           >
-            <a href='https://trilha-da-produtividade-u4l978p.gamma.site/' target='_blank' rel='noopener noreferrer' className="text-white no-underline">
+            <a href='https://www.mindtrail.com.br/trilha' target='_blank' rel='noopener noreferrer' className="text-white no-underline">
               Conhecer →
             </a>
           </button>

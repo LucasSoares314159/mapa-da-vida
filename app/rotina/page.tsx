@@ -15,6 +15,13 @@ export default async function PaginaRotina({
 
   if (!user) redirect('/auth/login')
 
+  const { count: totalMapas } = await supabase
+    .from('mapas')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+
+  if (!totalMapas || totalMapas === 0) redirect('/mapa/preparacao')
+
   const mapaId = searchParams.mapaId
 
   // Fetch user's existing rotina
