@@ -6,6 +6,9 @@ export const metadata: Metadata = {
     default: "MindTrail — Construa seu sistema de organização pessoal",
     template: "%s · MindTrail",
   },
+  icons: {
+    icon: '/favicon.png',
+  },
   description: "Responda 9 perguntas honestas e descubra o que está sustentando — e o que está consumindo — a sua energia. Diagnóstico gratuito, resultado imediato.",
   metadataBase: new URL("https://mindtrail.com.br"),
   openGraph: {
