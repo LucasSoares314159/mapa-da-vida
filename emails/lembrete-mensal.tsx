@@ -25,7 +25,7 @@ export default function LembreteMensal({
   return (
     <Html lang="pt-BR">
       <Head />
-      <Preview>Faz {diasDesdeUltimoMapa} dias desde o seu último diagnóstico. Hora de atualizar seu Mapa da Vida.</Preview>
+      <Preview>{`Faz ${diasDesdeUltimoMapa} dias desde o seu último diagnóstico. Hora de atualizar seu Mapa da Vida.`}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
