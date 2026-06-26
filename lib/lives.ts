@@ -23,10 +23,12 @@ export const LIVES: Live[] = [
   },
   {
     id: 'live-02',
-    titulo: 'Live 02 — Sistemas de Objetivos Pessoais',
+    titulo: 'Live 02 — Sistemas de Objetivos vs Sistemas de Organização Pessoal',
     duracao: '1:00:00',
-    videoId: undefined,
-    materiais: [],
+    videoId: 'A0_cgaho9vc',
+    materiais: [
+      { label: 'Material da aula', url: 'https://canva.link/memldznrp6r60tg' },
+    ],
   },
   {
     id: 'live-03',

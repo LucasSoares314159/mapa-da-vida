@@ -11,5 +11,11 @@
       "destination": "/trilha",
       "permanent": true
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/emails",
+      "schedule": "0 21 * * *"
+    }
   ]
 }
