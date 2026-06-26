@@ -85,7 +85,7 @@ async function enviarLembreteMensal(): Promise<{ enviados: number; erros: number
 
   // Filtra quem está há 30+ dias sem fazer um novo mapa
   const candidatos: Array<{ userId: string; diasDesde: number }> = []
-  for (const [userId, criado_em] of latestByUser.entries()) {
+  for (const [userId, criado_em] of Array.from(latestByUser.entries())) {
     const dias = Math.floor((Date.now() - new Date(criado_em).getTime()) / (1000 * 60 * 60 * 24))
     if (dias >= 30) {
       candidatos.push({ userId, diasDesde: dias })
