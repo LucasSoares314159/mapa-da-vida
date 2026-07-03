@@ -32,10 +32,13 @@ export const LIVES: Live[] = [
   },
   {
     id: 'live-03',
-    titulo: 'Live 03 — Consistência e Encerramento do Programa',
+    titulo: 'Live 3 - O Segredo da Consistência',
     duracao: '1:00:00',
-    videoId: undefined,
-    materiais: [],
+    videoId: 'R4P7CPgAtBY',
+    materiais: [
+      { label: 'Podcast da aula', url: 'https://drive.google.com/file/d/1ICJ4ZIfXLzP9yYPCwABwDljMtup7L1la/view?usp=sharing' },
+      { label: 'Material da aula', url: 'https://canva.link/g3sdhuxsu623g2p' },
+    ],
   },
 ]
 

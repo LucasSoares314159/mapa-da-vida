@@ -108,7 +108,7 @@ export function LiveAula({ live, index, total, anteriorId, proximoId }: Props) {
                     className="flex items-center gap-1.5 text-sm transition-opacity hover:opacity-70"
                     style={{ color: '#57AA8F' }}
                   >
-                    Acessar material
+                    {material.label}
                     <ExternalLink className="size-3" />
                   </a>
                 </li>
