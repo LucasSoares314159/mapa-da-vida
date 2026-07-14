@@ -1866,12 +1866,12 @@ window.addEventListener('DOMContentLoaded', () => {
 // Jornada — framework interativo (gráfico + cards)
 (function () {
   const steps = [
-    { n: 1, title: "Caótica", solid: "#A8D4C5", artefact: "MOV (Mínima Organização Viável)", desc: "é o momento em que o único foco é abrir um espaço mental e montar o mínimo operacional.", warn: "tentar se organizar com rotinas complexas e aplicativos." },
-    { n: 2, title: "Respiro Inicial", solid: "#8EC9B5", artefact: "Mapa da Vida + Momento de Vida", desc: "é o momento que você sente um pouco mais de senso de progresso e diminuição da sobrecarga, ainda não é hora de começar projetos, mas sim de analisar o todo.", warn: "começar grandes mudanças simultâneas." },
-    { n: 3, title: "Rotina Previsível", solid: "#74BDA1", artefact: "Calculadora da Rotina", desc: "é o momento que você já sabe quais as áreas prioritárias, seu momento de vida e tem um sistema de organização funcional, começa a fazer mudanças específicas e enxerga melhoras nítidas.", warn: "continuar aqui sem objetivos e sistemas." },
-    { n: 4, title: "Orientado a Metas", solid: "#57AA8F", artefact: "Definidor de Objetivos + Radar de Coerência", desc: "é o momento em que você já tem toda a estrutura para definir bons objetivos de curto, médio e longo prazo e analisar se estes fazem sentido com o seu momento de vida.", warn: "criar muitos objetivos e objetivos incoerentes com seu momento de vida." },
-    { n: 5, title: "Orientado a Sistemas", solid: "#3E9279", artefact: "Sistemas de Objetivos e Organização Pessoal", desc: "é o momento que você entende que os sistemas são o que vão suportar todo aprendizado das etapas anteriores nos dias difíceis.", warn: "não saber diferenciar sistemas de objetivos de sistemas de organização." },
-    { n: 6, title: "Consistência", solid: "#2A3F45", artefact: "Volta sem Culpa", desc: "é o momento que você percebe que ser consistente não é não falhar, é saber voltar para algumas casas sempre que necessário sem culpa.", warn: "não aceitar voltar etapas na jornada e abandonar todo o progresso." }
+    { n: 1, title: "Caótica", solid: "#A8D4C5", artefact: "MOV (Mínima Organização Viável)", desc: "É o momento em que o único foco é abrir um espaço mental e montar o mínimo operacional.", warn: "tentar se organizar com rotinas complexas e aplicativos." },
+    { n: 2, title: "Respiro Inicial", solid: "#8EC9B5", artefact: "Mapa da Vida + Momento de Vida", desc: "É o momento em que você sente um pouco mais de senso de progresso e diminuição da sobrecarga, ainda não é hora de começar projetos, mas sim de analisar o todo.", warn: "começar grandes mudanças simultâneas." },
+    { n: 3, title: "Rotina Previsível", solid: "#74BDA1", artefact: "Calculadora da Rotina", desc: "É o momento em que você já sabe quais as áreas prioritárias, seu momento de vida e tem um sistema de organização funcional, começa a fazer mudanças específicas e enxerga melhoras nítidas.", warn: "continuar aqui sem objetivos e sistemas." },
+    { n: 4, title: "Orientado a Metas", solid: "#57AA8F", artefact: "Definidor de Objetivos + Radar de Coerência", desc: "É o momento em que você já tem toda a estrutura para definir bons objetivos de curto, médio e longo prazo e analisar se estes fazem sentido com o seu momento de vida.", warn: "criar muitos objetivos e objetivos incoerentes com seu momento de vida." },
+    { n: 5, title: "Orientado a Sistemas", solid: "#3E9279", artefact: "Sistemas de Objetivos e Organização Pessoal", desc: "É o momento em que você entende que os sistemas são o que vão suportar todo aprendizado das etapas anteriores nos dias difíceis.", warn: "não saber diferenciar sistemas de objetivos de sistemas de organização." },
+    { n: 6, title: "Consistência", solid: "#2A3F45", artefact: "Volta sem Culpa", desc: "É o momento em que você percebe que ser consistente não é não falhar, é saber voltar para algumas casas sempre que necessário sem culpa.", warn: "não aceitar voltar etapas na jornada e abandonar todo o progresso." }
   ];
 
   let active = 0;
@@ -1891,7 +1891,7 @@ window.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="cbody">
           <div class="chip">${s.artefact}</div>
-          <div class="cdesc">É o momento que ${s.desc}</div>
+          <div class="cdesc">${s.desc}</div>
           <div class="cwarn">
             <span style="font-size:11px;flex-shrink:0;margin-top:1px">⚠️</span>
             <span class="wt"><b>Erro comum:</b> ${s.warn}</span>
