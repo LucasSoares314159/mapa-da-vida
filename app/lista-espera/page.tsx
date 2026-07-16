@@ -37,7 +37,7 @@ export default function ListaEsperaPage() {
           {/* Preço */}
           <div className="inline-block bg-mt-green-dark rounded-2xl px-8 py-5 mb-8">
             <p className="text-sm text-mt-border font-medium mb-1">Investimento</p>
-            <p className="text-5xl font-bold text-white">R$ 499,99</p>
+            <p className="text-5xl font-bold text-white">R$ 497,00</p>
             <p className="text-sm text-mt-border mt-1">em até 12x</p>
           </div>
 
