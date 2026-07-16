@@ -3,6 +3,7 @@ export type NomePilar = 'corpo' | 'mente' | 'espirito'
 
 export type PrazoObjetivo = 'curto' | 'medio' | 'longo'
 export type StatusObjetivo = 'ativo' | 'pausado' | 'concluido' | 'arquivado'
+export type FrequenciaLembrete = 'semanal' | 'quinzenal' | 'mensal'
 
 export interface Objetivo {
   id: string
@@ -12,6 +13,8 @@ export interface Objetivo {
   prazo: PrazoObjetivo
   status: StatusObjetivo
   data_alvo?: string | null
+  frequencia_lembrete?: FrequenciaLembrete | null
+  ultimo_lembrete_em?: string | null
   motivo?: string | null
   criado_em: string
   concluido_em?: string | null

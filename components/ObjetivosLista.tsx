@@ -14,7 +14,7 @@ import {
   arquivarObjetivo,
   editarObjetivo,
 } from '@/app/actions/objetivos'
-import type { Objetivo, PrazoObjetivo, NomePilar, StatusObjetivo } from '@/types'
+import type { Objetivo, PrazoObjetivo, NomePilar, StatusObjetivo, FrequenciaLembrete } from '@/types'
 
 const LIMITE = 3
 
@@ -40,6 +40,12 @@ const PRAZOS: { value: PrazoObjetivo; label: string; sublabel: string }[] = [
   { value: 'curto', label: 'Curto', sublabel: 'até 90 dias' },
   { value: 'medio', label: 'Médio', sublabel: '6–12 meses' },
   { value: 'longo', label: 'Longo', sublabel: '1–3 anos' },
+]
+
+const FREQUENCIAS: { value: FrequenciaLembrete; label: string; sublabel: string }[] = [
+  { value: 'semanal', label: 'Semanal', sublabel: 'a cada 7 dias' },
+  { value: 'quinzenal', label: 'Quinzenal', sublabel: 'a cada 15 dias' },
+  { value: 'mensal', label: 'Mensal', sublabel: 'a cada 30 dias' },
 ]
 
 const PILAR_OPTIONS = ['corpo', 'mente', 'espirito'] as const
@@ -77,6 +83,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
   const [formPrazo, setFormPrazo] = useState<PrazoObjetivo>('curto')
   const [formMotivo, setFormMotivo] = useState('')
   const [formDataAlvo, setFormDataAlvo] = useState('')
+  const [formFrequencia, setFormFrequencia] = useState<FrequenciaLembrete | null>(null)
   const [formLoading, setFormLoading] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
@@ -102,6 +109,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
       setFormPrazo(objetivo.prazo)
       setFormMotivo(objetivo.motivo || '')
       setFormDataAlvo(objetivo.data_alvo || '')
+      setFormFrequencia(objetivo.frequencia_lembrete || null)
     } else {
       setEditandoObjetivo(null)
       setFormTexto('')
@@ -109,6 +117,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
       setFormPrazo(prazo)
       setFormMotivo('')
       setFormDataAlvo('')
+      setFormFrequencia(null)
     }
     setFormError(null)
     setModalAberto(true)
@@ -125,6 +134,14 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
       setFormError('Descreva o objetivo com clareza.')
       return
     }
+    if (!formDataAlvo) {
+      setFormError('Defina uma data alvo.')
+      return
+    }
+    if (!formFrequencia) {
+      setFormError('Escolha a frequência de lembrete.')
+      return
+    }
     if (!editandoObjetivo && contarAtivos(formPrazo) >= LIMITE) {
       setFormError(`Limite de ${LIMITE} objetivos por prazo atingido.`)
       return
@@ -137,14 +154,16 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
             texto: formTexto.trim(),
             pilar: formPilar,
             prazo: formPrazo,
-            data_alvo: formDataAlvo || null,
+            data_alvo: formDataAlvo,
+            frequencia_lembrete: formFrequencia,
             motivo: formMotivo.trim() || null,
           })
         : await criarObjetivo({
             texto: formTexto.trim(),
             pilar: formPilar,
             prazo: formPrazo,
-            data_alvo: formDataAlvo || null,
+            data_alvo: formDataAlvo,
+            frequencia_lembrete: formFrequencia,
             motivo: formMotivo.trim() || null,
           })
 
@@ -388,6 +407,8 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
           onChangeMotivo={setFormMotivo}
           formDataAlvo={formDataAlvo}
           onChangeDataAlvo={setFormDataAlvo}
+          formFrequencia={formFrequencia}
+          onChangeFrequencia={setFormFrequencia}
           formError={formError}
           formLoading={formLoading}
           onSalvar={handleSalvarObjetivo}
@@ -420,6 +441,10 @@ function ObjetivoCard({ objetivo, processingId, onConcluir, onPausar, onRetomar,
   const confirmRef = useRef<HTMLDivElement>(null)
   const concluido = objetivo.status === 'concluido'
   const isProcessing = processingId !== null
+  const atrasado =
+    objetivo.status === 'ativo' &&
+    !!objetivo.data_alvo &&
+    new Date(objetivo.data_alvo + 'T00:00:00') < new Date(new Date().toDateString())
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -539,6 +564,19 @@ function ObjetivoCard({ objetivo, processingId, onConcluir, onPausar, onRetomar,
             >
               {PILAR_LABEL[objetivo.pilar]}
             </span>
+
+            {atrasado && (
+              <span style={{
+                border: '1px solid #b88a30',
+                color: '#b88a30',
+                background: 'rgba(212,168,67,0.15)',
+                borderRadius: '100px',
+                fontSize: '11px',
+                padding: '3px 10px',
+              }}>
+                Prazo passou
+              </span>
+            )}
 
             {concluido ? (
               <span style={{ ...STATUS_CONCLUIDO, borderRadius: '100px', fontSize: '11px', padding: '3px 10px' }}>
@@ -726,6 +764,8 @@ interface ObjetivoModalProps {
   onChangeMotivo: (v: string) => void
   formDataAlvo: string
   onChangeDataAlvo: (v: string) => void
+  formFrequencia: FrequenciaLembrete | null
+  onChangeFrequencia: (v: FrequenciaLembrete) => void
   formError: string | null
   formLoading: boolean
   onSalvar: () => void
@@ -735,7 +775,7 @@ interface ObjetivoModalProps {
 function ObjetivoModal({
   editando, formTexto, onChangeTexto, formPilar, onChangePilar,
   formPrazo, onChangePrazo, formMotivo, onChangeMotivo, formDataAlvo,
-  onChangeDataAlvo, formError, formLoading, onSalvar, onFechar,
+  onChangeDataAlvo, formFrequencia, onChangeFrequencia, formError, formLoading, onSalvar, onFechar,
 }: ObjetivoModalProps) {
   return (
     <div
@@ -814,13 +854,35 @@ function ObjetivoModal({
 
           <div className="flex flex-col gap-2">
             <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
-              Data alvo <span className="text-[10px] font-normal normal-case tracking-normal">(opcional)</span>
+              Data alvo
             </Label>
             <Input
               type="date"
               value={formDataAlvo}
               onChange={(e) => onChangeDataAlvo(e.target.value)}
             />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
+              Frequência de lembrete
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              {FREQUENCIAS.map((f) => (
+                <button
+                  key={f.value}
+                  onClick={() => onChangeFrequencia(f.value)}
+                  className={cn(
+                    'px-3.5 py-1.5 text-sm font-medium rounded-lg border transition-colors',
+                    formFrequencia === f.value
+                      ? 'bg-mt-green text-white border-mt-green'
+                      : 'border-mt-border text-mt-muted hover:bg-gray-50'
+                  )}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="flex flex-col gap-2">

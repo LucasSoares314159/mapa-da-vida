@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isCronAuthorized } from '@/lib/cron-auth'
 import { createAdminSupabaseClient } from '@/lib/supabase-admin'
 import { enviarEmail } from '@/lib/email'
-import { templateLembreteMensal, templatePlanejamentoSemanal } from '@/lib/email-templates'
+import {
+  templateLembreteMensal,
+  templatePlanejamentoSemanal,
+  templateLembreteObjetivo,
+  templateObjetivoConcluido,
+} from '@/lib/email-templates'
+import type { FrequenciaLembrete, PrazoObjetivo } from '@/types'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -125,6 +131,135 @@ async function enviarLembreteMensal(): Promise<{ enviados: number; erros: number
   return { enviados, erros }
 }
 
+const INTERVALO_DIAS: Record<FrequenciaLembrete, number> = {
+  semanal: 7,
+  quinzenal: 15,
+  mensal: 30,
+}
+
+const PRAZO_LABEL: Record<PrazoObjetivo, string> = {
+  curto: 'curto prazo',
+  medio: 'médio prazo',
+  longo: 'longo prazo',
+}
+
+// Diferença em dias de calendário (não horas), comparando só a data (sem horário)
+function diasEntre(de: Date, ate: Date): number {
+  const msPorDia = 1000 * 60 * 60 * 24
+  const deUTC = Date.UTC(de.getFullYear(), de.getMonth(), de.getDate())
+  const ateUTC = Date.UTC(ate.getFullYear(), ate.getMonth(), ate.getDate())
+  return Math.round((ateUTC - deUTC) / msPorDia)
+}
+
+function isMesmaData(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+}
+
+async function enviarLembretesObjetivo(): Promise<{ enviados: number; erros: number }> {
+  const supabase = createAdminSupabaseClient()
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!
+  const agora = new Date()
+
+  const { data: objetivos, error: objetivosError } = await supabase
+    .from('objetivos')
+    .select('id, user_id, texto, prazo, status, data_alvo, frequencia_lembrete, ultimo_lembrete_em, criado_em')
+    .in('status', ['ativo', 'concluido'])
+    .not('data_alvo', 'is', null)
+
+  if (objetivosError) throw new Error(`Erro ao buscar objetivos: ${objetivosError.message}`)
+
+  type ObjetivoRow = {
+    id: string
+    user_id: string
+    texto: string
+    prazo: PrazoObjetivo
+    status: 'ativo' | 'concluido'
+    data_alvo: string
+    frequencia_lembrete: FrequenciaLembrete | null
+    ultimo_lembrete_em: string | null
+    criado_em: string
+  }
+
+  type Candidato = { objetivo: ObjetivoRow; tipo: 'lembrete' | 'conclusao' }
+  const candidatos: Candidato[] = []
+
+  for (const objetivo of (objetivos ?? []) as ObjetivoRow[]) {
+    const dataAlvo = new Date(objetivo.data_alvo)
+
+    if (objetivo.status === 'ativo') {
+      if (!objetivo.frequencia_lembrete) continue
+      // Prazo já vencido: para de cobrar até a pessoa concluir, arquivar ou editar a data
+      if (diasEntre(agora, dataAlvo) < 0) continue
+      const intervalo = INTERVALO_DIAS[objetivo.frequencia_lembrete]
+      const desde = objetivo.ultimo_lembrete_em ? new Date(objetivo.ultimo_lembrete_em) : new Date(objetivo.criado_em)
+      const diasDesdeUltimo = diasEntre(desde, agora)
+      if (diasDesdeUltimo >= intervalo) {
+        candidatos.push({ objetivo, tipo: 'lembrete' })
+      }
+    } else if (objetivo.status === 'concluido') {
+      const jaEnviadoHoje = objetivo.ultimo_lembrete_em && isMesmaData(new Date(objetivo.ultimo_lembrete_em), agora)
+      if (isMesmaData(dataAlvo, agora) && !jaEnviadoHoje) {
+        candidatos.push({ objetivo, tipo: 'conclusao' })
+      }
+    }
+  }
+
+  let enviados = 0
+  let erros = 0
+
+  // Cache de nome/email por usuário para não repetir buscas quando o mesmo usuário tem vários objetivos elegíveis
+  const usuarioCache = new Map<string, { email: string | null; nome: string }>()
+
+  for (const { objetivo, tipo } of candidatos) {
+    try {
+      if (!usuarioCache.has(objetivo.user_id)) {
+        const [{ data: userData }, { data: profile }] = await Promise.all([
+          supabase.auth.admin.getUserById(objetivo.user_id),
+          supabase.from('profiles').select('nome').eq('id', objetivo.user_id).single(),
+        ])
+        usuarioCache.set(objetivo.user_id, {
+          email: userData?.user?.email ?? null,
+          nome: (profile as { nome: string } | null)?.nome ?? 'amigo(a)',
+        })
+      }
+
+      const { email, nome } = usuarioCache.get(objetivo.user_id)!
+      if (!email) continue
+
+      if (tipo === 'lembrete') {
+        const diasRestantes = diasEntre(agora, new Date(objetivo.data_alvo))
+        const { subject, html } = await templateLembreteObjetivo({
+          nome,
+          textoObjetivo: objetivo.texto,
+          prazoLabel: PRAZO_LABEL[objetivo.prazo],
+          diasRestantes,
+          urlObjetivos: `${siteUrl}/objetivos`,
+        })
+        await enviarEmail({ to: email, subject, html })
+      } else {
+        const { subject, html } = await templateObjetivoConcluido({
+          nome,
+          textoObjetivo: objetivo.texto,
+          urlObjetivos: `${siteUrl}/objetivos`,
+        })
+        await enviarEmail({ to: email, subject, html })
+      }
+
+      await supabase
+        .from('objetivos')
+        .update({ ultimo_lembrete_em: agora.toISOString() })
+        .eq('id', objetivo.id)
+
+      enviados++
+    } catch (err) {
+      console.error(`[lembrete-objetivo] Falha ao enviar para objetivo ${objetivo.id}:`, err)
+      erros++
+    }
+  }
+
+  return { enviados, erros }
+}
+
 export async function GET(req: NextRequest) {
   if (!isCronAuthorized(req)) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
@@ -134,7 +269,8 @@ export async function GET(req: NextRequest) {
     ok: boolean
     semanal?: { enviados: number; erros: number }
     mensal: { enviados: number; erros: number }
-  } = { ok: true, mensal: { enviados: 0, erros: 0 } }
+    objetivos: { enviados: number; erros: number }
+  } = { ok: true, mensal: { enviados: 0, erros: 0 }, objetivos: { enviados: 0, erros: 0 } }
 
   // Planejamento semanal: somente aos domingos
   if (isHojeDomingo()) {
@@ -154,6 +290,15 @@ export async function GET(req: NextRequest) {
   } catch (err) {
     console.error('[lembrete-mensal] Erro geral:', err)
     resultado.mensal = { enviados: 0, erros: 1 }
+  }
+
+  // Lembretes de objetivo: todo dia (a lógica interna filtra quem elegível)
+  try {
+    resultado.objetivos = await enviarLembretesObjetivo()
+    console.error(`[lembrete-objetivo] Enviados: ${resultado.objetivos.enviados}, Erros: ${resultado.objetivos.erros}`)
+  } catch (err) {
+    console.error('[lembrete-objetivo] Erro geral:', err)
+    resultado.objetivos = { enviados: 0, erros: 1 }
   }
 
   return NextResponse.json(resultado)

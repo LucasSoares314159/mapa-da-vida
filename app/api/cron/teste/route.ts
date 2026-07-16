@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isCronAuthorized } from '@/lib/cron-auth'
 import { enviarEmail } from '@/lib/email'
-import { templateLembreteMensal, templatePlanejamentoSemanal } from '@/lib/email-templates'
+import {
+  templateLembreteMensal,
+  templatePlanejamentoSemanal,
+  templateLembreteObjetivo,
+  templateObjetivoConcluido,
+} from '@/lib/email-templates'
 
 export const runtime = 'nodejs'
 
@@ -22,6 +27,22 @@ export async function GET(req: NextRequest) {
     const { subject, html } = await templatePlanejamentoSemanal({
       nome: 'Lucas',
       urlDashboard: `${process.env.NEXT_PUBLIC_SITE_URL}/objetivos`,
+    })
+    await enviarEmail({ to: para, subject, html })
+  } else if (tipo === 'objetivo') {
+    const { subject, html } = await templateLembreteObjetivo({
+      nome: 'Lucas',
+      textoObjetivo: 'Treinar 3x por semana',
+      prazoLabel: 'curto prazo',
+      diasRestantes: 5,
+      urlObjetivos: `${process.env.NEXT_PUBLIC_SITE_URL}/objetivos`,
+    })
+    await enviarEmail({ to: para, subject, html })
+  } else if (tipo === 'objetivo-concluido') {
+    const { subject, html } = await templateObjetivoConcluido({
+      nome: 'Lucas',
+      textoObjetivo: 'Treinar 3x por semana',
+      urlObjetivos: `${process.env.NEXT_PUBLIC_SITE_URL}/objetivos`,
     })
     await enviarEmail({ to: para, subject, html })
   } else {

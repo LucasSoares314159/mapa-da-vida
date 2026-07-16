@@ -1,19 +1,23 @@
 'use server'
 
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import type { Objetivo, StatusObjetivo, PrazoObjetivo, NomePilar } from '@/types'
+import type { Objetivo, StatusObjetivo, PrazoObjetivo, NomePilar, FrequenciaLembrete } from '@/types'
 
 export async function criarObjetivo(input: {
   texto: string
   pilar: NomePilar
   prazo: PrazoObjetivo
-  data_alvo?: string | null
+  data_alvo: string
+  frequencia_lembrete: FrequenciaLembrete
   motivo?: string | null
 }): Promise<{ error: string } | { redirectTo: string } | { data: Objetivo }> {
   const supabase = createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) return { redirectTo: '/auth/login' }
+
+  if (!input.data_alvo) return { error: 'Defina uma data alvo.' }
+  if (!input.frequencia_lembrete) return { error: 'Escolha a frequência de lembrete.' }
 
   const { data, error } = await supabase
     .from('objetivos')
@@ -22,7 +26,8 @@ export async function criarObjetivo(input: {
       texto: input.texto.trim(),
       pilar: input.pilar,
       prazo: input.prazo,
-      data_alvo: input.data_alvo ?? null,
+      data_alvo: input.data_alvo,
+      frequencia_lembrete: input.frequencia_lembrete,
       motivo: input.motivo?.trim() || null,
       status: 'ativo',
     })
@@ -87,7 +92,8 @@ export async function editarObjetivo(
     texto: string
     pilar: NomePilar
     prazo: PrazoObjetivo
-    data_alvo?: string | null
+    data_alvo: string
+    frequencia_lembrete: FrequenciaLembrete
     motivo?: string | null
   }
 ): Promise<{ error: string } | { redirectTo: string } | { data: Objetivo }> {
@@ -96,13 +102,17 @@ export async function editarObjetivo(
 
   if (!user) return { redirectTo: '/auth/login' }
 
+  if (!input.data_alvo) return { error: 'Defina uma data alvo.' }
+  if (!input.frequencia_lembrete) return { error: 'Escolha a frequência de lembrete.' }
+
   const { data, error } = await supabase
     .from('objetivos')
     .update({
       texto: input.texto.trim(),
       pilar: input.pilar,
       prazo: input.prazo,
-      data_alvo: input.data_alvo ?? null,
+      data_alvo: input.data_alvo,
+      frequencia_lembrete: input.frequencia_lembrete,
       motivo: input.motivo?.trim() || null,
     })
     .eq('id', id)
