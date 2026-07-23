@@ -1044,6 +1044,42 @@
 
   .faq-item.open .faq-resposta { display: block; }
 
+  /* BLOCO DE OBJEÇÃO (mini-seção pergunta → resposta) */
+  .objecao-bloco {
+    max-width: 760px;
+    margin: 0 auto;
+    background: #fff;
+    border: 0.5px solid var(--borda);
+    border-radius: 16px;
+    padding: 44px;
+  }
+
+  .objecao-label {
+    display: block;
+    margin-bottom: 18px;
+  }
+
+  .objecao-pergunta {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 24px;
+    line-height: 1.4;
+    color: var(--verde-escuro);
+    margin-bottom: 20px;
+  }
+
+  .objecao-resposta {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    line-height: 1.75;
+    color: #444;
+  }
+
+  @media (max-width: 760px) {
+    .objecao-bloco { padding: 28px; }
+    .objecao-pergunta { font-size: 20px; }
+  }
+
   /* CTA FINAL */
   .cta-final {
     background: var(--verde-escuro);
@@ -1225,10 +1261,22 @@
 
     /* Preço */
     .preco-box { padding: 32px 24px; }
+    .preco-por { font-size: 40px; }
     .btn-cta { padding: 16px 24px; font-size: 15px; }
 
     /* Footer */
     .footer-links { flex-wrap: wrap; gap: 16px; }
+
+    /* Alvo de toque (botões e tabs) */
+    .btn-nav { padding: 12px 22px; min-height: 44px; display: inline-flex; align-items: center; }
+    .sec-features-btn { width: 44px; height: 44px; }
+    .atos-tab { padding: 10px 0 12px 0; margin-right: 18px; }
+    .trilha-tab { padding: 11px 14px; }
+  }
+
+  @media (max-width: 400px) {
+    .cta-final h2 { font-size: 30px; }
+    .preco-por { font-size: 34px; }
   }
 </style>
 </head>
@@ -1287,6 +1335,17 @@
       <div class="dor-card">"Sou um procrastinador(a) oficial e me sinto frustrado por não conseguir avançar como queria".</div>
       <div class="dor-card">"Minha semana começa com um plano e acaba no modo bombeiro".</div>
       <div class="dor-card">"já tentei Pomodoro, GTD, Notion, time-blocking e não aguento mais métodos que não funcionam".</div>
+    </div>
+  </div>
+</section>
+
+<!-- OBJEÇÃO — FALTA DE TEMPO -->
+<section class="sec-escura">
+  <div class="container-texto">
+    <div class="objecao-bloco">
+      <span class="sec-label objecao-label">e se eu não tiver tempo?</span>
+      <p class="objecao-pergunta">"gostei, mas não sei se vou ter tempo de me dedicar."</p>
+      <p class="objecao-resposta">O público da Trilha são pessoas extremamente ocupadas — por isso o primeiro desafio da jornada é criar um planejamento mínimo que te dê um respiro e abra espaço na agenda para continuar. Founders, médicos, executivos, artistas e outras rotinas caóticas já passaram pela jornada e chegaram até o final.</p>
     </div>
   </div>
 </section>
@@ -1392,7 +1451,7 @@
       <div class="feature-row invertido">
         <div class="feature-texto">
           <h3>calculadora de rotina</h3>
-          <p>você descobre onde o seu tempo realmente tem para definir os seus objetivos baseado na sua rotina real - e não na rotina dos outros..</p>
+          <p>você descobre onde o seu tempo realmente vai para definir os seus objetivos baseado na sua rotina real — e não na rotina dos outros.</p>
           <span class="feature-marcador">→ entenda se você está numa zona de sacrifício ou privilégio.</span>
         </div>
         <div class="feature-imagem">
@@ -1411,7 +1470,7 @@
       <div class="feature-row">
         <div class="feature-texto">
           <h3>definidor de objetivos</h3>
-          <p>crie e acompanhe os seus objetivos de acordo com a sua rotina real e pare de abadonar seus projetos no meio do caminho.</p>
+          <p>crie e acompanhe os seus objetivos de acordo com a sua rotina real e pare de abandonar seus projetos no meio do caminho.</p>
           <span class="feature-marcador">→ não engavete mais seus projetos depois de 2 semanas.</span>
         </div>
         <div class="feature-imagem">
@@ -1493,6 +1552,17 @@
   </div>
 </section>
 
+<!-- OBJEÇÃO — HORÁRIO DAS AULAS -->
+<section class="sec-branca">
+  <div class="container-texto">
+    <div class="objecao-bloco">
+      <span class="sec-label objecao-label">e o horário?</span>
+      <p class="objecao-pergunta">"em que horário vão ser as aulas ao vivo?"</p>
+      <p class="objecao-resposta">A turma vota entre três períodos: manhã, hora do almoço e noite. Se a votação ficar dividida entre dois períodos, abrimos os dois horários — assim você sempre terá uma opção que funciona para a sua rotina.</p>
+    </div>
+  </div>
+</section>
+
 
 
 <!-- TRILHAS -->
@@ -1542,7 +1612,7 @@
       <div class="para-quem-col sim">
         <h3>é para você se:</h3>
         <ul class="check-list">
-          <li><span class="check-icon">✓</span> você tem um rotina cheia que necessita de organização</li>
+          <li><span class="check-icon">✓</span> você tem uma rotina cheia que necessita de organização</li>
           <li><span class="check-icon">✓</span> sua agenda não respeita fronteiras entre trabalho e vida — e você quer mudar isso</li>
           <li><span class="check-icon">✓</span> você já tentou vários métodos e parou antes de completar um mês</li>
           <li><span class="check-icon">✓</span> você quer consistência real, não mais um framework</li>
@@ -1629,7 +1699,7 @@
 
           <div class="atos-content" id="ato-1">
             <p>Meu corpo e minha cabeça me obrigaram a parar. Percebi que precisava considerar outros pilares na minha vida. </p>
-            <p>O <span class="destaque">Mapa da Vida</span> nasceu ai. Depois de ler um estudo sobre longevidade vi que meu lifestyle estava me matando (literalmente). Criei um esboço e comecei a compartilhar (muita gente adorou e passou a usar também).
+            <p>O <span class="destaque">Mapa da Vida</span> nasceu aí. Depois de ler um estudo sobre longevidade vi que meu lifestyle estava me matando (literalmente). Criei um esboço e comecei a compartilhar (muita gente adorou e passou a usar também).
             Mas mapear não era suficiente. Eu sempre criava objetivos demais e parava meus projetos pela metade.</p>
             <p>Percebi que precisava de um <span class="destaque">critério para decidir o que fazia sentido</span> colocar e tirar da minha vida.
             Vieram a <span class="destaque">Calculadora de Rotina</span> e o <span class="destaque">Definidor de Objetivos</span>.</p>
@@ -1637,12 +1707,23 @@
 
           <div class="atos-content" id="ato-2">
             <p>Quando as ferramentas se conectaram me percebi bem mais <span class="destaque">consistente e em paz</span>. Um alívio para quem, quase sempre, <span class="destaque">se sentia frustrado</span>.</p>
-            <p>Refleti sobre o motivo da mudança e percebi que: <span class="destaque">eu estava mais consistente porque tinha aprendido a construir meu próprio método de organização pessoal.</span>.</p>
+            <p>Refleti sobre o motivo da mudança e percebi que: <span class="destaque">eu estava mais consistente porque tinha aprendido a construir meu próprio método de organização pessoal.</span></p>
             <p>Hoje apesar da rotina corrida como executivo no mercado de entretenimento consigo <span class="destaque">cuidar da saúde, colocar o trabalho no lugar do trabalho e viver mais, sem culpa.</span></p>
             <p><span class="destaque">É essa paz que quero te ensinar a ter na Trilha da Produtividade.</span></p>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- OBJEÇÃO — DATA DE INÍCIO -->
+<section class="sec-clara">
+  <div class="container-texto">
+    <div class="objecao-bloco">
+      <span class="sec-label objecao-label">quando começa?</span>
+      <p class="objecao-pergunta">"quando começam as aulas? já tem data marcada?"</p>
+      <p class="objecao-resposta">As aulas começam na semana do dia 17/08 e seguem por quatro semanas. Os melhores dias e horários são definidos em votação com a turma, para encaixar no ritmo de todo mundo.</p>
     </div>
   </div>
 </section>
@@ -1684,7 +1765,7 @@
         <p class="depoimento-citacao">"Essa semana, apesar de ter sido muito corrida, parece que alinhei mais as expectativas comigo mesma. A carga mental foi muito menor."</p>
       </div>
 
-      <a href="https://chat.whatsapp.com/BmXD97eGDEYEgRMXI0fN7R" target="_blank" rel="noopener noreferrer" class="btn-cta btn-cta-full">INSCREVA-SE NA TURMA 2</a>
+      <a href="https://chat.whatsapp.com/BmXD97eGDEYEgRMXI0fN7R" target="_blank" rel="noopener noreferrer" class="btn-cta btn-cta-full" data-cta-local="meio-pagina" onclick="gtag('event', 'click_whatsapp_grupo', { local_botao: 'meio-pagina' });">INSCREVA-SE NA TURMA 2</a>
       <p class="garantia">sem estresse. se em 14 dias você sentir que não é para você, devolvemos tudo — sem burocracia, sem pergunta.</p>
     </div>
   </div>
@@ -1700,10 +1781,34 @@
 
       <div class="faq-item">
         <div class="faq-pergunta" onclick="toggleFaq(this)">
+          quando começam as aulas? já tem data marcada?
+          <span class="faq-seta">+</span>
+        </div>
+        <div class="faq-resposta">as aulas começam na semana do dia 17/08 e seguem por quatro semanas. os melhores dias e horários são definidos em votação com a turma, para encaixar no ritmo de todo mundo.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pergunta" onclick="toggleFaq(this)">
+          em que horário vão ser as aulas ao vivo?
+          <span class="faq-seta">+</span>
+        </div>
+        <div class="faq-resposta">a turma vota entre três períodos: manhã, hora do almoço e noite. se a votação ficar dividida entre dois períodos, abrimos os dois horários — assim você sempre terá uma opção que funciona para a sua rotina.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pergunta" onclick="toggleFaq(this)">
           qual o compromisso de tempo por semana?
           <span class="faq-seta">+</span>
         </div>
         <div class="faq-resposta">em média 1 hora de estudo + 1 hora de prática por semana é o suficiente para mudar sua rotina e te tornar consistente nos seus objetivos.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pergunta" onclick="toggleFaq(this)">
+          e se eu não tiver tempo de me dedicar?
+          <span class="faq-seta">+</span>
+        </div>
+        <div class="faq-resposta">o público da Trilha são pessoas extremamente ocupadas — por isso o primeiro desafio da jornada é criar um planejamento mínimo que te dê um respiro e abra espaço na agenda para continuar. founders, médicos, executivos, artistas e outras rotinas caóticas já passaram pela jornada e chegaram até o final.</div>
       </div>
 
       <div class="faq-item">
@@ -1753,8 +1858,8 @@
 <!-- CTA FINAL -->
 <section class="cta-final">
   <h2>pronto para ser consistente nos seus objetivos?</h2>
-  <a href="https://chat.whatsapp.com/BmXD97eGDEYEgRMXI0fN7R" target="_blank" rel="noopener noreferrer" class="btn-cta">INSCREVA-SE NA TURMA 2</a>
-  <p class="cta-suporte">tem dúvida antes de decidir? <a href="https://wa.me/5561982425139" target="_blank">me manda uma mensagem.</a></p>
+  <a href="https://chat.whatsapp.com/BmXD97eGDEYEgRMXI0fN7R" target="_blank" rel="noopener noreferrer" class="btn-cta" data-cta-local="final-pagina" onclick="gtag('event', 'click_whatsapp_grupo', { local_botao: 'final-pagina' });">INSCREVA-SE NA TURMA 2</a>
+  <p class="cta-suporte">tem dúvida antes de decidir? <a href="https://wa.me/5561982425139" target="_blank" onclick="gtag('event', 'click_whatsapp_duvida');">me manda uma mensagem.</a></p>
 </section>
 
 <!-- FOOTER -->
