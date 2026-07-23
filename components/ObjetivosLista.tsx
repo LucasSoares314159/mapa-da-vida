@@ -14,7 +14,10 @@ import {
   arquivarObjetivo,
   editarObjetivo,
 } from '@/app/actions/objetivos'
-import type { Objetivo, PrazoObjetivo, NomePilar, StatusObjetivo, FrequenciaLembrete } from '@/types'
+import { MomentoDestaque } from '@/components/MomentoDestaque'
+import { Alerta } from '@/components/ui/alerta'
+import { ESTACOES } from '@/types'
+import type { Objetivo, PrazoObjetivo, NomePilar, StatusObjetivo, FrequenciaLembrete, MomentoVida } from '@/types'
 
 const LIMITE = 3
 
@@ -68,9 +71,10 @@ type Props = {
   objetivos: Objetivo[]
   percentualLivre: number
   zona: 'privilegio' | 'sacrificio'
+  momento: MomentoVida | null
 }
 
-export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props) {
+export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento }: Props) {
   const router = useRouter()
   const [tabAtiva, setTabAtiva] = useState<PrazoObjetivo>('curto')
   const [lista, setLista] = useState<Objetivo[]>(objs)
@@ -89,6 +93,9 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
 
   const [toast, setToast] = useState<{ mensagem: string; visivel: boolean }>({ mensagem: '', visivel: false })
   const [processingId, setProcessingId] = useState<string | null>(null)
+  // Banner de Zona Sacrifício: dispensável durante a sessão (reaparece ao recarregar
+  // enquanto a rotina continuar no limite).
+  const [alertaSacrificioFechado, setAlertaSacrificioFechado] = useState(false)
 
   const porPrazo = (prazo: PrazoObjetivo) => lista.filter((o) => o.prazo === prazo)
 
@@ -272,26 +279,8 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
           Mapa de {getMesAtual()} · {getZonaLabel(zona)} · {percentualLivre}% livre
         </p>
 
-        {/* Banner Zona Sacrifício */}
-        {zona === 'sacrificio' && (
-          <div style={{
-            background: 'rgba(192, 80, 80, 0.07)',
-            borderLeft: '3px solid #C05050',
-            borderRadius: '8px',
-            padding: '12px 16px',
-          }}>
-            <p style={{
-              fontFamily: "'Lora', serif",
-              fontStyle: 'italic',
-              fontSize: '14px',
-              color: '#C05050',
-              lineHeight: '1.7',
-              margin: 0,
-            }}>
-              Sua rotina já está no limite. Antes de adicionar um objetivo novo, considere o que você vai remover.
-            </p>
-          </div>
-        )}
+        {/* Destaque do Momento de Vida — o princípio que guia os objetivos */}
+        <MomentoDestaque momento={momento} />
 
         {/* Tabs */}
         <div className="flex gap-1 rounded-[10px] border border-mt-border bg-white p-1">
@@ -337,6 +326,17 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
             )
           })}
         </div>
+
+        {/* Banner Zona Sacrifício — abaixo das tabs, dispensável */}
+        {zona === 'sacrificio' && !alertaSacrificioFechado && (
+          <Alerta
+            variante="atencao"
+            titulo="Sua rotina já está no limite"
+            onFechar={() => setAlertaSacrificioFechado(true)}
+          >
+            Antes de adicionar um objetivo novo, considere o que você vai remover.
+          </Alerta>
+        )}
 
         {/* Lista + empty state + botão */}
         <div className="flex flex-col gap-3">
@@ -396,6 +396,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona }: Props
       {/* Modal */}
       {modalAberto && (
         <ObjetivoModal
+          momento={momento}
           editando={editandoObjetivo}
           formTexto={formTexto}
           onChangeTexto={setFormTexto}
@@ -753,6 +754,7 @@ function EmptyState({ prazo }: { prazo: PrazoObjetivo }) {
 // ---------------------------------------------------------------------------
 
 interface ObjetivoModalProps {
+  momento: MomentoVida | null
   editando: Objetivo | null
   formTexto: string
   onChangeTexto: (v: string) => void
@@ -773,10 +775,11 @@ interface ObjetivoModalProps {
 }
 
 function ObjetivoModal({
-  editando, formTexto, onChangeTexto, formPilar, onChangePilar,
+  momento, editando, formTexto, onChangeTexto, formPilar, onChangePilar,
   formPrazo, onChangePrazo, formMotivo, onChangeMotivo, formDataAlvo,
   onChangeDataAlvo, formFrequencia, onChangeFrequencia, formError, formLoading, onSalvar, onFechar,
 }: ObjetivoModalProps) {
+  const est = momento ? ESTACOES[momento.estacao] : null
   return (
     <div
       onClick={(e) => { if (e.target === e.currentTarget) onFechar() }}
@@ -794,6 +797,35 @@ function ObjetivoModal({
           <h2 className="text-lg font-medium text-mt-black">
             {editando ? 'Editar objetivo' : 'Novo objetivo'}
           </h2>
+
+          {/* Lembrete do Momento de Vida — âncora reflexiva, não bloqueia */}
+          {est && momento && (
+            <div
+              style={{
+                display: 'flex',
+                gap: '10px',
+                alignItems: 'flex-start',
+                background: `${est.cor}0D`,
+                borderLeft: `3px solid ${est.cor}`,
+                borderRadius: '8px',
+                padding: '10px 12px',
+                marginTop: '-8px',
+              }}
+            >
+              <span style={{ fontSize: '15px', lineHeight: 1.3, flexShrink: 0 }}>{est.emoji}</span>
+              <p
+                style={{
+                  fontFamily: "'Lora', serif",
+                  fontSize: '13px',
+                  color: '#4a5f59',
+                  lineHeight: 1.55,
+                  margin: 0,
+                }}
+              >
+                Seu momento é <span style={{ fontStyle: 'italic', color: est.cor, fontWeight: 500 }}>{momento.frase}</span>. Esse objetivo conversa com ele?
+              </p>
+            </div>
+          )}
 
           <div className="flex flex-col gap-2">
             <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">

@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { AuthLayout } from '@/components/AuthLayout'
 import { ObjetivosLista } from '@/components/ObjetivosLista'
-import type { Objetivo } from '@/types'
+import type { Objetivo, MomentoVida } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,7 +19,7 @@ export default async function ObjetivosPage() {
 
   if (!totalMapas || totalMapas === 0) redirect('/mapa/preparacao')
 
-  const [{ data: profile }, { data: objetivosRaw }, { data: rotinaRaw }] = await Promise.all([
+  const [{ data: profile }, { data: objetivosRaw }, { data: rotinaRaw }, { data: momentoRaw }] = await Promise.all([
     supabase.from('profiles').select('nome').eq('id', user.id).single(),
     supabase
       .from('objetivos')
@@ -32,17 +32,24 @@ export default async function ObjetivosPage() {
       .select('percentual_livre')
       .eq('user_id', user.id)
       .maybeSingle(),
+    supabase
+      .from('momentos_vida')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('ativo', true)
+      .maybeSingle(),
   ])
 
   const nomeUsuario = profile?.nome ?? user.email ?? ''
   const objetivos = (objetivosRaw ?? []) as Objetivo[]
+  const momento = (momentoRaw as MomentoVida | null) ?? null
 
   const percentualLivre = rotinaRaw?.percentual_livre ?? 100
   const zona = percentualLivre >= 40 ? 'privilegio' : 'sacrificio'
 
   return (
     <AuthLayout titulo="Meus Objetivos" nomeUsuario={nomeUsuario}>
-      <ObjetivosLista objetivos={objetivos} percentualLivre={percentualLivre} zona={zona} />
+      <ObjetivosLista objetivos={objetivos} percentualLivre={percentualLivre} zona={zona} momento={momento} />
     </AuthLayout>
   )
 }
