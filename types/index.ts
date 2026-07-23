@@ -5,6 +5,76 @@ export type PrazoObjetivo = 'curto' | 'medio' | 'longo'
 export type StatusObjetivo = 'ativo' | 'pausado' | 'concluido' | 'arquivado'
 export type FrequenciaLembrete = 'semanal' | 'quinzenal' | 'mensal'
 
+// --- Momento de Vida ---
+// A camada de intenção que fica acima dos objetivos e da rotina: uma declaração
+// honesta de qual fase o usuário está vivendo, que guia todo o resto.
+export type EstacaoMomento = 'semear' | 'construir' | 'consolidar' | 'recuperar' | 'transicao'
+export type DuracaoMomento = '3_meses' | '6_meses' | '1_ano'
+
+export interface MomentoVida {
+  id: string
+  user_id: string
+  estacao: EstacaoMomento
+  frase: string
+  duracao: DuracaoMomento
+  data_revisao: string // date (YYYY-MM-DD): criado_em + duração
+  ativo: boolean // apenas um momento ativo por usuário; os anteriores viram histórico
+  ultimo_lembrete_em?: string | null
+  criado_em: string
+}
+
+// Metadados de apresentação de cada estação (label, ícone/emoji, cor e frase de contexto).
+// A cor sai da paleta MindTrail para harmonizar com os pilares e a Zona Sacrifício.
+export const ESTACOES: Record<EstacaoMomento, {
+  label: string
+  emoji: string
+  cor: string
+  contexto: string
+  placeholder: string
+}> = {
+  semear: {
+    label: 'Semear',
+    emoji: '🌱',
+    cor: '#7BC49A',
+    contexto: 'Você está começando algo, explorando, plantando o que ainda não deu fruto.',
+    placeholder: 'Ex: experimentar caminhos novos sem cobrar resultado imediato',
+  },
+  construir: {
+    label: 'Construir',
+    emoji: '🏗️',
+    cor: '#57AA8F',
+    contexto: 'Você está em fase de crescer, produzir e avançar com força total.',
+    placeholder: 'Ex: focar no trabalho, ser consistente e pensar no longo prazo',
+  },
+  consolidar: {
+    label: 'Consolidar',
+    emoji: '🧭',
+    cor: '#6B7FD7',
+    contexto: 'Você está estabilizando o que construiu, criando consistência e mantendo o ritmo.',
+    placeholder: 'Ex: manter o que já funciona e criar rotina sustentável',
+  },
+  recuperar: {
+    label: 'Recuperar',
+    emoji: '🌾',
+    cor: '#D4A843',
+    contexto: 'Você está diminuindo o ritmo, cuidando de si e restaurando suas energias.',
+    placeholder: 'Ex: diminuir o ritmo e focar na saúde',
+  },
+  transicao: {
+    label: 'Transição',
+    emoji: '🔄',
+    cor: '#9B7FD4',
+    contexto: 'Você está mudando de fase, reavaliando prioridades e redirecionando o rumo.',
+    placeholder: 'Ex: reavaliar o que importa e decidir o próximo passo',
+  },
+}
+
+export const DURACOES: Record<DuracaoMomento, { label: string; sublabel: string; meses: number }> = {
+  '3_meses': { label: '3 meses', sublabel: 'fase curta e intensa', meses: 3 },
+  '6_meses': { label: '6 meses', sublabel: 'fase de médio alcance', meses: 6 },
+  '1_ano': { label: '1 ano', sublabel: 'uma virada longa', meses: 12 },
+}
+
 export interface Objetivo {
   id: string
   user_id: string

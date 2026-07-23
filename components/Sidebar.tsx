@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useFormStatus } from 'react-dom'
-import { LogOut, Map, Clock, Target, BookOpen } from 'lucide-react'
+import { LogOut, Map, Clock, Target, BookOpen, Compass } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
 import { cn } from '@/lib/utils'
 
@@ -32,6 +32,7 @@ export function Sidebar({ onClose }: Props) {
   const isRotina = pathname === '/rotina'
   const isObjetivos = pathname === '/objetivos'
   const isContent = pathname === '/content'
+  const isMomento = pathname === '/momento'
 
   return (
     <aside className="flex h-full w-[220px] shrink-0 flex-col bg-white" style={{ borderRight: '0.5px solid #c8d8d2' }}>
@@ -57,6 +58,20 @@ export function Sidebar({ onClose }: Props) {
         >
           <BookOpen className="size-4 shrink-0" />
           Conteúdo
+        </Link>
+
+        <Link
+          href="/momento"
+          onClick={onClose}
+          className={cn(
+            'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200',
+            isMomento
+              ? 'bg-mt-off-white text-mt-green-dark'
+              : 'text-mt-muted hover:bg-mt-off-white hover:text-mt-green-dark'
+          )}
+        >
+          <Compass className="size-4 shrink-0" />
+          Momento de Vida
         </Link>
 
         <Link
