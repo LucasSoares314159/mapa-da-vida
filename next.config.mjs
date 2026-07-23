@@ -2,7 +2,7 @@
 const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', '@xyflow/react', '@xyflow/system', '@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-label', '@radix-ui/react-slot'],
-    serverExternalPackages: ['nodemailer'],
+    serverComponentsExternalPackages: ['nodemailer'],
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
