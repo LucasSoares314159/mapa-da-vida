@@ -7,8 +7,40 @@ import {
   templatePlanejamentoSemanal,
   templateLembreteObjetivo,
   templateObjetivoConcluido,
+  templateMomentoRevisao,
 } from '@/lib/email-templates'
-import type { FrequenciaLembrete, PrazoObjetivo } from '@/types'
+import { ESTACOES, DURACOES } from '@/types'
+import type { FrequenciaLembrete, PrazoObjetivo, EstacaoMomento, DuracaoMomento } from '@/types'
+
+type MomentoAtivo = {
+  estacao: EstacaoMomento
+  frase: string
+  duracao: DuracaoMomento
+  data_revisao: string
+  ultimo_lembrete_em: string | null
+  criado_em: string
+}
+
+// Busca o momento de vida ativo de um conjunto de usuários, em batch.
+// Retorna um Map user_id → momento (apenas os que têm momento ativo).
+async function buscarMomentosAtivos(
+  supabase: ReturnType<typeof createAdminSupabaseClient>,
+  userIds: string[],
+): Promise<Map<string, MomentoAtivo>> {
+  const mapa = new Map<string, MomentoAtivo>()
+  if (userIds.length === 0) return mapa
+
+  const { data } = await supabase
+    .from('momentos_vida')
+    .select('user_id, estacao, frase, duracao, data_revisao, ultimo_lembrete_em, criado_em')
+    .in('user_id', userIds)
+    .eq('ativo', true)
+
+  for (const row of (data ?? []) as Array<MomentoAtivo & { user_id: string }>) {
+    mapa.set(row.user_id, row)
+  }
+  return mapa
+}
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -48,15 +80,21 @@ async function enviarPlanejamentoSemanal(): Promise<{ enviados: number; erros: n
 
   const nomeMap = new Map((profiles ?? []).map((p: { id: string; nome: string }) => [p.id, p.nome]))
 
+  // Momentos de vida ativos, para citar como fio condutor no email
+  const momentoMap = await buscarMomentosAtivos(supabase, userIds)
+
   let enviados = 0
   let erros = 0
 
   for (const { id, email } of allUsers) {
     try {
       const nome = nomeMap.get(id) ?? 'amigo(a)'
+      const momento = momentoMap.get(id)
       const { subject, html } = await templatePlanejamentoSemanal({
         nome,
         urlDashboard: `${siteUrl}/objetivos`,
+        momentoFrase: momento?.frase,
+        momentoEstacaoLabel: momento ? ESTACOES[momento.estacao].label : undefined,
       })
       await enviarEmail({ to: email, subject, html })
       enviados++
@@ -207,6 +245,10 @@ async function enviarLembretesObjetivo(): Promise<{ enviados: number; erros: num
   let enviados = 0
   let erros = 0
 
+  // Momentos ativos dos usuários com objetivos elegíveis (batch, para citar no email)
+  const userIdsCandidatos = Array.from(new Set(candidatos.map((c) => c.objetivo.user_id)))
+  const momentoMap = await buscarMomentosAtivos(supabase, userIdsCandidatos)
+
   // Cache de nome/email por usuário para não repetir buscas quando o mesmo usuário tem vários objetivos elegíveis
   const usuarioCache = new Map<string, { email: string | null; nome: string }>()
 
@@ -226,6 +268,8 @@ async function enviarLembretesObjetivo(): Promise<{ enviados: number; erros: num
       const { email, nome } = usuarioCache.get(objetivo.user_id)!
       if (!email) continue
 
+      const momento = momentoMap.get(objetivo.user_id)
+
       if (tipo === 'lembrete') {
         const diasRestantes = diasEntre(agora, new Date(objetivo.data_alvo))
         const { subject, html } = await templateLembreteObjetivo({
@@ -234,6 +278,8 @@ async function enviarLembretesObjetivo(): Promise<{ enviados: number; erros: num
           prazoLabel: PRAZO_LABEL[objetivo.prazo],
           diasRestantes,
           urlObjetivos: `${siteUrl}/objetivos`,
+          momentoFrase: momento?.frase,
+          momentoEstacaoLabel: momento ? ESTACOES[momento.estacao].label : undefined,
         })
         await enviarEmail({ to: email, subject, html })
       } else {
@@ -260,6 +306,88 @@ async function enviarLembretesObjetivo(): Promise<{ enviados: number; erros: num
   return { enviados, erros }
 }
 
+// Envia o lembrete de revisão quando o momento de vida ativo do usuário venceu
+// (data_revisao <= hoje). Reenvia no máximo a cada 7 dias enquanto o usuário não
+// redefinir o momento — ao redefinir, o antigo deixa de ser ativo e para de cobrar.
+const INTERVALO_REENVIO_MOMENTO = 7
+
+async function enviarLembretesRevisaoMomento(): Promise<{ enviados: number; erros: number }> {
+  const supabase = createAdminSupabaseClient()
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!
+  const agora = new Date()
+
+  const { data: momentos, error } = await supabase
+    .from('momentos_vida')
+    .select('id, user_id, estacao, frase, duracao, data_revisao, ultimo_lembrete_em, criado_em')
+    .eq('ativo', true)
+
+  if (error) throw new Error(`Erro ao buscar momentos: ${error.message}`)
+
+  type MomentoRow = {
+    id: string
+    user_id: string
+    estacao: EstacaoMomento
+    frase: string
+    duracao: DuracaoMomento
+    data_revisao: string
+    ultimo_lembrete_em: string | null
+    criado_em: string
+  }
+
+  // Elegíveis: já venceram (data_revisao <= hoje) e ainda não foram lembrados
+  // nos últimos 7 dias.
+  const candidatos: MomentoRow[] = []
+  for (const m of (momentos ?? []) as MomentoRow[]) {
+    const dataRevisao = new Date(m.data_revisao)
+    if (diasEntre(agora, dataRevisao) > 0) continue // ainda não venceu
+    if (m.ultimo_lembrete_em) {
+      const diasDesde = diasEntre(new Date(m.ultimo_lembrete_em), agora)
+      if (diasDesde < INTERVALO_REENVIO_MOMENTO) continue
+    }
+    candidatos.push(m)
+  }
+
+  let enviados = 0
+  let erros = 0
+
+  for (const m of candidatos) {
+    try {
+      const [{ data: userData }, { data: profile }] = await Promise.all([
+        supabase.auth.admin.getUserById(m.user_id),
+        supabase.from('profiles').select('nome').eq('id', m.user_id).single(),
+      ])
+
+      const email = userData?.user?.email
+      const nome = (profile as { nome: string } | null)?.nome ?? 'amigo(a)'
+      if (!email) continue
+
+      const est = ESTACOES[m.estacao]
+      const { subject, html } = await templateMomentoRevisao({
+        nome,
+        estacaoLabel: est.label,
+        estacaoEmoji: est.emoji,
+        frase: m.frase,
+        duracaoLabel: DURACOES[m.duracao].label,
+        urlMomento: `${siteUrl}/momento`,
+      })
+
+      await enviarEmail({ to: email, subject, html })
+
+      await supabase
+        .from('momentos_vida')
+        .update({ ultimo_lembrete_em: agora.toISOString() })
+        .eq('id', m.id)
+
+      enviados++
+    } catch (err) {
+      console.error(`[momento-revisao] Falha ao enviar para momento ${m.id}:`, err)
+      erros++
+    }
+  }
+
+  return { enviados, erros }
+}
+
 export async function GET(req: NextRequest) {
   if (!isCronAuthorized(req)) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
@@ -270,7 +398,8 @@ export async function GET(req: NextRequest) {
     semanal?: { enviados: number; erros: number }
     mensal: { enviados: number; erros: number }
     objetivos: { enviados: number; erros: number }
-  } = { ok: true, mensal: { enviados: 0, erros: 0 }, objetivos: { enviados: 0, erros: 0 } }
+    momentos: { enviados: number; erros: number }
+  } = { ok: true, mensal: { enviados: 0, erros: 0 }, objetivos: { enviados: 0, erros: 0 }, momentos: { enviados: 0, erros: 0 } }
 
   // Planejamento semanal: somente aos domingos
   if (isHojeDomingo()) {
@@ -299,6 +428,15 @@ export async function GET(req: NextRequest) {
   } catch (err) {
     console.error('[lembrete-objetivo] Erro geral:', err)
     resultado.objetivos = { enviados: 0, erros: 1 }
+  }
+
+  // Lembretes de revisão do momento de vida: todo dia (a lógica interna filtra quem venceu)
+  try {
+    resultado.momentos = await enviarLembretesRevisaoMomento()
+    console.error(`[momento-revisao] Enviados: ${resultado.momentos.enviados}, Erros: ${resultado.momentos.erros}`)
+  } catch (err) {
+    console.error('[momento-revisao] Erro geral:', err)
+    resultado.momentos = { enviados: 0, erros: 1 }
   }
 
   return NextResponse.json(resultado)

@@ -14,11 +14,15 @@ import {
 interface PlanejamentoSemanalProps {
   nome?: string
   urlDashboard?: string
+  momentoFrase?: string
+  momentoEstacaoLabel?: string
 }
 
 export default function PlanejamentoSemanal({
   nome = 'Lucas',
   urlDashboard = 'https://mapadavida.mindtrail.com.br/objetivos',
+  momentoFrase,
+  momentoEstacaoLabel,
 }: PlanejamentoSemanalProps) {
   return (
     <Html lang="pt-BR">
@@ -37,6 +41,13 @@ export default function PlanejamentoSemanal({
             <Text style={paragraph}>
               O melhor momento da semana para parar 30 minutos. Pegar a caneta e o papel e planejar a próxima semana.
             </Text>
+
+            {momentoFrase && (
+              <Text style={momentoLinha}>
+                Seu momento de vida{momentoEstacaoLabel ? ` (${momentoEstacaoLabel})` : ''}:{' '}
+                <em>{momentoFrase}</em>. Deixe que ele guie as prioridades da semana.
+              </Text>
+            )}
 
             <Text style={paragraph}>
               <strong>Esse é o passo a passo simples do MOV (Mínima Organização Viável):</strong>
@@ -129,6 +140,16 @@ const greeting: React.CSSProperties = {
   fontSize: '16px',
   color: '#1a2e35',
   margin: '0 0 16px',
+}
+
+const momentoLinha: React.CSSProperties = {
+  fontSize: '14px',
+  color: '#6f8f87',
+  lineHeight: '1.7',
+  margin: '0 0 16px',
+  padding: '12px 16px',
+  backgroundColor: '#f7faf9',
+  borderRadius: '8px',
 }
 
 const paragraph: React.CSSProperties = {

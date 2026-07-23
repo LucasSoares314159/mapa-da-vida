@@ -11,79 +11,69 @@ import {
   Text,
 } from '@react-email/components'
 
-interface LembreteObjetivoProps {
+interface MomentoRevisaoProps {
   nome?: string
-  textoObjetivo?: string
-  prazoLabel?: string
-  diasRestantes?: number
-  urlObjetivos?: string
-  momentoFrase?: string
-  momentoEstacaoLabel?: string
+  estacaoLabel?: string
+  estacaoEmoji?: string
+  frase?: string
+  duracaoLabel?: string
+  urlMomento?: string
 }
 
-export default function LembreteObjetivo({
+export default function MomentoRevisao({
   nome = 'Lucas',
-  textoObjetivo = 'Treinar 3x por semana',
-  prazoLabel = 'curto prazo',
-  diasRestantes = 12,
-  urlObjetivos = 'https://mapadavida.mindtrail.com.br/objetivos',
-  momentoFrase,
-  momentoEstacaoLabel,
-}: LembreteObjetivoProps) {
-  const prazoTexto = diasRestantes < 0
-    ? `O prazo que você definiu já passou há ${Math.abs(diasRestantes)} dia${Math.abs(diasRestantes) === 1 ? '' : 's'}.`
-    : diasRestantes === 0
-      ? 'O prazo que você definiu é hoje.'
-      : `Faltam ${diasRestantes} dia${diasRestantes === 1 ? '' : 's'} para o prazo que você definiu.`
-
+  estacaoLabel = 'Construir',
+  estacaoEmoji = '🏗️',
+  frase = 'focar no trabalho e pensar no longo prazo',
+  duracaoLabel = '3 meses',
+  urlMomento = 'https://mapadavida.mindtrail.com.br/momento',
+}: MomentoRevisaoProps) {
   return (
     <Html lang="pt-BR">
       <Head />
-      <Preview>{`Não esqueça: "${textoObjetivo}". ${prazoTexto}`}</Preview>
+      <Preview>{`A fase que você definiu (${duracaoLabel}) chegou ao fim. Ainda é esse o seu momento?`}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
             <Text style={headerTag}>MINDTRAIL</Text>
-            <Heading style={headerTitle}>Não esqueça seu plano</Heading>
+            <Heading style={headerTitle}>É hora de revisar seu momento</Heading>
           </Section>
 
           <Section style={content}>
             <Text style={greeting}>Olá, <strong>{nome}</strong>!</Text>
 
             <Text style={paragraph}>
-              Esse é o seu objetivo de <strong>{prazoLabel}</strong>:
+              Há {duracaoLabel}, você parou para definir a fase que estava vivendo:
             </Text>
 
-            <Text style={objetivoBox}>
-              {textoObjetivo}
+            <Text style={momentoBox}>
+              {estacaoEmoji} <strong>{estacaoLabel}</strong>
+              {'\n'}
+              {frase}
             </Text>
 
             <Text style={paragraph}>
-              {prazoTexto} Como estão as coisas até aqui?
+              Esse foi o princípio que guiou seus objetivos e sua rotina nesse tempo. Mas a vida
+              muda — e o seu momento também pode ter mudado.
             </Text>
 
-            {momentoFrase && (
-              <Text style={momentoLinha}>
-                Lembre do seu momento{momentoEstacaoLabel ? ` (${momentoEstacaoLabel})` : ''}:{' '}
-                <em>{momentoFrase}</em>. Esse objetivo ainda conversa com ele?
-              </Text>
-            )}
-
             <Text style={paragraph}>
-              Vale parar 2 minutos para olhar de novo pra esse objetivo e decidir o próximo passo.
+              <strong>Ainda é esse o seu momento?</strong> Ou algo pede uma nova direção agora?
+              Vale parar dois minutos para olhar e decidir.
             </Text>
 
             <Section style={buttonContainer}>
-              <Button style={button} href={urlObjetivos}>
-                Ver meu objetivo →
+              <Button style={button} href={urlMomento}>
+                Revisar meu momento →
               </Button>
             </Section>
 
             <Hr style={hr} />
 
             <Text style={footer}>
-              Você está recebendo este email porque definiu um lembrete para este objetivo.{'\n'}
-              Para mudar a frequência ou desativar, edite o objetivo em sua conta.
+              Você está recebendo este email porque a duração que você definiu para o seu
+              momento de vida terminou.{'\n'}
+              Para redefinir ou ajustar, acesse seu momento na conta.
             </Text>
           </Section>
         </Container>
@@ -145,26 +135,16 @@ const paragraph: React.CSSProperties = {
   margin: '0 0 16px',
 }
 
-const objetivoBox: React.CSSProperties = {
+const momentoBox: React.CSSProperties = {
   fontSize: '16px',
   color: '#1a2e35',
-  fontWeight: '600',
-  lineHeight: '1.5',
+  lineHeight: '1.6',
   margin: '0 0 20px',
-  padding: '16px 20px',
+  padding: '18px 22px',
   backgroundColor: '#f0f7f4',
   borderLeft: '3px solid #57aa8f',
   borderRadius: '4px',
-}
-
-const momentoLinha: React.CSSProperties = {
-  fontSize: '14px',
-  color: '#6f8f87',
-  lineHeight: '1.7',
-  margin: '0 0 16px',
-  padding: '12px 16px',
-  backgroundColor: '#f7faf9',
-  borderRadius: '8px',
+  whiteSpace: 'pre-line',
 }
 
 const buttonContainer: React.CSSProperties = {

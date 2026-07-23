@@ -3,6 +3,7 @@ import LembreteMensal from '@/emails/lembrete-mensal'
 import PlanejamentoSemanal from '@/emails/planejamento-semanal'
 import LembreteObjetivo from '@/emails/lembrete-objetivo'
 import ObjetivoConcluido from '@/emails/objetivo-concluido'
+import MomentoRevisao from '@/emails/momento-revisao'
 
 export async function templateLembreteMensal(opts: {
   nome: string
@@ -23,12 +24,16 @@ export async function templateLembreteMensal(opts: {
 export async function templatePlanejamentoSemanal(opts: {
   nome: string
   urlDashboard: string
+  momentoFrase?: string
+  momentoEstacaoLabel?: string
 }): Promise<{ subject: string; html: string }> {
   const subject = 'Bora fazer esse planejamento semanal? 📋'
   const html = await render(
     PlanejamentoSemanal({
       nome: opts.nome,
       urlDashboard: opts.urlDashboard,
+      momentoFrase: opts.momentoFrase,
+      momentoEstacaoLabel: opts.momentoEstacaoLabel,
     })
   )
   return { subject, html }
@@ -40,6 +45,8 @@ export async function templateLembreteObjetivo(opts: {
   prazoLabel: string
   diasRestantes: number
   urlObjetivos: string
+  momentoFrase?: string
+  momentoEstacaoLabel?: string
 }): Promise<{ subject: string; html: string }> {
   const subject = 'Não esqueça seu plano 🎯'
   const html = await render(
@@ -49,6 +56,8 @@ export async function templateLembreteObjetivo(opts: {
       prazoLabel: opts.prazoLabel,
       diasRestantes: opts.diasRestantes,
       urlObjetivos: opts.urlObjetivos,
+      momentoFrase: opts.momentoFrase,
+      momentoEstacaoLabel: opts.momentoEstacaoLabel,
     })
   )
   return { subject, html }
@@ -65,6 +74,28 @@ export async function templateObjetivoConcluido(opts: {
       nome: opts.nome,
       textoObjetivo: opts.textoObjetivo,
       urlObjetivos: opts.urlObjetivos,
+    })
+  )
+  return { subject, html }
+}
+
+export async function templateMomentoRevisao(opts: {
+  nome: string
+  estacaoLabel: string
+  estacaoEmoji: string
+  frase: string
+  duracaoLabel: string
+  urlMomento: string
+}): Promise<{ subject: string; html: string }> {
+  const subject = 'Ainda é esse o seu momento? 🧭'
+  const html = await render(
+    MomentoRevisao({
+      nome: opts.nome,
+      estacaoLabel: opts.estacaoLabel,
+      estacaoEmoji: opts.estacaoEmoji,
+      frase: opts.frase,
+      duracaoLabel: opts.duracaoLabel,
+      urlMomento: opts.urlMomento,
     })
   )
   return { subject, html }
