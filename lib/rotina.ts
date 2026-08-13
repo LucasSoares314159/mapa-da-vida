@@ -15,24 +15,39 @@ export type ResultadoRotina = {
   horasZona: number
 }
 
+// Baseline de referência (horas ocupadas com rotina): jornada CLT (8h) + necessidades
+// básicas médias (4h) + tela moderada (2h) num dia útil; sem trabalho no fim de semana.
+// Fixa em horas absolutas — não escala com o sono do usuário.
+export const BASELINE_OCUPADA_DIA_UTIL = 8 + 4 + 2
+export const BASELINE_OCUPADA_FDS = 4 + 2
+
 export function calcularRotina(input: InputRotina): ResultadoRotina {
   const { horasSono, horasTrabalho, horasBasicas, diasTrabalho, horasTela } = input
 
-  const consumidaSemana = (horasSono + horasTrabalho + horasBasicas + horasTela) / 24
-  const consumidaFDS = (horasSono + horasBasicas + horasTela) / 24
+  // "Livre" é medido sobre as horas acordadas (24h − sono), não sobre o dia inteiro,
+  // já que o sono não compete com trabalho/básicas/tela pelo mesmo tempo.
+  const horasAcordado = 24 - horasSono
+  const consumidaSemana = (horasTrabalho + horasBasicas + horasTela) / horasAcordado
+  const consumidaFDS = (horasBasicas + horasTela) / horasAcordado
   const mediaConsumida =
     (consumidaSemana * diasTrabalho + consumidaFDS * (7 - diasTrabalho)) / 7
 
-  const percentualLivre = Math.round((1 - mediaConsumida) * 100)
-  const horasLivresSemana = Math.round((1 - mediaConsumida) * 168)
-  const horasLivresDiaUtil = Math.round((1 - consumidaSemana) * 24 * 10) / 10
-  const horasLivresDiaFDS = Math.round((1 - consumidaFDS) * 24 * 10) / 10
+  const percentualLivre = Math.max(0, Math.round((1 - mediaConsumida) * 100))
+  const horasLivresSemana = Math.max(0, Math.round((1 - mediaConsumida) * horasAcordado * 7))
+  const horasLivresDiaUtil = Math.max(0, Math.round((1 - consumidaSemana) * horasAcordado * 10) / 10)
+  const horasLivresDiaFDS = Math.max(0, Math.round((1 - consumidaFDS) * horasAcordado * 10) / 10)
 
-  const zona = percentualLivre >= 40 ? 'privilegio' : 'sacrificio'
-  const horasZona =
-    percentualLivre >= 40
-      ? Math.round((percentualLivre - 40) * 1.68)
-      : Math.round((40 - percentualLivre) * 1.68)
+  // Zona compara a ocupação real (em horas) contra a baseline de referência — não contra
+  // um percentual fixo — para que a classificação reflita "acima ou abaixo do padrão
+  // esperado", e não apenas "sobrou pouco tempo por dormir mais ou menos".
+  const ocupadaDiaUtil = horasTrabalho + horasBasicas + horasTela
+  const ocupadaFDS = horasBasicas + horasTela
+  const ocupadaMedia = (ocupadaDiaUtil * diasTrabalho + ocupadaFDS * (7 - diasTrabalho)) / 7
+  const baselineMedia =
+    (BASELINE_OCUPADA_DIA_UTIL * diasTrabalho + BASELINE_OCUPADA_FDS * (7 - diasTrabalho)) / 7
+
+  const zona = ocupadaMedia > baselineMedia ? 'sacrificio' : 'privilegio'
+  const horasZona = Math.round(Math.abs(ocupadaMedia - baselineMedia) * 7)
 
   return {
     percentualLivre,

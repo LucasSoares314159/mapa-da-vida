@@ -1,6 +1,7 @@
 'use server'
 
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { calcularRotina } from '@/lib/rotina'
 import type { InputRotina } from '@/lib/rotina'
 
 export async function salvarRotina(
@@ -14,11 +15,7 @@ export async function salvarRotina(
 
   if (!user) return { redirectTo: '/auth/login' }
 
-  const consumidaSemana = (input.horasSono + input.horasTrabalho + input.horasBasicas + input.horasTela) / 24
-  const consumidaFDS = (input.horasSono + input.horasBasicas + input.horasTela) / 24
-  const mediaConsumida =
-    (consumidaSemana * input.diasTrabalho + consumidaFDS * (7 - input.diasTrabalho)) / 7
-  const percentualLivre = Math.round((1 - mediaConsumida) * 100)
+  const { percentualLivre, zona } = calcularRotina(input)
 
   const { error } = await supabase.from('rotinas').upsert(
     {
@@ -29,6 +26,7 @@ export async function salvarRotina(
       dias_trabalho: input.diasTrabalho,
       horas_tela: input.horasTela,
       percentual_livre: percentualLivre,
+      zona,
       mapa_id: mapaId || null,
       atualizado_em: new Date().toISOString(),
     },

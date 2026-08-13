@@ -18,11 +18,17 @@ create table if not exists public.rotinas (
   horas_sono numeric not null default 8,
   horas_trabalho numeric not null default 8,
   horas_basicas numeric not null default 4,
+  horas_tela numeric not null default 2,
   dias_trabalho integer not null default 5,
   percentual_livre integer not null default 40,
+  zona text not null default 'privilegio',
   atualizado_em timestamp with time zone not null default now(),
   unique(user_id)
 );
+
+-- Se a tabela já existir (ambientes anteriores a esta revisão), rode também:
+-- alter table public.rotinas add column if not exists horas_tela numeric not null default 2;
+-- alter table public.rotinas add column if not exists zona text not null default 'privilegio';
 
 -- Create index for faster queries
 create index if not exists idx_rotinas_user_id on public.rotinas(user_id);

@@ -61,8 +61,9 @@ export default async function DiagnosticoPage({ params }: Props) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rotina = rotinaRaw as any
   const percentualLivre = typeof rotina?.percentual_livre === 'number' ? rotina.percentual_livre : 0
+  const zona = (rotina?.zona as 'privilegio' | 'sacrificio' | undefined) ?? 'privilegio'
 
-  const zonaConfig = rotina ? getZonaConfig(percentualLivre >= 40 ? 'privilegio' : 'sacrificio') : null
+  const zonaConfig = rotina ? getZonaConfig(zona) : null
 
   return (
     <AuthLayout titulo="Diagnóstico Completo" nomeUsuario={nomeUsuario}>

@@ -29,7 +29,7 @@ export default async function ObjetivosPage() {
       .order('criado_em', { ascending: false }),
     supabase
       .from('rotinas')
-      .select('percentual_livre')
+      .select('percentual_livre, zona')
       .eq('user_id', user.id)
       .maybeSingle(),
     supabase
@@ -45,7 +45,7 @@ export default async function ObjetivosPage() {
   const momento = (momentoRaw as MomentoVida | null) ?? null
 
   const percentualLivre = rotinaRaw?.percentual_livre ?? 100
-  const zona = percentualLivre >= 40 ? 'privilegio' : 'sacrificio'
+  const zona = (rotinaRaw?.zona as 'privilegio' | 'sacrificio' | undefined) ?? 'privilegio'
 
   return (
     <AuthLayout titulo="Meus Objetivos" nomeUsuario={nomeUsuario}>
