@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react'
 import type { Live } from '@/lib/lives'
@@ -14,6 +15,11 @@ type Props = {
 
 export function LiveAula({ live, index, total, anteriorId, proximoId }: Props) {
   const router = useRouter()
+
+  useEffect(() => {
+    if (anteriorId) router.prefetch(`/content/live/${anteriorId}`)
+    if (proximoId) router.prefetch(`/content/live/${proximoId}`)
+  }, [anteriorId, proximoId, router])
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-8">
