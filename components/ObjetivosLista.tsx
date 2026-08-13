@@ -16,6 +16,7 @@ import {
 } from '@/app/actions/objetivos'
 import { MomentoDestaque } from '@/components/MomentoDestaque'
 import { Alerta } from '@/components/ui/alerta'
+import { validarPrazoComData } from '@/lib/prazo'
 import { ESTACOES } from '@/types'
 import type { Objetivo, PrazoObjetivo, NomePilar, StatusObjetivo, FrequenciaLembrete, MomentoVida } from '@/types'
 
@@ -80,6 +81,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
   const [lista, setLista] = useState<Objetivo[]>(objs)
 
   const [modalAberto, setModalAberto] = useState(false)
+  const [etapaModal, setEtapaModal] = useState<'objetivo' | 'radar'>('objetivo')
   const [editandoObjetivo, setEditandoObjetivo] = useState<Objetivo | null>(null)
 
   const [formTexto, setFormTexto] = useState('')
@@ -88,6 +90,8 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
   const [formMotivo, setFormMotivo] = useState('')
   const [formDataAlvo, setFormDataAlvo] = useState('')
   const [formFrequencia, setFormFrequencia] = useState<FrequenciaLembrete | null>(null)
+  const [formRadarFazSentido, setFormRadarFazSentido] = useState<boolean | null>(null)
+  const [formRadarPorMim, setFormRadarPorMim] = useState<boolean | null>(null)
   const [formLoading, setFormLoading] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
@@ -117,6 +121,8 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
       setFormMotivo(objetivo.motivo || '')
       setFormDataAlvo(objetivo.data_alvo || '')
       setFormFrequencia(objetivo.frequencia_lembrete || null)
+      setFormRadarFazSentido(objetivo.radar_faz_sentido ?? null)
+      setFormRadarPorMim(objetivo.radar_por_mim ?? null)
     } else {
       setEditandoObjetivo(null)
       setFormTexto('')
@@ -125,8 +131,11 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
       setFormMotivo('')
       setFormDataAlvo('')
       setFormFrequencia(null)
+      setFormRadarFazSentido(null)
+      setFormRadarPorMim(null)
     }
     setFormError(null)
+    setEtapaModal('objetivo')
     setModalAberto(true)
   }
 
@@ -136,7 +145,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
     setFormError(null)
   }
 
-  async function handleSalvarObjetivo() {
+  function handleAvancarParaRadar() {
     if (!formTexto.trim()) {
       setFormError('Descreva o objetivo com clareza.')
       return
@@ -145,12 +154,35 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
       setFormError('Defina uma data alvo.')
       return
     }
+    const erroPrazo = validarPrazoComData(formPrazo, formDataAlvo)
+    if (erroPrazo) {
+      setFormError(erroPrazo)
+      return
+    }
     if (!formFrequencia) {
       setFormError('Escolha a frequência de lembrete.')
       return
     }
     if (!editandoObjetivo && contarAtivos(formPrazo) >= LIMITE) {
       setFormError(`Limite de ${LIMITE} objetivos por prazo atingido.`)
+      return
+    }
+    setFormError(null)
+    setEtapaModal('radar')
+  }
+
+  function handleVoltarParaObjetivo() {
+    setFormError(null)
+    setEtapaModal('objetivo')
+  }
+
+  async function handleSalvarObjetivo() {
+    if (!formFrequencia) {
+      setFormError('Escolha a frequência de lembrete.')
+      return
+    }
+    if (formRadarFazSentido === null || formRadarPorMim === null) {
+      setFormError('Responda as duas perguntas antes de salvar.')
       return
     }
     setFormLoading(true)
@@ -164,6 +196,8 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
             data_alvo: formDataAlvo,
             frequencia_lembrete: formFrequencia,
             motivo: formMotivo.trim() || null,
+            radar_faz_sentido: formRadarFazSentido,
+            radar_por_mim: formRadarPorMim,
           })
         : await criarObjetivo({
             texto: formTexto.trim(),
@@ -172,6 +206,8 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
             data_alvo: formDataAlvo,
             frequencia_lembrete: formFrequencia,
             motivo: formMotivo.trim() || null,
+            radar_faz_sentido: formRadarFazSentido,
+            radar_por_mim: formRadarPorMim,
           })
 
       if ('redirectTo' in result) { router.push(result.redirectTo); return }
@@ -398,6 +434,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
         <ObjetivoModal
           momento={momento}
           editando={editandoObjetivo}
+          etapa={etapaModal}
           formTexto={formTexto}
           onChangeTexto={setFormTexto}
           formPilar={formPilar}
@@ -410,8 +447,14 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
           onChangeDataAlvo={setFormDataAlvo}
           formFrequencia={formFrequencia}
           onChangeFrequencia={setFormFrequencia}
+          formRadarFazSentido={formRadarFazSentido}
+          onChangeRadarFazSentido={setFormRadarFazSentido}
+          formRadarPorMim={formRadarPorMim}
+          onChangeRadarPorMim={setFormRadarPorMim}
           formError={formError}
           formLoading={formLoading}
+          onAvancar={handleAvancarParaRadar}
+          onVoltar={handleVoltarParaObjetivo}
           onSalvar={handleSalvarObjetivo}
           onFechar={handleFecharModal}
         />
@@ -446,6 +489,8 @@ function ObjetivoCard({ objetivo, processingId, onConcluir, onPausar, onRetomar,
     objetivo.status === 'ativo' &&
     !!objetivo.data_alvo &&
     new Date(objetivo.data_alvo + 'T00:00:00') < new Date(new Date().toDateString())
+  const possivelComparacao =
+    objetivo.radar_faz_sentido === false || objetivo.radar_por_mim === false
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -576,6 +621,22 @@ function ObjetivoCard({ objetivo, processingId, onConcluir, onPausar, onRetomar,
                 padding: '3px 10px',
               }}>
                 Prazo passou
+              </span>
+            )}
+
+            {!concluido && possivelComparacao && (
+              <span
+                title="O radar de coerência indicou que esse objetivo pode ser fruto de comparação."
+                style={{
+                  border: '1px solid #C05050',
+                  color: '#C05050',
+                  background: 'rgba(192,80,80,0.1)',
+                  borderRadius: '100px',
+                  fontSize: '11px',
+                  padding: '3px 10px',
+                }}
+              >
+                Fruto de comparação?
               </span>
             )}
 
@@ -756,6 +817,98 @@ function EmptyState({ prazo }: { prazo: PrazoObjetivo }) {
 interface ObjetivoModalProps {
   momento: MomentoVida | null
   editando: Objetivo | null
+  etapa: 'objetivo' | 'radar'
+  formTexto: string
+  onChangeTexto: (v: string) => void
+  formPilar: NomePilar
+  onChangePilar: (v: NomePilar) => void
+  formPrazo: PrazoObjetivo
+  onChangePrazo: (v: PrazoObjetivo) => void
+  formMotivo: string
+  onChangeMotivo: (v: string) => void
+  formDataAlvo: string
+  onChangeDataAlvo: (v: string) => void
+  formFrequencia: FrequenciaLembrete | null
+  onChangeFrequencia: (v: FrequenciaLembrete) => void
+  formRadarFazSentido: boolean | null
+  onChangeRadarFazSentido: (v: boolean) => void
+  formRadarPorMim: boolean | null
+  onChangeRadarPorMim: (v: boolean) => void
+  formError: string | null
+  formLoading: boolean
+  onAvancar: () => void
+  onVoltar: () => void
+  onSalvar: () => void
+  onFechar: () => void
+}
+
+function ObjetivoModal({
+  momento, editando, etapa, formTexto, onChangeTexto, formPilar, onChangePilar,
+  formPrazo, onChangePrazo, formMotivo, onChangeMotivo, formDataAlvo,
+  onChangeDataAlvo, formFrequencia, onChangeFrequencia,
+  formRadarFazSentido, onChangeRadarFazSentido, formRadarPorMim, onChangeRadarPorMim,
+  formError, formLoading, onAvancar, onVoltar, onSalvar, onFechar,
+}: ObjetivoModalProps) {
+  return (
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onFechar() }}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-5"
+    >
+      <div
+        className="flex flex-col overflow-hidden"
+        style={{
+          background: '#fff',
+          borderRadius: '16px',
+          width: '100%',
+          maxWidth: '440px',
+          maxHeight: '85vh',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+        }}
+      >
+        {etapa === 'objetivo' ? (
+          <EtapaObjetivo
+            editando={editando}
+            formTexto={formTexto}
+            onChangeTexto={onChangeTexto}
+            formPilar={formPilar}
+            onChangePilar={onChangePilar}
+            formPrazo={formPrazo}
+            onChangePrazo={onChangePrazo}
+            formMotivo={formMotivo}
+            onChangeMotivo={onChangeMotivo}
+            formDataAlvo={formDataAlvo}
+            onChangeDataAlvo={onChangeDataAlvo}
+            formFrequencia={formFrequencia}
+            onChangeFrequencia={onChangeFrequencia}
+            formError={formError}
+            onAvancar={onAvancar}
+            onFechar={onFechar}
+          />
+        ) : (
+          <EtapaRadarCoerencia
+            momento={momento}
+            editando={editando}
+            formRadarFazSentido={formRadarFazSentido}
+            onChangeRadarFazSentido={onChangeRadarFazSentido}
+            formRadarPorMim={formRadarPorMim}
+            onChangeRadarPorMim={onChangeRadarPorMim}
+            formError={formError}
+            formLoading={formLoading}
+            onVoltar={onVoltar}
+            onSalvar={onSalvar}
+          />
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// EtapaObjetivo — dados do objetivo (etapa 1 de 2)
+// ---------------------------------------------------------------------------
+
+interface EtapaObjetivoProps {
+  editando: Objetivo | null
   formTexto: string
   onChangeTexto: (v: string) => void
   formPilar: NomePilar
@@ -769,187 +922,306 @@ interface ObjetivoModalProps {
   formFrequencia: FrequenciaLembrete | null
   onChangeFrequencia: (v: FrequenciaLembrete) => void
   formError: string | null
-  formLoading: boolean
-  onSalvar: () => void
+  onAvancar: () => void
   onFechar: () => void
 }
 
-function ObjetivoModal({
-  momento, editando, formTexto, onChangeTexto, formPilar, onChangePilar,
+function EtapaObjetivo({
+  editando, formTexto, onChangeTexto, formPilar, onChangePilar,
   formPrazo, onChangePrazo, formMotivo, onChangeMotivo, formDataAlvo,
-  onChangeDataAlvo, formFrequencia, onChangeFrequencia, formError, formLoading, onSalvar, onFechar,
-}: ObjetivoModalProps) {
-  const est = momento ? ESTACOES[momento.estacao] : null
+  onChangeDataAlvo, formFrequencia, onChangeFrequencia, formError, onAvancar, onFechar,
+}: EtapaObjetivoProps) {
   return (
-    <div
-      onClick={(e) => { if (e.target === e.currentTarget) onFechar() }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-5"
-    >
-      <div style={{
-        background: '#fff',
-        borderRadius: '16px',
-        padding: '32px',
-        width: '100%',
-        maxWidth: '440px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-      }}>
-        <div className="flex flex-col gap-5">
-          <h2 className="text-lg font-medium text-mt-black">
-            {editando ? 'Editar objetivo' : 'Novo objetivo'}
-          </h2>
+    <div className="flex flex-col gap-5 overflow-y-auto p-8">
+      <h2 className="text-lg font-medium text-mt-black">
+        {editando ? 'Editar objetivo' : 'Novo objetivo'}
+      </h2>
 
-          {/* Lembrete do Momento de Vida — âncora reflexiva, não bloqueia */}
-          {est && momento && (
-            <div
+      <div className="flex flex-col gap-2">
+        <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
+          O que você quer alcançar?
+        </Label>
+        <Textarea
+          value={formTexto}
+          onChange={(e) => onChangeTexto(e.target.value)}
+          rows={3}
+          placeholder="Descreva o objetivo com clareza..."
+          className="resize-none"
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
+          Prazo
+        </Label>
+        <div className="flex flex-wrap gap-2">
+          {PRAZOS.map((p) => (
+            <button
+              key={p.value}
+              onClick={() => onChangePrazo(p.value)}
+              className={cn(
+                'px-3.5 py-1.5 text-sm font-medium rounded-lg border transition-colors',
+                formPrazo === p.value
+                  ? 'bg-mt-green text-white border-mt-green'
+                  : 'border-mt-border text-mt-muted hover:bg-gray-50'
+              )}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
+          Pilar
+        </Label>
+        <div className="flex flex-wrap gap-2">
+          {PILAR_OPTIONS.map((p) => (
+            <button
+              key={p}
+              onClick={() => onChangePilar(p)}
+              className="px-3.5 py-1.5 text-sm font-medium rounded-full border transition-colors"
               style={{
-                display: 'flex',
-                gap: '10px',
-                alignItems: 'flex-start',
-                background: `${est.cor}0D`,
-                borderLeft: `3px solid ${est.cor}`,
-                borderRadius: '8px',
-                padding: '10px 12px',
-                marginTop: '-8px',
+                background: formPilar === p ? PILAR_COR[p] : 'transparent',
+                borderColor: formPilar === p ? PILAR_COR[p] : '#c8d8d2',
+                color: formPilar === p ? '#fff' : '#6f8f87',
               }}
             >
-              <span style={{ fontSize: '15px', lineHeight: 1.3, flexShrink: 0 }}>{est.emoji}</span>
-              <p
-                style={{
-                  fontFamily: "'Lora', serif",
-                  fontSize: '13px',
-                  color: '#4a5f59',
-                  lineHeight: 1.55,
-                  margin: 0,
-                }}
-              >
-                Seu momento é <span style={{ fontStyle: 'italic', color: est.cor, fontWeight: 500 }}>{momento.frase}</span>. Esse objetivo conversa com ele?
-              </p>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2">
-            <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
-              O que você quer alcançar?
-            </Label>
-            <Textarea
-              value={formTexto}
-              onChange={(e) => onChangeTexto(e.target.value)}
-              rows={3}
-              placeholder="Descreva o objetivo com clareza..."
-              className="resize-none"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
-              Prazo
-            </Label>
-            <div className="flex flex-wrap gap-2">
-              {PRAZOS.map((p) => (
-                <button
-                  key={p.value}
-                  onClick={() => onChangePrazo(p.value)}
-                  className={cn(
-                    'px-3.5 py-1.5 text-sm font-medium rounded-lg border transition-colors',
-                    formPrazo === p.value
-                      ? 'bg-mt-green text-white border-mt-green'
-                      : 'border-mt-border text-mt-muted hover:bg-gray-50'
-                  )}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
-              Pilar
-            </Label>
-            <div className="flex flex-wrap gap-2">
-              {PILAR_OPTIONS.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => onChangePilar(p)}
-                  className="px-3.5 py-1.5 text-sm font-medium rounded-full border transition-colors"
-                  style={{
-                    background: formPilar === p ? PILAR_COR[p] : 'transparent',
-                    borderColor: formPilar === p ? PILAR_COR[p] : '#c8d8d2',
-                    color: formPilar === p ? '#fff' : '#6f8f87',
-                  }}
-                >
-                  {PILAR_LABEL[p]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
-              Data alvo
-            </Label>
-            <Input
-              type="date"
-              value={formDataAlvo}
-              onChange={(e) => onChangeDataAlvo(e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
-              Frequência de lembrete
-            </Label>
-            <div className="flex flex-wrap gap-2">
-              {FREQUENCIAS.map((f) => (
-                <button
-                  key={f.value}
-                  onClick={() => onChangeFrequencia(f.value)}
-                  className={cn(
-                    'px-3.5 py-1.5 text-sm font-medium rounded-lg border transition-colors',
-                    formFrequencia === f.value
-                      ? 'bg-mt-green text-white border-mt-green'
-                      : 'border-mt-border text-mt-muted hover:bg-gray-50'
-                  )}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
-              Por que esse objetivo importa para você?{' '}
-              <span className="text-[10px] font-normal normal-case tracking-normal">(opcional)</span>
-            </Label>
-            <Textarea
-              value={formMotivo}
-              onChange={(e) => onChangeMotivo(e.target.value)}
-              rows={2}
-              placeholder="Escreva brevemente o motivo..."
-              className="resize-none"
-            />
-          </div>
-
-          {formError && <p className="text-sm text-mt-red">{formError}</p>}
-
-          <div className="flex flex-col gap-2.5 pt-1">
-            <Button
-              onClick={onSalvar}
-              disabled={formLoading}
-              className="bg-mt-green text-white hover:bg-mt-green-dark disabled:opacity-60"
-            >
-              {formLoading ? 'Salvando...' : editando ? 'Atualizar objetivo' : 'Salvar objetivo'}
-            </Button>
-            <Button
-              onClick={onFechar}
-              variant="outline"
-              className="border-mt-border text-mt-muted hover:border-mt-green hover:text-mt-green hover:bg-transparent"
-            >
-              Cancelar
-            </Button>
-          </div>
+              {PILAR_LABEL[p]}
+            </button>
+          ))}
         </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
+          Data alvo
+        </Label>
+        <Input
+          type="date"
+          value={formDataAlvo}
+          onChange={(e) => onChangeDataAlvo(e.target.value)}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
+          Frequência de lembrete
+        </Label>
+        <div className="flex flex-wrap gap-2">
+          {FREQUENCIAS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => onChangeFrequencia(f.value)}
+              className={cn(
+                'px-3.5 py-1.5 text-sm font-medium rounded-lg border transition-colors',
+                formFrequencia === f.value
+                  ? 'bg-mt-green text-white border-mt-green'
+                  : 'border-mt-border text-mt-muted hover:bg-gray-50'
+              )}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
+          Por que esse objetivo importa para você?{' '}
+          <span className="text-[10px] font-normal normal-case tracking-normal">(opcional)</span>
+        </Label>
+        <Textarea
+          value={formMotivo}
+          onChange={(e) => onChangeMotivo(e.target.value)}
+          rows={2}
+          placeholder="Escreva brevemente o motivo..."
+          className="resize-none"
+        />
+      </div>
+
+      {formError && <p className="text-sm text-mt-red">{formError}</p>}
+
+      <div className="flex flex-col gap-2.5 pt-1">
+        <Button
+          onClick={onAvancar}
+          className="bg-mt-green text-white hover:bg-mt-green-dark"
+        >
+          Continuar
+        </Button>
+        <Button
+          onClick={onFechar}
+          variant="outline"
+          className="border-mt-border text-mt-muted hover:border-mt-green hover:text-mt-green hover:bg-transparent"
+        >
+          Cancelar
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// EtapaRadarCoerencia — pausa reflexiva final, foco total (etapa 2 de 2)
+// ---------------------------------------------------------------------------
+
+interface EtapaRadarCoerenciaProps {
+  momento: MomentoVida | null
+  editando: Objetivo | null
+  formRadarFazSentido: boolean | null
+  onChangeRadarFazSentido: (v: boolean) => void
+  formRadarPorMim: boolean | null
+  onChangeRadarPorMim: (v: boolean) => void
+  formError: string | null
+  formLoading: boolean
+  onVoltar: () => void
+  onSalvar: () => void
+}
+
+function EtapaRadarCoerencia({
+  momento, editando, formRadarFazSentido, onChangeRadarFazSentido,
+  formRadarPorMim, onChangeRadarPorMim, formError, formLoading, onVoltar, onSalvar,
+}: EtapaRadarCoerenciaProps) {
+  const est = momento ? ESTACOES[momento.estacao] : null
+  const podeSalvar = formRadarFazSentido !== null && formRadarPorMim !== null
+
+  return (
+    <div className="flex flex-col gap-6 overflow-y-auto p-8">
+      <div className="flex flex-col gap-1">
+        <p className="text-[11px] font-medium uppercase tracking-wide text-mt-muted flex items-center gap-1.5">
+          <span aria-hidden>▶</span> Radar de Coerência
+        </p>
+        <p
+          style={{
+            fontFamily: "'Lora', serif",
+            fontStyle: 'italic',
+            fontSize: '13px',
+            color: '#6f8f87',
+            lineHeight: 1.5,
+            margin: 0,
+          }}
+        >
+          Antes de salvar, uma pausa. Responda com honestidade.
+        </p>
+      </div>
+
+      {/* Lembrete do Momento de Vida — pequeno em altura, mas com peso visual próprio */}
+      {est && momento && (
+        <div
+          className="flex items-center gap-2.5"
+          style={{
+            background: `${est.cor}14`,
+            border: `1px solid ${est.cor}40`,
+            borderRadius: '10px',
+            padding: '10px 12px',
+          }}
+        >
+          <span
+            aria-hidden
+            className="flex items-center justify-center flex-shrink-0"
+            style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '8px',
+              background: est.cor,
+              fontSize: '14px',
+              boxShadow: `0 2px 6px ${est.cor}55`,
+            }}
+          >
+            {est.emoji}
+          </span>
+          <p style={{ fontSize: '12.5px', color: '#4a5f59', lineHeight: 1.4, margin: 0 }}>
+            Seu momento é{' '}
+            <span style={{ fontFamily: "'Lora', serif", fontStyle: 'italic', color: est.cor, fontWeight: 500 }}>
+              {momento.frase}
+            </span>
+          </p>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3">
+        <Label className="text-base font-medium text-mt-black">
+          Esse objetivo faz sentido com o meu momento de vida?
+        </Label>
+        <div className="flex gap-2">
+          {[
+            { value: true, label: 'Sim' },
+            { value: false, label: 'Não' },
+          ].map((opt) => (
+            <button
+              key={String(opt.value)}
+              type="button"
+              onClick={() => onChangeRadarFazSentido(opt.value)}
+              className={cn(
+                'flex-1 px-4 py-3 text-sm font-medium rounded-lg border transition-colors',
+                formRadarFazSentido === opt.value
+                  ? 'bg-mt-green text-white border-mt-green'
+                  : 'border-mt-border text-mt-muted hover:bg-gray-50'
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <Label className="text-base font-medium text-mt-black">
+          Estou fazendo isso por mim ou para outras pessoas?
+        </Label>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { value: true, label: 'Por mim' },
+            { value: false, label: 'Para outras pessoas' },
+          ].map((opt) => (
+            <button
+              key={String(opt.value)}
+              type="button"
+              onClick={() => onChangeRadarPorMim(opt.value)}
+              className={cn(
+                'flex-1 px-4 py-3 text-sm font-medium rounded-lg border transition-colors',
+                formRadarPorMim === opt.value
+                  ? 'bg-mt-green text-white border-mt-green'
+                  : 'border-mt-border text-mt-muted hover:bg-gray-50'
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <p
+        style={{
+          fontFamily: "'Lora', serif",
+          fontStyle: 'italic',
+          fontSize: '13px',
+          color: '#6f8f87',
+          textAlign: 'center',
+          margin: 0,
+        }}
+      >
+        A comparação é a ladra da alegria.
+      </p>
+
+      {formError && <p className="text-sm text-mt-red">{formError}</p>}
+
+      <div className="flex flex-col gap-2.5 pt-1">
+        <Button
+          onClick={onSalvar}
+          disabled={formLoading || !podeSalvar}
+          className="bg-mt-green text-white hover:bg-mt-green-dark disabled:opacity-60"
+        >
+          {formLoading ? 'Salvando...' : editando ? 'Atualizar objetivo' : 'Salvar objetivo'}
+        </Button>
+        <Button
+          onClick={onVoltar}
+          variant="outline"
+          className="border-mt-border text-mt-muted hover:border-mt-green hover:text-mt-green hover:bg-transparent"
+        >
+          Voltar
+        </Button>
       </div>
     </div>
   )

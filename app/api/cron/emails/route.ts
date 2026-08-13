@@ -10,6 +10,7 @@ import {
   templateMomentoRevisao,
 } from '@/lib/email-templates'
 import { ESTACOES, DURACOES } from '@/types'
+import { PRAZO_LABEL_EMAIL } from '@/lib/prazo'
 import type { FrequenciaLembrete, PrazoObjetivo, EstacaoMomento, DuracaoMomento } from '@/types'
 
 type MomentoAtivo = {
@@ -175,12 +176,6 @@ const INTERVALO_DIAS: Record<FrequenciaLembrete, number> = {
   mensal: 30,
 }
 
-const PRAZO_LABEL: Record<PrazoObjetivo, string> = {
-  curto: 'curto prazo',
-  medio: 'médio prazo',
-  longo: 'longo prazo',
-}
-
 // Diferença em dias de calendário (não horas), comparando só a data (sem horário)
 function diasEntre(de: Date, ate: Date): number {
   const msPorDia = 1000 * 60 * 60 * 24
@@ -275,7 +270,7 @@ async function enviarLembretesObjetivo(): Promise<{ enviados: number; erros: num
         const { subject, html } = await templateLembreteObjetivo({
           nome,
           textoObjetivo: objetivo.texto,
-          prazoLabel: PRAZO_LABEL[objetivo.prazo],
+          prazoLabel: PRAZO_LABEL_EMAIL[objetivo.prazo],
           diasRestantes,
           urlObjetivos: `${siteUrl}/objetivos`,
           momentoFrase: momento?.frase,

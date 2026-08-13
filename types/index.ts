@@ -88,6 +88,9 @@ export interface Objetivo {
   motivo?: string | null
   criado_em: string
   concluido_em?: string | null
+  // Radar de Coerência — respondido obrigatoriamente ao criar/editar o objetivo
+  radar_faz_sentido?: boolean | null
+  radar_por_mim?: boolean | null
 }
 
 export type NomeArea =

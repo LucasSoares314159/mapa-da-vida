@@ -1,6 +1,7 @@
 'use server'
 
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { validarPrazoComData } from '@/lib/prazo'
 import type { Objetivo, StatusObjetivo, PrazoObjetivo, NomePilar, FrequenciaLembrete } from '@/types'
 
 export async function criarObjetivo(input: {
@@ -10,6 +11,8 @@ export async function criarObjetivo(input: {
   data_alvo: string
   frequencia_lembrete: FrequenciaLembrete
   motivo?: string | null
+  radar_faz_sentido: boolean | null
+  radar_por_mim: boolean | null
 }): Promise<{ error: string } | { redirectTo: string } | { data: Objetivo }> {
   const supabase = createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -17,7 +20,12 @@ export async function criarObjetivo(input: {
   if (!user) return { redirectTo: '/auth/login' }
 
   if (!input.data_alvo) return { error: 'Defina uma data alvo.' }
+  const erroPrazo = validarPrazoComData(input.prazo, input.data_alvo)
+  if (erroPrazo) return { error: erroPrazo }
   if (!input.frequencia_lembrete) return { error: 'Escolha a frequência de lembrete.' }
+  if (input.radar_faz_sentido === null || input.radar_por_mim === null) {
+    return { error: 'Responda o Radar de Coerência antes de salvar.' }
+  }
 
   const { data, error } = await supabase
     .from('objetivos')
@@ -30,6 +38,8 @@ export async function criarObjetivo(input: {
       frequencia_lembrete: input.frequencia_lembrete,
       motivo: input.motivo?.trim() || null,
       status: 'ativo',
+      radar_faz_sentido: input.radar_faz_sentido,
+      radar_por_mim: input.radar_por_mim,
     })
     .select()
     .single()
@@ -95,6 +105,8 @@ export async function editarObjetivo(
     data_alvo: string
     frequencia_lembrete: FrequenciaLembrete
     motivo?: string | null
+    radar_faz_sentido: boolean | null
+    radar_por_mim: boolean | null
   }
 ): Promise<{ error: string } | { redirectTo: string } | { data: Objetivo }> {
   const supabase = createServerSupabaseClient()
@@ -103,7 +115,12 @@ export async function editarObjetivo(
   if (!user) return { redirectTo: '/auth/login' }
 
   if (!input.data_alvo) return { error: 'Defina uma data alvo.' }
+  const erroPrazo = validarPrazoComData(input.prazo, input.data_alvo)
+  if (erroPrazo) return { error: erroPrazo }
   if (!input.frequencia_lembrete) return { error: 'Escolha a frequência de lembrete.' }
+  if (input.radar_faz_sentido === null || input.radar_por_mim === null) {
+    return { error: 'Responda o Radar de Coerência antes de salvar.' }
+  }
 
   const { data, error } = await supabase
     .from('objetivos')
@@ -114,6 +131,8 @@ export async function editarObjetivo(
       data_alvo: input.data_alvo,
       frequencia_lembrete: input.frequencia_lembrete,
       motivo: input.motivo?.trim() || null,
+      radar_faz_sentido: input.radar_faz_sentido,
+      radar_por_mim: input.radar_por_mim,
     })
     .eq('id', id)
     .eq('user_id', user.id)

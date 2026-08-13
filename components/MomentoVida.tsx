@@ -94,8 +94,7 @@ function MomentoDefinido({ momento, onEditar }: { momento: MomentoVida; onEditar
         style={{
           background: '#fff',
           borderRadius: '16px',
-          border: `1px solid ${est.cor}55`,
-          borderLeft: `4px solid ${est.cor}`,
+          border: '1px solid #e2ece8',
           padding: '28px',
           display: 'flex',
           flexDirection: 'column',
