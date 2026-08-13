@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { calcularAnalise } from '@/lib/analise'
-import { getZonaConfig } from '@/lib/rotina'
+import { calcularRotina, getZonaConfig } from '@/lib/rotina'
 import { AuthLayout } from '@/components/AuthLayout'
 import { NewsletterCTA } from '@/components/NewsletterCTA'
 import { FeedbackTally } from '@/components/FeedbackTally'
@@ -60,10 +60,18 @@ export default async function DiagnosticoPage({ params }: Props) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rotina = rotinaRaw as any
-  const percentualLivre = typeof rotina?.percentual_livre === 'number' ? rotina.percentual_livre : 0
   const zona = (rotina?.zona as 'privilegio' | 'sacrificio' | undefined) ?? 'privilegio'
 
   const zonaConfig = rotina ? getZonaConfig(zona) : null
+  const horasLivresSemana = rotina
+    ? calcularRotina({
+        horasSono: rotina.horas_sono ?? 8,
+        horasTrabalho: rotina.horas_trabalho ?? 8,
+        horasBasicas: rotina.horas_basicas ?? 4,
+        diasTrabalho: rotina.dias_trabalho ?? 5,
+        horasTela: rotina.horas_tela ?? 0,
+      }).horasLivresSemana
+    : 0
 
   return (
     <AuthLayout titulo="Diagnóstico Completo" nomeUsuario={nomeUsuario}>
@@ -149,7 +157,7 @@ export default async function DiagnosticoPage({ params }: Props) {
                 <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.75)' }}>de tempo livre</span>
               </div>
               <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                ≈ {Math.round((1 - ((rotina.horas_sono ?? 0) + (rotina.horas_trabalho ?? 0) + (rotina.horas_basicas ?? 0)) / 24) * 168)} horas por semana
+                ≈ {horasLivresSemana} horas por semana
               </p>
             </div>
 
