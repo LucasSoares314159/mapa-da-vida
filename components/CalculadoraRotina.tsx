@@ -114,9 +114,6 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
           <h1 className="font-heading font-medium text-[28px] leading-[1.3] text-[#EDF2EF]">
             Antes de definir objetivos, veja quanto tempo você realmente tem.
           </h1>
-          <p className="font-editorial italic text-[15px] text-[#a8c4bc] leading-[1.8] border-l-2 border-mt-green pl-4">
-            &ldquo;Essa não é uma verdade absoluta. É uma convenção — como o metro, que é um pedaço de madeira que serve de balizador. O objetivo é só te mostrar com o que você está trabalhando.&rdquo;
-          </p>
         </div>
 
         {/* Inputs Section */}
