@@ -9,8 +9,8 @@ import { MODULOS } from '@/lib/modulos'
 
 const TOTAL_AULAS = MODULOS.length
 
-// Soma total em minutos: 5+15+30+30+20+45+30+90+15+25 = 305 min = 5h05min
-const DURACAO_TOTAL = '5 h 05 min'
+// Soma total: 5:00+12:30+19:17+30:00+10:37+15:01+30:00+1:30:00+15:00 = 3h47min
+const DURACAO_TOTAL = '3 h 47 min'
 
 type Props = {
   nomeUsuario: string
