@@ -13,17 +13,9 @@ export default async function HomePage() {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Quem está logado entra direto na plataforma, tendo feito mapa ou não.
   if (user) {
-    const { count } = await supabase
-      .from('mapas')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-
-    if (count && count > 0) {
-      redirect('/objetivos')
-    } else {
-      redirect('/mapa/preparacao')
-    }
+    redirect('/content')
   }
 
   return (

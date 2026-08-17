@@ -13,13 +13,6 @@ export default async function MomentoPage() {
 
   if (!user) redirect('/auth/login')
 
-  const { count: totalMapas } = await supabase
-    .from('mapas')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-
-  if (!totalMapas || totalMapas === 0) redirect('/mapa/preparacao')
-
   const [{ data: profile }, { data: momento }, totalMembros] = await Promise.all([
     supabase.from('profiles').select('nome').eq('id', user.id).single(),
     supabase
