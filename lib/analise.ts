@@ -23,8 +23,16 @@ const MAX_AREAS_DESTACADAS = 3
  * Os achados por área não são somáveis: vêm de populações e metodologias
  * diferentes e seus efeitos se sobrepõem. Por isso a projeção usa este número
  * agregado em vez de somar os ganhos individuais.
+ *
+ * Estruturado (não embutido em texto corrido) para que a revelação animada
+ * possa exibi-lo como um contador em destaque, dado central do momento WOW.
  */
-const GANHO_AGREGADO = 'de 8 a 10 anos de vida livre de doença'
+export interface GanhoEstimado {
+  valor: string
+  unidade: string
+}
+
+const GANHO_AGREGADO: GanhoEstimado = { valor: '8 a 10', unidade: 'anos de vida livre de doença' }
 
 export interface AreaDestacada {
   nome: NomeArea
@@ -42,6 +50,8 @@ export interface Diagnostico {
   /** Áreas críticas com seu fundamento e achado científico. */
   areasDestacadas: AreaDestacada[]
   totais: Record<StatusArea, number>
+  /** O ganho agregado, como dado central do momento de revelação. */
+  ganhoEstimado: GanhoEstimado
 }
 
 /** Ordena por gravidade: vermelho primeiro, depois amarelo. */
@@ -133,7 +143,7 @@ function montarProjecao(criticas: Area[], totais: Record<StatusArea, number>): s
   if (criticas.length === 0) {
     return [
       'Um mapa assim não se mantém sozinho. O que sustenta esse resultado é repetição, e repetição só continua enquanto for protegida.',
-      `Nas Blue Zones, os hábitos que somam ${GANHO_AGREGADO} não são heroicos. São pequenos e repetidos por décadas. Você já está nesse caminho, e a única pergunta é o que acontece quando a vida apertar.`,
+      'Nas Blue Zones, esse ganho não vem de nada heroico. São hábitos pequenos, repetidos por décadas. Você já está nesse caminho, e a única pergunta é o que acontece quando a vida apertar.',
     ]
   }
 
@@ -142,7 +152,7 @@ function montarProjecao(criticas: Area[], totais: Record<StatusArea, number>): s
   if (soAmarelos) {
     return [
       'O amarelo é confortável porque não dói. E por não doer, ele dura. Dez anos assim passam rápido, e o mapa continua igual, com a diferença de que o corpo tem dez anos a mais.',
-      `Nas Blue Zones, os hábitos que geram ${GANHO_AGREGADO} não são heroicos. São pequenos e repetidos por décadas. A vantagem de sair do amarelo agora é que ainda não há dano pra reverter, só hábito pra construir.`,
+      'Nas Blue Zones, esse ganho não vem de nada heroico. São hábitos pequenos, repetidos por décadas. A vantagem de sair do amarelo agora é que ainda não há dano pra reverter, só hábito pra construir.',
     ]
   }
 
@@ -151,7 +161,7 @@ function montarProjecao(criticas: Area[], totais: Record<StatusArea, number>): s
   if (totais.vermelho === 9) {
     return [
       'Manter tudo de pé sozinho tem prazo. O corpo aguenta por um tempo, depois começa a cobrar em coisas que não dá pra adiar: sono que não descansa, doença que aparece, vontade que some.',
-      `A saída aqui não é consertar nove áreas de uma vez, é escolher uma. Nas Blue Zones, as pessoas que somam ${GANHO_AGREGADO} não fizeram tudo certo ao mesmo tempo. Elas viveram em lugares onde um hábito bom puxava o próximo.`,
+      'A saída aqui não é consertar nove áreas de uma vez, é escolher uma. Nas Blue Zones, quem chega nesse resultado não fez tudo certo ao mesmo tempo. Viveu em lugares onde um hábito bom puxava o próximo.',
     ]
   }
 
@@ -161,7 +171,8 @@ function montarProjecao(criticas: Area[], totais: Record<StatusArea, number>): s
     ? 'Mantido do jeito que está, esse ciclo se aperta com o tempo. Cada área puxa a outra pra baixo, e o custo aparece devagar: cansaço que não passa com fim de semana, exames que começam a mudar, distância que vira solidão.'
     : 'Mantido do jeito que está, o custo aparece devagar. Não em crise, mas em desgaste: energia que não volta, disposição que encurta, o corpo pedindo mais tempo pra se recuperar do mesmo esforço de sempre.'
 
-  const segundo = `As populações mais longevas do mundo não são as que trabalham menos. São as que protegem a mesa, o descanso e os vínculos como parte do trabalho de viver. O Blue Zones estima que esse conjunto de hábitos soma ${GANHO_AGREGADO}.`
+  const segundo =
+    'As populações mais longevas do mundo não são as que trabalham menos. São as que protegem a mesa, o descanso e os vínculos como parte do trabalho de viver.'
 
   return [primeiro, segundo]
 }
@@ -206,6 +217,7 @@ export function calcularDiagnostico(areas: Area[]): Diagnostico {
       base: BASE_AREAS[a.area],
     })),
     totais,
+    ganhoEstimado: GANHO_AGREGADO,
   }
 }
 
