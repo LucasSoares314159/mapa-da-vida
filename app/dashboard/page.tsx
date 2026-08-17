@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { AuthLayout } from '@/components/AuthLayout'
 import { DashboardLista } from '@/components/DashboardLista'
+import { EvolucaoMapas } from '@/components/EvolucaoMapas'
 import { NewsletterCTA } from '@/components/NewsletterCTA'
 import type { Mapa } from '@/types'
 
@@ -61,6 +62,9 @@ export default async function DashboardPage() {
         </div>
 
         <NewsletterCTA utm_campaign="dashboard" variant="compact" />
+
+        {/* Evolução do balanço ao longo do tempo */}
+        <EvolucaoMapas mapas={mapas} />
 
         {/* Lista de mapas */}
         <DashboardLista mapas={mapas} />
