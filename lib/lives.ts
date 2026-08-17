@@ -24,7 +24,7 @@ export const LIVES: Live[] = [
   {
     id: 'live-02',
     titulo: 'Live 02 — Sistemas de Objetivos vs Sistemas de Organização Pessoal',
-    duracao: '1:00:00',
+    duracao: '1:02:11',
     videoId: 'A0_cgaho9vc',
     materiais: [
       { label: 'Material da aula', url: 'https://canva.link/memldznrp6r60tg' },
@@ -33,7 +33,7 @@ export const LIVES: Live[] = [
   {
     id: 'live-03',
     titulo: 'Live 3 - O Segredo da Consistência',
-    duracao: '1:00:00',
+    duracao: '1:11:37',
     videoId: 'R4P7CPgAtBY',
     materiais: [
       { label: 'Podcast da aula', url: 'https://drive.google.com/file/d/1ICJ4ZIfXLzP9yYPCwABwDljMtup7L1la/view?usp=sharing' },
