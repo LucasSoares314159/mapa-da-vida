@@ -8,7 +8,6 @@ import { calcularDiagnostico } from '@/lib/analise'
 import { calcularRotina, getZonaConfig } from '@/lib/rotina'
 import { cn } from '@/lib/utils'
 import { AuthLayout } from '@/components/AuthLayout'
-import { NewsletterCTA } from '@/components/NewsletterCTA'
 import { FeedbackTally } from '@/components/FeedbackTally'
 import type { Mapa } from '@/types'
 
@@ -231,9 +230,6 @@ export default async function DiagnosticoPage({ params }: Props) {
 
         {/* NPS Feedback */}
         <FeedbackTally />
-
-        {/* Newsletter CTA */}
-        <NewsletterCTA utm_campaign="pos-diagnostico" />
       </div>
     </AuthLayout>
   )
