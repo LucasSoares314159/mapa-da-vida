@@ -1,11 +1,12 @@
 'use client'
 
-import { useMemo, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useMemo, useCallback, useState } from 'react'
 import { ReactFlow, type Node, type Edge, type NodeMouseHandler } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { PILARES } from '@/types'
-import type { Mapa, Area, NomePilar, StatusArea } from '@/types'
+import type { Mapa, Area, NomeArea, NomePilar, StatusArea } from '@/types'
+import { BASE_AREAS } from '@/lib/blue-zones'
+import { AreaDestaqueOverlay } from './AreaDestaqueOverlay'
 
 // Cores dos status — seguem o padrão das pills do questionário
 const STATUS_STYLE: Record<StatusArea, { bg: string; border: string; ponto: string }> = {
@@ -158,7 +159,7 @@ function buildFlow(mapa: Mapa): { nodes: Node[]; edges: FlowEdge[] } {
           width: NODE_W_AREA,
           height: AREA_H,
           textAlign: 'center',
-          cursor: 'pointer',
+          cursor: 'default',
         } as React.CSSProperties,
         draggable: false,
       })
@@ -183,21 +184,31 @@ type Props = {
 }
 
 export function MapaFlow({ mapa }: Props) {
-  const router = useRouter()
   const { nodes, edges } = useMemo(() => buildFlow(mapa), [mapa])
+  const [areaEmFoco, setAreaEmFoco] = useState<{ nome: NomeArea; status: StatusArea } | null>(null)
 
-  // Clique em nó de área redireciona para diagnóstico
-  const onNodeClick: NodeMouseHandler = useCallback(
+  const areaMap = useMemo(() => {
+    const m = new Map<string, Area>()
+    for (const area of mapa.areas ?? []) m.set(area.area, area)
+    return m
+  }, [mapa.areas])
+
+  const onNodeMouseEnter: NodeMouseHandler = useCallback(
     (_event, node) => {
-      if (node.id.startsWith('area-')) {
-        router.push(`/diagnostico/${mapa.id}`)
-      }
+      if (!node.id.startsWith('area-')) return
+      const nome = node.id.replace('area-', '') as NomeArea
+      const area = areaMap.get(nome)
+      setAreaEmFoco({ nome, status: area?.status ?? 'verde' })
     },
-    [router, mapa.id]
+    [areaMap]
   )
 
+  const onNodeMouseLeave: NodeMouseHandler = useCallback(() => {
+    setAreaEmFoco(null)
+  }, [])
+
   return (
-    <div style={{ width: '100%', height: '100%' }}>
+    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -209,8 +220,17 @@ export function MapaFlow({ mapa }: Props) {
         panOnScroll={false}
         zoomOnScroll={false}
         proOptions={{ hideAttribution: true }}
-        onNodeClick={onNodeClick}
+        onNodeMouseEnter={onNodeMouseEnter}
+        onNodeMouseLeave={onNodeMouseLeave}
       />
+
+      {areaEmFoco && (
+        <AreaDestaqueOverlay
+          nome={areaEmFoco.nome}
+          status={areaEmFoco.status}
+          base={BASE_AREAS[areaEmFoco.nome]}
+        />
+      )}
     </div>
   )
 }
