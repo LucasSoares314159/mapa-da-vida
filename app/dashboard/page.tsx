@@ -32,7 +32,7 @@ export default async function DashboardPage() {
   return (
     <AuthLayout titulo="Seus mapas" nomeUsuario={nomeUsuario}>
       <div className="mx-auto w-full max-w-2xl px-6 py-8 flex flex-col gap-6">
-        {/* Banner Trilha da Produtividade */}
+        {/* Banner do canal no YouTube */}
         <div
           className="flex items-center justify-between gap-4 px-5 py-4"
           style={{ backgroundColor: '#2A3F45', borderRadius: 12 }}
@@ -42,23 +42,24 @@ export default async function DashboardPage() {
               className="text-xs font-semibold uppercase tracking-widest"
               style={{ color: '#57AA8F' }}
             >
-              ⛰️Trilha da Produtividade
+              ▶️ MindTrail no YouTube
             </span>
             <p className="font-semibold text-[15px] leading-snug" style={{ color: '#EDF2EF' }}>
-              Transforme seu diagnóstico em ação
+              Vídeos novos toda semana
             </p>
             <p className="text-xs mt-0.5" style={{ color: '#a8c4bc' }}>
-              4 semanas para construir seu sistema de organização pessoal
+              Como organizar a rotina, definir objetivos e manter consistência
             </p>
           </div>
-          <button
-            className="shrink-0 text-sm font-medium text-white px-4 py-2 transition-opacity hover:opacity-90"
+          <a
+            href="https://www.youtube.com/@mindtrail_co"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 text-sm font-medium text-white px-4 py-2 no-underline transition-opacity hover:opacity-90"
             style={{ backgroundColor: '#57AA8F', borderRadius: 8 }}
           >
-            <a href='https://www.mindtrail.com.br/trilha' target='_blank' rel='noopener noreferrer' className="text-white no-underline">
-              Conhecer →
-            </a>
-          </button>
+            Inscrever-se →
+          </a>
         </div>
 
         <NewsletterCTA utm_campaign="dashboard" variant="compact" />
