@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { calcularDiagnostico } from '@/lib/analise'
 import { calcularRotina, getZonaConfig } from '@/lib/rotina'
+import { cn } from '@/lib/utils'
 import { AuthLayout } from '@/components/AuthLayout'
 import { NewsletterCTA } from '@/components/NewsletterCTA'
 import { FeedbackTally } from '@/components/FeedbackTally'
@@ -115,45 +116,29 @@ export default async function DiagnosticoPage({ params }: Props) {
               O que o estudo mostra sobre essas áreas
             </h2>
 
-            {diagnostico.areasDestacadas.map(({ nome, status, base }) => {
-              const cor = status === 'vermelho' ? '#C05050' : '#D4A843'
-              return (
-                <div
-                  key={nome}
-                  className="flex flex-col gap-3 rounded-card bg-white px-9 py-7"
-                  style={{ border: '0.5px solid #c8d8d2' }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: cor,
-                        flexShrink: 0,
-                        display: 'inline-block',
-                      }}
-                    />
-                    <h3 className="text-sm font-semibold text-mt-black">{nome}</h3>
-                  </div>
-
-                  <p className="text-[0.95rem] leading-relaxed text-mt-black">{base.fundamento}</p>
-
-                  <p
-                    className="text-sm leading-relaxed"
-                    style={{
-                      backgroundColor: 'rgba(87,170,143,0.08)',
-                      borderLeft: `2px solid #57AA8F`,
-                      borderRadius: 6,
-                      padding: '14px 16px',
-                      color: '#2A3F45',
-                    }}
-                  >
-                    {base.destaque}
-                  </p>
+            {diagnostico.areasDestacadas.map(({ nome, status, base }) => (
+              <div
+                key={nome}
+                className="flex flex-col gap-3 rounded-card bg-white px-9 py-7"
+                style={{ border: '0.5px solid #c8d8d2' }}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      'inline-block size-2 shrink-0 rounded-full',
+                      status === 'vermelho' ? 'bg-mt-red' : 'bg-mt-yellow'
+                    )}
+                  />
+                  <h3 className="text-sm font-semibold text-mt-black">{nome}</h3>
                 </div>
-              )
-            })}
+
+                <p className="text-[0.95rem] leading-relaxed text-mt-black">{base.fundamento}</p>
+
+                <p className="rounded-md border-l-2 border-mt-green bg-mt-green/10 px-4 py-3.5 text-sm leading-relaxed text-mt-green-dark">
+                  {base.destaque}
+                </p>
+              </div>
+            ))}
           </div>
         )}
 

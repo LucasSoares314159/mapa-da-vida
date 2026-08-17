@@ -25,9 +25,9 @@ export interface BaseArea {
 export const BASE_AREAS: Record<NomeArea, BaseArea> = {
   'Exercícios Físicos': {
     fundamento:
-      'Corpo que não se move perde capacidade em silêncio. Força, equilíbrio e disposição não somem de uma vez, somem aos poucos, até o dia em que fazem falta.',
+      'Movimento é o que mantém o corpo capaz de fazer o que você precisa dele. Sem uso, força e fôlego encolhem, mesmo sem você notar no dia a dia.',
     destaque:
-      'Nas Blue Zones ninguém treina em academia. Em Sardenha, pastores caminham 8 quilômetros por dia cuidando do rebanho. Movimento espalhado pelo dia protege mais o coração que trinta minutos de corrida seguidos de dez horas sentado, e soma até 4,5 anos de vida.',
+      'Nas Blue Zones ninguém treina em academia. Em Sardenha, pastores caminham 8 quilômetros por dia cuidando do rebanho. Esse movimento espalhado ao longo do dia soma até 4,5 anos de vida a mais.',
     fonte: 'blue-zones',
   },
   'Alimentação': {
@@ -39,9 +39,9 @@ export const BASE_AREAS: Record<NomeArea, BaseArea> = {
   },
   'Hobbies': {
     fundamento:
-      'Fazer algo sem cobrança de resultado não é luxo, é o que descarrega a pressão acumulada. Sem essa válvula, o estresse não some, ele fica.',
+      'Fazer algo só por gostar descarrega a pressão que se acumula no resto da semana. Toda Blue Zone tem um ritual assim, protegido na rotina.',
     destaque:
-      'Em Ikaria, na Grécia, a ilha inteira para pra sesta no meio da tarde. Quem tem esse hábito tem até 35% menos risco de morrer de doença do coração. Em Sardenha o ritual é o vinho no fim do dia, com os amigos. Toda Blue Zone tem o seu jeito de desacelerar.',
+      'Em Ikaria, na Grécia, a ilha inteira para pra sesta no meio da tarde. Quem tem esse hábito tem até 35% menos risco de morrer de doença do coração. Em Sardenha o ritual é o vinho no fim do dia, com os amigos.',
     fonte: 'blue-zones',
   },
   'Rede de Apoio': {
@@ -74,7 +74,7 @@ export const BASE_AREAS: Record<NomeArea, BaseArea> = {
   },
   'Experiências': {
     fundamento:
-      'Novidade mantém o cérebro acordado. Rotina previsível demais faz os anos passarem sem deixar marca, e o cérebro para de construir reserva.',
+      'Viver coisas novas é o que constrói reserva cognitiva. Numa rotina sempre igual, os anos passam sem deixar marca, e o cérebro perde estímulo pra continuar se adaptando.',
     destaque:
       'Um estudo acompanhou 6.700 adultos mais velhos: quem tinha feito ao menos uma viagem nos dois anos anteriores teve 31% menos risco de perda cognitiva e 59% menos risco de demência. Não precisa ser longe. Precisa ser novo.',
     fonte: 'correlato',
