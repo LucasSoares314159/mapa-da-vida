@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { contarMembros } from '@/lib/membros'
 import { AuthLayout } from '@/components/AuthLayout'
 import { ModuloAula } from '@/components/ModuloAula'
 import { getModulo, MODULOS } from '@/lib/modulos'
@@ -12,11 +13,10 @@ export default async function ModuloPage({ params }: { params: { id: string } })
 
   if (!user) redirect('/auth/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('nome, aulas_concluidas')
-    .eq('id', user.id)
-    .single()
+  const [{ data: profile }, totalMembros] = await Promise.all([
+    supabase.from('profiles').select('nome, aulas_concluidas').eq('id', user.id).single(),
+    contarMembros(),
+  ])
 
   const nomeUsuario = profile?.nome ?? user.email ?? ''
   const aulasConcluidas: number[] = profile?.aulas_concluidas ?? []
@@ -29,7 +29,7 @@ export default async function ModuloPage({ params }: { params: { id: string } })
   const proximo = MODULOS[index + 1] ?? null
 
   return (
-    <AuthLayout titulo={modulo.titulo} nomeUsuario={nomeUsuario}>
+    <AuthLayout titulo={modulo.titulo} nomeUsuario={nomeUsuario} totalMembros={totalMembros}>
       <ModuloAula
         modulo={modulo}
         index={index + 1}

@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { contarMembros } from '@/lib/membros'
 import { calcularDiagnostico } from '@/lib/analise'
 import { calcularRotina, getZonaConfig } from '@/lib/rotina'
 import { cn } from '@/lib/utils'
@@ -24,7 +25,7 @@ export default async function DiagnosticoPage({ params }: Props) {
   } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const [{ data: profile }, { data: mapaRaw }] = await Promise.all([
+  const [{ data: profile }, { data: mapaRaw }, totalMembros] = await Promise.all([
     supabase.from('profiles').select('nome').eq('id', user.id).single(),
     supabase
       .from('mapas')
@@ -32,6 +33,7 @@ export default async function DiagnosticoPage({ params }: Props) {
       .eq('id', id)
       .eq('user_id', user.id)
       .single(),
+    contarMembros(),
   ])
 
   if (!mapaRaw) notFound()
@@ -73,7 +75,7 @@ export default async function DiagnosticoPage({ params }: Props) {
     : 0
 
   return (
-    <AuthLayout titulo="Diagnóstico Completo" nomeUsuario={nomeUsuario}>
+    <AuthLayout titulo="Diagnóstico Completo" nomeUsuario={nomeUsuario} totalMembros={totalMembros}>
       <div className="mx-auto flex max-w-xl flex-col gap-4 px-6 py-8">
         {/* Botão Ver mapa */}
         <Link

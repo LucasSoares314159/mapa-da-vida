@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { contarMembros } from '@/lib/membros'
 import { AuthLayout } from '@/components/AuthLayout'
 import { LiveAula } from '@/components/LiveAula'
 import { getLive, LIVES } from '@/lib/lives'
@@ -12,11 +13,10 @@ export default async function LivePage({ params }: { params: { id: string } }) {
 
   if (!user) redirect('/auth/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('nome')
-    .eq('id', user.id)
-    .single()
+  const [{ data: profile }, totalMembros] = await Promise.all([
+    supabase.from('profiles').select('nome').eq('id', user.id).single(),
+    contarMembros(),
+  ])
 
   const nomeUsuario = profile?.nome ?? user.email ?? ''
 
@@ -28,7 +28,7 @@ export default async function LivePage({ params }: { params: { id: string } }) {
   const proximo = LIVES[index + 1] ?? null
 
   return (
-    <AuthLayout titulo={live.titulo} nomeUsuario={nomeUsuario}>
+    <AuthLayout titulo={live.titulo} nomeUsuario={nomeUsuario} totalMembros={totalMembros}>
       <LiveAula
         live={live}
         index={index + 1}

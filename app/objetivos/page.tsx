@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { contarMembros } from '@/lib/membros'
 import { AuthLayout } from '@/components/AuthLayout'
 import { ObjetivosLista } from '@/components/ObjetivosLista'
 import type { Objetivo, MomentoVida } from '@/types'
@@ -19,7 +20,7 @@ export default async function ObjetivosPage() {
 
   if (!totalMapas || totalMapas === 0) redirect('/mapa/preparacao')
 
-  const [{ data: profile }, { data: objetivosRaw }, { data: rotinaRaw }, { data: momentoRaw }] = await Promise.all([
+  const [{ data: profile }, { data: objetivosRaw }, { data: rotinaRaw }, { data: momentoRaw }, totalMembros] = await Promise.all([
     supabase.from('profiles').select('nome').eq('id', user.id).single(),
     supabase
       .from('objetivos')
@@ -38,6 +39,7 @@ export default async function ObjetivosPage() {
       .eq('user_id', user.id)
       .eq('ativo', true)
       .maybeSingle(),
+    contarMembros(),
   ])
 
   const nomeUsuario = profile?.nome ?? user.email ?? ''
@@ -48,7 +50,7 @@ export default async function ObjetivosPage() {
   const zona = (rotinaRaw?.zona as 'privilegio' | 'sacrificio' | undefined) ?? 'privilegio'
 
   return (
-    <AuthLayout titulo="Meus Objetivos" nomeUsuario={nomeUsuario}>
+    <AuthLayout titulo="Meus Objetivos" nomeUsuario={nomeUsuario} totalMembros={totalMembros}>
       <ObjetivosLista objetivos={objetivos} percentualLivre={percentualLivre} zona={zona} momento={momento} />
     </AuthLayout>
   )
