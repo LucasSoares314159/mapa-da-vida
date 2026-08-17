@@ -7,17 +7,19 @@ import { Header } from './Header'
 type Props = {
   titulo: string
   nomeUsuario: string
+  /** Total de cadastrados, exibido no rodapé da sidebar. */
+  totalMembros?: number | null
   children: React.ReactNode
 }
 
-export function AuthLayout({ titulo, nomeUsuario, children }: Props) {
+export function AuthLayout({ titulo, nomeUsuario, totalMembros, children }: Props) {
   const [sidebarAberta, setSidebarAberta] = useState(false)
 
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar — visível apenas em lg+ */}
       <div className="hidden lg:flex h-screen">
-        <Sidebar />
+        <Sidebar totalMembros={totalMembros} />
       </div>
 
       {/* Drawer overlay — visível apenas em mobile quando aberto */}
@@ -35,7 +37,7 @@ export function AuthLayout({ titulo, nomeUsuario, children }: Props) {
           sidebarAberta ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <Sidebar onClose={() => setSidebarAberta(false)} />
+        <Sidebar onClose={() => setSidebarAberta(false)} totalMembros={totalMembros} />
       </div>
 
       {/* Conteúdo principal */}

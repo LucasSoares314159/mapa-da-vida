@@ -3,12 +3,14 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useFormStatus } from 'react-dom'
-import { LogOut, Map, Clock, Target, BookOpen, Compass } from 'lucide-react'
+import { LogOut, Map, Clock, Target, BookOpen, Compass, Users } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
 import { cn } from '@/lib/utils'
 
 type Props = {
   onClose?: () => void
+  /** Total de cadastrados; ausente quando a contagem falha. */
+  totalMembros?: number | null
 }
 
 function LogoutButton() {
@@ -26,7 +28,7 @@ function LogoutButton() {
   )
 }
 
-export function Sidebar({ onClose }: Props) {
+export function Sidebar({ onClose, totalMembros }: Props) {
   const pathname = usePathname()
   const isDashboard = pathname === '/dashboard'
   const isRotina = pathname === '/rotina'
@@ -127,6 +129,13 @@ export function Sidebar({ onClose }: Props) {
 
       {/* Footer */}
       <div className="p-3" style={{ borderTop: '0.5px solid #c8d8d2' }}>
+        {typeof totalMembros === 'number' && (
+          <div className="flex items-center gap-2 px-3 py-2 text-xs" style={{ color: '#6f8f87' }}>
+            <Users className="size-3.5 shrink-0" />
+            {totalMembros.toLocaleString('pt-BR')} {totalMembros === 1 ? 'membro' : 'membros'}
+          </div>
+        )}
+
         <form action={logout}>
           <LogoutButton />
         </form>
