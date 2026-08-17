@@ -4,7 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { calcularAnalise } from '@/lib/analise'
+import { calcularDiagnostico } from '@/lib/analise'
 import { calcularRotina, getZonaConfig } from '@/lib/rotina'
 import { AuthLayout } from '@/components/AuthLayout'
 import { NewsletterCTA } from '@/components/NewsletterCTA'
@@ -50,11 +50,10 @@ export default async function DiagnosticoPage({ params }: Props) {
 
   const mapa = mapaRaw as Mapa
   const areas = mapa.areas ?? []
-  const analise = calcularAnalise(areas)
+  const diagnostico = calcularDiagnostico(areas)
   const nomeUsuario = profile?.nome ?? user.email ?? ''
 
-  const totais = { verde: 0, amarelo: 0, vermelho: 0 }
-  for (const area of areas) totais[area.status]++
+  const totais = diagnostico.totais
 
   const areasComObservacao = areas.filter((a) => a.observacao?.trim())
 
@@ -86,10 +85,77 @@ export default async function DiagnosticoPage({ params }: Props) {
           Ver mapa
         </Link>
 
-        {/* Análise Diagnóstica */}
-        <div className="rounded-card bg-white px-9 py-8" style={{ border: '0.5px solid #c8d8d2' }}>
-          <p className="text-[1.05rem] font-medium leading-relaxed text-mt-black">{analise}</p>
+        {/* Análise Diagnóstica — padrão, projeção e escolha */}
+        <div
+          className="flex flex-col gap-5 rounded-card bg-white px-9 py-8"
+          style={{ border: '0.5px solid #c8d8d2' }}
+        >
+          <p className="text-[1.05rem] font-medium leading-relaxed text-mt-black">
+            {diagnostico.padrao}
+          </p>
+
+          {diagnostico.projecao.map((paragrafo, i) => (
+            <p key={i} className="text-[0.95rem] leading-relaxed text-mt-green-dark">
+              {paragrafo}
+            </p>
+          ))}
+
+          <p
+            className="text-[1rem] leading-relaxed font-editorial italic"
+            style={{ color: '#2A3F45', borderTop: '0.5px solid #c8d8d2', paddingTop: 20 }}
+          >
+            {diagnostico.escolha}
+          </p>
         </div>
+
+        {/* Áreas que pedem atenção — fundamento e evidência de cada uma */}
+        {diagnostico.areasDestacadas.length > 0 && (
+          <div className="flex flex-col gap-4">
+            <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              O que o estudo mostra sobre essas áreas
+            </h2>
+
+            {diagnostico.areasDestacadas.map(({ nome, status, base }) => {
+              const cor = status === 'vermelho' ? '#C05050' : '#D4A843'
+              return (
+                <div
+                  key={nome}
+                  className="flex flex-col gap-3 rounded-card bg-white px-9 py-7"
+                  style={{ border: '0.5px solid #c8d8d2' }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: cor,
+                        flexShrink: 0,
+                        display: 'inline-block',
+                      }}
+                    />
+                    <h3 className="text-sm font-semibold text-mt-black">{nome}</h3>
+                  </div>
+
+                  <p className="text-[0.95rem] leading-relaxed text-mt-black">{base.fundamento}</p>
+
+                  <p
+                    className="text-sm leading-relaxed"
+                    style={{
+                      backgroundColor: 'rgba(87,170,143,0.08)',
+                      borderLeft: `2px solid #57AA8F`,
+                      borderRadius: 6,
+                      padding: '14px 16px',
+                      color: '#2A3F45',
+                    }}
+                  >
+                    {base.destaque}
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        )}
 
         {/* Status Badges - Faróis */}
         <div className="flex items-center gap-2 rounded-card bg-white px-9 py-6" style={{ border: '0.5px solid #c8d8d2' }}>

@@ -6,19 +6,19 @@ import { ArrowLeft, ArrowUp, FileText } from 'lucide-react'
 import { MapaFlow } from './MapaFlow'
 import { NewsletterCTA } from '@/components/NewsletterCTA'
 import { cn } from '@/lib/utils'
+import type { Diagnostico } from '@/lib/analise'
 import type { Mapa } from '@/types'
 
 type Props = {
   mapa: Mapa
-  analise: string
+  diagnostico: Diagnostico
 }
 
-export function RevelacaoMapa({ mapa, analise }: Props) {
+export function RevelacaoMapa({ mapa, diagnostico }: Props) {
   const [revealed, setRevealed] = useState(false)
   const analiseRef = useRef<HTMLDivElement>(null)
 
-  const totais = { verde: 0, amarelo: 0, vermelho: 0 }
-  for (const area of mapa.areas ?? []) totais[area.status]++
+  const totais = diagnostico.totais
 
   useEffect(() => {
     const revelarEScrollar = () => {
@@ -117,7 +117,7 @@ export function RevelacaoMapa({ mapa, analise }: Props) {
             Ver mapa
           </button>
 
-          {/* Texto da análise em Lora itálico */}
+          {/* Padrão — o momento de impacto, em Lora itálico */}
           <p
             className="text-center leading-relaxed"
             style={{
@@ -128,8 +128,87 @@ export function RevelacaoMapa({ mapa, analise }: Props) {
               lineHeight: 1.75,
             }}
           >
-            {analise}
+            {diagnostico.padrao}
           </p>
+
+          {/* Projeção — para onde esse padrão leva */}
+          <div className="flex flex-col gap-4">
+            {diagnostico.projecao.map((paragrafo, i) => (
+              <p
+                key={i}
+                className="text-center leading-relaxed"
+                style={{ fontSize: '0.95rem', color: 'rgba(237,242,239,0.8)', lineHeight: 1.7 }}
+              >
+                {paragrafo}
+              </p>
+            ))}
+          </div>
+
+          {/* Escolha */}
+          <p
+            className="text-center leading-relaxed"
+            style={{
+              fontFamily: 'var(--font-lora), Lora, serif',
+              fontStyle: 'italic',
+              fontSize: '1rem',
+              color: '#EDF2EF',
+              lineHeight: 1.7,
+              borderTop: '0.5px solid rgba(237,242,239,0.15)',
+              paddingTop: 28,
+            }}
+          >
+            {diagnostico.escolha}
+          </p>
+
+          {/* Áreas críticas — fundamento e evidência */}
+          {diagnostico.areasDestacadas.length > 0 && (
+            <div className="flex w-full flex-col gap-3">
+              {diagnostico.areasDestacadas.map(({ nome, status, base }) => (
+                <div
+                  key={nome}
+                  className="flex flex-col gap-2.5"
+                  style={{
+                    backgroundColor: 'rgba(237,242,239,0.05)',
+                    border: '0.5px solid rgba(237,242,239,0.12)',
+                    borderRadius: 12,
+                    padding: '20px 22px',
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      style={{
+                        width: 7,
+                        height: 7,
+                        borderRadius: '50%',
+                        backgroundColor: status === 'vermelho' ? '#C05050' : '#D4A843',
+                        flexShrink: 0,
+                        display: 'inline-block',
+                      }}
+                    />
+                    <h3 className="text-sm font-semibold" style={{ color: '#EDF2EF' }}>
+                      {nome}
+                    </h3>
+                  </div>
+
+                  <p style={{ fontSize: '0.9rem', color: 'rgba(237,242,239,0.85)', lineHeight: 1.65 }}>
+                    {base.fundamento}
+                  </p>
+
+                  <p
+                    style={{
+                      fontSize: '0.85rem',
+                      color: 'rgba(237,242,239,0.7)',
+                      lineHeight: 1.65,
+                      borderLeft: '2px solid #57AA8F',
+                      paddingLeft: 14,
+                    }}
+                  >
+                    {base.destaque}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Pills de cores centralizadas */}
           <div className="flex items-center justify-center gap-2">

@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { calcularAnalise } from '@/lib/analise'
+import { calcularDiagnostico } from '@/lib/analise'
 import type { Mapa } from '@/types'
 
 const RevelacaoMapa = dynamic(
@@ -42,7 +42,7 @@ export default async function MapaPage({ params }: Props) {
   if (!mapaRaw) notFound()
 
   const mapa = mapaRaw as Mapa
-  const analise = calcularAnalise(mapa.areas ?? [])
+  const diagnostico = calcularDiagnostico(mapa.areas ?? [])
 
-  return <RevelacaoMapa mapa={mapa} analise={analise} />
+  return <RevelacaoMapa mapa={mapa} diagnostico={diagnostico} />
 }
