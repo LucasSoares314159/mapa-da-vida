@@ -4,6 +4,10 @@ Substitui o array sobrescrito `profiles.aulas_concluidas` por uma tabela de
 eventos com timestamp por aula. A partir daqui, toda conclusão registra **quando**
 aconteceu — o que destrava velocidade da trilha, dias travado, drop-off e coorte.
 
+> **Como rodar:** abra o arquivo `migracao_progresso_aulas.sql` e cole o conteúdo
+> dele no Supabase SQL Editor. Não cole este arquivo `.md` — o SQL Editor não
+> entende Markdown e falha já no `#` do título.
+
 Execute no Supabase SQL Editor (Dashboard → SQL Editor → New Query).
 
 ## SQL
