@@ -7,6 +7,7 @@ import { PERIODOS } from '@/lib/metricas'
 import { MODULOS } from '@/lib/modulos'
 import { Funil } from './Funil'
 import { DistribuicaoModulos } from './DistribuicaoModulos'
+import { Dedicacao } from './Dedicacao'
 
 type Aba = 'todas' | 'turma1' | 'turma2'
 
@@ -109,6 +110,14 @@ export function PainelMetricas({
                 turma.temDataReal && turma.emRisco > turma.total * 0.45 ? 'critico' : 'alerta'
               }
             />
+          </div>
+
+          {/* Dedicação */}
+          <div className="flex flex-col gap-2">
+            <h3 className="text-[11px] font-medium uppercase tracking-wider text-mt-muted">
+              Dedicação · retorno e consistência
+            </h3>
+            <Dedicacao turma={turma} />
           </div>
 
           {/* Funil */}

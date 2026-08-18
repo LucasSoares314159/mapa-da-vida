@@ -57,12 +57,14 @@ export function TabelaAlunos({ alunos }: { alunos: LinhaAluno[] }) {
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-mt-border bg-mt-surface">
-        <table className="w-full min-w-[760px] text-sm">
+        <table className="w-full min-w-[900px] text-sm">
           <thead>
             <tr className="border-b border-mt-border bg-mt-off-white">
               <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-muted">Aluno</th>
               <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-muted">Turma</th>
               <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-muted">Onde parou</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-muted">Dias ativos</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-muted">Conteúdo</th>
               <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-muted">Parado há</th>
               <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-muted">Artefatos</th>
             </tr>
@@ -91,6 +93,16 @@ export function TabelaAlunos({ alunos }: { alunos: LinhaAluno[] }) {
                     ? 'Não começou'
                     : MODULOS[a.ultimoModulo].titulo.replace(/ —.*/, '')}
                   <span className="ml-1 text-xs">({a.modulosConcluidos}/{MODULOS.length})</span>
+                </td>
+                <td className="px-4 py-3 text-right tabular-nums text-mt-muted">
+                  {a.turma === 'turma1' ? '—' : a.diasAtivos || '—'}
+                </td>
+                <td className="px-4 py-3 text-right tabular-nums text-mt-muted">
+                  {a.minutosConteudo
+                    ? a.minutosConteudo >= 60
+                      ? `${Math.floor(a.minutosConteudo / 60)}h${a.minutosConteudo % 60 ? ` ${a.minutosConteudo % 60}min` : ''}`
+                      : `${a.minutosConteudo}min`
+                    : '—'}
                 </td>
                 <td className="px-4 py-3 text-right tabular-nums">
                   <span
@@ -133,7 +145,7 @@ export function TabelaAlunos({ alunos }: { alunos: LinhaAluno[] }) {
             ))}
             {ordenados.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-sm text-mt-muted">
+                <td colSpan={7} className="px-4 py-8 text-center text-sm text-mt-muted">
                   Ninguém em risco no momento.
                 </td>
               </tr>

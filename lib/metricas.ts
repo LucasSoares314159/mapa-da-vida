@@ -37,6 +37,15 @@ export type LinhaAluno = {
   modulosConcluidos: number
   ultimoModulo: number | null
   ultimaAtividade: string | null
+  primeiraAtividade: string | null
+  /** Dias distintos em que concluiu ao menos uma aula. */
+  diasAtivos: number
+  /** Maior sequência de dias seguidos com atividade. */
+  maiorSequencia: number
+  /** Mediana de dias entre conclusões consecutivas. */
+  ritmoMediano: number | null
+  /** Minutos de conteúdo concluído, somando a duração dos módulos. */
+  minutosConteudo: number
   diasParado: number | null
   emRisco: boolean
   temMapa: boolean
@@ -61,6 +70,21 @@ export type VisaoTurma = {
   mediaModulos: number
   /** Métricas de tempo só valem onde há data real de conclusão. */
   temDataReal: boolean
+  /** Dedicação: medida por retorno e consistência, não por aba aberta. */
+  ritmo: {
+    /** Média de dias distintos com atividade, entre quem já começou. */
+    mediaDiasAtivos: number
+    /** Maior sequência de dias seguidos observada na turma. */
+    melhorSequencia: number
+    /** Mediana de dias entre uma aula e a seguinte. */
+    ritmoMediano: number | null
+    /** Minutos de conteúdo concluído, somados. */
+    minutosTotais: number
+    /** Média de minutos por aluno que começou. */
+    minutosPorAluno: number
+    /** Quantos voltaram em mais de um dia — sinal de hábito, não de curiosidade. */
+    voltaram: number
+  }
 }
 
 export type Metricas = {
@@ -76,6 +100,58 @@ export type Metricas = {
   ativos7d: number
   concluiramTrilha: number
   dadosDeTempoConfiaveis: boolean
+}
+
+/** Duração de um módulo em minutos, a partir de "MM:SS" ou "H:MM:SS". */
+function duracaoEmMinutos(d: string): number {
+  const partes = d.split(':').map(Number)
+  if (partes.length === 3) return partes[0] * 60 + partes[1] + partes[2] / 60
+  if (partes.length === 2) return partes[0] + partes[1] / 60
+  return 0
+}
+
+const MINUTOS_POR_MODULO = MODULOS.map((m) => duracaoEmMinutos(m.duracao))
+
+/** Dia local no formato YYYY-MM-DD, para agrupar conclusões por data. */
+function diaDe(iso: string): string {
+  return iso.slice(0, 10)
+}
+
+/**
+ * Maior sequência de dias consecutivos com atividade. É a métrica que mais se
+ * aproxima de "dedicação" sem depender de aba aberta: mostra quem criou hábito.
+ */
+function maiorSequenciaDe(dias: string[]): number {
+  if (dias.length === 0) return 0
+  const ordenados = Array.from(new Set(dias)).sort()
+  let melhor = 1
+  let atual = 1
+  for (let i = 1; i < ordenados.length; i++) {
+    const anterior = new Date(ordenados[i - 1] + 'T00:00:00Z').getTime()
+    const hoje = new Date(ordenados[i] + 'T00:00:00Z').getTime()
+    const distancia = Math.round((hoje - anterior) / 86_400_000)
+    atual = distancia === 1 ? atual + 1 : 1
+    if (atual > melhor) melhor = atual
+  }
+  return melhor
+}
+
+/** Mediana de dias entre conclusões consecutivas — resiste a outliers. */
+function ritmoMedianoDe(datas: string[]): number | null {
+  if (datas.length < 2) return null
+  const ordenadas = [...datas].sort()
+  const intervalos: number[] = []
+  for (let i = 1; i < ordenadas.length; i++) {
+    const ms = new Date(ordenadas[i]).getTime() - new Date(ordenadas[i - 1]).getTime()
+    intervalos.push(ms / 86_400_000)
+  }
+  intervalos.sort((a, b) => a - b)
+  const meio = Math.floor(intervalos.length / 2)
+  const mediana =
+    intervalos.length % 2 === 0
+      ? (intervalos[meio - 1] + intervalos[meio]) / 2
+      : intervalos[meio]
+  return Math.round(mediana * 10) / 10
 }
 
 function diasDesde(iso: string | null): number | null {
@@ -163,24 +239,31 @@ export async function carregarMetricas(periodo: Periodo = {}): Promise<Metricas>
   const comRotina = setDe(rotinas as any, 'atualizado_em')
 
   // Eventos de progresso agrupados por aluno.
-  const porAluno = new Map<string, { indices: number[]; ultima: string | null }>()
+  type Progresso = { indices: number[]; ultima: string | null; datas: string[] }
+  const porAluno = new Map<string, Progresso>()
   for (const e of eventos) {
     const idx = moduloIdParaIndice(e.modulo_id)
     if (idx < 0) continue
     // Datas estimadas não têm posição no tempo: só entram quando não há janela.
     if (periodo.desde && !(e.data_confiavel && naJanela(e.concluido_em))) continue
-    const atual = porAluno.get(e.user_id) ?? { indices: [], ultima: null }
+    const atual: Progresso = porAluno.get(e.user_id) ?? {
+      indices: [],
+      ultima: null,
+      datas: [],
+    }
     atual.indices.push(idx)
-    // Datas estimadas na migração não valem como "atividade recente".
-    if (e.data_confiavel && (!atual.ultima || e.concluido_em > atual.ultima)) {
-      atual.ultima = e.concluido_em
+    // Só datas reais alimentam ritmo e "atividade recente".
+    if (e.data_confiavel) {
+      atual.datas.push(e.concluido_em)
+      if (!atual.ultima || e.concluido_em > atual.ultima) atual.ultima = e.concluido_em
     }
     porAluno.set(e.user_id, atual)
   }
 
   const alunos: LinhaAluno[] = alunosBrutos.map((p) => {
-    const prog = porAluno.get(p.id) ?? { indices: [], ultima: null }
+    const prog = porAluno.get(p.id) ?? { indices: [], ultima: null, datas: [] }
     const turma = turmaDe(p.criado_em ?? '')
+    const diasComAtividade = Array.from(new Set(prog.datas.map(diaDe)))
     const dias = diasDesde(prog.ultima)
     // Quem nunca teve atividade datada conta como parado desde o cadastro.
     const diasParado = dias ?? diasDesde(p.criado_em)
@@ -195,6 +278,13 @@ export async function carregarMetricas(periodo: Periodo = {}): Promise<Metricas>
       modulosConcluidos: prog.indices.length,
       ultimoModulo: prog.indices.length ? Math.max(...prog.indices) : null,
       ultimaAtividade: prog.ultima,
+      primeiraAtividade: prog.datas.length ? [...prog.datas].sort()[0] : null,
+      diasAtivos: diasComAtividade.length,
+      maiorSequencia: maiorSequenciaDe(diasComAtividade),
+      ritmoMediano: ritmoMedianoDe(prog.datas),
+      minutosConteudo: Math.round(
+        prog.indices.reduce((soma, i) => soma + (MINUTOS_POR_MODULO[i] ?? 0), 0)
+      ),
       diasParado,
       // Só a Turma 2 tem data real de conclusão; marcar a Turma 1 como "em
       // risco" seria medir a data da migração, não o comportamento dela.
@@ -294,6 +384,15 @@ export async function carregarMetricas(periodo: Periodo = {}): Promise<Metricas>
     temDataReal: boolean
   ): VisaoTurma {
     const somaModulos = grupo.reduce((s, a) => s + a.modulosConcluidos, 0)
+    // Ritmo só considera quem já concluiu alguma aula: incluir quem nunca
+    // começou puxaria todas as médias para zero sem dizer nada sobre dedicação.
+    const ativos = grupo.filter((a) => a.diasAtivos > 0)
+    const ritmos = ativos
+      .map((a) => a.ritmoMediano)
+      .filter((r): r is number => r !== null)
+      .sort((x, y) => x - y)
+    const minutosTotais = grupo.reduce((s, a) => s + a.minutosConteudo, 0)
+
     return {
       nome,
       descricao,
@@ -311,6 +410,16 @@ export async function carregarMetricas(periodo: Periodo = {}): Promise<Metricas>
       concluiramTrilha: grupo.filter((a) => a.modulosConcluidos === MODULOS.length).length,
       mediaModulos: grupo.length ? Math.round((somaModulos / grupo.length) * 10) / 10 : 0,
       temDataReal,
+      ritmo: {
+        mediaDiasAtivos: ativos.length
+          ? Math.round((ativos.reduce((s, a) => s + a.diasAtivos, 0) / ativos.length) * 10) / 10
+          : 0,
+        melhorSequencia: Math.max(0, ...grupo.map((a) => a.maiorSequencia)),
+        ritmoMediano: ritmos.length ? ritmos[Math.floor(ritmos.length / 2)] : null,
+        minutosTotais,
+        minutosPorAluno: ativos.length ? Math.round(minutosTotais / ativos.length) : 0,
+        voltaram: grupo.filter((a) => a.diasAtivos > 1).length,
+      },
     }
   }
 
