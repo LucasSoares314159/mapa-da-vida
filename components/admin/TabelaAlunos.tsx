@@ -13,12 +13,38 @@ import { MODULOS } from '@/lib/modulos'
  */
 export function TabelaAlunos({ alunos }: { alunos: LinhaAluno[] }) {
   const [soRisco, setSoRisco] = useState(false)
+  const [turma, setTurma] = useState<'todas' | 'turma1' | 'turma2'>('todas')
 
-  const visiveis = soRisco ? alunos.filter((a) => a.emRisco) : alunos
+  const visiveis = alunos
+    .filter((a) => turma === 'todas' || a.turma === turma)
+    .filter((a) => !soRisco || a.emRisco)
   const ordenados = [...visiveis].sort((a, b) => (b.diasParado ?? 0) - (a.diasParado ?? 0))
 
   return (
     <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex gap-1 rounded-lg border border-mt-border bg-mt-surface p-1">
+          {([
+            ['todas', 'Todas'],
+            ['turma2', 'Turma 2'],
+            ['turma1', 'Turma 1'],
+          ] as const).map(([valor, rotulo]) => (
+            <button
+              key={valor}
+              type="button"
+              onClick={() => setTurma(valor)}
+              className="rounded px-3 py-1 text-xs font-medium transition-colors"
+              style={
+                turma === valor
+                  ? { backgroundColor: '#57AA8F', color: '#fff' }
+                  : { color: '#6f8f87' }
+              }
+            >
+              {rotulo}
+            </button>
+          ))}
+        </div>
+
       <label className="flex cursor-pointer items-center gap-2 self-start text-sm text-mt-muted">
         <input
           type="checkbox"
@@ -28,12 +54,14 @@ export function TabelaAlunos({ alunos }: { alunos: LinhaAluno[] }) {
         />
         Mostrar só quem está em risco
       </label>
+      </div>
 
       <div className="overflow-x-auto rounded-lg border border-mt-border bg-mt-surface">
-        <table className="w-full min-w-[680px] text-sm">
+        <table className="w-full min-w-[760px] text-sm">
           <thead>
             <tr className="border-b border-mt-border bg-mt-off-white">
               <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-muted">Aluno</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-muted">Turma</th>
               <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-muted">Onde parou</th>
               <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-muted">Parado há</th>
               <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-muted">Artefatos</th>
@@ -46,6 +74,18 @@ export function TabelaAlunos({ alunos }: { alunos: LinhaAluno[] }) {
                   <p className="font-medium" style={{ color: '#1a2e29' }}>{a.nome}</p>
                   <p className="text-xs text-mt-muted">{a.email}</p>
                 </td>
+                <td className="px-4 py-3">
+                  <span
+                    className="rounded px-2 py-0.5 text-[11px] font-medium"
+                    style={
+                      a.turma === 'turma2'
+                        ? { backgroundColor: '#E8F1EC', color: '#3F8C74' }
+                        : { backgroundColor: '#EDF2EF', color: '#6f8f87' }
+                    }
+                  >
+                    {a.turma === 'turma2' ? 'T2' : 'T1'}
+                  </span>
+                </td>
                 <td className="px-4 py-3 text-mt-muted">
                   {a.ultimoModulo === null
                     ? 'Não começou'
@@ -56,12 +96,14 @@ export function TabelaAlunos({ alunos }: { alunos: LinhaAluno[] }) {
                   <span
                     className="rounded-full px-2 py-1 text-xs font-medium"
                     style={
-                      a.emRisco
+                      a.turma === 'turma1'
+                        ? { backgroundColor: '#EDF2EF', color: '#6f8f87' }
+                        : a.emRisco
                         ? { backgroundColor: '#F6E0E0', color: '#C05050' }
                         : { backgroundColor: '#E8F1EC', color: '#3F8C74' }
                     }
                   >
-                    {a.diasParado ?? '—'}d
+                    {a.turma === 'turma1' ? '—' : `${a.diasParado ?? '—'}d`}
                   </span>
                 </td>
                 <td className="px-4 py-3">
@@ -91,7 +133,7 @@ export function TabelaAlunos({ alunos }: { alunos: LinhaAluno[] }) {
             ))}
             {ordenados.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-sm text-mt-muted">
+                <td colSpan={5} className="px-4 py-8 text-center text-sm text-mt-muted">
                   Ninguém em risco no momento.
                 </td>
               </tr>
