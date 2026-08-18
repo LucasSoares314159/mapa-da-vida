@@ -34,6 +34,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Back office: só os emails listados em ADMIN_EMAILS entram.
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    const admins = (process.env.ADMIN_EMAILS ?? '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean)
+
+    if (!user?.email || !admins.includes(user.email.toLowerCase())) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/content'
+      return NextResponse.redirect(url)
+    }
+  }
+
   const isRedefinirSenha = request.nextUrl.pathname === '/auth/redefinir-senha'
   const isVerificarEmail = request.nextUrl.pathname === '/auth/verificar-email'
 
@@ -47,5 +61,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/mapa/:path*', '/auth/:path*', '/rotina/:path*', '/rotina', '/diagnostico/:path*', '/objetivos', '/objetivos/:path*', '/content', '/content/:path*'],
+  matcher: ['/admin', '/admin/:path*', '/dashboard/:path*', '/mapa/:path*', '/auth/:path*', '/rotina/:path*', '/rotina', '/diagnostico/:path*', '/objetivos', '/objetivos/:path*', '/content', '/content/:path*'],
 }

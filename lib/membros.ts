@@ -13,6 +13,7 @@ export async function contarMembros(): Promise<number | null> {
     const { count, error } = await supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
+      .eq('excluir_das_metricas', false)
 
     if (error) {
       console.error('[membros] erro ao contar perfis:', error)

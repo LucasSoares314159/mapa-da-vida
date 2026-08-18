@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ChevronUp, ChevronDown, Check } from 'lucide-react'
-import { atualizarProgresso } from '@/app/actions/progresso'
+import { marcarAula } from '@/app/actions/progresso'
 import { LIVES } from '@/lib/lives'
 import { MODULOS } from '@/lib/modulos'
 
@@ -29,12 +29,12 @@ export function TrilhaConteudo({ nomeUsuario, aulasConcluidas }: Props) {
   function toggleAula(index: number) {
     if (!MODULOS[index].link) return
 
-    const novoArray = concluidas.includes(index)
-      ? concluidas.filter((i) => i !== index)
-      : [...concluidas, index]
+    const jaConcluida = concluidas.includes(index)
 
-    setConcluidas(novoArray)
-    atualizarProgresso(novoArray)
+    setConcluidas(
+      jaConcluida ? concluidas.filter((i) => i !== index) : [...concluidas, index]
+    )
+    marcarAula(index, !jaConcluida)
   }
 
   return (

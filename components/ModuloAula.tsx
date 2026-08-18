@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, ChevronRight, ExternalLink, Check } from 'lucide-react'
-import { atualizarProgresso } from '@/app/actions/progresso'
+import { marcarAula } from '@/app/actions/progresso'
 import { MODULOS, type Modulo } from '@/lib/modulos'
 import { ModulosSidebar } from './ModulosSidebar'
 
@@ -37,15 +37,13 @@ export function ModuloAula({
 
   function toggleConcluida() {
     if (concluida) {
-      const novoArray = concluidas.filter((i) => i !== moduloIndex)
-      setConcluidas(novoArray)
-      atualizarProgresso(novoArray)
+      setConcluidas(concluidas.filter((i) => i !== moduloIndex))
+      marcarAula(moduloIndex, false)
       return
     }
 
-    const novoArray = [...concluidas, moduloIndex]
-    setConcluidas(novoArray)
-    atualizarProgresso(novoArray)
+    setConcluidas([...concluidas, moduloIndex])
+    marcarAula(moduloIndex, true)
 
     if (proximoId) {
       router.push(`/content/modulo/${proximoId}`)
