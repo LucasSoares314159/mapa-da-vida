@@ -94,7 +94,10 @@ export async function carregarMetricas(): Promise<Metricas> {
     { data: objetivos },
     { data: rotinas },
   ] = await Promise.all([
-    sb.from('profiles').select('id, nome, criado_em').order('criado_em'),
+    sb
+      .from('profiles')
+      .select('id, nome, criado_em, excluir_das_metricas')
+      .order('criado_em'),
     sb.from('progresso_aulas').select('user_id, modulo_id, concluido_em, data_confiavel'),
     sb.from('mapas').select('user_id'),
     sb.from('momentos_vida').select('user_id'),
@@ -102,7 +105,9 @@ export async function carregarMetricas(): Promise<Metricas> {
     sb.from('rotinas').select('user_id'),
   ])
 
-  const alunosBrutos = perfis ?? []
+  // Contas internas (testes, equipe) ficam fora de todas as métricas — a
+  // plataforma segue funcionando normalmente para elas.
+  const alunosBrutos = (perfis ?? []).filter((p) => !p.excluir_das_metricas)
   const eventos = progresso ?? []
   const total = alunosBrutos.length
 
