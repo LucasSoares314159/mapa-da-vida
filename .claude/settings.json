@@ -24,5 +24,20 @@
     "additionalDirectories": [
       "/Users/danilo/Documents/mapa-da-vida-clone/.git"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/checar-claude-md.sh",
+            "timeout": 10,
+            "statusMessage": "Conferindo CLAUDE.md"
+          }
+        ]
+      }
+    ]
   }
 }

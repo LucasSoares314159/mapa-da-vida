@@ -1,284 +1,407 @@
 # Mapa da Vida — CLAUDE.md
 
-## Visão Geral do Produto
-**Mapa da Vida** é o AHA moment de um programa chamado **Trilha da Produtividade** (MindTrail), que ensina pessoas a construir seu próprio sistema de organização pessoal. O Mapa da Vida é o Módulo 1 — um diagnóstico reflexivo onde o usuário responde perguntas sobre pilares da vida, classifica cada área com um status (verde, amarelo ou vermelho), e recebe um mapa visual em formato de fluxograma com análise diagnóstica. O objetivo é gerar um choque de realidade que motiva a mudança.
+> **Como manter este arquivo:** ele descreve o que o código **não** diz por si só —
+> decisões, invariantes e armadilhas. Não duplique o que se lê na fonte: aponte para
+> ela. Ao terminar uma feature, rode o checklist em [Manutenção deste arquivo](#manutenção-deste-arquivo).
 
 ---
 
-## Ambiente de Desenvolvimento
+## Produto
 
-- **Pasta do projeto:** `/Users/danilo/Documents/mapa-da-vida-14`
-- **Porta do servidor:** `3001` (não 3000)
-- **Node.js:** v22.x (obrigatório — v24 é incompatível)
-- **Para rodar:** `npm run dev` dentro da pasta do projeto
-- **Para parar processos travados:** `pkill -9 -f "next dev"`
-- **Se o macOS travar o servidor:** `xattr -cr /Users/danilo/Documents/mapa-da-vida-14/`
+**Trilha da Produtividade** (MindTrail) é um programa pago que ensina a pessoa a
+construir seu próprio sistema de organização pessoal. São 9 módulos e lives.
 
----
+O **Mapa da Vida** é o Módulo 3 e o AHA moment: um diagnóstico reflexivo em que a
+pessoa classifica 9 áreas da vida como verde/amarelo/vermelho e recebe um
+fluxograma com análise. O choque de realidade motiva a mudança.
 
-## Stack Tecnológica
+A plataforma web hospeda a trilha e quatro ferramentas que a acompanham: **Mapa**,
+**Momento de Vida**, **Objetivos** e **Calculadora de Rotina**. O conteúdo em si
+(vídeos e materiais) vive no **YouTube e no Notion** — a plataforma referencia, não
+hospeda. Isso importa em qualquer discussão de métricas de engajamento.
 
-| Camada | Tecnologia | Versão |
+### Turmas
+
+| Turma | Cadastros | Particularidade |
 |---|---|---|
-| Framework | Next.js (App Router) | 14.2.35 |
-| Linguagem | TypeScript | — |
-| Estilização | Tailwind CSS | v3 |
-| Componentes UI | shadcn/ui | — |
-| Ícones | Lucide React | — |
-| Formulários | Zod | — |
-| Fluxograma | @xyflow/react (React Flow) | — |
-| Backend / Banco | Supabase (PostgreSQL) | — |
-| Autenticação | Supabase Auth | — |
-| Hospedagem | Vercel (ainda não configurado) | — |
+| Turma 1 | até julho/2026 | progresso migrado **sem data real** |
+| Turma 2 | de 17/08/2026 | nasceu com registro de data |
+
+`profiles` contém **apenas quem pagou** — 13 pessoas. Há ~47 contas em `auth.users`
+sem perfil: resíduo da época em que o Mapa era um produto aberto e gratuito, cujos
+perfis foram deletados de propósito. **Nunca reconciliar `auth.users` com
+`profiles`** — isso reintroduziria não-clientes nas métricas.
 
 ---
 
-## Regras Gerais de Desenvolvimento
+## Ambiente
 
-- Sempre usar **TypeScript**
-- Sempre usar **App Router** do Next.js 14 (nunca Pages Router)
-- Componentes devem ser **funcionais** com hooks
-- Estilização **exclusivamente com Tailwind CSS** — nunca CSS inline ou arquivos .css separados
-- Usar **shadcn/ui** para todos os elementos de UI (botões, inputs, modais, cards, etc.)
-- Validação de formulários sempre com **Zod**
-- Comunicação com banco de dados sempre via **Supabase client**
-- Todo texto da interface em **português do Brasil**
-- Código comentado em **português**
-- Nunca instalar bibliotecas novas sem avisar e justificar
-- **Next.js 14 específico:** `params` é síncrono (não use `await params`), `cookies()` não é async, usar `useFormState` de `react-dom` (não `useActionState` do React)
-- Middleware usa `middleware.ts` (não `proxy.ts` — isso é Next.js 16+)
-- Nunca rodar `npm run build` enquanto `npm run dev` está ativo
+- **Pasta:** `/Users/danilo/Documents/mapa-da-vida`
+- **Porta:** `3001` (`npm run dev`)
+- **Node.js:** v22.x — v24 é incompatível
+- **Preview de e-mails:** `npm run email` (porta 3002)
+- **Processos travados:** `pkill -9 -f "next dev"`
+- **macOS bloqueando o servidor:** `xattr -cr .` (já roda no `postinstall`)
+- O aviso `Found lockfile missing swc dependencies` no boot é cosmético; ignore.
+
+### Antes de qualquer push
+
+```bash
+npx tsc --noEmit          # tipos
+npx next lint             # ESLint — o build da Vercel FALHA em erros de lint
+npm run build             # só com o dev parado
+```
+
+`tsc` sozinho **não** basta: já quebrou um deploy por erros de ESLint que ele não vê.
 
 ---
 
-## Estrutura de Rotas
+## Stack
 
-| Rota | Descrição |
+| Camada | Tecnologia |
 |---|---|
-| `/` | Landing page |
-| `/auth/login` | Login |
-| `/auth/cadastro` | Cadastro |
-| `/auth/esqueci-senha` | Recuperação de senha |
-| `/auth/redefinir-senha` | Redefinição de senha |
-| `/auth/verificar-email` | Verificação de email |
-| `/dashboard` | Lista de mapas do usuário |
-| `/mapa/preparacao` | Tela de introdução antes de criar mapa (AHA moment) |
-| `/mapa/novo` | Formulário em steps (3 pilares) para criar mapa |
-| `/mapa/[id]` | Visualização do mapa com revelação animada |
-| `/diagnostico/[id]` | Diagnóstico completo com observações |
+| Framework | Next.js 14.2.35 (App Router) |
+| Linguagem | TypeScript |
+| Estilo | Tailwind CSS v3 + shadcn/ui |
+| Ícones | Lucide React |
+| Formulários | react-hook-form + Zod |
+| Fluxograma | @xyflow/react |
+| Gráficos | Recharts |
+| Animação | motion |
+| Banco / Auth | Supabase (PostgreSQL) |
+| E-mail | react-email + nodemailer (SMTP) |
+| Hospedagem | Vercel |
+
+### Next.js 14 — diferenças que causam erro
+
+- `params` é **síncrono** (não `await params`)
+- `cookies()` **não** é async
+- `useFormState` de `react-dom` (não `useActionState`)
+- `middleware.ts` na raiz (não `proxy.ts`, que é Next 16+)
 
 ---
 
-## Estrutura de Pastas
+## Rotas
+
+| Rota | Descrição | Auth |
+|---|---|---|
+| `/` | Landing page | pública |
+| `/lista-espera`, `/obrigado` | Captação e agradecimento | pública |
+| `/auth/*` | login, cadastro, esqueci/redefinir senha, verificar e-mail, callback | pública |
+| `/content` | Trilha: módulos e lives | ✅ |
+| `/content/modulo/[id]`, `/content/live/[id]` | Aula individual | ✅ |
+| `/mapa/preparacao` → `/mapa/novo` → `/mapa/[id]` | Fluxo do AHA moment | ✅ |
+| `/diagnostico/[id]` | Diagnóstico completo | ✅ |
+| `/momento` | Momento de Vida | ✅ (guarda própria) |
+| `/objetivos` | Objetivos + Radar de Coerência | ✅ |
+| `/rotina` | Calculadora de Rotina | ✅ |
+| `/dashboard` | Mapas salvos e evolução | ✅ |
+| `/admin` | Back office de métricas | ✅ + `ADMIN_EMAILS` |
+| `/api/cron/emails` | Disparo diário (21h UTC) | `CRON_SECRET` |
+| `/api/lista-espera` | Webhook de captação | pública |
+
+**`/momento` não está no matcher do middleware.** Ela se protege sozinha na página,
+então não há brecha — mas fica sem o refresh de sessão que o middleware faz. Ao mexer
+nela, considere adicionar ao matcher.
+
+---
+
+## Estrutura
 
 ```
 /app
-  /auth          → páginas de login e cadastro
-  /dashboard     → listagem de mapas salvos
-  /mapa
-    /preparacao  → tela de introdução AHA moment
-    /novo        → criação de novo mapa (step by step)
-    /[id]        → visualização de mapa salvo
-  /diagnostico
-    /[id]        → diagnóstico completo
-  /actions
-    auth.ts      → server actions de autenticação
-    mapa.ts      → server actions do mapa
+  /actions        auth · mapa · momento · objetivos · progresso · rotina
+  /admin          back office
+  /api            cron/emails · cron/teste · lista-espera
+  /auth /content /mapa /diagnostico /momento /objetivos /rotina /dashboard
 /components
-  /ui            → componentes shadcn/ui
-  /mapa          → MapaFlow.tsx, RevelacaoMapa.tsx
-/lib
-  supabase.ts        → cliente Supabase (browser)
-  supabase-server.ts → cliente Supabase (server)
-  analise.ts         → lógica de análise diagnóstica
-  utils.ts           → utilitários gerais
-  validations.ts     → schemas Zod
-/types
-  index.ts       → tipos TypeScript globais
+  /ui             shadcn/ui
+  /admin          Kpi · Funil · PainelMetricas · TabelaAlunos · Dedicacao · DistribuicaoModulos
+  /mapa           MapaFlow · RevelacaoMapa · RevelacaoDiagnostico · AreaDestaqueOverlay
+  /lp /lista-espera
+/lib              ver tabela abaixo
+/emails           5 templates react-email
+/hooks            useMetaPixel · useUTMForward
+/types/index.ts   tipos + PILARES + ESTACOES + COR_STATUS
 ```
 
----
+### `/lib` — onde vive cada regra
 
-## Estrutura dos Pilares e Perguntas Reflexivas
-
-| Pilar | Área | Pergunta Reflexiva |
-|---|---|---|
-| **Corpo** | Exercícios Físicos | O quanto você sente que o seu corpo é funcional e tem a mobilidade, força e resistência que deveria ter? |
-| **Corpo** | Alimentação | Se alguém filmasse tudo que você comeu nos últimos 7 dias, você ficaria confortável assistindo? |
-| **Corpo** | Hobbies | Você tem algo na sua vida que faz só porque gosta — sem precisar ser produtivo, sem gerar resultado? |
-| **Mente** | Rede de Apoio | Se você recebesse uma notícia muito difícil hoje, quem você ligaria? Essa pessoa sabe o que está acontecendo na sua vida de verdade? |
-| **Mente** | Trabalho | Como você se sente no domingo à noite pensando na semana que vem? Esse sentimento é exceção ou regra? |
-| **Mente** | Finanças | Sem olhar para nenhum aplicativo agora: você sabe quanto entra, quanto sai e para onde vai o seu dinheiro todo mês? |
-| **Espírito** | Propósito | Você consegue explicar, em uma frase, por que faz o que faz todos os dias? Essa resposta te energiza ou te pesa? |
-| **Espírito** | Experiências | Quando foi a última vez que você fez algo pela primeira vez? Algo que te tirou da rotina e ficou na memória? |
-| **Espírito** | Espiritualidade | Você tem alguma prática — qualquer que seja — que te reconecta com algo maior que a lista de tarefas do dia? |
-
-### Status possíveis por área
-- 🟢 **Verde** — Estou bem nessa área
-- 🟡 **Amarelo** — Precisa de atenção
-- 🔴 **Vermelho** — Precisa de mudança urgente
-
-Campo de observação opcional com placeholder: *"O que está por trás dessa escolha?"*
-
----
-
-## Modelo de Dados (Supabase)
-
-### Tabela: `profiles`
-| Campo | Tipo | Descrição |
-|---|---|---|
-| id | uuid | FK para auth.users |
-| nome | text | Nome do usuário |
-| criado_em | timestamp | Data de criação |
-
-### Tabela: `mapas`
-| Campo | Tipo | Descrição |
-|---|---|---|
-| id | uuid | PK |
-| user_id | uuid | FK para profiles |
-| titulo | text | Título do mapa (opcional) |
-| criado_em | timestamp | Data de realização |
-
-### Tabela: `areas`
-| Campo | Tipo | Descrição |
-|---|---|---|
-| id | uuid | PK |
-| mapa_id | uuid | FK para mapas |
-| pilar | text | "corpo", "mente" ou "espirito" |
-| area | text | Nome da área |
-| status | text | "verde", "amarelo" ou "vermelho" |
-| observacao | text | Anotação livre do usuário (opcional) |
-
----
-
-## Fluxo do AHA Moment
-
-### 1. Tela de Preparação (`/mapa/preparacao`)
-Tela dark, impactante, sem distrações:
-- Tag: "ANTES DE COMEÇAR"
-- Título: "Esse não é um quiz. É uma pausa."
-- Texto explicativo sobre honestidade e 10 minutos de atenção
-- Frase final: "A maioria das pessoas nunca para para olhar para a própria vida dessa forma. Você está prestes a fazer isso."
-- Botão: "Estou pronto"
-- Botão de voltar discreto no canto superior esquerdo
-
-### 2. Questionário (`/mapa/novo`)
-- Um pilar por tela, com indicador de progresso (ex: 1 de 3) — cada tela exibe as 3 áreas do pilar
-- Nome do pilar no topo
-- Pergunta reflexiva em destaque
-- Botões de status: Verde / Amarelo / Vermelho (com cores correspondentes)
-- Campo de observação opcional com placeholder "O que está por trás dessa escolha?"
-- Botão de voltar discreto
-
-### 3. Revelação do Mapa (`/mapa/[id]`)
-- Mapa React Flow aparece primeiro, full screen, sem texto
-- Após 3 segundos ou ao rolar: análise diagnóstica aparece em fundo escuro
-- Análise baseada no padrão de respostas (ver lib/analise.ts)
-- Proporção de cores (🟢 N 🟡 N 🔴 N)
-- Frase: "Agora você tem o diagnóstico. A pergunta que fica é: o que você vai fazer com ele?"
-- Botão: "Definir meu objetivo" → leva ao dashboard por enquanto
-
-### 4. Diagnóstico Completo (`/diagnostico/[id]`)
-- Texto de análise diagnóstica no topo
-- Proporção de cores
-- Observações preenchidas pelo usuário, organizadas por área
-- Apenas áreas com observação são exibidas
-
----
-
-## Lógica de Análise Diagnóstica (lib/analise.ts)
-
-| Padrão | Texto resumido |
+| Arquivo | Responsabilidade |
 |---|---|
-| Maioria vermelha no Corpo | "Seu corpo está sendo colocado em último lugar há um tempo. Isso não aparece de uma hora para outra — mas quando aparece, aparece de uma vez." |
-| Maioria vermelha na Mente | "A estrutura que deveria te sustentar está frágil. Trabalho pesando, relações superficiais, dinheiro sem controle — os três juntos criam um ciclo que consome mais energia do que você percebe." |
-| Maioria vermelha no Espírito | "Você está funcionando. Mas não está vivendo. Sem propósito claro, sem experiências que renovam — a rotina vira só sobrevivência. E sobrevivência cansa." |
-| Tudo vermelho | "Esse é o mapa de alguém no modo sobrevivência. Não é fraqueza — é o resultado de ignorar sinais por tempo demais. A boa notícia é que você parou para olhar. A maioria não para." |
-| Maioria amarela | "Nada está em colapso. Mas nada está bem. Esse é o estado mais perigoso — porque não dói o suficiente para forçar uma mudança. Amarelo é o lugar onde as pessoas ficam presas por anos sem perceber." |
-| Verde no Espírito, vermelho no resto | "Você sabe o que quer e tem clareza de propósito. O problema é que a estrutura ao redor — corpo, mente, rotina — não está colaborando. Clareza sem estrutura gera frustração." |
-| Verde no Corpo, vermelho no resto | "Seu corpo está em dia, mas a mente e o espírito estão pagando o preço de algo. Energia física sem direção tem um limite." |
-| Maioria verde | "Seu mapa está equilibrado. O próximo passo não é consertar — é construir consistência para que isso dure quando a vida apertar. Porque ela vai apertar." |
+| `analise.ts` | Diagnóstico do Mapa em 3 camadas |
+| `blue-zones.ts` | Base científica por área, usada pela camada 3 |
+| `metricas.ts` | **Todas** as agregações do back office |
+| `progresso.ts` | Ponte índice da UI ↔ `modulo_id` do banco |
+| `modulos.ts` / `lives.ts` | Catálogo de conteúdo (fonte de verdade) |
+| `rotina.ts` | Cálculo de horas livres e Zona |
+| `prazo.ts` | Labels de prazo de objetivo |
+| `membros.ts` | Contagem de cadastrados |
+| `email.ts` / `email-templates.ts` | Envio e montagem |
+| `cron-auth.ts` | Validação do `CRON_SECRET` |
+| `supabase.ts` / `-server.ts` / `-admin.ts` | Clientes browser / server / service-role |
+| `validations.ts` | Schemas Zod |
 
 ---
 
-## Dashboard
+## Modelo de dados
 
-- Listagem de mapas salvos com data de realização
-- Cada card mostra: título, data, contadores de cores (🟢 N 🟡 N 🔴 N)
-- Duas ações por card: "Ver Mapa" e "Ver Diagnóstico Completo"
-- Botão "+ Novo Mapa" no topo direito
+Fonte de verdade: os arquivos `SUPABASE_*_MIGRATION.md` e `migracao_*.sql` na raiz.
+
+| Tabela | Campos-chave |
+|---|---|
+| `profiles` | `id`, `nome`, `criado_em`, `aulas_concluidas` (legado), `excluir_das_metricas` |
+| `mapas` | `id`, `user_id`, `titulo`, `criado_em` |
+| `areas` | `mapa_id`, `pilar`, `area`, `status`, `observacao` |
+| `objetivos` | `texto`, `pilar`, `prazo`, `status`, `data_alvo`, `motivo`, `frequencia_lembrete`, `radar_faz_sentido`, `radar_por_mim` |
+| `rotinas` | `horas_sono/trabalho/basicas/tela`, `dias_trabalho`, `percentual_livre`, `zona` — 1 por usuário |
+| `momentos_vida` | `estacao`, `frase`, `duracao`, `data_revisao`, `ativo` — 1 ativo por usuário |
+| `progresso_aulas` | `user_id`, `modulo_id`, `concluido_em`, `data_confiavel` |
+
+### Invariantes que não podem ser quebrados
+
+**`progresso_aulas.data_confiavel`** — `false` marca linhas migradas do array antigo,
+cuja data é estimada (data de cadastro). Métricas de **tempo** filtram `true`; as de
+**contagem** usam tudo. Sem isso, quem concluiu 7 módulos apareceria como tendo feito
+tudo no mesmo segundo e destruiria as médias de ritmo.
+
+**`profiles.aulas_concluidas`** é legado, não é mais escrito. Só remover depois de
+validar o back office em produção.
+
+**`profiles.excluir_das_metricas`** — contas internas somem do back office e do
+contador de membros, mas a plataforma funciona normal para elas. Apagar dados de conta
+interna seria o oposto do pretendido.
+
+**`modulo_id` é texto** (`'modulo-3'`), não índice. Índice é posicional: reordenar
+módulos corromperia o progresso de todos.
 
 ---
 
-## Fases do Produto
+## Pilares e áreas
 
-### ✅ Fase 1 — MVP Web (atual)
-- Autenticação completa (login, cadastro, recuperação de senha)
-- Fluxo AHA moment (preparação → questionário → revelação → transição)
-- Dashboard com listagem, ver mapa e diagnóstico completo
-- CRUD de mapas
+9 áreas em 3 pilares. **Fonte de verdade: `PILARES` em `types/index.ts`** — nomes,
+áreas e perguntas reflexivas. Não duplique aqui; edite lá.
 
-### 🔜 Fase 2 — Enriquecimento
-- Definição de objetivos por área
-- Gestão de tarefas vinculadas a cada objetivo
-- Comparativo entre mapas ao longo do tempo
+- **Corpo** — Exercícios Físicos, Alimentação, Hobbies
+- **Mente** — Rede de Apoio, Trabalho, Finanças
+- **Espírito** — Propósito, Experiências, Espiritualidade
 
-### 🔜 Fase 3 — Mobile
-- React Native + Expo
-- Mesmo Supabase como backend
-- Reaproveitar lógica de negócio e tipos TypeScript
+Status: 🟢 verde (bem) · 🟡 amarelo (atenção) · 🔴 vermelho (mudança urgente).
+Observação opcional: *"O que está por trás dessa escolha?"*
 
 ---
 
-## Convenções de Frontend
+## Diagnóstico do Mapa (`lib/analise.ts`)
+
+Substituiu a versão antiga, que escolhia entre 9 textos fixos pela maioria de cor.
+Agora o texto é **composto** a partir das áreas que a pessoa marcou como críticas,
+em três camadas:
+
+1. **Seleção** — áreas mais graves (vermelho antes de amarelo), sem trava por pilar.
+   Se as três piores forem do mesmo pilar, o texto foca nele: fidelidade ao relato
+   vale mais que equilíbrio narrativo.
+2. **Projeção temporal** — onde esse padrão chega, e onde chegaram as populações que
+   cuidaram dessas áreas. Sempre na **moldura de ganho** (quanto a mais se vive),
+   nunca de perda.
+3. **Base científica** — por área, de `lib/blue-zones.ts`.
+
+O ganho estimado usa um **número agregado** do estudo Blue Zones, não a soma dos
+ganhos por área: os achados vêm de populações e metodologias diferentes e seus
+efeitos se sobrepõem.
+
+---
+
+## Momento de Vida
+
+Camada de intenção acima dos objetivos: a pessoa declara que fase está vivendo, e
+isso guia o resto. Cinco estações — semear, construir, consolidar, recuperar,
+transição — com duração de 3/6/12 meses e data de revisão.
+
+**Fonte de verdade: `ESTACOES` e `DURACOES` em `types/index.ts`.**
+
+Feature de **meados de agosto/2026**. Baixa adesão é esperado — não trate como
+gargalo de funil, sobretudo na Turma 1, que não a tinha.
+
+---
+
+## Objetivos e Radar de Coerência
+
+Objetivo tem pilar, prazo (curto/médio/longo), status e lembrete opcional.
+
+O **Radar de Coerência** são duas perguntas obrigatórias na criação/edição:
+
+- `radar_faz_sentido` — "faz sentido com o meu momento de vida?"
+- `radar_por_mim` — "estou fazendo por mim ou para outras pessoas?"
+
+Qualquer `false` exibe um selo de alerta no card — sinaliza objetivo possivelmente
+nascido de comparação, **sem impedir** o uso. Nullable no banco para não quebrar
+objetivos anteriores à feature; obrigatório na action.
+
+---
+
+## Calculadora de Rotina
+
+A pessoa informa horas de sono, trabalho, necessidades básicas e tela; o cálculo
+devolve percentual livre e classifica em duas zonas.
+
+A **Zona** compara a ocupação real em horas contra uma *baseline de referência* — não
+contra um percentual fixo. Assim ela reflete "acima ou abaixo do padrão esperado", e
+não apenas "sobrou pouco tempo porque dormiu mais".
+
+- **Zona de Privilégio** — mais margem que a média
+- **Zona de Sacrifício** — no limite; objetivo novo exige remover algo antes
+
+Config visual em `getZonaConfig()`. Uma rotina por usuário (`unique(user_id)`).
+
+---
+
+## Back office (`/admin`)
+
+Protegido por `ADMIN_EMAILS` (lista separada por vírgula) no middleware. Toda leitura
+passa pelo **cliente admin em Server Components** — o RLS restringe cada tabela ao
+próprio usuário, e a service-role key nunca chega ao browser.
+
+**Toda agregação vive em `lib/metricas.ts`.** Componentes só renderizam.
+
+### Decisões que o código não explica
+
+**Funil cumulativo** — cada etapa conta só quem cumpriu as anteriores. Sem isso o
+gráfico "sobe" no meio (mais gente fez o Mapa do que marcou aula) e deixa de
+significar algo. O bloco **Alcance** mostra o uso fora de ordem, ao lado.
+
+**Features novas saem do funil de turmas antigas** — a flag `desdeTurma2` nas etapas.
+Medir adesão ao Momento na Turma 1 mediria data de lançamento, não comportamento.
+
+**Turma 1 não tem risco nem ritmo** — datas estimadas não têm posição no tempo. A tela
+diz isso explicitamente em vez de exibir número falso.
+
+**Dedicação não usa tempo de sessão.** Tempo de sessão mede aba aberta, e os módulos
+6, 7 e 8 não têm vídeo — vivem no Notion. Quem assiste 1h30 do M7 apareceria com zero.
+Medimos retorno e consistência: dias distintos com atividade, maior sequência, mediana
+entre aulas, minutos de conteúdo concluído.
+
+**Médias só contam quem começou** — incluir quem nunca abriu zeraria tudo sem dizer
+nada sobre dedicação.
+
+**Risco:** 7+ dias sem concluir aula (`DIAS_RISCO`), só Turma 2.
+
+**Privacidade:** a tela mostra nome, e-mail e progresso, mas **nunca** as observações
+do Mapa nem o texto dos objetivos. Dá para agir sem ler o que a pessoa escreveu no
+momento mais vulnerável. Agregados de status seguem visíveis, sem nome atrelado.
+
+---
+
+## E-mails
+
+5 templates em `/emails`, renderizados por react-email e enviados por SMTP.
+Um cron diário (21h UTC, `vercel.json`) em `/api/cron/emails` decide o que disparar:
+
+| Template | Quando |
+|---|---|
+| `planejamento-semanal` | domingos (checa BRT = UTC−3) |
+| `lembrete-mensal` | marcos do ciclo do mapa: 30, 37, 44, 51, 58 dias |
+| `lembrete-objetivo` | conforme `frequencia_lembrete`; para de cobrar prazo vencido |
+| `momento-revisao` | ao chegar a `data_revisao` |
+| `objetivo-concluido` | na conclusão |
+
+Os e-mails citam o Momento de Vida ativo como fio condutor. Buscas de usuário são em
+**batch** — não faça query por pessoa dentro de loop.
+
+---
+
+## Variáveis de ambiente
+
+| Variável | Uso |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` / `_ANON_KEY` | cliente browser |
+| `SUPABASE_SERVICE_ROLE_KEY` | cliente admin — **nunca** no browser |
+| `ADMIN_EMAILS` | acesso a `/admin`, separados por vírgula |
+| `CRON_SECRET` | autenticação do cron da Vercel |
+| `SMTP_*` | host, port, secure, user, pass, from |
+| `NEXT_PUBLIC_SITE_URL` | links absolutos em e-mails |
+| `MAKE_WEBHOOK_URL` | integração da lista de espera |
+| `NEXT_PUBLIC_META_PIXEL_LISTA_ESPERA_ID` | pixel de captação |
+
+Ao adicionar variável nova: **`.env.local` e Vercel**, e a Vercel precisa de redeploy —
+variáveis não se aplicam a builds existentes.
+
+---
+
+## Convenções
 
 ### Hierarquia de responsabilidade
-- **Páginas** (`/app`) — orquestram apenas. Buscam dados, passam props, definem layout. Sem lógica de negócio.
-- **Componentes** (`/components`) — só renderizam. Recebem props, mostram UI. Sem chamadas ao Supabase.
-- **Actions/Lib** (`/app/actions`, `/lib`) — toda lógica de negócio, validações e chamadas ao banco.
 
-### Quando criar um componente
-Só vira componente o que aparece em mais de um lugar. Exemplos:
-- ✅ Card de mapa (dashboard + comparativos futuros)
-- ✅ Indicador de status verde/amarelo/vermelho
-- ✅ Header/navegação autenticada
-- ❌ Tela de preparação (aparece só uma vez)
-- ❌ Texto de diagnóstico (específico de cada contexto)
+- **Páginas** (`/app`) — orquestram: buscam dados, passam props, definem layout. Sem
+  lógica de negócio.
+- **Componentes** (`/components`) — só renderizam. Sem chamadas ao Supabase.
+- **Actions e lib** — toda lógica, validação e acesso ao banco.
 
-### Convenção de nomes
-- `PaginaNome.tsx` → páginas específicas
-- `ComponenteNome.tsx` → componentes reutilizáveis
-- `useNome.ts` → hooks customizados
-- `nomeFuncao.ts` → utilitários e actions
+### Quando criar componente
 
-### Estado: onde guardar o quê
-- `useState` → formulários, UI temporária (modais, toggles)
-- Supabase → tudo que precisa persistir
-- URL/params → identificadores de recursos (id do mapa)
-- Server Components → dados que não mudam durante a sessão
-- Nunca usar Redux ou Zustand — desnecessário para este projeto
+Só o que aparece em mais de um lugar. Card de mapa e indicador de status, sim. Tela de
+preparação (aparece uma vez), não.
 
-### Padrão de commits
-- `feat:` nova funcionalidade
-- `fix:` correção de bug
-- `style:` mudança visual sem alterar lógica
-- `refactor:` reorganização de código sem mudar comportamento
-- Exemplos:
-  - `feat: dashboard com listagem de mapas`
-  - `fix: botão voltar na tela de preparação`
-  - `style: design system MindTrail aplicado`
+### Nomes
 
-### Regra de ouro para cada sessão
-Antes de começar: qual página estou construindo? O que ela busca do Supabase? O que é reutilizável? Tem commit recente?
+`ComponenteNome.tsx` · `useNome.ts` · `nomeFuncao.ts`
+
+### Estado
+
+`useState` para formulários e UI temporária · Supabase para o que persiste · URL para
+identificadores e filtros compartilháveis (o período do `/admin` é search param de
+propósito) · Server Components para dados estáveis. **Nunca Redux ou Zustand.**
+
+### Estilo
+
+Só Tailwind — sem CSS inline nem `.css` separado. Paleta `mt-*` no
+`tailwind.config.ts`. Interface e comentários em **português do Brasil**.
+
+### Commits
+
+`feat:` · `fix:` · `style:` · `refactor:`. Mensagem explica **por que**, não só o quê.
 
 ---
 
-## Boas Práticas
+## Boas práticas
 
-- Sempre perguntar antes de refatorar algo que não foi pedido
-- Preferir soluções simples a soluções elegantes quando o resultado for o mesmo
-- Quando houver dúvida sobre comportamento esperado, perguntar antes de implementar
-- Não gerar código para Fase 2 ou Fase 3 até ser solicitado
-- Ao criar um novo componente, sempre criar o arquivo correspondente em `/components`
-- **Sempre fazer commit após cada funcionalidade funcionando**
-- Nunca misturar `npm run build` com `npm run dev` ao mesmo tempo
+- Perguntar antes de refatorar o que não foi pedido
+- Solução simples > solução elegante, quando o resultado é o mesmo
+- Não instalar biblioteca sem avisar e justificar
+- Commit após cada funcionalidade funcionando
+- Nunca `npm run build` com o `dev` ativo
+- **Ao mexer em métricas, validar contra o banco real** antes de afirmar que funciona
+- Migração de schema: gerar um `.sql` **puro** (SQL Editor não entende Markdown) e
+  colocar `ALTER`/`CREATE` antes de qualquer `UPDATE` no mesmo arquivo
+
+---
+
+## Manutenção deste arquivo
+
+Rodar quando uma feature terminar, **antes do commit final**:
+
+1. **Rota nova?** → tabela [Rotas](#rotas) + verificar `matcher` do middleware
+2. **Tabela ou coluna nova?** → [Modelo de dados](#modelo-de-dados); se houver
+   invariante (flag, unicidade, legado), documentar em *Invariantes*
+3. **Arquivo novo em `/lib`?** → tabela [`/lib`](#lib--onde-vive-cada-regra)
+4. **Variável de ambiente nova?** → tabela + lembrete da Vercel
+5. **Decisão contra-intuitiva?** → seção da feature, explicando o **porquê**. É o
+   conteúdo mais valioso daqui: o código mostra o quê, não o porquê da alternativa
+   descartada
+6. **Feature com data de lançamento relevante para métricas?** → registrar a data;
+   adesão baixa em feature nova não é gargalo
+7. **Template de e-mail novo?** → tabela [E-mails](#e-mails)
+
+**Não** documentar: estrutura óbvia de código, histórico de bugs corrigidos, o que o
+git já conta, ou listas que duplicam constantes do `types/index.ts` — aponte para a
+constante.
+
+### Fases
+
+- ✅ **Fase 1** — auth, AHA moment, dashboard, CRUD de mapas
+- ✅ **Fase 2** — Momento de Vida, Objetivos + Radar, Calculadora de Rotina, e-mails,
+  back office
+- 🔜 **Fase 3** — comparativo entre mapas ao longo do tempo; % de vídeo assistido
+  (YouTube IFrame API) se as métricas de ritmo não bastarem
+- 🔜 **Fase 4** — React Native + Expo, mesmo Supabase, reaproveitando lógica e tipos
+
+Não gerar código de fase futura sem pedido.
