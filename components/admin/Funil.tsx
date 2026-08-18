@@ -1,12 +1,15 @@
 type Etapa = { rotulo: string; detalhe: string; valor: number; pct: number }
 
 /**
- * Funil de ativação. Cada etapa é um artefato real no banco — não um checkbox —
- * então a queda entre dois passos mostra onde as pessoas realmente param.
+ * Funil de ativação em linhas compactas.
+ *
+ * Cada etapa é um artefato real no banco, e o funil é cumulativo — só conta quem
+ * cumpriu as anteriores. A barra usa o total da primeira etapa como referência,
+ * então o estreitamento é visível de relance.
  */
 export function Funil({ etapas }: { etapas: Etapa[] }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="overflow-hidden rounded-lg border border-mt-border bg-mt-surface">
       {etapas.map((e, i) => {
         const anterior = i > 0 ? etapas[i - 1].valor : null
         const queda =
@@ -15,34 +18,45 @@ export function Funil({ etapas }: { etapas: Etapa[] }) {
             : 0
 
         return (
-          <div key={e.rotulo} className="rounded-lg border border-mt-border bg-mt-surface p-4">
-            <div className="flex items-baseline justify-between gap-3">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold" style={{ color: '#1a2e29' }}>
-                  {e.rotulo}
-                </p>
-                <p className="truncate text-xs text-mt-muted">{e.detalhe}</p>
-              </div>
-              <div className="flex shrink-0 items-baseline gap-2">
-                <span className="font-heading text-xl font-bold tabular-nums" style={{ color: '#1a2e29' }}>
-                  {e.valor}
-                </span>
-                <span className="text-xs tabular-nums text-mt-muted">{e.pct}%</span>
-              </div>
+          <div
+            key={e.rotulo}
+            className="flex items-center gap-3 border-b border-mt-border px-4 py-2.5 last:border-0"
+          >
+            {/* Rótulo */}
+            <div className="w-44 shrink-0">
+              <p className="truncate text-sm font-medium" style={{ color: '#1a2e29' }}>
+                {e.rotulo}
+              </p>
+              <p className="truncate text-[11px] text-mt-muted">{e.detalhe}</p>
             </div>
 
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-mt-off-white">
+            {/* Barra */}
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-mt-off-white">
               <div
                 className="h-full rounded-full transition-all"
                 style={{ width: `${e.pct}%`, backgroundColor: '#57AA8F' }}
               />
             </div>
 
-            {queda > 0 && (
-              <p className="mt-2 text-xs" style={{ color: queda >= 40 ? '#C05050' : '#6f8f87' }}>
-                −{queda}% em relação à etapa anterior
-              </p>
-            )}
+            {/* Números */}
+            <div className="flex w-24 shrink-0 items-baseline justify-end gap-1.5">
+              <span className="text-sm font-semibold tabular-nums" style={{ color: '#1a2e29' }}>
+                {e.valor}
+              </span>
+              <span className="text-[11px] tabular-nums text-mt-muted">{e.pct}%</span>
+            </div>
+
+            {/* Queda em relação à etapa anterior */}
+            <div className="w-14 shrink-0 text-right">
+              {queda > 0 && (
+                <span
+                  className="text-[11px] tabular-nums"
+                  style={{ color: queda >= 40 ? '#C05050' : '#6f8f87' }}
+                >
+                  −{queda}%
+                </span>
+              )}
+            </div>
           </div>
         )
       })}

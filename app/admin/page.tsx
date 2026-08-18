@@ -1,17 +1,22 @@
+import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { contarMembros } from '@/lib/membros'
-import { carregarMetricas, DIAS_RISCO } from '@/lib/metricas'
+import { carregarMetricas, periodoDe, type IdPeriodo, PERIODOS, DIAS_RISCO } from '@/lib/metricas'
 import { MODULOS } from '@/lib/modulos'
 import { AuthLayout } from '@/components/AuthLayout'
 import { Kpi } from '@/components/admin/Kpi'
-import { PainelTurma } from '@/components/admin/PainelTurma'
+import { PainelMetricas } from '@/components/admin/PainelMetricas'
 import { TabelaAlunos } from '@/components/admin/TabelaAlunos'
 
 // Métricas sempre frescas — sem cache entre visitas.
 export const dynamic = 'force-dynamic'
 
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: { periodo?: string }
+}) {
   const supabase = createServerSupabaseClient()
   const {
     data: { user },
@@ -19,10 +24,13 @@ export default async function AdminPage() {
 
   if (!user) redirect('/auth/login')
 
+  const periodoId = (PERIODOS.find((p) => p.id === searchParams.periodo)?.id ??
+    'tudo') as IdPeriodo
+
   const [{ data: profile }, totalMembros, m] = await Promise.all([
     supabase.from('profiles').select('nome').eq('id', user.id).single(),
     contarMembros(),
-    carregarMetricas(),
+    carregarMetricas(periodoDe(periodoId)),
   ])
 
   const nomeUsuario = profile?.nome ?? user.email ?? ''
@@ -49,11 +57,9 @@ export default async function AdminPage() {
           />
         </div>
 
-        {/* Turma 2 primeiro — é a que está viva */}
-        <PainelTurma turma={m.turma2} destaque />
-
-        {/* Turma 1 — retrospectivo */}
-        <PainelTurma turma={m.turma1} />
+        <Suspense fallback={<div className="h-64 rounded-lg border border-mt-border bg-mt-surface" />}>
+          <PainelMetricas metricas={m} periodo={periodoId} />
+        </Suspense>
 
         {/* Conteúdo, base inteira */}
         <section className="flex flex-col gap-3">

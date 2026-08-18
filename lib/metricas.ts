@@ -65,6 +65,7 @@ export type VisaoTurma = {
 
 export type Metricas = {
   totalAlunos: number
+  todas: VisaoTurma
   turma1: VisaoTurma
   turma2: VisaoTurma
   funil: Etapa[]
@@ -83,7 +84,25 @@ function diasDesde(iso: string | null): number | null {
   return Math.floor(ms / 86_400_000)
 }
 
-export async function carregarMetricas(): Promise<Metricas> {
+/** Janela de análise. Sem `desde`, considera tudo. */
+export type Periodo = { desde?: string; ate?: string }
+
+export const PERIODOS = [
+  { id: 'tudo', rotulo: 'Tudo' },
+  { id: '7d', rotulo: '7 dias' },
+  { id: '30d', rotulo: '30 dias' },
+  { id: '90d', rotulo: '90 dias' },
+] as const
+
+export type IdPeriodo = (typeof PERIODOS)[number]['id']
+
+export function periodoDe(id: IdPeriodo): Periodo {
+  if (id === 'tudo') return {}
+  const dias = id === '7d' ? 7 : id === '30d' ? 30 : 90
+  return { desde: new Date(Date.now() - dias * 86_400_000).toISOString() }
+}
+
+export async function carregarMetricas(periodo: Periodo = {}): Promise<Metricas> {
   const sb = createAdminSupabaseClient()
 
   const [
@@ -99,10 +118,10 @@ export async function carregarMetricas(): Promise<Metricas> {
       .select('id, nome, criado_em, excluir_das_metricas')
       .order('criado_em'),
     sb.from('progresso_aulas').select('user_id, modulo_id, concluido_em, data_confiavel'),
-    sb.from('mapas').select('user_id'),
-    sb.from('momentos_vida').select('user_id'),
-    sb.from('objetivos').select('user_id'),
-    sb.from('rotinas').select('user_id'),
+    sb.from('mapas').select('user_id, criado_em'),
+    sb.from('momentos_vida').select('user_id, criado_em'),
+    sb.from('objetivos').select('user_id, criado_em'),
+    sb.from('rotinas').select('user_id, atualizado_em'),
   ])
 
   // Contas internas (testes, equipe) ficam fora de todas as métricas — a
@@ -122,19 +141,34 @@ export async function carregarMetricas(): Promise<Metricas> {
     // Sem email a tela ainda funciona — só perde o contato direto.
   }
 
-  const setDe = (linhas: { user_id: string }[] | null) =>
-    new Set((linhas ?? []).map((l) => l.user_id))
+  /** Dentro da janela de análise? Sem janela, tudo entra. */
+  const naJanela = (iso: string | null | undefined) => {
+    if (!iso) return !periodo.desde
+    if (periodo.desde && iso < periodo.desde) return false
+    if (periodo.ate && iso > periodo.ate) return false
+    return true
+  }
 
-  const comMapa = setDe(mapas)
-  const comMomento = setDe(momentos)
-  const comObjetivo = setDe(objetivos)
-  const comRotina = setDe(rotinas)
+  const setDe = (
+    linhas: Record<string, string>[] | null,
+    colunaData: string
+  ) =>
+    new Set(
+      (linhas ?? []).filter((l) => naJanela(l[colunaData])).map((l) => l.user_id)
+    )
+
+  const comMapa = setDe(mapas as any, 'criado_em')
+  const comMomento = setDe(momentos as any, 'criado_em')
+  const comObjetivo = setDe(objetivos as any, 'criado_em')
+  const comRotina = setDe(rotinas as any, 'atualizado_em')
 
   // Eventos de progresso agrupados por aluno.
   const porAluno = new Map<string, { indices: number[]; ultima: string | null }>()
   for (const e of eventos) {
     const idx = moduloIdParaIndice(e.modulo_id)
     if (idx < 0) continue
+    // Datas estimadas não têm posição no tempo: só entram quando não há janela.
+    if (periodo.desde && !(e.data_confiavel && naJanela(e.concluido_em))) continue
     const atual = porAluno.get(e.user_id) ?? { indices: [], ultima: null }
     atual.indices.push(idx)
     // Datas estimadas na migração não valem como "atividade recente".
@@ -282,6 +316,13 @@ export async function carregarMetricas(): Promise<Metricas> {
 
   return {
     totalAlunos: total,
+    todas: visao(
+      alunos,
+      'Base completa',
+      'Turma 1 e Turma 2 juntas.',
+      true,
+      false
+    ),
     turma1: visao(
       turma1,
       'Turma 1',
