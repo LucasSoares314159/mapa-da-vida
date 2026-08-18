@@ -225,18 +225,18 @@ export async function carregarMetricas(periodo: Periodo = {}): Promise<Metricas>
     return true
   }
 
-  const setDe = (
-    linhas: Record<string, string>[] | null,
-    colunaData: string
-  ) =>
-    new Set(
-      (linhas ?? []).filter((l) => naJanela(l[colunaData])).map((l) => l.user_id)
-    )
+  /** Quem tem ao menos um registro da tabela dentro da janela de análise. */
+  function setDe<T extends { user_id: string }>(
+    linhas: T[] | null,
+    dataDe: (linha: T) => string | null
+  ) {
+    return new Set((linhas ?? []).filter((l) => naJanela(dataDe(l))).map((l) => l.user_id))
+  }
 
-  const comMapa = setDe(mapas as any, 'criado_em')
-  const comMomento = setDe(momentos as any, 'criado_em')
-  const comObjetivo = setDe(objetivos as any, 'criado_em')
-  const comRotina = setDe(rotinas as any, 'atualizado_em')
+  const comMapa = setDe(mapas, (l) => l.criado_em)
+  const comMomento = setDe(momentos, (l) => l.criado_em)
+  const comObjetivo = setDe(objetivos, (l) => l.criado_em)
+  const comRotina = setDe(rotinas, (l) => l.atualizado_em)
 
   // Eventos de progresso agrupados por aluno.
   type Progresso = { indices: number[]; ultima: string | null; datas: string[] }
@@ -299,15 +299,13 @@ export async function carregarMetricas(periodo: Periodo = {}): Promise<Metricas>
     }
   })
 
-  const pct = (n: number) => (total ? Math.round((n / total) * 100) : 0)
-
   // Etapas do funil, na ordem em que a trilha as propõe. Cada uma é um
   // artefato real no banco — não um checkbox.
   //
   // `desdeTurma2` marca features lançadas junto com a Turma 2: incluí-las no
   // funil da Turma 1 mediria a data de lançamento, não o engajamento.
   const etapas = [
-    { rotulo: 'Cadastrou', detalhe: 'Entrou na turma', desdeTurma2: false, tem: (_: LinhaAluno) => true },
+    { rotulo: 'Cadastrou', detalhe: 'Entrou na turma', desdeTurma2: false, tem: () => true },
     { rotulo: 'Começou a trilha', detalhe: 'Concluiu ao menos um módulo', desdeTurma2: false, tem: (a: LinhaAluno) => a.modulosConcluidos > 0 },
     { rotulo: 'Fez o Mapa da Vida', detalhe: 'Módulo 3 · o AHA moment', desdeTurma2: false, tem: (a: LinhaAluno) => a.temMapa },
     { rotulo: 'Criou um Objetivo', detalhe: 'Módulo 5 · saiu do diagnóstico para a ação', desdeTurma2: false, tem: (a: LinhaAluno) => a.temObjetivo },
