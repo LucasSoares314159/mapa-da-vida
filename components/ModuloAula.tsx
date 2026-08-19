@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, ChevronRight, ExternalLink, Check } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Check, BookOpen } from 'lucide-react'
 import { marcarAula } from '@/app/actions/progresso'
 import { MODULOS, type Modulo } from '@/lib/modulos'
+import type { Bloco } from '@/lib/conteudo-modulos'
+import { LeituraModuloOverlay } from './LeituraModuloOverlay'
 import { ModulosSidebar } from './ModulosSidebar'
 
 type Props = {
@@ -15,6 +17,7 @@ type Props = {
   proximoId: string | null
   moduloIndex: number
   aulasConcluidas: number[]
+  blocos: Bloco[]
 }
 
 export function ModuloAula({
@@ -25,9 +28,11 @@ export function ModuloAula({
   proximoId,
   moduloIndex,
   aulasConcluidas,
+  blocos,
 }: Props) {
   const router = useRouter()
   const [concluidas, setConcluidas] = useState<number[]>(aulasConcluidas)
+  const [leituraAberta, setLeituraAberta] = useState(false)
   const concluida = concluidas.includes(moduloIndex)
 
   useEffect(() => {
@@ -128,34 +133,29 @@ export function ModuloAula({
           </div>
         )}
 
-        {/* Conteúdo no Notion */}
-        {modulo.link && (
-          <div className="flex flex-col gap-3">
-            <span className="text-sm font-semibold" style={{ color: '#1a2e29' }}>
-              Material da aula:
-            </span>
-            <ul className="flex flex-col gap-2">
-              <li className="flex items-center gap-2">
-                <span style={{ color: '#4a6b62' }}>•</span>
-                <a
-                  href={modulo.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-sm transition-opacity hover:opacity-70"
-                  style={{ color: '#57AA8F' }}
-                >
-                  Abrir conteúdo no Notion
-                  <ExternalLink className="size-3" />
-                </a>
-              </li>
-            </ul>
-          </div>
+        {/* Conteúdo escrito */}
+        {blocos.length > 0 && (
+          <button
+            onClick={() => setLeituraAberta(true)}
+            className="flex items-center justify-center gap-2 rounded-xl px-5 py-4 text-sm font-semibold transition-opacity hover:opacity-90"
+            style={{ backgroundColor: '#f0f7f5', border: '0.5px solid #c8d8d2', color: '#1a2e29' }}
+          >
+            <BookOpen className="size-4" style={{ color: '#57AA8F' }} />
+            Ler conteúdo da aula
+          </button>
         )}
       </div>
 
       <ModulosSidebar modulos={MODULOS} moduloAtualId={modulo.id} concluidas={concluidas} />
       </div>
     </div>
+
+    <LeituraModuloOverlay
+      titulo={modulo.titulo}
+      blocos={blocos}
+      aberto={leituraAberta}
+      onFechar={() => setLeituraAberta(false)}
+    />
 
     {/* Ação de conclusão — fixa no rodapé */}
     <div

@@ -27,8 +27,6 @@ export function TrilhaConteudo({ nomeUsuario, aulasConcluidas }: Props) {
   const porcentagem = Math.round((qtdConcluidas / TOTAL_AULAS) * 100)
 
   function toggleAula(index: number) {
-    if (!MODULOS[index].link) return
-
     const jaConcluida = concluidas.includes(index)
 
     setConcluidas(
@@ -126,7 +124,6 @@ export function TrilhaConteudo({ nomeUsuario, aulasConcluidas }: Props) {
           <div>
             {MODULOS.map((modulo, index) => {
               const concluida = concluidas.includes(index)
-              const disponivel = !!modulo.link
 
               return (
                 <div
@@ -141,16 +138,11 @@ export function TrilhaConteudo({ nomeUsuario, aulasConcluidas }: Props) {
                     {/* Checkbox / bolinha */}
                     <button
                       onClick={() => toggleAula(index)}
-                      disabled={!disponivel}
                       className="shrink-0 size-4 rounded-full flex items-center justify-center transition-colors"
                       style={
                         concluida
                           ? { backgroundColor: '#57AA8F', border: 'none', cursor: 'pointer' }
-                          : {
-                              backgroundColor: 'transparent',
-                              border: '1.5px solid #c8d8d2',
-                              cursor: disponivel ? 'pointer' : 'default',
-                            }
+                          : { backgroundColor: 'transparent', border: '1.5px solid #c8d8d2', cursor: 'pointer' }
                       }
                       aria-label={concluida ? 'Marcar como não concluída' : 'Marcar como concluída'}
                     >
@@ -158,49 +150,16 @@ export function TrilhaConteudo({ nomeUsuario, aulasConcluidas }: Props) {
                     </button>
 
                     {/* Título */}
-                    <div className="flex items-center gap-2 flex-wrap min-w-0">
-                      {disponivel ? (
-                        <Link
-                          href={`/content/modulo/${modulo.id}`}
-                          className="text-sm font-medium transition-opacity hover:opacity-70"
-                          style={{
-                            color: '#57AA8F',
-                            textDecoration: concluida ? 'line-through' : 'none',
-                          }}
-                        >
-                          {modulo.titulo}
-                        </Link>
-                      ) : (
-                        <span
-                          className="text-sm"
-                          style={{
-                            color: '#1a2e29',
-                            textDecoration: concluida ? 'line-through' : 'none',
-                          }}
-                        >
-                          {modulo.titulo}
-                        </span>
-                      )}
-
-                      {!disponivel && (
-                        <span
-                          style={{
-                            padding: '2px 8px',
-                            borderRadius: '100px',
-                            fontSize: '10px',
-                            fontWeight: 500,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.04em',
-                            background: 'rgba(212,168,67,0.12)',
-                            color: '#D4A843',
-                            border: '0.5px solid #D4A843',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          Indisponível
-                        </span>
-                      )}
-                    </div>
+                    <Link
+                      href={`/content/modulo/${modulo.id}`}
+                      className="text-sm font-medium transition-opacity hover:opacity-70"
+                      style={{
+                        color: '#57AA8F',
+                        textDecoration: concluida ? 'line-through' : 'none',
+                      }}
+                    >
+                      {modulo.titulo}
+                    </Link>
                   </div>
 
                   {/* Duração */}

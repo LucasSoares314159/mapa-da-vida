@@ -16,9 +16,10 @@ pessoa classifica 9 áreas da vida como verde/amarelo/vermelho e recebe um
 fluxograma com análise. O choque de realidade motiva a mudança.
 
 A plataforma web hospeda a trilha e quatro ferramentas que a acompanham: **Mapa**,
-**Momento de Vida**, **Objetivos** e **Calculadora de Rotina**. O conteúdo em si
-(vídeos e materiais) vive no **YouTube e no Notion** — a plataforma referencia, não
-hospeda. Isso importa em qualquer discussão de métricas de engajamento.
+**Momento de Vida**, **Objetivos** e **Calculadora de Rotina**. Os vídeos vivem no
+**YouTube** (embed por `videoId`). O texto de cada aula é nativo da plataforma — ver
+[Conteúdo dos módulos](#conteúdo-dos-módulos-admin-modulos) — migrado manualmente do
+Notion, que deixou de ser a fonte.
 
 ### Turmas
 
@@ -97,6 +98,7 @@ npm run build             # só com o dev parado
 | `/rotina` | Calculadora de Rotina | ✅ |
 | `/dashboard` | Mapas salvos e evolução | ✅ |
 | `/admin` | Back office de métricas | ✅ + `ADMIN_EMAILS` |
+| `/admin/modulos`, `/admin/modulos/[id]` | Editor do conteúdo escrito das aulas | ✅ + `ADMIN_EMAILS` |
 | `/api/cron/emails` | Disparo diário (21h UTC) | `CRON_SECRET` |
 | `/api/lista-espera` | Webhook de captação | pública |
 
@@ -133,7 +135,8 @@ nela, considere adicionar ao matcher.
 | `blue-zones.ts` | Base científica por área, usada pela camada 3 |
 | `metricas.ts` | **Todas** as agregações do back office |
 | `progresso.ts` | Ponte índice da UI ↔ `modulo_id` do banco |
-| `modulos.ts` / `lives.ts` | Catálogo de conteúdo (fonte de verdade) |
+| `modulos.ts` / `lives.ts` | Catálogo de conteúdo — título, duração, `videoId` (fonte de verdade) |
+| `conteudo-modulos.ts` | Leitura/escrita dos blocos de texto de cada módulo (tabela `modulos_conteudo`) |
 | `rotina.ts` | Cálculo de horas livres e Zona |
 | `prazo.ts` | Labels de prazo de objetivo |
 | `membros.ts` | Contagem de cadastrados |
@@ -157,6 +160,7 @@ Fonte de verdade: os arquivos `SUPABASE_*_MIGRATION.md` e `migracao_*.sql` na ra
 | `rotinas` | `horas_sono/trabalho/basicas/tela`, `dias_trabalho`, `percentual_livre`, `zona` — 1 por usuário |
 | `momentos_vida` | `estacao`, `frase`, `duracao`, `data_revisao`, `ativo` — 1 ativo por usuário |
 | `progresso_aulas` | `user_id`, `modulo_id`, `concluido_em`, `data_confiavel` |
+| `modulos_conteudo` | `modulo_id` (PK, texto), `blocos` (jsonb), `atualizado_em` |
 
 ### Invariantes que não podem ser quebrados
 
@@ -173,7 +177,8 @@ contador de membros, mas a plataforma funciona normal para elas. Apagar dados de
 interna seria o oposto do pretendido.
 
 **`modulo_id` é texto** (`'modulo-3'`), não índice. Índice é posicional: reordenar
-módulos corromperia o progresso de todos.
+módulos corromperia o progresso de todos. `modulos_conteudo.modulo_id` usa o mesmo
+texto, sem FK — ver [Conteúdo dos módulos](#conteúdo-dos-módulos-admin-modulos).
 
 ---
 
@@ -252,6 +257,29 @@ não apenas "sobrou pouco tempo porque dormiu mais".
 - **Zona de Sacrifício** — no limite; objetivo novo exige remover algo antes
 
 Config visual em `getZonaConfig()`. Uma rotina por usuário (`unique(user_id)`).
+
+---
+
+## Conteúdo dos módulos (`/admin/modulos`)
+
+Substitui o link externo que cada aula tinha para o Notion: o texto agora é nativo,
+em blocos estruturados (`lib/conteudo-modulos.ts`, tipo `Bloco`), editado em
+`/admin/modulos/[id]` e lido em `/content/modulo/[id]` via `ConteudoModulo`.
+
+**Só o texto migrou para o banco — título, duração e `videoId` continuam em
+`lib/modulos.ts`.** `MODULOS` é importado de forma síncrona em vários lugares,
+inclusive `lib/metricas.ts` (cálculo de duração, funil, drop-off por módulo) fora de
+um Server Component. Migrar esses campos também obrigaria tornar essa leitura
+assíncrona e reescrever o back office. `modulos_conteudo.modulo_id` referencia o
+mesmo texto (`'modulo-3''`) só por convenção, sem FK.
+
+Upload de imagem vai para o bucket público `modulos-imagens` no Supabase Storage, via
+`app/actions/admin-conteudo.ts` (service role — só a leitura do conteúdo tem policy de
+RLS para usuário comum; escrita e upload passam pelo cliente admin).
+
+**Módulos não têm mais estado "indisponível".** Antes um módulo sem link do Notion
+ficava bloqueado na trilha; migrar o texto é um processo manual e gradual, então todo
+módulo com `videoId` já é navegável mesmo com `blocos` vazio.
 
 ---
 

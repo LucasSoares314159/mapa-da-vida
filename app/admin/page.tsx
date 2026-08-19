@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { contarMembros } from '@/lib/membros'
 import { carregarMetricas, periodoDe, type IdPeriodo, PERIODOS, DIAS_RISCO } from '@/lib/metricas'
@@ -42,6 +43,14 @@ export default async function AdminPage({
   return (
     <AuthLayout titulo="Back Office" nomeUsuario={nomeUsuario} totalMembros={totalMembros}>
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-8">
+
+        <Link
+          href="/admin/modulos"
+          className="flex w-fit items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-70"
+          style={{ color: '#57AA8F' }}
+        >
+          Editar conteúdo dos módulos →
+        </Link>
 
         {/* Base */}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
