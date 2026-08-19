@@ -26,7 +26,7 @@ export default function MomentoRevisao({
   estacaoEmoji = '🏗️',
   frase = 'focar no trabalho e pensar no longo prazo',
   duracaoLabel = '3 meses',
-  urlMomento = 'https://mapadavida.mindtrail.com.br/momento',
+  urlMomento = 'https://mindtrail.com.br/momento',
 }: MomentoRevisaoProps) {
   return (
     <Html lang="pt-BR">

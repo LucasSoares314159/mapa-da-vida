@@ -20,7 +20,7 @@ interface LembreteMensalProps {
 export default function LembreteMensal({
   nome = 'Lucas',
   diasDesdeUltimoMapa = 35,
-  urlNovoMapa = 'https://mapadavida.mindtrail.com.br/mapa/preparacao',
+  urlNovoMapa = 'https://mindtrail.com.br/mapa/preparacao',
 }: LembreteMensalProps) {
   return (
     <Html lang="pt-BR">

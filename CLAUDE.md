@@ -93,7 +93,7 @@ npm run build             # só com o dev parado
 | `/content/modulo/[id]`, `/content/live/[id]` | Aula individual | ✅ |
 | `/mapa/preparacao` → `/mapa/novo` → `/mapa/[id]` | Fluxo do AHA moment | ✅ |
 | `/diagnostico/[id]` | Diagnóstico completo | ✅ |
-| `/momento` | Momento de Vida | ✅ (guarda própria) |
+| `/momento` | Momento de Vida | ✅ |
 | `/objetivos` | Objetivos + Radar de Coerência | ✅ |
 | `/rotina` | Calculadora de Rotina | ✅ |
 | `/dashboard` | Mapas salvos e evolução | ✅ |
@@ -102,9 +102,9 @@ npm run build             # só com o dev parado
 | `/api/cron/emails` | Disparo diário (21h UTC) | `CRON_SECRET` |
 | `/api/lista-espera` | Webhook de captação | pública |
 
-**`/momento` não está no matcher do middleware.** Ela se protege sozinha na página,
-então não há brecha — mas fica sem o refresh de sessão que o middleware faz. Ao mexer
-nela, considere adicionar ao matcher.
+Toda rota autenticada passa pelo `matcher` do middleware, que além de barrar
+visitante também **renova a sessão**. Ao criar rota protegida, adicione ao matcher —
+uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 
 ---
 

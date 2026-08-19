@@ -20,7 +20,7 @@ interface PlanejamentoSemanalProps {
 
 export default function PlanejamentoSemanal({
   nome = 'Lucas',
-  urlDashboard = 'https://mapadavida.mindtrail.com.br/objetivos',
+  urlDashboard = 'https://mindtrail.com.br/objetivos',
   momentoFrase,
   momentoEstacaoLabel,
 }: PlanejamentoSemanalProps) {

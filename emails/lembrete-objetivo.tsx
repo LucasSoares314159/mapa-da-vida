@@ -26,7 +26,7 @@ export default function LembreteObjetivo({
   textoObjetivo = 'Treinar 3x por semana',
   prazoLabel = 'curto prazo',
   diasRestantes = 12,
-  urlObjetivos = 'https://mapadavida.mindtrail.com.br/objetivos',
+  urlObjetivos = 'https://mindtrail.com.br/objetivos',
   momentoFrase,
   momentoEstacaoLabel,
 }: LembreteObjetivoProps) {
