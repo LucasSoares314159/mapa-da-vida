@@ -13,7 +13,20 @@
 </script>
 <base href="/trilha/">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trilha da Produtividade — MindTrail</title>
+<title>Trilha — MindTrail</title>
+<meta name="description" content="A Trilha é onde profissionais como você constroem uma rotina que sustenta as duas coisas: a carreira que você já tem e o projeto que está parado há meses esperando você ter tempo.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://mindtrail.com.br/trilha">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Trilha — MindTrail">
+<meta property="og:description" content="A Trilha é onde profissionais como você constroem uma rotina que sustenta as duas coisas: a carreira que você já tem e o projeto que está parado há meses esperando você ter tempo.">
+<meta property="og:image" content="https://mindtrail.com.br/trilha/lucas-hero.JPG">
+<meta property="og:url" content="https://mindtrail.com.br/trilha">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Trilha — MindTrail">
+<meta name="twitter:description" content="A Trilha é onde profissionais como você constroem uma rotina que sustenta as duas coisas: a carreira que você já tem e o projeto que está parado há meses esperando você ter tempo.">
+<meta name="twitter:image" content="https://mindtrail.com.br/trilha/lucas-hero.JPG">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500&family=DM+Sans:wght@400;500&family=Lora:ital@1&display=swap" rel="stylesheet">
@@ -22,7 +35,7 @@
     --verde: #57AA8F;
     --verde-escuro: #2A3F45;
     --off-white: #EDF2EF;
-    --preto: #0C0F0F;
+    --preto: #030A09;
     --borda: #c8d8d2;
     --verde-sup: #E8F5F1;
     --texto-sec: #6f8f87;
@@ -133,11 +146,6 @@
     text-align: center;
   }
 
-  .hero-headline {
-    max-width: 1000px;
-    margin-left: auto;
-    margin-right: auto;
-  }
 
   .tag {
     display: inline-flex;
@@ -164,7 +172,7 @@
     background: var(--verde);
   }
 
-  .hero h2.hero-headline {
+  .hero h1.hero-headline {
     font-size: 48px;
     font-weight: 500;
     line-height: 1.15;
@@ -172,7 +180,7 @@
     margin: 0 auto 12px;
   }
 
-  .hero h2.hero-headline em {
+  .hero h1.hero-headline em {
     font-style: normal;
     color: var(--verde);
   }
@@ -183,7 +191,7 @@
     color: #a8c4bc;
     margin: 24px auto 0;
     line-height: 1.75;
-    max-width: 560px;
+    max-width: 420px;
   }
 
   .hero-sub strong {
@@ -228,7 +236,7 @@
   }
 
   .container { max-width: 1100px; margin: 0 auto; }
-  .container-texto { max-width: 760px; margin: 0 auto; }
+  .container-texto { max-width: 640px; margin: 0 auto; }
 
   .sec-label {
     font-family: 'DM Sans', sans-serif;
@@ -294,35 +302,48 @@
   .feature-row:last-child { border-bottom: none; }
 
   .feature-row .feature-texto { order: 1; }
-  .feature-row .feature-imagem { order: 2; }
+  .feature-row .feature-imagem-col { order: 2; }
 
   .feature-row.invertido .feature-texto { order: 2; }
-  .feature-row.invertido .feature-imagem { order: 1; }
+  .feature-row.invertido .feature-imagem-col { order: 1; }
+
+  /* .feature-imagem-col agrupa print + legenda; o arredondamento vive só na
+     moldura da imagem (.feature-imagem), não no grupo — senão o overflow:hidden
+     corta a base do arredondamento onde a legenda ocupa espaço por baixo. */
+  .feature-imagem-col { display: flex; flex-direction: column; }
 
   .feature-imagem {
     border-radius: 14px;
     overflow: hidden;
-    line-height: 0;
+  }
+
+  .feature-imagem img { display: block; }
+
+  .feature-imagem-col .legenda {
+    line-height: 1.55;
+    margin-top: 14px;
+    text-align: center;
   }
 
   .feature-row h3 {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 500;
     color: var(--verde-escuro);
     margin-bottom: 12px;
   }
 
   .feature-row p {
-    font-size: 16px;
-    color: #333;
+    font-size: 17px;
+    color: var(--preto);
     line-height: 1.75;
     margin-bottom: 16px;
   }
 
   .feature-marcador {
-    font-size: 14px;
+    font-size: 17px;
     color: var(--verde);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Lora', serif;
+    font-style: italic;
     font-weight: 500;
   }
 
@@ -334,6 +355,7 @@
 
   .sec-verde h2 { color: #fff; }
   .sec-verde .sec-label { color: rgba(255, 255, 255, 0.7); }
+
 
   .sec-features-carousel {
     margin-top: 40px;
@@ -406,14 +428,14 @@
 
   .sec-feature h4 {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 500;
     color: var(--verde-escuro);
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
 
   .sec-feature p {
-    font-size: 13px;
+    font-size: 16px;
     color: var(--texto-sec);
     line-height: 1.6;
   }
@@ -628,8 +650,8 @@
   }
 
   .para-quem-col.nao {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--verde-escuro);
+    border: 1px solid rgba(255, 255, 255, 0.15);
   }
 
   .para-quem-col.sim h3 {
@@ -659,7 +681,7 @@
   .check-list { list-style: none; }
 
   .check-list li {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.6;
     padding: 10px 0;
     border-bottom: 0.5px solid var(--borda);
@@ -789,7 +811,7 @@
   .destaque {
     position: relative;
     text-decoration: none;
-    background: linear-gradient(to right, var(--verde) 0%, var(--verde) 0%) no-repeat bottom;
+    background: linear-gradient(to right, var(--verde) 0%, var(--verde) 0%) no-repeat left bottom;
     background-size: 0% 1.5px;
     transition: background-size 0.5s ease;
   }
@@ -952,25 +974,33 @@
     flex-shrink: 0;
   }
 
-  .preco-de {
-    font-size: 16px;
-    color: rgba(237,242,239,0.45);
-    text-decoration: line-through;
-    margin-bottom: 4px;
+
+  .preco-parcelamento {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  .preco-parcelamento-rotulo {
+    font-size: 28px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.75);
+  }
+
+  .preco-parcelamento-valor {
+    font-size: 56px;
+    font-weight: 500;
   }
 
   .preco-por {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 52px;
+    font-size: 20px;
     font-weight: 500;
-    color: #fff;
-    line-height: 1;
-    margin-bottom: 6px;
-  }
-
-  .preco-parcelamento {
-    font-size: 14px;
-    color: rgba(237,242,239,0.55);
+    color: rgba(237,242,239,0.85);
     margin-bottom: 32px;
   }
 
@@ -1210,6 +1240,25 @@
   .sec-subtitulo-dark { color: #a8c4bc; max-width: 480px; }
   .sec-subtitulo      { color: var(--texto-sec); margin-bottom: 32px; }
   .sec-subtitulo-sec  { color: var(--texto-sec); }
+
+  .badges-ferramentas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .badge-ferramenta {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(87, 170, 143, 0.15);
+    color: var(--verde-escuro);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(87, 170, 143, 0.3);
+  }
   .feature-img        { width: 100%; height: auto; display: block; }
   .lucas-foto-img     { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
   .text-center        { text-align: center; }
@@ -1228,7 +1277,7 @@
     .hero { min-height: 560px; }
     .hero-container { padding: 70px 20px 80px; }
     .hero-texto { max-width: 100%; }
-    .hero h2.hero-headline { font-size: 32px; }
+    .hero h1.hero-headline { font-size: 32px; }
 
     /* Tipografia */
     h2 { font-size: 28px; }
@@ -1242,7 +1291,7 @@
     .dor-cards { grid-template-columns: 1fr; }
     .feature-row { grid-template-columns: 1fr; }
     .feature-row.invertido .feature-texto { order: 1; }
-    .feature-row.invertido .feature-imagem { order: 2; }
+    .feature-row.invertido .feature-imagem-col { order: 2; }
     .sec-features-track { grid-auto-columns: calc(85% - 12px); }
     .jornada-fw .layout { grid-template-columns: 1fr; }
     .jornada-fw .chart-wrap { padding: 12px; max-height: none; }
@@ -1261,7 +1310,8 @@
 
     /* Preço */
     .preco-box { padding: 32px 24px; }
-    .preco-por { font-size: 40px; }
+    .preco-parcelamento-valor { font-size: 42px; }
+    .preco-parcelamento-rotulo { font-size: 22px; }
     .btn-cta { padding: 16px 24px; font-size: 15px; }
 
     /* Footer */
@@ -1276,13 +1326,454 @@
 
   @media (max-width: 400px) {
     .cta-final h2 { font-size: 30px; }
-    .preco-por { font-size: 34px; }
+    .preco-parcelamento-valor { font-size: 36px; }
+    .preco-parcelamento-rotulo { font-size: 19px; }
+  }
+
+  /* ===== REESTRUTURAÇÃO LP — 2026-08-27 ===== */
+
+  /* Medida de leitura: 35-45 caracteres (regra 7 do brief) */
+  .medida { max-width: 21em; }
+  .medida-centro { max-width: 21em; margin-left: auto; margin-right: auto; }
+
+  /* Capitular — seções 3 e 6 (regra 10) */
+  .drop-cap::first-letter {
+    float: left;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 3.4em;
+    line-height: 0.82;
+    font-weight: 500;
+    color: var(--verde);
+    padding: 0.06em 0.1em 0 0;
+  }
+
+  /* Legenda argumentativa de imagem (regra 9) */
+  .legenda {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--texto-sec);
+    margin-top: 14px;
+  }
+  .legenda-centro { margin-left: auto; margin-right: auto; text-align: center; }
+
+  /* --- 2. HERO: foto primeiro, H1 abaixo (regra 8) --- */
+  .hero-foto {
+    border-radius: 18px;
+    overflow: hidden;
+    border: 0.5px solid var(--borda);
+    margin-bottom: 34px;
+  }
+  .hero-foto img { width: 100%; height: auto; display: block; }
+  .hero-headline-abaixo { margin-top: 4px; }
+
+  /* --- 3. O RETRATO: linhas soltas com respiro --- */
+  .retrato-linhas { margin: 8px 0 46px; }
+  .retrato-linha {
+    font-family: 'Lora', serif;
+    font-size: 21px;
+    line-height: 1.6;
+    max-width: 21em;
+    margin-bottom: 30px;
+    color: var(--preto);
+  }
+  .retrato-fecho {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 27px;
+    line-height: 1.4;
+    font-weight: 400;
+    max-width: 19em;
+    color: var(--verde-escuro);
+    border-left: 3px solid var(--verde);
+    padding-left: 24px;
+  }
+
+  /* --- 4 e 7. Grid de 3 cards (reusa a linguagem de .dor-card) --- */
+  .cards-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin: 44px 0 0;
+  }
+  .card-3 {
+    background: #fff;
+    border: 0.5px solid var(--borda);
+    border-radius: 14px;
+    padding: 30px 26px;
+  }
+  .card-3 h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--verde-escuro);
+    margin-bottom: 12px;
+  }
+  .card-3 p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--preto);
+  }
+  .card-3.destaque {
+    background: var(--verde-sup);
+    border-color: var(--verde);
+  }
+  .card-3.destaque h3 { color: var(--verde-escuro); }
+
+  /* --- 5. Fecho de destaque reutilizável --- */
+  .fecho-destaque {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 23px;
+    line-height: 1.45;
+    color: var(--verde-escuro);
+    max-width: 20em;
+    margin-top: 36px;
+    border-left: 3px solid var(--verde);
+    padding-left: 22px;
+  }
+
+  /* Corpo de texto padrão das seções novas */
+  .corpo-sec p {
+    font-size: 17px;
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+
+  /* --- 7. Fecho do mecanismo (Reason Why) --- */
+  .mecanismo {
+    margin-top: 44px;
+    padding: 30px 32px;
+    background: var(--verde-sup);
+    border-radius: 14px;
+    border: 0.5px solid var(--verde);
+  }
+  .mecanismo p {
+    font-size: 17px;
+    line-height: 1.8;
+    margin: 0;
+    color: var(--preto);
+  }
+
+  /* --- 9. Perseverança coletiva: respiro generoso --- */
+  .sec-respiro { padding: 130px 40px; }
+  .perseveranca h2 { max-width: 14em; margin-bottom: 40px; }
+
+  /* Corpo e destaque no mesmo padrão da seção "O retrato": Lora (a única variante
+     carregada é itálica, então já sai em itálico sem precisar de font-style) */
+  .perseveranca .corpo-sec p {
+    font-family: 'Lora', serif;
+    font-size: 21px;
+    line-height: 1.6;
+  }
+  .perseveranca .fecho-destaque {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  /* --- 10. O que é A Trilha: 4 itens, sem ícone decorativo --- */
+  .trilha-itens {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 40px;
+  }
+  .trilha-item {
+    background: rgba(255, 255, 255, 0.08);
+    border: 0.5px solid rgba(255, 255, 255, 0.25);
+    border-radius: 14px;
+    padding: 28px 26px;
+  }
+  .trilha-item h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .trilha-item p {
+    font-size: 16px;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  /* --- 2/13/15. Linha de apoio abaixo do CTA --- */
+  .cta-apoio {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--texto-sec);
+    margin-top: 14px;
+  }
+  .cta-apoio-centro { margin-left: auto; margin-right: auto; text-align: center; }
+  .cta-final .cta-apoio { color: rgba(255, 255, 255, 0.75); }
+
+  /* Legenda da foto do Lucas (seção 6) */
+  .lucas-foto + .legenda { margin-bottom: 18px; }
+
+  @media (max-width: 768px) {
+    .cards-3 { grid-template-columns: 1fr; }
+    .trilha-itens { grid-template-columns: 1fr; }
+    .sec-respiro { padding: 90px 40px; }
+  }
+
+  @media (max-width: 600px) {
+    .retrato-linha { font-size: 19px; }
+    .retrato-fecho { font-size: 23px; }
+    .fecho-destaque { font-size: 20px; }
+    .perseveranca h2 { font-size: 30px; }
+  }
+
+
+  /* Medida de leitura — o container define a largura e centraliza;
+     os parágrafos preenchem, então tudo alinha na mesma margem. */
+  .container-leitura {
+    max-width: 30em;
+    margin: 0 auto;
+  }
+  .container-leitura > * { max-width: 100%; }
+
+  /* Elementos de texto corrido herdam a largura do container e alinham à esquerda dele */
+  .corpo-sec p,
+  .mecanismo p,
+  .retrato-linha,
+  .legenda,
+  .cta-apoio { max-width: 100%; }
+
+  .fecho-destaque,
+  .retrato-fecho { max-width: 100%; }
+
+
+  /* HERO — sem foto: título ganha largura maior para não quebrar em linhas curtas */
+  .hero-texto { max-width: 900px; }
+  .hero-texto .hero-headline { max-width: 100%; }
+  .hero-texto .hero-sub { max-width: 620px; margin-left: auto; margin-right: auto; }
+
+  /* Legenda e linha de apoio sobre o fundo escuro do hero precisam de contraste */
+  .hero .legenda,
+  .hero .cta-apoio {
+    color: #a8c4bc;
+    max-width: 100%;
+    text-align: center;
+  }
+
+  /* Fecho do mecanismo (seção 7): mesma margem visual dos cards.
+     O card tem 26px de padding interno, então o padding aqui iguala. */
+  .mecanismo { margin-left: 0; margin-right: 0; padding-left: 26px; padding-right: 26px; }
+
+
+  /* Seção 6 — framework proprietário à esquerda + jornada de 3 etapas com relevo à direita */
+  .trilha-duas-colunas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    margin-top: 40px;
+    align-items: center;
+  }
+
+  .fw-col { text-align: center; }
+  .fw-col img { width: 100%; max-width: 460px; height: auto; display: block; margin: 0 auto; border-radius: 14px; border: 0.5px solid var(--borda); }
+  .fw-col .legenda { text-align: center; margin: 14px auto 0; }
+
+  /* Timeline vertical: 3 steps empilhados, emoji num círculo à esquerda,
+     linha conectando um step ao próximo, título+texto à direita. Fluxo normal
+     de documento — nada de posição calculada por %, então não há como desalinhar. */
+  .relevo-etapas { display: flex; flex-direction: column; }
+
+  .relevo-etapa {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 20px;
+    position: relative;
+    padding-bottom: 32px;
+  }
+  .relevo-etapa:last-child { padding-bottom: 0; }
+
+  .relevo-etapa-marco {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--off-white);
+    border: 2px solid var(--verde);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    position: relative;
+    z-index: 1;
+  }
+  .relevo-etapa.chegada .relevo-etapa-marco {
+    background: var(--verde);
+    box-shadow: 0 0 0 6px rgba(87, 170, 143, 0.18);
+  }
+
+  /* Linha vertical ligando este marco ao próximo */
+  /* A linha vai do fim do círculo até o início do próximo step — não uma altura
+     fixa em px, porque o texto de cada step tem tamanho variável. bottom: 0 do
+     .relevo-etapa (que tem padding-bottom) resolve isso sem precisar calcular altura. */
+  .relevo-etapa:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 48px;
+    bottom: 0;
+    left: 23px;
+    width: 0;
+    border-left: 2px dashed var(--borda);
+  }
+
+  .relevo-etapa-texto { padding-top: 8px; }
+  .relevo-etapa-texto h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--verde-escuro);
+    margin-bottom: 8px;
+  }
+  .relevo-etapa-texto p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--preto);
+  }
+  .relevo-etapa.chegada .relevo-etapa-texto h3 { color: var(--verde); }
+
+  /* Seção 4 — loop visual em vez de cards: círculo com estações que representam o ciclo sem saída */
+  .custo-grid {
+    display: grid;
+    grid-template-columns: 440px 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+
+  .custo-loop { position: relative; width: 300px; height: 300px; margin: 0 auto; }
+
+  .custo-loop-trilho {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px dashed var(--borda);
+  }
+
+  .custo-loop-estacao {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--off-white);
+    border: 2px solid var(--verde);
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .custo-loop-estacao[data-n="1"] { top: 50%;  left: 0%; }
+  .custo-loop-estacao[data-n="2"] { top: 0%;   left: 50%; }
+  .custo-loop-estacao[data-n="3"] { top: 50%;  left: 100%; }
+  .custo-loop-estacao[data-n="4"] { top: 100%; left: 50%; }
+
+  .custo-loop-icone {
+    font-size: 14px;
+    line-height: 1;
+    color: var(--verde-escuro);
+  }
+
+  .custo-loop-label {
+    position: absolute;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--verde-escuro);
+    white-space: nowrap;
+    transform: translate(-50%, 0);
+  }
+  .custo-loop-label[data-n="1"] { top: 46%; left: -6%; transform: translate(-100%, -50%); text-align: right; }
+  .custo-loop-label[data-n="2"] { top: -28px; left: 50%; }
+  .custo-loop-label[data-n="3"] { top: 46%; left: 106%; transform: translate(0, -50%); }
+  .custo-loop-label[data-n="4"] { top: 108%; left: 50%; }
+
+  .custo-loop-marcador {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--verde);
+    box-shadow: 0 0 0 6px rgba(87, 170, 143, 0.18);
+    offset-path: circle(150px at 150px 150px);
+    animation: custo-percorrer 6s linear infinite;
+  }
+
+  @keyframes custo-percorrer {
+    0%   { offset-distance: 0%; }
+    100% { offset-distance: 100%; }
+  }
+
+  .custo-loop-centro {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .custo-loop-centro span {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--texto-sec);
+  }
+
+  .custo-texto { display: flex; flex-direction: column; gap: 28px; }
+  .custo-item-titulo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .custo-item-numero {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--off-white);
+    border: 2px solid var(--verde);
+    color: var(--verde-escuro);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .custo-item h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--verde-escuro);
+  }
+  .custo-item p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--preto);
+    max-width: 32em;
+  }
+
+  @media (max-width: 768px) {
+    .custo-grid { grid-template-columns: 1fr; gap: 40px; justify-items: center; }
+    .trilha-duas-colunas { grid-template-columns: 1fr; gap: 40px; }
+  }
+
+  @media (max-width: 420px) {
+    .custo-loop { transform: scale(0.72); margin: -42px auto; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .custo-loop-marcador { animation: none; offset-distance: 0%; }
   }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
+<!-- 1 · HEADER -->
 <nav>
   <div class="nav-logo">
     <a href="#" class="nav-logo-link">
@@ -1290,13 +1781,13 @@
     </a>
   </div>
   <div class="nav-links">
-    <a href="#plataforma">Plataforma</a>
+    <a href="#comunidade">Comunidade</a>
     <span class="nav-sep">+</span>
-    <a href="#guias">Guias Exclusivos</a>
+    <a href="#plataforma">Plataforma</a>
     <span class="nav-sep">+</span>
     <a href="#aulas">Aulas</a>
     <span class="nav-sep">+</span>
-    <a href="#comunidade">Comunidade</a>
+    <a href="#comprar">Frameworks</a>
     <a href="#comprar" class="btn-nav">ENTRAR NA TRILHA</a>
   </div>
   <button class="nav-hamburger" onclick="toggleMenu(this)" aria-label="Menu">
@@ -1305,55 +1796,378 @@
 </nav>
 <div class="nav-mobile-menu" id="nav-mobile-menu">
   <a href="#plataforma" onclick="closeMenu()">Plataforma</a>
-  <a href="#guias" onclick="closeMenu()">Guias Exclusivos</a>
+  <a href="#comprar" onclick="closeMenu()">Frameworks</a>
   <a href="#aulas" onclick="closeMenu()">Aulas</a>
   <a href="#comunidade" onclick="closeMenu()">Comunidade</a>
   <a href="#comprar" class="btn-nav" onclick="closeMenu()">entrar na trilha</a>
 </div>
 
-<!-- HERO -->
+<!-- 2 · HERO -->
 <section class="hero">
   <div class="hero-container">
     <div class="hero-texto">
-      <span class="tag"><span class="tag-dot"></span>4 semanas · Plataforma · Desafios em Grupo</span>
-      <h2 class="hero-headline">Construa a <em>rotina</em> que vai te tornar <em>consistente</em> nos seus <em>objetivos</em>.</h2>
-      <p class="hero-sub">Tenha as <strong>ferramentas</strong> e <strong>sistemas</strong> para sustentar os seus planos nos dias difíceis e avance com pessoas que estão na mesma jornada.</p>
-      <a href="#comprar" class="btn-cta" onclick="smoothScroll(event)">SE INSCREVA NA TURMA 2</a>
+      <span class="tag">Comunidade · Acesso imediato · Turmas ao vivo</span>
+
+      <h1 class="hero-headline hero-headline-abaixo">Você dá conta de tudo no trabalho.<br><em>E não sobra nada pra sua vida pessoal</em></h1>
+      <p class="hero-sub">A Trilha é onde profissionais como você constroem uma rotina que sustenta as duas coisas: a carreira que você já tem e o projeto que está parado há meses esperando você ter tempo</p>
+      <a href="#comprar" class="btn-cta" onclick="smoothScroll(event)">ENTRAR NA TRILHA — R$497</a>
+      <p class="cta-apoio">Em até 3x de R$ 166</p>
     </div>
   </div>
 </section>
 
-<!-- DOR -->
+<!-- 3 · O RETRATO -->
 <section class="sec-clara">
-  <div class="container-texto">
-    <h2>Isso soa familiar?</h2>
-
-    <div class="dor-cards">
-      <div class="dor-card">"Sou organizada(o) no trabalho, mas minha vida pessoal é caótica".</div>
-      <div class="dor-card">"Dei muito duro para construir a minha carreira e tendo a priorizar sempre o trabalho ao invés de uma rotina saudável".</div>
-      <div class="dor-card">"Eu sei o que preciso fazer, mas não consigo me manter consistente".</div>
-      <div class="dor-card">"Sou um procrastinador(a) oficial e me sinto frustrado por não conseguir avançar como queria".</div>
-      <div class="dor-card">"Minha semana começa com um plano e acaba no modo bombeiro".</div>
-      <div class="dor-card">"já tentei Pomodoro, GTD, Notion, time-blocking e não aguento mais métodos que não funcionam".</div>
+  <div class="container-texto container-leitura">
+    <div class="retrato-linhas">
+      <p class="retrato-linha">Segunda-feira você monta o plano da semana.</p>
+      <p class="retrato-linha">Quarta você está apagando incêndio.</p>
+      <p class="retrato-linha">Sexta você não abriu o seu projeto pessoal, não foi na academia, comeu o que deu — e ainda terminou o dia às onze da noite respondendo mensagem.</p>
+      <p class="retrato-linha">Domingo você pensa: semana que vem vai ser diferente.</p>
     </div>
+
+    <p class="retrato-fecho">Essa é a realidade da maioria das pessoas que trabalham no corporativo.</p>
   </div>
 </section>
 
-<!-- OBJEÇÃO — FALTA DE TEMPO -->
-<section class="sec-escura">
-  <div class="container-texto">
-    <div class="objecao-bloco">
-      <span class="sec-label objecao-label">e se eu não tiver tempo?</span>
-      <p class="objecao-pergunta">"gostei, mas não sei se vou ter tempo de me dedicar."</p>
-      <p class="objecao-resposta">O público da Trilha são pessoas extremamente ocupadas — por isso o primeiro desafio da jornada é criar um planejamento mínimo que te dê um respiro e abra espaço na agenda para continuar. Founders, médicos, executivos, artistas e outras rotinas caóticas já passaram pela jornada e chegaram até o final.</p>
-    </div>
-  </div>
-</section>
-
-<!-- PROVA SOCIAL — TURMA 1 -->
+<!-- 4 · O CUSTO -->
 <section class="sec-branca">
-  <div class="container-texto">
-    <span class="sec-label sec-label-center">o que a turma 1 viveu</span>
+  <div class="container">
+    <div class="custo-grid">
+      <div class="custo-loop">
+        <div class="custo-loop-trilho"></div>
+        <div class="custo-loop-estacao" data-n="1"><span class="custo-loop-icone">☼</span></div>
+        <div class="custo-loop-estacao" data-n="2"><span class="custo-loop-icone">◆</span></div>
+        <div class="custo-loop-estacao" data-n="3"><span class="custo-loop-icone">✉</span></div>
+        <div class="custo-loop-estacao" data-n="4"><span class="custo-loop-icone">☾</span></div>
+        <div class="custo-loop-label" data-n="1">acorda</div>
+        <div class="custo-loop-label" data-n="2">trabalho</div>
+        <div class="custo-loop-label" data-n="3">redes sociais</div>
+        <div class="custo-loop-label" data-n="4">dorme</div>
+        <div class="custo-loop-marcador"></div>
+        <div class="custo-loop-centro"><span>o loop da semana</span></div>
+      </div>
+
+      <div class="custo-texto">
+        <div class="custo-item">
+          <div class="custo-item-titulo">
+            <span class="custo-item-numero">1</span>
+            <h3>No dia a dia</h3>
+          </div>
+          <p>O trabalho ocupa o dia inteiro e transborda pra noite. O que é seu fica pro fim de uma fila que nunca acaba.</p>
+        </div>
+        <div class="custo-item">
+          <div class="custo-item-titulo">
+            <span class="custo-item-numero">2</span>
+            <h3>No Trabalho</h3>
+          </div>
+          <p>Você organiza a vida dos outros com competência e não consegue organizar a sua. E a culpa vem junto.</p>
+        </div>
+        <div class="custo-item">
+          <div class="custo-item-titulo">
+            <span class="custo-item-numero">3</span>
+            <h3>E isso está errado</h3>
+          </div>
+          <p><strong>Ninguém deveria precisar escolher entre ser bom no trabalho e ter uma vida fora dele.</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · POR QUE NÃO PEGOU -->
+<section class="sec-clara">
+  <div class="container-texto container-leitura">
+    <h2>Você já tentou. Várias vezes</h2>
+
+    <div class="trilhas-tabs">
+      <button class="trilha-tab active" onclick="showTrilha('cinco', this)">ACORDAR ÀS 5H</button>
+      <button class="trilha-tab" onclick="showTrilha('gtd', this)">GTD / NOTION</button>
+      <button class="trilha-tab" onclick="showTrilha('pomodoro', this)">CHATGPT / CLAUDE</button>
+    </div>
+
+    <div id="trilha-cinco" class="trilha-content active">
+      <div class="trilha-box">
+        <p>Funciona pra quem dorme às 21h, não tem filho e não mora onde você mora. Você fecha o notebook às 23h.</p>
+      </div>
+    </div>
+
+    <div id="trilha-gtd" class="trilha-content">
+      <div class="trilha-box">
+        <p>Você montou o sistema num domingo com energia. Ele exigia uma manutenção diária que a sua terça-feira não tem.</p>
+      </div>
+    </div>
+
+    <div id="trilha-pomodoro" class="trilha-content">
+      <div class="trilha-box">
+        <p>Você já pediu um cronograma pronto, baixou toda skill de produtividade que achou, montou uma planilha incrível. Nenhuma delas sabia que a sua terça-feira ia virar de cabeça pra baixo.</p>
+      </div>
+    </div>
+
+    <div class="corpo-sec" style="margin-top: 36px;">
+      <p>Nenhum desses métodos falhou por sua causa. Todos assumiram uma vida que não é a sua.</p>
+    </div>
+
+    <p class="fecho-destaque">É por isso que você tem um cemitério de ferramentas.</p>
+  </div>
+</section>
+
+<!-- 6 · COMO É FAZER A TRILHA -->
+<section class="sec-clara">
+  <div class="container">
+    <h2>A gente te mostra a <span class="destaque">TRILHA</span> para sair desse loop ⛰️</h2>
+
+    <div class="trilha-duas-colunas">
+      <div class="fw-col">
+        <img src="framework.png" alt="Framework proprietário da Trilha: as 6 etapas da jornada, do caos à consistência" loading="lazy" decoding="async" width="2500" height="2255">
+        <p class="legenda">Um framework construído com mais de 10 anos de estudo e consistência</p>
+      </div>
+
+      <div class="relevo-col">
+        <div class="relevo-etapas">
+          <div class="relevo-etapa">
+            <div class="relevo-etapa-marco">🏁</div>
+            <div class="relevo-etapa-texto">
+              <h3>A largada</h3>
+              <p>Faça o Mapa da Vida em 10 minutos e análise os pilares da sua vida de forma sistêmica. Monte seu primeiro sistema de organização pessoal já na primeira aula.</p>
+            </div>
+          </div>
+          <div class="relevo-etapa">
+            <div class="relevo-etapa-marco">⛰️</div>
+            <div class="relevo-etapa-texto">
+              <h3>O caminho</h3>
+              <p>Entenda o seu momento de vida, quanto tempo realmente tem na rotina e crie objetivos coerentes que não serão esquecidos daqui 2 semanas.</p>
+            </div>
+          </div>
+          <div class="relevo-etapa chegada">
+            <div class="relevo-etapa-marco">🚩</div>
+            <div class="relevo-etapa-texto">
+              <h3>A chegada</h3>
+              <p>Suas manhãs voltam a ser suas. O projeto pessoal sai do papel. E quando a semana desandar, você volta do ponto onde parou, sem recomeçar do zero e sem culpa.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · QUEM ESTÁ DO OUTRO LADO -->
+<section class="sec-branca">
+  <div class="container">
+    <h2>Quem é o guia da TRILHA 🥾</h2>
+
+    <div class="lucas-grid">
+      <div>
+        <div class="lucas-foto">
+          <img
+            src="lucas-hero.JPG"
+            alt="Lucas Soares"
+            class="lucas-foto-img"
+            loading="lazy"
+            decoding="async"
+            width="2048"
+            height="1024"
+          >
+        </div>
+        <div class="lucas-links">
+          <a href="https://www.linkedin.com/in/lucas-soares/" class="btn-ghost" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <a href="https://www.instagram.com/mindtrail.co/" class="btn-ghost" target="_blank" rel="noopener noreferrer">Instagram</a>
+        </div>
+      </div>
+      <div class="lucas-texto">
+        <div class="atos-container">
+          <div class="atos-tabs">
+            <button class="atos-tab active" onclick="mostrarAto(0, this)">Ato 1</button>
+            <button class="atos-tab" onclick="mostrarAto(1, this)">Ato 2</button>
+            <button class="atos-tab" onclick="mostrarAto(2, this)">Ato 3</button>
+          </div>
+
+          <div class="atos-content active" id="ato-0">
+            <p>Em 2020 eu tocava <span class="destaque">três empregos</span>. Era mega organizado no trabalho e um caos na vida pessoal. Comecei a ter problemas de saúde e tive o famoso burnout. <span class="destaque">Algo estava completamente fora do lugar</span>.</p>
+            <p>Eu só olhava para trabalho. Mudei a minha realidade financeira com muito trampo e apesar disso ainda tinha muito medo de voltar a não ter grana.<span class="destaque"> Resultado? Mais trabalho.</span></p>
+          </div>
+
+          <div class="atos-content" id="ato-1">
+            <p>Meu corpo e minha cabeça me obrigaram a parar. Percebi que precisava considerar outros pilares na minha vida. </p>
+            <p>O <span class="destaque">Mapa da Vida</span> nasceu aí. Depois de ler um estudo sobre longevidade vi que meu lifestyle estava me matando (literalmente). Criei um esboço e comecei a compartilhar (muita gente adorou e passou a usar também).
+            Mas mapear não era suficiente. Eu sempre criava objetivos demais e parava meus projetos pela metade.</p>
+            <p>Percebi que precisava de um <span class="destaque">critério para decidir o que fazia sentido</span> colocar e tirar da minha vida.
+            Vieram a <span class="destaque">Calculadora de Rotina</span> e o <span class="destaque">Definidor de Objetivos</span>.</p>
+          </div>
+
+          <div class="atos-content" id="ato-2">
+            <p>Quando as ferramentas se conectaram, fiquei bem mais <span class="destaque">consistente e em paz</span> — um alívio depois de tanto tempo frustrado. Veio de ter <span class="destaque">construído meu próprio método</span>, não um emprestado.</p>
+            <p>Hoje, apesar da rotina corrida como executivo, cuido da saúde e coloco o trabalho no lugar do trabalho. Moro em Salvador de propósito: cidade de sol, rotina diurna, gente na rua cedo. <span class="destaque">Treino de manhã porque é a hora que eu decidi que é minha.</span></p>
+            <p>É a mesma estrutura que você vai montar na Trilha. <span class="destaque">A diferença é que a sua vai ser sua, não a minha.</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · NOSSA PLATAFORMA -->
+<section id="plataforma" class="sec-clara">
+  <div class="container">
+    <h2>Nossa plataforma</h2>
+    <div class="badges-ferramentas">
+      <span class="badge-ferramenta">Mapa da Vida</span>
+      <span class="badge-ferramenta">Aulas</span>
+      <span class="badge-ferramenta">Calculadora de Rotina</span>
+      <span class="badge-ferramenta">Definidor de Objetivos</span>
+      <span class="badge-ferramenta">Frameworks</span>
+    </div>
+
+    <div class="features-list">
+
+      <div class="feature-row">
+        <div class="feature-texto">
+          <h3>Mapa da Vida</h3>
+          <p>essa é a primeira coisa que você faz na trilha. baseado nos estudos das bluezones ele avalia 3 pilares fundamentais: corpo, mente e espírito. tem coragem?</p>
+          <span class="feature-marcador">→ você enxerga onde vai chegar no futuro se continuar assim.</span>
+        </div>
+        <div class="feature-imagem-col">
+          <div class="feature-imagem">
+            <img
+              src="mapa-da-vida.png"
+              alt="Screenshot do Mapa da Vida"
+              class="feature-img"
+              loading="lazy"
+              decoding="async"
+              width="2816"
+              height="1536"
+            >
+          </div>
+          <p class="legenda">A primeira coisa que você faz na Trilha. 10 minutos</p>
+        </div>
+      </div>
+
+      <div class="feature-row invertido">
+        <div class="feature-texto">
+          <h3>Calculadora de Rotina</h3>
+          <p>você descobre onde o seu tempo realmente vai para definir os seus objetivos baseado na sua rotina real — e não na rotina dos outros.</p>
+          <span class="feature-marcador">→ entenda se você está numa zona de sacrifício ou privilégio.</span>
+        </div>
+        <div class="feature-imagem-col">
+          <div class="feature-imagem">
+            <img
+              src="calculadora-rotina.png"
+              alt="Screenshot da Calculadora de Rotina"
+              class="feature-img"
+              loading="lazy"
+              decoding="async"
+              width="1984"
+              height="1536"
+            >
+          </div>
+          <p class="legenda">Parte do tempo que você tem de verdade, não do ideal</p>
+        </div>
+      </div>
+
+      <div class="feature-row">
+        <div class="feature-texto">
+          <h3>Definidor de Objetivos</h3>
+          <p>crie e acompanhe os seus objetivos de acordo com a sua rotina real e pare de abandonar seus projetos no meio do caminho.</p>
+          <span class="feature-marcador">→ não engavete mais seus projetos depois de 2 semanas.</span>
+        </div>
+        <div class="feature-imagem-col">
+          <div class="feature-imagem">
+            <img
+              src="definidor-objetivos.png"
+              alt="Screenshot do Definidor de Objetivos"
+              class="feature-img"
+              loading="lazy"
+              decoding="async"
+              width="2500"
+              height="1344"
+            >
+          </div>
+          <p class="legenda">Objetivos que cabem na rotina real, não na imaginada</p>
+        </div>
+      </div>
+
+      <div class="feature-row invertido">
+        <div class="feature-texto">
+          <h3>Aulas & Frameworks</h3>
+          <p>para aplicar a trilha e construir o seu sistema de organização pessoal.</p>
+          <span class="feature-marcador">→ disponíveis desde o primeiro dia, comece a sua jornada agora.</span>
+        </div>
+        <div class="feature-imagem-col">
+          <div class="feature-imagem">
+            <img
+              src="aulas.png"
+              alt="Screenshot das Aulas"
+              class="feature-img"
+              loading="lazy"
+              decoding="async"
+              width="1250"
+              height="650"
+            >
+          </div>
+          <p class="legenda">No ar desde o primeiro dia, sem espera</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section> 
+
+<!-- 9 · O QUE É A TRILHA -->
+<section id="aulas" class="sec-verde">
+  <div class="container">
+    <h2 class="text-center">Tudo que você receber ao entrar na TRILHA 🧠</h2>
+
+    <div class="sec-features-carousel">
+      <div class="sec-features-track" id="features-track">
+        <div class="sec-feature">
+          <div class="sec-feature-icon">◈</div>
+          <h4>Comunidade</h4>
+          <p>esteja com pessoas incríveis na mesma jornada</p>
+        </div>
+        <div class="sec-feature">
+          <div class="sec-feature-icon">▶</div>
+          <h4>Plataforma</h4>
+          <p>siga a trilha e tenha uma plataforma que te ajuda em todas as etapas</p>
+        </div>
+        <div class="sec-feature">
+          <div class="sec-feature-icon">✦</div>
+          <h4>Desafios</h4>
+          <p>participe de desafios que te ajudam a aplicar o que aprendeu</p>
+        </div>
+        <div class="sec-feature">
+          <div class="sec-feature-icon">◉</div>
+          <h4>Sessões ao Vivo</h4>
+          <p>Sessões ao vivo com a comunidade por 4 semanas (pegue a turma que se encaixar na sua rotina)</p>
+        </div>
+      </div>
+
+      <div class="sec-features-nav">
+        <button class="sec-features-btn" id="features-prev" onclick="scrollFeatures(-1)" aria-label="Anterior">‹</button>
+        <button class="sec-features-btn" id="features-next" onclick="scrollFeatures(1)" aria-label="Próximo">›</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 · PERSEVERANÇA COLETIVA -->
+<section id="comunidade" class="sec-branca sec-respiro">
+  <div class="container-texto container-leitura perseveranca">
+    <h2>Tenha pessoas incríveis na mesma jornada 🫂</h2>
+
+    <div class="corpo-sec">
+      <p>O ChatGPT não entende que você ficou gripado e não conseguiu treinar. O Notion não sabia que a sua semana desandou.</p>
+      <p>Ter pessoas na mesma jornada é um reforço positivo — para os dias em que não houver motivação e sobrar culpa.</p>
+    </div>
+
+    <p class="fecho-destaque">A vida é mais leve quando compartilhamos a jornada.</p>
+  </div>
+</section>
+
+<!-- 11 · DEPOIMENTOS -->
+<section class="sec-clara">
+  <div class="container">
+    <h2 class="text-center">Quem já atravessou</h2>
 
     <div class="depoimentos-video-wrap">
       <div class="depoimentos-video-frame">
@@ -1389,254 +2203,6 @@
         </div>
         <p class="depoimento-citacao">"A aula de ontem me fez procurar a personal de novo, pra tentar malhar mesmo sem personal presente em cada treino."</p>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- JORNADA -->
-<section class="sec-escura">
-  <div class="container">
-    <span class="sec-label sec-label-dark">a trilha</span>
-    <h2 class="dark">Uma jornada completa de melhoria</h2>
-    <p class="sec-subtitulo-dark">Um framework construído com mais de 10 anos de estudo e consistência</p>
-
-    <div class="jornada-fw">
-      <div class="layout">
-        <div class="chart-wrap">
-          <img
-            src="framework.png"
-            alt="Framework da Trilha da Produtividade: as 6 etapas da jornada, do caos à consistência"
-            class="jornada-fw-img"
-            loading="lazy"
-            decoding="async"
-            width="2500"
-            height="2255"
-          >
-        </div>
-
-        <div class="cards" id="jornada-cards"></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FEATURES DESTAQUE -->
-<section id="plataforma" class="sec-clara">
-  <div class="container">
-    <span class="sec-label">ferramentas</span>
-    <h2>nossa plataforma</h2>
-    <p class="sec-subtitulo-sec">mapa da vida + calculadora de rotina + definidor de objetivos + aulas</p>
-
-    <div class="features-list">
-
-      <div class="feature-row">
-        <div class="feature-texto">
-          <h3>mapa da vida</h3>
-          <p>essa é a primeira coisa que você faz na trilha. baseado nos estudos das bluezones ele avalia 3 pilares fundamentais: corpo, mente e espírito. tem coragem?</p>
-          <span class="feature-marcador">→ você enxerga onde vai chegar no futuro se continuar assim.</span>
-        </div>
-        <div class="feature-imagem">
-          <img
-            src="mapa-da-vida.png"
-            alt="Screenshot do Mapa da Vida"
-            class="feature-img"
-            loading="lazy"
-            decoding="async"
-            width="2816"
-            height="1536"
-          >
-        </div>
-      </div>
-
-      <div class="feature-row invertido">
-        <div class="feature-texto">
-          <h3>calculadora de rotina</h3>
-          <p>você descobre onde o seu tempo realmente vai para definir os seus objetivos baseado na sua rotina real — e não na rotina dos outros.</p>
-          <span class="feature-marcador">→ entenda se você está numa zona de sacrifício ou privilégio.</span>
-        </div>
-        <div class="feature-imagem">
-          <img
-            src="calculadora-rotina.png"
-            alt="Screenshot da Calculadora de Rotina"
-            class="feature-img"
-            loading="lazy"
-            decoding="async"
-            width="1984"
-            height="1536"
-          >
-        </div>
-      </div>
-
-      <div class="feature-row">
-        <div class="feature-texto">
-          <h3>definidor de objetivos</h3>
-          <p>crie e acompanhe os seus objetivos de acordo com a sua rotina real e pare de abandonar seus projetos no meio do caminho.</p>
-          <span class="feature-marcador">→ não engavete mais seus projetos depois de 2 semanas.</span>
-        </div>
-        <div class="feature-imagem">
-          <img
-            src="definidor-objetivos.png"
-            alt="Screenshot do Definidor de Objetivos"
-            class="feature-img"
-            loading="lazy"
-            decoding="async"
-            width="2500"
-            height="1344"
-          >
-        </div>
-      </div>
-
-      <div class="feature-row invertido">
-        <div class="feature-texto">
-          <h3>aulas</h3>
-          <p>para aplicar a jornada e construir o seu sistema de organização pessoal.</p>
-          <span class="feature-marcador">→ acesse quando quiser para revisar o método</span>
-        </div>
-        <div class="feature-imagem">
-          <img
-            src="aulas.png"
-            alt="Screenshot das Aulas"
-            class="feature-img"
-            loading="lazy"
-            decoding="async"
-            width="1250"
-            height="650"
-          >
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- FEATURES SECUNDÁRIAS -->
-<section id="aulas" class="sec-verde">
-  <div class="container">
-    <span class="sec-label">Um ecossistema completo</span>
-    <h2>para seguir contigo</h2>
-
-    <div class="sec-features-carousel">
-      <div class="sec-features-track" id="features-track">
-        <div class="sec-feature">
-          <div class="sec-feature-icon">◉</div>
-          <h4>sessões ao vivo</h4>
-          <p>3 encontros durante a trilha com orientação direta</p>
-        </div>
-        <div class="sec-feature">
-          <div class="sec-feature-icon">✦</div>
-          <h4>desafios</h4>
-          <p>avance com pessoas na mesma jornada em desafios coletivos</p>
-        </div>
-        <div class="sec-feature">
-          <div class="sec-feature-icon">▶</div>
-          <h4>aulas gravadas</h4>
-          <p>acesse no seu ritmo, no horário que funciona para você</p>
-        </div>
-        <div class="sec-feature">
-          <div class="sec-feature-icon">◈</div>
-          <h4>comunidade</h4>
-          <p>se conecte com pessoas na mesma jornada que você</p>
-        </div>
-        <div class="sec-feature">
-          <div class="sec-feature-icon">✉</div>
-          <h4>guias exclusivos</h4>
-          <p>guias técnicos e profundos sobre produtividade disponíveis por 1 ano</p>
-        </div>
-      </div>
-
-      <div class="sec-features-nav">
-        <button class="sec-features-btn" id="features-prev" onclick="scrollFeatures(-1)" aria-label="Anterior">‹</button>
-        <button class="sec-features-btn" id="features-next" onclick="scrollFeatures(1)" aria-label="Próximo">›</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- OBJEÇÃO — HORÁRIO DAS AULAS -->
-<section class="sec-branca">
-  <div class="container-texto">
-    <div class="objecao-bloco">
-      <span class="sec-label objecao-label">e o horário?</span>
-      <p class="objecao-pergunta">"em que horário vão ser as aulas ao vivo?"</p>
-      <p class="objecao-resposta">A turma vota entre três períodos: manhã, hora do almoço e noite. Se a votação ficar dividida entre dois períodos, abrimos os dois horários — assim você sempre terá uma opção que funciona para a sua rotina.</p>
-    </div>
-  </div>
-</section>
-
-
-
-<!-- TRILHAS -->
-<section id="guias" class="sec-clara">
-  <div class="container">
-    <span class="sec-label">seu momento de vida</span>
-    <h2>onde você está agora?</h2>
-    <p class="sec-subtitulo">aulas variadas que acompanham cada fase da sua jornada.</p>
-
-    <div class="trilhas-tabs">
-      <button class="trilha-tab active" onclick="showTrilha('consistencia', this)">SER CONSISTENTE</button>
-      <button class="trilha-tab" onclick="showTrilha('viver', this)">VIVER MAIS</button>
-      <button class="trilha-tab" onclick="showTrilha('clareza', this)">TER CLAREZA</button>
-    </div>
-
-    <div id="trilha-consistencia" class="trilha-content active">
-      <div class="trilha-box">
-        <blockquote>"você sabe o que precisa fazer — só não consegue manter."</blockquote>
-        <p>Você quer aprender tudo ao mesmo tempo. Mas, no fim, não foca em nada, porque a rotina atropela as suas demandas.</p>
-      </div>
-    </div>
-
-    <div id="trilha-viver" class="trilha-content">
-      <div class="trilha-box">
-        <blockquote>"você é organizado no trabalho. sua vida pessoal é um caos."</blockquote>
-        <p>Se você sempre prioriza o trabalho em detrimento da vida pessoal, saiba que não está só. Aqui, você encontra as ferramentas para abrir espaço na agenda e viver mais, sem culpa. </p>
-      </div>
-    </div>
-
-    <div id="trilha-clareza" class="trilha-content">
-      <div class="trilha-box">
-        <blockquote>"você não sabe para onde está indo — e cada dia parece igual ao anterior."</blockquote>
-        <p>Seja porque você chegou ao seu objetivo, ou porque se sente perdido tentando encontrar o próximo passo, o Mapa da Vida e a Trilha guiam você rumo ao seu próximo marco — seja ele grande ou pequeno</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- PARA QUEM É -->
-<section id="comunidade" class="sec-elegibilidade">
-  <div class="container">
-    <span class="sec-label">elegibilidade</span>
-    <h2>é para você?</h2>
-
-    <div class="para-quem-grid">
-      <div class="para-quem-col sim">
-        <h3>é para você se:</h3>
-        <ul class="check-list">
-          <li><span class="check-icon">✓</span> você tem uma rotina cheia que necessita de organização</li>
-          <li><span class="check-icon">✓</span> sua agenda não respeita fronteiras entre trabalho e vida — e você quer mudar isso</li>
-          <li><span class="check-icon">✓</span> você já tentou vários métodos e parou antes de completar um mês</li>
-          <li><span class="check-icon">✓</span> você quer consistência real, não mais um framework</li>
-        </ul>
-      </div>
-      <div class="para-quem-col nao">
-        <h3>não é para você se:</h3>
-        <ul class="check-list">
-          <li><span class="x-icon">✕</span> você quer um hack rápido ou uma planilha pronta para copiar</li>
-          <li><span class="x-icon">✕</span> você busca alta performance e mais output</li>
-          <li><span class="x-icon">✕</span> você não está disposto a olhar para como realmente usa seu tempo</li>
-          <li><span class="x-icon">✕</span> você espera uma solução que funcione sem nenhum esforço da sua parte</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- PROVA SOCIAL — QUEM JÁ PASSOU -->
-<section class="sec-clara">
-  <div class="container-texto">
-    <span class="sec-label sec-label-center">quem já passou pela trilha</span>
-
-    <div class="depoimentos-grid">
       <div class="depoimento-card">
         <div class="depoimento-header">
           <img src="joanna.png" alt="Joanna Delgado" class="depoimento-foto" onerror="this.onerror=null;this.removeAttribute('src');this.textContent='JD';">
@@ -1661,95 +2227,52 @@
   </div>
 </section>
 
-<!-- LUCAS -->
-<section class="sec-branca">
+<!-- 12 · É PARA VOCÊ? -->
+<section class="sec-elegibilidade">
   <div class="container">
-    <span class="sec-label">quem está do outro lado</span>
+    <h2 class="text-center">É para você?</h2>
 
-    <div class="lucas-grid">
-      <div>
-        <div class="lucas-foto">
-          <img
-            src="lucas-hero.JPG"
-            alt="Lucas Soares"
-            class="lucas-foto-img"
-            loading="lazy"
-            decoding="async"
-            width="2048"
-            height="1024"
-          >
-        </div>
-        <div class="lucas-links">
-          <a href="https://www.linkedin.com/in/lucas-soares/" class="btn-ghost" target="_blank">LinkedIn</a>
-          <a href="https://www.instagram.com/mindtrail.co/" class="btn-ghost" target="_blank">Instagram</a>
-        </div>
+    <div class="para-quem-grid">
+      <div class="para-quem-col sim">
+        <h3>é para você se:</h3>
+        <ul class="check-list">
+          <li><span class="check-icon">✓</span> você tem uma rotina cheia que necessita de organização</li>
+          <li><span class="check-icon">✓</span> sua agenda não respeita fronteiras entre trabalho e vida — e você quer mudar isso</li>
+          <li><span class="check-icon">✓</span> você já tentou vários métodos e parou antes de completar um mês</li>
+          <li><span class="check-icon">✓</span> você quer espaço para alguma coisa sua fora do trabalho</li>
+        </ul>
       </div>
-      <div class="lucas-texto">
-        <div class="atos-container">
-          <div class="atos-tabs">
-            <button class="atos-tab active" onclick="mostrarAto(0, this)">Ato 1</button>
-            <button class="atos-tab" onclick="mostrarAto(1, this)">Ato 2</button>
-            <button class="atos-tab" onclick="mostrarAto(2, this)">Ato 3</button>
-          </div>
-
-          <div class="atos-content active" id="ato-0">
-            <p>Em 2020 eu tocava <span class="destaque">três empregos</span>. Era mega organizado no trabalho e um caos na vida pessoal. Comecei a ter problemas de saúde e tive o famoso burnout. <span class="destaque">Algo estava completamente fora do lugar</span>.</p>
-            <p>Eu só olhava para trabalho. Mudei a minha realidade financeira com muito trampo e apesar disso ainda tinha muito medo de voltar a não ter grana.<span class="destaque"> Resultado? Mais trabalho.</span></p>
-          </div>
-
-          <div class="atos-content" id="ato-1">
-            <p>Meu corpo e minha cabeça me obrigaram a parar. Percebi que precisava considerar outros pilares na minha vida. </p>
-            <p>O <span class="destaque">Mapa da Vida</span> nasceu aí. Depois de ler um estudo sobre longevidade vi que meu lifestyle estava me matando (literalmente). Criei um esboço e comecei a compartilhar (muita gente adorou e passou a usar também).
-            Mas mapear não era suficiente. Eu sempre criava objetivos demais e parava meus projetos pela metade.</p>
-            <p>Percebi que precisava de um <span class="destaque">critério para decidir o que fazia sentido</span> colocar e tirar da minha vida.
-            Vieram a <span class="destaque">Calculadora de Rotina</span> e o <span class="destaque">Definidor de Objetivos</span>.</p>
-          </div>
-
-          <div class="atos-content" id="ato-2">
-            <p>Quando as ferramentas se conectaram me percebi bem mais <span class="destaque">consistente e em paz</span>. Um alívio para quem, quase sempre, <span class="destaque">se sentia frustrado</span>.</p>
-            <p>Refleti sobre o motivo da mudança e percebi que: <span class="destaque">eu estava mais consistente porque tinha aprendido a construir meu próprio método de organização pessoal.</span></p>
-            <p>Hoje apesar da rotina corrida como executivo no mercado de entretenimento consigo <span class="destaque">cuidar da saúde, colocar o trabalho no lugar do trabalho e viver mais, sem culpa.</span></p>
-            <p><span class="destaque">É essa paz que quero te ensinar a ter na Trilha da Produtividade.</span></p>
-          </div>
-        </div>
+      <div class="para-quem-col nao">
+        <h3>não é para você se:</h3>
+        <ul class="check-list">
+          <li><span class="x-icon">✕</span> você quer um hack rápido ou uma planilha pronta para copiar</li>
+          <li><span class="x-icon">✕</span> você busca alta performance e mais output</li>
+          <li><span class="x-icon">✕</span> você não está disposto(a) a olhar para como realmente usa seu tempo</li>
+          <li><span class="x-icon">✕</span> você espera uma solução que funcione sem nenhum esforço da sua parte</li>
+        </ul>
       </div>
     </div>
   </div>
 </section>
 
-<!-- OBJEÇÃO — DATA DE INÍCIO -->
-<section class="sec-clara">
-  <div class="container-texto">
-    <div class="objecao-bloco">
-      <span class="sec-label objecao-label">quando começa?</span>
-      <p class="objecao-pergunta">"quando começam as aulas? já tem data marcada?"</p>
-      <p class="objecao-resposta">As aulas começam na semana do dia 17/08 e seguem por quatro semanas. Os melhores dias e horários são definidos em votação com a turma, para encaixar no ritmo de todo mundo.</p>
-    </div>
-  </div>
-</section>
-
-<!-- PREÇO -->
+<!-- 13 · PREÇOS -->
 <section id="comprar" class="sec-branca">
   <div class="container-texto">
-    <span class="sec-label sec-label-center">TURMA 2</span>
-    <h2 class="text-center">acesso antecipado</h2>
+    <h2 class="text-center">A TRILHA</h2>
 
     <div class="preco-box">
-      <span class="preco-tag">TURMA 2 · acesso antecipado</span>
-      <!-- <div class="vagas-aviso">
-        <span class="vagas-dot"></span>
-        restam 5 vagas - inscreva-se
-      </div> -->
-      <p class="preco-de">R$799,99</p>
-      <p class="preco-por">R$497,00</p>
-      <p class="preco-parcelamento">ou 12x de R$41,66</p>
+      <p class="preco-parcelamento">
+        <span class="preco-parcelamento-rotulo">3x de</span>
+        <span class="preco-parcelamento-valor">R$166</span>
+      </p>
+      <p class="preco-por">ou R$497 à vista</p>
 
       <ul class="preco-checklist">
-        <li><span class="check-icon">✓</span> programa completo de 4 semanas com aulas ao vivo</li>
-        <li><span class="check-icon">✓</span> conteúdo e aulas gravadas por 12 meses</li>
-        <li><span class="check-icon">✓</span> plataforma completa (ferramentas + alertas personalizados)</li>
-        <li><span class="check-icon">✓</span> acesso direto ao criador do programa para dúvidas</li>
-        <li><span class="check-icon">✓</span> desafios práticos com as turmas</li>
+        <li><span class="check-icon">✓</span> comunidade com acesso direto a mim</li>
+        <li><span class="check-icon">✓</span> desafios práticos em grupo</li>
+        <li><span class="check-icon">✓</span> aulas ao vivo sobre temas técnicos (ficam gravadas)</li>
+        <li><span class="check-icon">✓</span> plataforma completa: Mapa da Vida, Calculadora de Rotina, Definidor de Objetivos, lembretes personalizados</li>
+        <li><span class="check-icon">✓</span> aulas gravadas e guias exclusivos</li>
         <li><span class="check-icon">✓</span> lives com especialistas</li>
         <li><span class="check-icon">✓</span> <strong class="preco-destaque-item">garantia de 14 dias</strong></li>
       </ul>
@@ -1765,35 +2288,18 @@
         <p class="depoimento-citacao">"Essa semana, apesar de ter sido muito corrida, parece que alinhei mais as expectativas comigo mesma. A carga mental foi muito menor."</p>
       </div>
 
-      <a href="https://pay.kiwify.com.br/cZ3CIOK" target="_blank" rel="noopener noreferrer" class="btn-cta btn-cta-full" data-cta-local="meio-pagina" onclick="gtag('event', 'click_checkout', { local_botao: 'meio-pagina' });">INSCREVA-SE NA TURMA 2</a>
-      <p class="garantia">sem estresse. se em 14 dias você sentir que não é para você, devolvemos tudo — sem burocracia, sem pergunta.</p>
+      <a href="https://pay.kiwify.com.br/cZ3CIOK" target="_blank" rel="noopener noreferrer" class="btn-cta btn-cta-full" data-cta-local="meio-pagina" onclick="gtag('event', 'click_checkout', { local_botao: 'meio-pagina' });">ENTRAR NA TRILHA</a>
+      <p class="cta-apoio cta-apoio-centro">Seu acesso começa hoje. Se não for para você, me manda uma mensagem em até 14 dias e eu devolvo tudo.</p>
     </div>
   </div>
 </section>
 
-<!-- FAQ -->
+<!-- 14 · FAQ -->
 <section class="sec-clara">
   <div class="container">
-    <span class="sec-label sec-label-center">dúvidas</span>
-    <h2 class="text-center">perguntas frequentes</h2>
+    <h2 class="text-center">Perguntas frequentes</h2>
 
     <div class="faq-list">
-
-      <div class="faq-item">
-        <div class="faq-pergunta" onclick="toggleFaq(this)">
-          quando começam as aulas? já tem data marcada?
-          <span class="faq-seta">+</span>
-        </div>
-        <div class="faq-resposta">as aulas começam na semana do dia 17/08 e seguem por quatro semanas. os melhores dias e horários são definidos em votação com a turma, para encaixar no ritmo de todo mundo.</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pergunta" onclick="toggleFaq(this)">
-          em que horário vão ser as aulas ao vivo?
-          <span class="faq-seta">+</span>
-        </div>
-        <div class="faq-resposta">a turma vota entre três períodos: manhã, hora do almoço e noite. se a votação ficar dividida entre dois períodos, abrimos os dois horários — assim você sempre terá uma opção que funciona para a sua rotina.</div>
-      </div>
 
       <div class="faq-item">
         <div class="faq-pergunta" onclick="toggleFaq(this)">
@@ -1808,31 +2314,31 @@
           e se eu não tiver tempo de me dedicar?
           <span class="faq-seta">+</span>
         </div>
-        <div class="faq-resposta">o público da Trilha são pessoas extremamente ocupadas — por isso o primeiro desafio da jornada é criar um planejamento mínimo que te dê um respiro e abra espaço na agenda para continuar. founders, médicos, executivos, artistas e outras rotinas caóticas já passaram pela jornada e chegaram até o final.</div>
+        <div class="faq-resposta">o público da Trilha são pessoas extremamente ocupadas — por isso o primeiro desafio da jornada é criar um planejamento mínimo que te dê um respiro e abra espaço na agenda para continuar. founders, médicos e médicas, executivos e executivas, artistas e outras rotinas caóticas já passaram pela jornada e chegaram até o final.</div>
       </div>
 
       <div class="faq-item">
         <div class="faq-pergunta" onclick="toggleFaq(this)">
-          as aulas são todas ao vivo?
+          não vou conseguir acompanhar os encontros ao vivo. e aí?
           <span class="faq-seta">+</span>
         </div>
-        <div class="faq-resposta">são 8 módulos, sendo 3 com aulas ao vivo durante as 4 semanas — o restante do conteúdo é escrito e gravado, alguns transformados em podcasts para facilitar a sua vida. Todas as aulas ficam gravadas, mas é fundamental que haja um esforço para estar presente.</div>
+        <div class="faq-resposta">fica gravado, e você não perde nada: a turma é um evento da comunidade, não um prazo. se essa não der, você pega a próxima.</div>
       </div>
 
       <div class="faq-item">
         <div class="faq-pergunta" onclick="toggleFaq(this)">
-          o que é a plataforma da Trilha da Produtividade?
+          vou ter que esperar a turma começar?
           <span class="faq-seta">+</span>
         </div>
-        <div class="faq-resposta">não somos uma plataforma que serve como repositório de conteúdo, como o Circle — a plataforma da Trilha é 100% desenvolvida para esse programa. Você tem um software completo para aplicar a trilha e fica com ele por 12 meses.</div>
+        <div class="faq-resposta">não. você entra e já faz o Mapa da Vida, as aulas e um desafio no mesmo dia. a turma ao vivo é o próximo passo, não a porta de entrada.</div>
       </div>
 
       <div class="faq-item">
         <div class="faq-pergunta" onclick="toggleFaq(this)">
-          mapa da vida, calculadora de rotina, radar de coerência? o que é isso?
+          já tentei de tudo e parei. por que aqui seria diferente?
           <span class="faq-seta">+</span>
         </div>
-        <div class="faq-resposta">nós criamos uma plataforma para tangibilizar o método: imagine que, além do conteúdo, você vai ter o seu próprio software de gestão de objetivos; uma ferramenta para criar um mapa da sua vida e conectar com sua rotina; e uma ferramenta para analisar seus objetivos definidos e te dizer se fazem sentido com o seu momento de vida — entre outras. Você não está entrando em uma plataforma com um monte de conteúdo solto e sem conexão: você vai ter o seu próprio software de gestão da sua rotina, dos seus objetivos e do seu planejamento.</div>
+        <div class="faq-resposta">porque você tentou o sistema dos outros. aqui você monta o seu, a partir da sua semana real, e aprende a voltar pra ele quando cair. e não faz isso sozinho(a).</div>
       </div>
 
       <div class="faq-item">
@@ -1845,31 +2351,71 @@
 
       <div class="faq-item">
         <div class="faq-pergunta" onclick="toggleFaq(this)">
+          as aulas são todas ao vivo? como funcionam os módulos?
+          <span class="faq-seta">+</span>
+        </div>
+        <div class="faq-resposta">são 8 módulos, sendo 3 com aulas ao vivo durante as 4 semanas — o restante do conteúdo é escrito e gravado, alguns transformados em podcasts para facilitar a sua vida. Todas as aulas ficam gravadas, mas é fundamental que haja um esforço para estar presente.<br><br>os 8 módulos são:<br>1. Mínima Organização Viável (MOV)<br>2. Definindo seu Momento de Vida<br>3. Mapa da Vida<br>4. Rotina vs Projetos<br>5. Definindo Objetivos<br>6. Sistema de Objetivos<br>7. Sistema de Organização Pessoal<br>8. O Segredo da Consistência</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pergunta" onclick="toggleFaq(this)">
+          quando começa a próxima turma?
+          <span class="faq-seta">+</span>
+        </div>
+        <div class="faq-resposta">não tem data fixa, e é de propósito. você não espera turma para começar: entra hoje e já faz o Mapa da Vida, as aulas e um desafio. as turmas ao vivo são combinadas dentro da comunidade, com quem já está lá — data e horário saem de votação, para encaixar no ritmo de todo mundo.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pergunta" onclick="toggleFaq(this)">
+          em que dia e horário vão ser as aulas ao vivo?
+          <span class="faq-seta">+</span>
+        </div>
+        <div class="faq-resposta">a turma vota. os períodos são manhã, hora do almoço e noite — se a votação ficar dividida entre dois, abrimos os dois horários. a data segue a mesma lógica: quem está dentro combina junto.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pergunta" onclick="toggleFaq(this)">
+          o que é a plataforma da Trilha?
+          <span class="faq-seta">+</span>
+        </div>
+        <div class="faq-resposta">não somos uma plataforma que serve como repositório de conteúdo, como o Circle — a plataforma da Trilha é 100% desenvolvida para esse programa. Você tem um software completo para aplicar a trilha e fica com ele por 12 meses.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pergunta" onclick="toggleFaq(this)">
+          mapa da vida, calculadora de rotina? o que é isso?
+          <span class="faq-seta">+</span>
+        </div>
+        <div class="faq-resposta">nós criamos uma plataforma para tangibilizar o método: imagine que, além do conteúdo, você vai ter o seu próprio software de gestão de objetivos; uma ferramenta para criar um mapa da sua vida e conectar com sua rotina; e uma ferramenta para analisar seus objetivos definidos e te dizer se fazem sentido com o seu momento de vida — entre outras. Você não está entrando em uma plataforma com um monte de conteúdo solto e sem conexão: você vai ter o seu próprio software de gestão da sua rotina, dos seus objetivos e do seu planejamento.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pergunta" onclick="toggleFaq(this)">
           como funciona a garantia?
           <span class="faq-seta">+</span>
         </div>
-        <div class="faq-resposta">você tem 14 dias a partir do início do programa para pedir reembolso integral. sem formulário — só me manda uma mensagem.</div>
+        <div class="faq-resposta">entre, faça o Mapa da Vida e assista às duas primeiras aulas. se depois disso achar que não é pra você, me manda mensagem em até 14 dias e devolvo o valor integral. sem formulário.</div>
       </div>
 
     </div>
   </div>
 </section>
 
-<!-- CTA FINAL -->
+<!-- 15 · CTA FINAL -->
 <section class="cta-final">
-  <h2>pronto para ser consistente nos seus objetivos?</h2>
-  <a href="https://pay.kiwify.com.br/cZ3CIOK" target="_blank" rel="noopener noreferrer" class="btn-cta" data-cta-local="final-pagina" onclick="gtag('event', 'click_checkout', { local_botao: 'final-pagina' });">INSCREVA-SE NA TURMA 2</a>
-  <p class="cta-suporte">tem dúvida antes de decidir? <a href="https://wa.me/5561982425139" target="_blank" onclick="gtag('event', 'click_whatsapp_duvida');">me manda uma mensagem.</a></p>
+  <h2>Pronto(a) para ter uma vida além do expediente?</h2>
+  <a href="https://pay.kiwify.com.br/cZ3CIOK" target="_blank" rel="noopener noreferrer" class="btn-cta" data-cta-local="final-pagina" onclick="gtag('event', 'click_checkout', { local_botao: 'final-pagina' });">ENTRAR NA TRILHA — R$497</a>
+  <p class="cta-suporte">tem dúvida antes de decidir? <a href="https://wa.me/5561982425139" target="_blank" rel="noopener noreferrer" onclick="gtag('event', 'click_whatsapp_duvida');">me manda uma mensagem.</a></p>
 </section>
 
-<!-- FOOTER -->
+<!-- 16 · RODAPÉ -->
 <footer>
   <div class="footer-logo">Mind<span>Trail</span> · Lucas Soares</div>
   <div class="footer-links">
-    <a href="https://www.instagram.com/mindtrail.co/" target="_blank">Instagram</a>
-    <a href="https://www.linkedin.com/in/lucas-soares/" target="_blank">LinkedIn</a>
-    <a href="https://www.youtube.com/@mindtrail_co" target="_blank">YouTube</a>
-    <a href="https://themindtrail.substack.com/" target="_blank">Newsletter</a>
+    <a href="https://www.instagram.com/mindtrail.co/" target="_blank" rel="noopener noreferrer">Instagram</a>
+    <a href="https://www.linkedin.com/in/lucas-soares/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    <a href="https://www.youtube.com/@mindtrail_co" target="_blank" rel="noopener noreferrer">YouTube</a>
+    <a href="https://themindtrail.substack.com/" target="_blank" rel="noopener noreferrer">Newsletter</a>
   </div>
 </footer>
 
@@ -1923,6 +2469,8 @@ function updateFeaturesNav() {
   nextBtn.disabled = track.scrollLeft >= maxScroll - 4;
 }
 
+
+
 function animarDestaques(container) {
   const spans = container.querySelectorAll('.destaque');
   spans.forEach(el => el.classList.remove('visivel'));
@@ -1975,48 +2523,15 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Destaques fora dos Atos do Lucas (ex: título "trilha" da seção 6): ativa direto,
+  // sem depender de observer disparar em cada caso de navegação (F5 já na seção, scroll rápido etc).
+  document.querySelectorAll('.destaque').forEach(el => {
+    if (el.closest('.atos-content')) return;
+    el.classList.add('visivel');
+  });
+
 });
 
-// Jornada — framework interativo (gráfico + cards)
-(function () {
-  const steps = [
-    { n: 1, title: "Caótica", solid: "#A8D4C5", artefact: "MOV (Mínima Organização Viável)", desc: "É o momento em que o único foco é abrir um espaço mental e montar o mínimo operacional.", warn: "tentar se organizar com rotinas complexas e aplicativos." },
-    { n: 2, title: "Respiro Inicial", solid: "#8EC9B5", artefact: "Mapa da Vida + Momento de Vida", desc: "É o momento em que você sente um pouco mais de senso de progresso e diminuição da sobrecarga, ainda não é hora de começar projetos, mas sim de analisar o todo.", warn: "começar grandes mudanças simultâneas." },
-    { n: 3, title: "Rotina Previsível", solid: "#74BDA1", artefact: "Calculadora da Rotina", desc: "É o momento em que você já sabe quais as áreas prioritárias, seu momento de vida e tem um sistema de organização funcional, começa a fazer mudanças específicas e enxerga melhoras nítidas.", warn: "continuar aqui sem objetivos e sistemas." },
-    { n: 4, title: "Orientado a Metas", solid: "#57AA8F", artefact: "Definidor de Objetivos + Radar de Coerência", desc: "É o momento em que você já tem toda a estrutura para definir bons objetivos de curto, médio e longo prazo e analisar se estes fazem sentido com o seu momento de vida.", warn: "criar muitos objetivos e objetivos incoerentes com seu momento de vida." },
-    { n: 5, title: "Orientado a Sistemas", solid: "#3E9279", artefact: "Sistemas de Objetivos e Organização Pessoal", desc: "É o momento em que você entende que os sistemas são o que vão suportar todo aprendizado das etapas anteriores nos dias difíceis.", warn: "não saber diferenciar sistemas de objetivos de sistemas de organização." },
-    { n: 6, title: "Consistência", solid: "#2A3F45", artefact: "Volta sem Culpa", desc: "É o momento em que você percebe que ser consistente não é não falhar, é saber voltar para algumas casas sempre que necessário sem culpa.", warn: "não aceitar voltar etapas na jornada e abandonar todo o progresso." }
-  ];
-
-  let active = 0;
-
-  function renderJornadaCards() {
-    const col = document.getElementById('jornada-cards');
-    if (!col) return;
-    col.innerHTML = '';
-    steps.forEach((s, i) => {
-      const d = document.createElement('div');
-      d.className = 'card' + (i === active ? ' active' : '');
-      d.onclick = () => { active = i; renderJornadaCards(); };
-      d.innerHTML = `
-        <div class="ch">
-          <div class="badge" style="background:${s.solid}">${s.n}</div>
-          <div class="ctitle">${s.n} | ${s.title}</div>
-        </div>
-        <div class="cbody">
-          <div class="chip">${s.artefact}</div>
-          <div class="cdesc">${s.desc}</div>
-          <div class="cwarn">
-            <span style="font-size:11px;flex-shrink:0;margin-top:1px">⚠️</span>
-            <span class="wt"><b>Erro comum:</b> ${s.warn}</span>
-          </div>
-        </div>`;
-      col.appendChild(d);
-    });
-  }
-
-  renderJornadaCards();
-})();
 </script>
 
 </body>
