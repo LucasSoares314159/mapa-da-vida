@@ -4,6 +4,21 @@ import PlanejamentoSemanal from '@/emails/planejamento-semanal'
 import LembreteObjetivo from '@/emails/lembrete-objetivo'
 import ObjetivoConcluido from '@/emails/objetivo-concluido'
 import MomentoRevisao from '@/emails/momento-revisao'
+import AcessoPlataforma from '@/emails/acesso-plataforma'
+
+export async function templateAcessoPlataforma(opts: {
+  urlCadastro: string
+  validadeHoras: number
+}): Promise<{ subject: string; html: string }> {
+  const subject = 'Pagamento confirmado: crie sua conta na MindTrail'
+  const html = await render(
+    AcessoPlataforma({
+      urlCadastro: opts.urlCadastro,
+      validadeHoras: opts.validadeHoras,
+    })
+  )
+  return { subject, html }
+}
 
 export async function templateLembreteMensal(opts: {
   nome: string

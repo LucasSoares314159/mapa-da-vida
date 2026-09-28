@@ -70,10 +70,7 @@ export default function LoginPage() {
           <CardFooter className="flex flex-col gap-3">
             <SubmitButton className="w-full" pendingLabel="Entrando…">Entrar</SubmitButton>
             <p className="text-sm text-muted-foreground text-center">
-              Não tem uma conta?{' '}
-              <Link href="/auth/cadastro" className="text-foreground underline underline-offset-4 hover:text-primary">
-                Cadastre-se
-              </Link>
+              Comprou a Trilha? Use o link de acesso enviado por e-mail.
             </p>
           </CardFooter>
         </form>
