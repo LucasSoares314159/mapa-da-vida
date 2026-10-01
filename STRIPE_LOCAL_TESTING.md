@@ -25,6 +25,9 @@ Ao iniciar ou resetar a stack, a CLI aplica automaticamente `supabase/migrations
 
 O Mailpit local recebe os e-mails da aplicacao. A interface fica em `http://127.0.0.1:54324` e o SMTP em `127.0.0.1:54325`.
 
+Sem SMTP configurado, `npm run dev` imprime o link de cadastro no terminal com o prefixo
+`[checkout-dev]`. Esse fallback nunca e usado em producao.
+
 ## 2. Preparar o Stripe Sandbox
 
 No Stripe em modo de teste, crie um produto de pagamento unico de R$ 497 e coloque o identificador `price_...` em `STRIPE_PRICE_ID`. Coloque a chave secreta de teste `sk_test_...` em `STRIPE_SECRET_KEY`.

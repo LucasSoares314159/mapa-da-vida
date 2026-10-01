@@ -69,12 +69,22 @@ export async function enviarLinkAcessoCompra(compraId: string, email: string): P
   }
 
   const urlCadastro = `${siteUrl.replace(/\/$/, '')}/auth/cadastro?token=${encodeURIComponent(token)}`
-  const { subject, html } = await templateAcessoPlataforma({
-    urlCadastro,
-    validadeHoras: getTokenTtlHours(),
-  })
+  const smtpConfigurado = Boolean(process.env.SMTP_HOST && process.env.SMTP_FROM)
 
-  await enviarEmail({ to: email, subject, html })
+  if (!smtpConfigurado) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('SMTP nao configurado')
+    }
+
+    console.info(`[checkout-dev] Link de cadastro para ${email}: ${urlCadastro}`)
+  } else {
+    const { subject, html } = await templateAcessoPlataforma({
+      urlCadastro,
+      validadeHoras: getTokenTtlHours(),
+    })
+
+    await enviarEmail({ to: email, subject, html })
+  }
 
   const { error } = await supabase
     .from('compras')
