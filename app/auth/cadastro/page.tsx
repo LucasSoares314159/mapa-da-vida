@@ -1,69 +1,44 @@
-'use client'
-
-import { useFormState } from 'react-dom'
 import Link from 'next/link'
-import { cadastro } from '@/app/actions/auth'
-import { SubmitButton } from '@/components/ui/submit-button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { buscarConviteCompra } from '@/lib/acesso-compra'
+import { CadastroConviteForm } from '@/components/CadastroConviteForm'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 
-export default function CadastroPage() {
-  const [state, action] = useFormState(cadastro, undefined)
+type Props = {
+  searchParams: { token?: string }
+}
+export default async function CadastroPage({ searchParams }: Props) {
+  const token = searchParams.token ?? ''
+  let convite = null
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Criar conta</CardTitle>
-          <CardDescription>Comece a mapear sua vida</CardDescription>
-        </CardHeader>
+  try {
+    convite = await buscarConviteCompra(token)
+  } catch (error) {
+    console.error('[cadastro] Falha ao consultar convite:', error)
+  }
 
-        <form action={action}>
-          <CardContent className="flex flex-col gap-4">
-            {state?.message && (
-              <Alert variant="destructive">
-                <AlertDescription>{state.message}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="nome">Nome</Label>
-              <Input id="nome" name="nome" type="text" placeholder="Seu nome" autoComplete="name" required />
-              {state?.errors?.nome && <p className="text-xs text-destructive">{state.errors.nome[0]}</p>}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" placeholder="seu@email.com" autoComplete="email" required />
-              {state?.errors?.email && <p className="text-xs text-destructive">{state.errors.email[0]}</p>}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="senha">Senha</Label>
-              <Input id="senha" name="senha" type="password" placeholder="••••••••" autoComplete="new-password" required />
-              {state?.errors?.senha && <p className="text-xs text-destructive">{state.errors.senha[0]}</p>}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="confirmarSenha">Confirmar senha</Label>
-              <Input id="confirmarSenha" name="confirmarSenha" type="password" placeholder="••••••••" autoComplete="new-password" required />
-              {state?.errors?.confirmarSenha && <p className="text-xs text-destructive">{state.errors.confirmarSenha[0]}</p>}
-            </div>
-          </CardContent>
-
-          <CardFooter className="flex flex-col gap-3">
-            <SubmitButton className="w-full" pendingLabel="Criando conta…">Criar conta</SubmitButton>
-            <p className="text-sm text-muted-foreground text-center">
-              Já tem uma conta?{' '}
-              <Link href="/auth/login" className="text-foreground underline underline-offset-4 hover:text-primary">
-                Entrar
-              </Link>
+  if (!convite) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle>Link indisponível</CardTitle>
+            <CardDescription>Este link é inválido, expirou ou já foi utilizado.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm leading-6 text-muted-foreground">
+              Peça ao suporte o reenvio do acesso usando o mesmo e-mail informado na compra.
             </p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/auth/login">Ir para o login</Link>
+            </Button>
           </CardFooter>
-        </form>
-      </Card>
-    </div>
-  )
+        </Card>
+      </main>
+    )
+  }
+
+  return <CadastroConviteForm token={token} email={convite.email} />
 }
