@@ -217,6 +217,10 @@
 
   .btn-cta:hover { opacity: 0.9; }
 
+  .checkout-form { margin: 0; }
+  .checkout-form .btn-cta { border: 0; }
+  .cta-final .checkout-form { display: inline-block; }
+
   /* SEÇÃO CLARA */
   .sec-clara {
     background: var(--off-white);
@@ -2285,8 +2289,10 @@
         <p class="depoimento-citacao">"Essa semana, apesar de ter sido muito corrida, parece que alinhei mais as expectativas comigo mesma. A carga mental foi muito menor."</p>
       </div>
 
-      <a href="https://pay.kiwify.com.br/cZ3CIOK" target="_blank" rel="noopener noreferrer" class="btn-cta btn-cta-full" data-cta-local="meio-pagina" onclick="gtag('event', 'click_checkout', { local_botao: 'meio-pagina' });">ENTRAR NA TRILHA</a>
-      <p class="cta-apoio cta-apoio-centro">Seu acesso começa hoje. Se não for para você, me manda uma mensagem em até 14 dias e eu devolvo tudo.</p>
+      <form action="/api/stripe/checkout" method="post" class="checkout-form">
+        <button type="submit" class="btn-cta btn-cta-full" data-cta-local="meio-pagina" onclick="gtag('event', 'click_checkout', { local_botao: 'meio-pagina' });">ENTRAR NA TRILHA</button>
+      </form>
+      <p class="cta-apoio cta-apoio-centro">Seu acesso começa hoje. Se não for para você, me manda uma mensagem em até 7 dias e eu devolvo tudo.</p>
     </div>
   </div>
 </section>
@@ -2391,7 +2397,7 @@
           como funciona a garantia?
           <span class="faq-seta">+</span>
         </div>
-        <div class="faq-resposta">entre, faça o Mapa da Vida e assista às duas primeiras aulas. se depois disso achar que não é pra você, me manda mensagem em até 14 dias e devolvo o valor integral. sem formulário.</div>
+        <div class="faq-resposta">entre, faça o Mapa da Vida e assista às duas primeiras aulas. se depois disso achar que não é pra você, me manda mensagem em até 7 dias e devolvo o valor integral. sem formulário.</div>
       </div>
 
     </div>
@@ -2401,7 +2407,9 @@
 <!-- 15 · CTA FINAL -->
 <section class="cta-final">
   <h2>Pronto(a) para ter uma vida além do expediente?</h2>
-  <a href="https://pay.kiwify.com.br/cZ3CIOK" target="_blank" rel="noopener noreferrer" class="btn-cta" data-cta-local="final-pagina" onclick="gtag('event', 'click_checkout', { local_botao: 'final-pagina' });">ENTRAR NA TRILHA — R$397</a>
+  <form action="/api/stripe/checkout" method="post" class="checkout-form">
+    <button type="submit" class="btn-cta" data-cta-local="final-pagina" onclick="gtag('event', 'click_checkout', { local_botao: 'final-pagina' });">ENTRAR NA TRILHA — R$397</button>
+  </form>
   <p class="cta-suporte">tem dúvida antes de decidir? <a href="https://wa.me/5561982425139" target="_blank" rel="noopener noreferrer" onclick="gtag('event', 'click_whatsapp_duvida');">me manda uma mensagem.</a></p>
 </section>
 
