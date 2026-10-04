@@ -5,9 +5,10 @@ export const loginSchema = z.object({
   senha: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
 })
 
-export const cadastroSchema = z.object({
+export const cadastroConviteSchema = z.object({
   nome: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres'),
-  email: z.string().email('Email inválido'),
+  telefone: z.string().min(10, 'Informe um telefone válido').max(20, 'Telefone inválido'),
+  token: z.string().min(32, 'Link de acesso inválido'),
   senha: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
   confirmarSenha: z.string(),
 }).refine((data) => data.senha === data.confirmarSenha, {
@@ -38,7 +39,7 @@ export const mapaSchema = z.object({
 })
 
 export type LoginFormData = z.infer<typeof loginSchema>
-export type CadastroFormData = z.infer<typeof cadastroSchema>
+export type CadastroConviteFormData = z.infer<typeof cadastroConviteSchema>
 export type EsqueciSenhaFormData = z.infer<typeof esqueciSenhaSchema>
 export type RedefinirSenhaFormData = z.infer<typeof redefinirSenhaSchema>
 export type AreaFormData = z.infer<typeof areaSchema>

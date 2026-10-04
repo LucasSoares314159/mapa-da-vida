@@ -101,6 +101,10 @@ npm run build             # só com o dev parado
 | `/admin/modulos`, `/admin/modulos/[id]` | Editor do conteúdo escrito das aulas | ✅ + `ADMIN_EMAILS` |
 | `/api/cron/emails` | Disparo diário (21h UTC) | `CRON_SECRET` |
 | `/api/lista-espera` | Webhook de captação | pública |
+| `/api/stripe/checkout` | Cria Checkout Session de pagamento único | pública (POST) |
+| `/api/stripe/webhook` | Confirma pagamento e dispara acesso | assinatura Stripe |
+| `/api/admin/compras/reenviar-acesso` | Regenera link de uma compra | ✅ + `ADMIN_EMAILS` |
+| `/compra/sucesso` | Confirmação visual após o Checkout | pública |
 
 Toda rota autenticada passa pelo `matcher` do middleware, que além de barrar
 visitante também **renova a sessão**. Ao criar rota protegida, adicione ao matcher —
@@ -122,7 +126,7 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
   /mapa           MapaFlow · RevelacaoMapa · RevelacaoDiagnostico · AreaDestaqueOverlay
   /lp /lista-espera
 /lib              ver tabela abaixo
-/emails           5 templates react-email
+/emails           6 templates react-email
 /hooks            useMetaPixel · useUTMForward
 /types/index.ts   tipos + PILARES + ESTACOES + COR_STATUS
 ```
@@ -141,6 +145,8 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 | `prazo.ts` | Labels de prazo de objetivo |
 | `membros.ts` | Contagem de cadastrados |
 | `email.ts` / `email-templates.ts` | Envio e montagem |
+| `stripe.ts` | Cliente server-side do Stripe |
+| `acesso-compra.ts` | Emissão, hash, validação e envio de links de acesso |
 | `cron-auth.ts` | Validação do `CRON_SECRET` |
 | `supabase.ts` / `-server.ts` / `-admin.ts` | Clientes browser / server / service-role |
 | `validations.ts` | Schemas Zod |
@@ -149,7 +155,8 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 
 ## Modelo de dados
 
-Fonte de verdade: os arquivos `SUPABASE_*_MIGRATION.md` e `migracao_*.sql` na raiz.
+Fonte de verdade: os arquivos `SUPABASE_*_MIGRATION.md`, `migracao_*.sql` na raiz e
+as novas migrações versionadas em `supabase/migrations`.
 
 | Tabela | Campos-chave |
 |---|---|
@@ -161,6 +168,9 @@ Fonte de verdade: os arquivos `SUPABASE_*_MIGRATION.md` e `migracao_*.sql` na ra
 | `momentos_vida` | `estacao`, `frase`, `duracao`, `data_revisao`, `ativo` — 1 ativo por usuário |
 | `progresso_aulas` | `user_id`, `modulo_id`, `concluido_em`, `data_confiavel` |
 | `modulos_conteudo` | `modulo_id` (PK, texto), `blocos` (jsonb), `atualizado_em` |
+| `compras` | sessão/pagamento Stripe, e-mail, status, `user_id`, datas do funil |
+| `tokens_acesso_compra` | hash do token, expiração, uso e invalidação |
+| `stripe_webhook_events` | IDs de evento já recebidos para idempotência |
 
 ### Invariantes que não podem ser quebrados
 
@@ -171,6 +181,10 @@ tudo no mesmo segundo e destruiria as médias de ritmo.
 
 **`profiles.aulas_concluidas`** é legado, não é mais escrito. Só remover depois de
 validar o back office em produção.
+
+**Links de compra** — apenas o SHA-256 do token é persistido. Um novo envio invalida
+todos os links anteriores ainda ativos; `used_at` impede reutilização depois do cadastro.
+`stripe_webhook_events.event_id` impede e-mail duplicado quando o Stripe reenvia eventos.
 
 **`profiles.excluir_das_metricas`** — contas internas somem do back office e do
 contador de membros, mas a plataforma funciona normal para elas. Apagar dados de conta
@@ -321,7 +335,7 @@ momento mais vulnerável. Agregados de status seguem visíveis, sem nome atrelad
 
 ## E-mails
 
-5 templates em `/emails`, renderizados por react-email e enviados por SMTP.
+6 templates em `/emails`, renderizados por react-email e enviados por SMTP.
 Um cron diário (21h UTC, `vercel.json`) em `/api/cron/emails` decide o que disparar:
 
 | Template | Quando |
@@ -331,6 +345,7 @@ Um cron diário (21h UTC, `vercel.json`) em `/api/cron/emails` decide o que disp
 | `lembrete-objetivo` | conforme `frequencia_lembrete`; para de cobrar prazo vencido |
 | `momento-revisao` | ao chegar a `data_revisao` |
 | `objetivo-concluido` | na conclusão |
+| `acesso-plataforma` | após confirmação do pagamento pelo webhook Stripe |
 
 Os e-mails citam o Momento de Vida ativo como fio condutor. Buscas de usuário são em
 **batch** — não faça query por pessoa dentro de loop.
@@ -349,6 +364,10 @@ Os e-mails citam o Momento de Vida ativo como fio condutor. Buscas de usuário s
 | `NEXT_PUBLIC_SITE_URL` | links absolutos em e-mails |
 | `MAKE_WEBHOOK_URL` | integração da lista de espera |
 | `NEXT_PUBLIC_META_PIXEL_LISTA_ESPERA_ID` | pixel de captação |
+| `STRIPE_SECRET_KEY` | chave server-side do Stripe (`sk_test_` no sandbox) |
+| `STRIPE_PRICE_ID` | preço único vendido pelo Checkout |
+| `STRIPE_WEBHOOK_SECRET` | valida assinatura do webhook (`whsec_`) |
+| `ACCESS_LINK_TTL_HOURS` | validade do link de cadastro; padrão 168h |
 
 Ao adicionar variável nova: **`.env.local` e Vercel**, e a Vercel precisa de redeploy —
 variáveis não se aplicam a builds existentes.
