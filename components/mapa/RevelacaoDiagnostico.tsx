@@ -4,10 +4,14 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'motion/react'
 import type { Diagnostico } from '@/lib/analise'
+import { PILARES } from '@/types'
+import type { Area, NomePilar, StatusArea } from '@/types'
 
 type Props = {
   mapaId: string
   diagnostico: Diagnostico
+  /** As 9 áreas respondidas, para abrir com o retrato do próprio mapa. */
+  areas: Area[]
   onVerMapa: () => void
 }
 
@@ -15,9 +19,8 @@ const COR_STATUS = { vermelho: '#C05050', amarelo: '#D4A843' } as const
 
 /** Cada etapa é uma tela cheia; o clique avança para a próxima. */
 type Etapa =
-  | { tipo: 'ganho' }
+  | { tipo: 'retrato' }
   | { tipo: 'padrao' }
-  | { tipo: 'projecao' }
   | { tipo: 'area'; indice: number }
   | { tipo: 'acoes' }
 
@@ -31,12 +34,11 @@ const TRANSICAO = { duration: 0.7, ease: [0.16, 1, 0.3, 1] } as const
  * O avanço é por clique (não automático) para que cada pessoa leia no próprio
  * ritmo — o texto varia bastante de tamanho conforme o mapa.
  */
-export function RevelacaoDiagnostico({ mapaId, diagnostico, onVerMapa }: Props) {
+export function RevelacaoDiagnostico({ mapaId, diagnostico, areas, onVerMapa }: Props) {
   const etapas = useMemo<Etapa[]>(
     () => [
-      { tipo: 'ganho' },
+      { tipo: 'retrato' },
       { tipo: 'padrao' },
-      { tipo: 'projecao' },
       ...diagnostico.areasDestacadas.map((_, indice) => ({ tipo: 'area' as const, indice })),
       { tipo: 'acoes' },
     ],
@@ -66,7 +68,7 @@ export function RevelacaoDiagnostico({ mapaId, diagnostico, onVerMapa }: Props) 
           exit={{ opacity: 0, y: -16 }}
           transition={TRANSICAO}
         >
-          {etapa.tipo === 'ganho' && <TelaGanho diagnostico={diagnostico} />}
+          {etapa.tipo === 'retrato' && <TelaRetrato diagnostico={diagnostico} areas={areas} />}
 
           {etapa.tipo === 'padrao' && (
             <p
@@ -83,34 +85,6 @@ export function RevelacaoDiagnostico({ mapaId, diagnostico, onVerMapa }: Props) 
             </p>
           )}
 
-          {etapa.tipo === 'projecao' && (
-            <div className="flex flex-col gap-6">
-              {diagnostico.projecao.map((paragrafo, i) => (
-                <p
-                  key={i}
-                  className="text-center"
-                  style={{ fontSize: '1.02rem', color: 'rgba(237,242,239,0.85)', lineHeight: 1.75 }}
-                >
-                  {paragrafo}
-                </p>
-              ))}
-              <p
-                className="text-center"
-                style={{
-                  fontFamily: 'var(--font-lora), Lora, serif',
-                  fontStyle: 'italic',
-                  fontSize: '1.05rem',
-                  color: '#EDF2EF',
-                  lineHeight: 1.7,
-                  borderTop: '0.5px solid rgba(237,242,239,0.15)',
-                  paddingTop: 28,
-                }}
-              >
-                {diagnostico.escolha}
-              </p>
-            </div>
-          )}
-
           {etapa.tipo === 'area' && <TelaArea area={diagnostico.areasDestacadas[etapa.indice]} />}
 
           {etapa.tipo === 'acoes' && (
@@ -125,68 +99,6 @@ export function RevelacaoDiagnostico({ mapaId, diagnostico, onVerMapa }: Props) 
 }
 
 /** Clímax: o ganho estimado como número grande, com contagem de entrada. */
-function TelaGanho({ diagnostico }: { diagnostico: Diagnostico }) {
-  const { valor, unidade } = diagnostico.ganhoEstimado
-
-  return (
-    <div className="flex flex-col items-center gap-6">
-      <motion.p
-        className="text-center uppercase"
-        style={{
-          fontSize: 12,
-          letterSpacing: 2,
-          color: 'rgba(237,242,239,0.55)',
-          fontFamily: 'var(--font-space-grotesk), sans-serif',
-        }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-      >
-        O que o estudo mostra
-      </motion.p>
-
-      <motion.div
-        className="flex items-baseline justify-center gap-3"
-        initial={{ scale: 0.7, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <span
-          className="leading-none"
-          style={{
-            fontFamily: 'var(--font-space-grotesk), sans-serif',
-            fontSize: 'clamp(4.5rem, 18vw, 8rem)',
-            fontWeight: 700,
-            color: '#57AA8F',
-            letterSpacing: '-0.03em',
-          }}
-        >
-          {valor}
-        </span>
-      </motion.div>
-
-      <motion.p
-        className="max-w-xs text-center"
-        style={{ fontSize: '1.05rem', color: '#EDF2EF', lineHeight: 1.6 }}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 1.2 }}
-      >
-        {unidade}
-      </motion.p>
-
-      <motion.p
-        className="max-w-sm text-center"
-        style={{ fontSize: '0.9rem', color: 'rgba(237,242,239,0.6)', lineHeight: 1.65 }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.7, delay: 1.6 }}
-      >
-        É o que separa as populações mais longevas do mundo do resto. Não por genética, por hábito.
-      </motion.p>
-    </div>
-  )
-}
 
 /** Uma área crítica ocupando a tela inteira: fundamento e evidência. */
 function TelaArea({ area }: { area: Diagnostico['areasDestacadas'][number] }) {
@@ -266,6 +178,21 @@ function TelaAcoes({
 
   return (
     <div className="flex w-full flex-col items-center gap-8">
+      {/* Fecho que devolve agência. Vinha da tela de projeção, removida por ser
+          genérica — mas esta frase é boa e não podia sair junto. */}
+      <p
+        className="max-w-md text-center"
+        style={{
+          fontFamily: 'var(--font-lora), Lora, serif',
+          fontStyle: 'italic',
+          fontSize: '1.05rem',
+          color: '#EDF2EF',
+          lineHeight: 1.7,
+        }}
+      >
+        {diagnostico.escolha}
+      </p>
+
       <div className="flex items-center justify-center gap-2">
         {(
           [
@@ -321,6 +248,121 @@ function TelaAcoes({
           Ver diagnóstico completo
         </Link>
       </div>
+    </div>
+  )
+}
+
+const ORDEM_PILARES_REVELACAO: NomePilar[] = ['corpo', 'mente', 'espirito']
+
+const PONTO_STATUS: Record<StatusArea, string> = {
+  verde: '#57AA8F',
+  amarelo: '#D4A843',
+  vermelho: '#C05050',
+}
+
+/**
+ * Abertura do diagnóstico: o retrato do próprio mapa.
+ *
+ * Antes esta tela abria com o ganho agregado do estudo — um número grande antes
+ * de a pessoa ver o próprio resultado, que não dizia nada sobre ela. Agora o
+ * primeiro quadro é o mapa dela, e o dado do estudo entra depois, ligado ao que
+ * esse mapa mostra.
+ */
+function TelaRetrato({ diagnostico, areas }: { diagnostico: Diagnostico; areas: Area[] }) {
+  const { totais, ganhoEstimado } = diagnostico
+  const porArea = new Map(areas.map((a) => [a.area, a.status]))
+  const pedemMudanca = totais.vermelho + totais.amarelo
+
+  return (
+    <div className="flex w-full max-w-md flex-col items-center gap-8">
+      <motion.p
+        className="text-center uppercase"
+        style={{
+          fontSize: 12,
+          letterSpacing: 2,
+          color: 'rgba(237,242,239,0.55)',
+          fontFamily: 'var(--font-space-grotesk), sans-serif',
+        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        Seu mapa hoje
+      </motion.p>
+
+      {/* As 9 áreas, agrupadas por pilar */}
+      <div className="flex w-full flex-col gap-5">
+        {ORDEM_PILARES_REVELACAO.map((pilar, iPilar) => (
+          <motion.div
+            key={pilar}
+            className="flex flex-col gap-2"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.35 + iPilar * 0.18, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span
+              className="uppercase"
+              style={{
+                fontSize: 11,
+                letterSpacing: '1px',
+                fontWeight: 600,
+                color: 'rgba(237,242,239,0.45)',
+              }}
+            >
+              {PILARES[pilar].label}
+            </span>
+            {PILARES[pilar].areas.map((area) => {
+              const status = porArea.get(area) ?? 'verde'
+              return (
+                <div key={area} className="flex items-center gap-3">
+                  <span
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      backgroundColor: PONTO_STATUS[status],
+                      flexShrink: 0,
+                      display: 'inline-block',
+                    }}
+                  />
+                  <span style={{ fontSize: 15, color: '#EDF2EF' }}>{area}</span>
+                </div>
+              )
+            })}
+          </motion.div>
+        ))}
+      </div>
+
+      {/* O dado do estudo, ligado ao que este mapa mostra */}
+      <motion.p
+        className="text-center"
+        style={{
+          fontSize: '0.95rem',
+          color: 'rgba(237,242,239,0.7)',
+          lineHeight: 1.7,
+          borderTop: '0.5px solid rgba(237,242,239,0.15)',
+          paddingTop: 24,
+        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.7, delay: 1.1 }}
+      >
+        {pedemMudanca === 0 ? (
+          <>
+            Nenhuma área pedindo mudança hoje. Nas Blue Zones, manter esse resultado é o que
+            separa quem vive <strong style={{ color: '#EDF2EF' }}>{ganhoEstimado.valor} anos a mais</strong>{' '}
+            livre de doença.
+          </>
+        ) : (
+          <>
+            <strong style={{ color: '#EDF2EF' }}>
+              {pedemMudanca} {pedemMudanca === 1 ? 'área pede' : 'áreas pedem'} atenção
+            </strong>
+            . São justamente as que as populações mais longevas do mundo protegem — e o que
+            lhes dá {ganhoEstimado.valor} anos a mais livres de doença.
+          </>
+        )}
+      </motion.p>
     </div>
   )
 }

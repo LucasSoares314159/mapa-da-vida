@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { ArrowLeft, FileText, Sparkles } from 'lucide-react'
+import { ArrowLeft, BookOpen, FileText, Sparkles } from 'lucide-react'
 import { RevelacaoDiagnostico } from './RevelacaoDiagnostico'
 import type { Diagnostico } from '@/lib/analise'
 import type { Mapa } from '@/types'
@@ -108,11 +108,55 @@ export function RevelacaoMapa({ mapa, diagnostico }: Props) {
         <RevelacaoDiagnostico
           mapaId={mapa.id}
           diagnostico={diagnostico}
+          areas={mapa.areas ?? []}
           onVerMapa={() => setVisualizacao('mapa')}
         />
       ) : (
-        <div style={{ height: 'calc(100vh - 52px)' }}>
-          <MapaFlow mapa={mapa} minimal />
+        <div className="flex flex-col" style={{ minHeight: 'calc(100vh - 52px)' }}>
+          <div className="flex-1" style={{ minHeight: '60vh' }}>
+            <MapaFlow mapa={mapa} minimal />
+          </div>
+
+          {/* Saídas da tela do mapa. Sem elas a pessoa fica sem caminho óbvio:
+              o diagnóstico completo ficava num link de 12px no header, e não
+              havia nenhuma rota de volta para o conteúdo da Trilha. */}
+          <div
+            className="flex flex-col gap-3 px-6 py-6"
+            style={{ borderTop: '0.5px solid #c8d8d2', backgroundColor: '#fff' }}
+          >
+            <div className="mx-auto flex w-full max-w-md flex-col gap-3">
+              <Link
+                href={`/diagnostico/${mapa.id}`}
+                className="flex items-center justify-center gap-2 text-white transition-opacity hover:opacity-90"
+                style={{
+                  backgroundColor: '#57AA8F',
+                  borderRadius: 10,
+                  padding: '16px 24px',
+                  fontSize: 16,
+                  fontWeight: 500,
+                }}
+              >
+                <FileText className="size-4" />
+                Ver diagnóstico completo
+              </Link>
+
+              <Link
+                href="/content"
+                className="flex items-center justify-center gap-2 transition-opacity hover:opacity-80"
+                style={{
+                  border: '1.5px solid #57AA8F',
+                  color: '#2A3F45',
+                  borderRadius: 10,
+                  padding: '14px 24px',
+                  fontSize: 15,
+                  fontWeight: 500,
+                }}
+              >
+                <BookOpen className="size-4" />
+                Ir para o conteúdo da Trilha
+              </Link>
+            </div>
+          </div>
         </div>
       )}
     </div>

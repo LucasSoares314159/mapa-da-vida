@@ -272,6 +272,23 @@ retroativamente os mapas anteriores à feature. Mesmo padrão do Radar de Coerê
 Quarenta força uma frase com sujeito e motivo — dez aceitavam `"sei la nao"`, que cumpria
 a regra sem dizer nada a quem lesse depois, inclusive a própria pessoa ao comparar mapas.
 
+**A revelação abre com o retrato do próprio mapa, não com o ganho do estudo.** A primeira
+tela mostra as 9 áreas por pilar e só então liga o resultado ao dado das Blue Zones. Abrir
+com o número agregado punha algo abstrato antes de a pessoa ver o próprio resultado.
+
+**A tela de projeção foi removida da revelação.** `montarProjecao()` compõe texto a partir
+de **contagens** de cor, sem nunca citar as áreas da pessoa — servia para qualquer mapa com
+o mesmo placar. As telas por área, que vêm logo depois, dizem o mesmo com nome e base
+científica específicos. `diagnostico.projecao` continua existindo e é usado em
+`/diagnostico/[id]`; só saiu da sequência rápida.
+
+**A tela do mapa tem saídas explícitas.** "Ver diagnóstico completo" e "Ir para o conteúdo
+da Trilha" como botões grandes abaixo do fluxograma: antes a única saída era um link de
+12px no header, e não havia rota de volta para a Trilha.
+
+**Pilar e área aparecem em 20px no preenchimento.** Em 11px, ao lado de uma pergunta em
+26px, a pessoa não percebia qual área estava avaliando.
+
 **A abertura explica o Mapa antes de pedir qualquer resposta.** Quatro beats em
 `falasContexto()`: o que é → em que se baseia (Blue Zones) → para que serve (termômetro do
 impacto da Trilha, repetível) → tempo e foco. A pessoa chega sem contexto nenhum; sem

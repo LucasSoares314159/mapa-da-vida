@@ -125,7 +125,7 @@ export function falasContexto(ehPrimeiroMapa: boolean): Fala[] {
 
   return [
     {
-      texto: 'O Mapa da Vida é um primeiro diagnóstico de como está a sua vida.',
+      texto: 'O Mapa da Vida é um primeiro diagnóstico de como está a sua rotina.',
       nivel: 'titulo',
     },
     { texto: 'Ele é baseado no maior estudo de longevidade do planeta: as Blue Zones.' },

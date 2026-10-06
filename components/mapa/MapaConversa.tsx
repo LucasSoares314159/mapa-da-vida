@@ -298,13 +298,28 @@ export function MapaConversa({ userId, ehPrimeiroMapa, pedirPerfil }: Props) {
 
         {/* Área da conversa */}
         <div className="flex-1">
+          {/* Pilar e área precisam ser legíveis de relance: em 11px, ao lado de
+              uma pergunta em 26px, eles sumiam e a pessoa não sabia que área
+              estava avaliando. */}
           {passo.tipo === 'pergunta' && (
-            <p
-              className="mb-5 uppercase"
-              style={{ color: '#57AA8F', fontSize: 11, fontWeight: 600, letterSpacing: '0.8px' }}
-            >
-              {PILARES[passo.pilar].label} · {passo.area}
-            </p>
+            <div className="mb-6 flex flex-col gap-1.5">
+              <span
+                className="uppercase"
+                style={{ color: '#6f8f87', fontSize: 11, fontWeight: 600, letterSpacing: '1px' }}
+              >
+                Pilar {PILARES[passo.pilar].label}
+              </span>
+              <span
+                style={{
+                  color: '#57AA8F',
+                  fontSize: 20,
+                  fontWeight: 600,
+                  lineHeight: 1.2,
+                }}
+              >
+                {passo.area}
+              </span>
+            </div>
           )}
 
           {/* Heading alvo do foco ao trocar de passo */}
