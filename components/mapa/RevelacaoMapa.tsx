@@ -112,8 +112,11 @@ export function RevelacaoMapa({ mapa, diagnostico }: Props) {
           onVerMapa={() => setVisualizacao('mapa')}
         />
       ) : (
-        <div className="flex flex-col" style={{ minHeight: 'calc(100vh - 52px)' }}>
-          <div className="flex-1" style={{ minHeight: '60vh' }}>
+        <div className="flex flex-col">
+          {/* Altura explícita: MapaFlow se dimensiona com height:100%, que
+              resolve para zero dentro de um pai sem altura definida — era o que
+              deixava o fluxograma invisível. */}
+          <div style={{ height: 'calc(100vh - 52px - 164px)', minHeight: 320 }}>
             <MapaFlow mapa={mapa} minimal />
           </div>
 
