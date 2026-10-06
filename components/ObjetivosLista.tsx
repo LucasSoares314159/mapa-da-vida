@@ -20,8 +20,6 @@ import { validarPrazoComData } from '@/lib/prazo'
 import { ESTACOES } from '@/types'
 import type { Objetivo, PrazoObjetivo, NomePilar, StatusObjetivo, FrequenciaLembrete, MomentoVida } from '@/types'
 
-const LIMITE = 3
-
 const PILAR_COR: Record<NomePilar, string> = {
   corpo: '#57AA8F',
   mente: '#D4A843',
@@ -161,10 +159,6 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
     }
     if (!formFrequencia) {
       setFormError('Escolha a frequência de lembrete.')
-      return
-    }
-    if (!editandoObjetivo && contarAtivos(formPrazo) >= LIMITE) {
-      setFormError(`Limite de ${LIMITE} objetivos por prazo atingido.`)
       return
     }
     setFormError(null)
@@ -322,7 +316,6 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
         <div className="flex gap-1 rounded-[10px] border border-mt-border bg-white p-1">
           {PRAZOS.map((pz) => {
             const count = contarAtivos(pz.value)
-            const noLimite = count >= LIMITE
             const ativa = tabAtiva === pz.value
 
             return (
@@ -346,15 +339,11 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
                       borderRadius: '100px',
                       padding: '1px 5px',
                       lineHeight: '1.5',
-                      background: noLimite
-                        ? ativa ? 'rgba(255,255,255,0.25)' : 'rgba(192,80,80,0.15)'
-                        : ativa ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.08)',
-                      color: noLimite
-                        ? ativa ? '#fff' : '#C05050'
-                        : ativa ? '#fff' : 'inherit',
+                      background: ativa ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.08)',
+                      color: ativa ? '#fff' : 'inherit',
                     }}
                   >
-                    {noLimite ? `${count}/${LIMITE}` : count}
+                    {count}
                   </span>
                 </div>
                 <span className={cn('text-[10px] font-normal', ativa ? 'text-white/70' : 'text-mt-muted')}>{pz.sublabel}</span>

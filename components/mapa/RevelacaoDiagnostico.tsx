@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'motion/react'
+import { ChevronDown } from 'lucide-react'
 import type { Diagnostico } from '@/lib/analise'
 import { PILARES } from '@/types'
 import type { Area, NomePilar, StatusArea } from '@/types'
@@ -56,7 +57,7 @@ export function RevelacaoDiagnostico({ mapaId, diagnostico, areas, onVerMapa }: 
   return (
     <div
       onClick={avancar}
-      className="relative flex min-h-[calc(100vh-52px)] flex-col items-center justify-center overflow-hidden px-6 py-16"
+      className="relative flex min-h-[calc(100vh-52px)] flex-col items-center justify-center px-6 py-12"
       style={{ backgroundColor: '#2A3F45', cursor: ehUltima ? 'default' : 'pointer' }}
     >
       <AnimatePresence mode="wait">
@@ -263,10 +264,12 @@ const PONTO_STATUS: Record<StatusArea, string> = {
 /**
  * Abertura do diagnóstico: o retrato do próprio mapa.
  *
- * Antes esta tela abria com o ganho agregado do estudo — um número grande antes
- * de a pessoa ver o próprio resultado, que não dizia nada sobre ela. Agora o
- * primeiro quadro é o mapa dela, e o dado do estudo entra depois, ligado ao que
- * esse mapa mostra.
+ * Os três pilares ficam lado a lado, em colunas. Empilhado na vertical a tela
+ * passava de 1200px: exigia rolagem, perdia a leitura de conjunto — que é o
+ * ponto de um mapa — e empurrava a dica de avanço para cima do texto.
+ *
+ * Cada pilar entra em sequência, de cima para baixo, para o olho acompanhar a
+ * revelação em vez de receber tudo de uma vez.
  */
 function TelaRetrato({ diagnostico, areas }: { diagnostico: Diagnostico; areas: Area[] }) {
   const { totais, ganhoEstimado } = diagnostico
@@ -274,7 +277,7 @@ function TelaRetrato({ diagnostico, areas }: { diagnostico: Diagnostico; areas: 
   const pedemMudanca = totais.vermelho + totais.amarelo
 
   return (
-    <div className="flex w-full max-w-md flex-col items-center gap-8">
+    <div className="flex w-full max-w-2xl flex-col items-center gap-7">
       <motion.p
         className="text-center uppercase"
         style={{
@@ -285,84 +288,108 @@ function TelaRetrato({ diagnostico, areas }: { diagnostico: Diagnostico; areas: 
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
+        transition={{ duration: 0.5 }}
       >
         Seu mapa hoje
       </motion.p>
 
-      {/* As 9 áreas, agrupadas por pilar */}
-      <div className="flex w-full flex-col gap-5">
+      {/* Os três pilares em colunas — leitura de conjunto, sem rolagem */}
+      <div className="grid w-full grid-cols-3 gap-3 sm:gap-5">
         {ORDEM_PILARES_REVELACAO.map((pilar, iPilar) => (
           <motion.div
             key={pilar}
-            className="flex flex-col gap-2"
-            initial={{ opacity: 0, y: 12 }}
+            className="flex flex-col gap-2.5"
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.35 + iPilar * 0.18, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.5, delay: 0.25 + iPilar * 0.22, ease: [0.16, 1, 0.3, 1] }}
           >
             <span
               className="uppercase"
               style={{
-                fontSize: 11,
+                fontSize: 10,
                 letterSpacing: '1px',
-                fontWeight: 600,
-                color: 'rgba(237,242,239,0.45)',
+                fontWeight: 700,
+                color: 'rgba(237,242,239,0.5)',
+                borderBottom: '0.5px solid rgba(237,242,239,0.15)',
+                paddingBottom: 8,
               }}
             >
               {PILARES[pilar].label}
             </span>
-            {PILARES[pilar].areas.map((area) => {
+
+            {PILARES[pilar].areas.map((area, iArea) => {
               const status = porArea.get(area) ?? 'verde'
               return (
-                <div key={area} className="flex items-center gap-3">
+                <motion.div
+                  key={area}
+                  className="flex items-start gap-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.35, delay: 0.4 + iPilar * 0.22 + iArea * 0.07 }}
+                >
                   <span
                     style={{
-                      width: 10,
-                      height: 10,
+                      width: 8,
+                      height: 8,
                       borderRadius: '50%',
                       backgroundColor: PONTO_STATUS[status],
                       flexShrink: 0,
                       display: 'inline-block',
+                      marginTop: 6,
                     }}
                   />
-                  <span style={{ fontSize: 15, color: '#EDF2EF' }}>{area}</span>
-                </div>
+                  <span
+                    style={{
+                      fontSize: 13,
+                      color: status === 'verde' ? 'rgba(237,242,239,0.65)' : '#EDF2EF',
+                      fontWeight: status === 'vermelho' ? 600 : 400,
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    {area}
+                  </span>
+                </motion.div>
               )
             })}
           </motion.div>
         ))}
       </div>
 
-      {/* O dado do estudo, ligado ao que este mapa mostra */}
-      <motion.p
-        className="text-center"
+      {/* O que esse mapa mostra, ligado ao estudo */}
+      <motion.div
+        className="flex w-full flex-col items-center gap-2.5"
         style={{
-          fontSize: '0.95rem',
-          color: 'rgba(237,242,239,0.7)',
-          lineHeight: 1.7,
           borderTop: '0.5px solid rgba(237,242,239,0.15)',
           paddingTop: 24,
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.7, delay: 1.1 }}
+        transition={{ duration: 0.6, delay: 1.2 }}
       >
-        {pedemMudanca === 0 ? (
-          <>
-            Nenhuma área pedindo mudança hoje. Nas Blue Zones, manter esse resultado é o que
-            separa quem vive <strong style={{ color: '#EDF2EF' }}>{ganhoEstimado.valor} anos a mais</strong>{' '}
-            livre de doença.
-          </>
-        ) : (
-          <>
-            <strong style={{ color: '#EDF2EF' }}>
-              {pedemMudanca} {pedemMudanca === 1 ? 'área pede' : 'áreas pedem'} atenção
-            </strong>
-            . São justamente as que as populações mais longevas do mundo protegem — e o que
-            lhes dá {ganhoEstimado.valor} anos a mais livres de doença.
-          </>
-        )}
-      </motion.p>
+        <p
+          className="text-center"
+          style={{
+            fontSize: '1.15rem',
+            color: '#EDF2EF',
+            fontWeight: 600,
+            lineHeight: 1.4,
+          }}
+        >
+          {pedemMudanca === 0
+            ? 'Nenhuma área pedindo mudança hoje.'
+            : `${pedemMudanca} ${pedemMudanca === 1 ? 'área pede' : 'áreas pedem'} atenção.`}
+        </p>
+
+        {/* Disclaimer: contexto do estudo, em peso menor que o número acima */}
+        <p
+          className="max-w-md text-center"
+          style={{ fontSize: '0.85rem', color: 'rgba(237,242,239,0.55)', lineHeight: 1.6 }}
+        >
+          {pedemMudanca === 0
+            ? `Manter esse resultado é o que dá às populações das Blue Zones ${ganhoEstimado.valor} anos a mais livres de doença.`
+            : `São justamente as áreas que as populações mais longevas do mundo protegem — e o que lhes dá ${ganhoEstimado.valor} anos a mais livres de doença.`}
+        </p>
+      </motion.div>
     </div>
   )
 }
@@ -371,23 +398,30 @@ function TelaRetrato({ diagnostico, areas }: { diagnostico: Diagnostico; areas: 
 function IndicadorAvanco({ indice, total }: { indice: number; total: number }) {
   const [visivel, setVisivel] = useState(false)
 
-  // A dica de "toque para continuar" só aparece depois que a animação da etapa
-  // termina, para não competir com o conteúdo que está entrando.
+  // A dica só aparece depois que a animação da etapa termina, para não competir
+  // com o conteúdo que está entrando.
   useEffect(() => {
     setVisivel(false)
-    const timer = setTimeout(() => setVisivel(true), 2200)
+    const timer = setTimeout(() => setVisivel(true), 1600)
     return () => clearTimeout(timer)
   }, [indice])
 
+  // Fica no fluxo, não em `absolute`: sobreposto ao conteúdo, ele colidia com o
+  // texto nas telas mais altas e sumia no meio da leitura.
   return (
-    <div className="absolute inset-x-0 bottom-8 flex flex-col items-center gap-4">
+    <div className="mt-12 flex w-full flex-col items-center gap-4">
       <motion.span
-        style={{ fontSize: 12, color: 'rgba(237,242,239,0.4)' }}
+        className="flex items-center gap-2"
+        style={{ fontSize: 13, color: 'rgba(237,242,239,0.75)' }}
         initial={{ opacity: 0 }}
-        animate={{ opacity: visivel ? 1 : 0 }}
-        transition={{ duration: 0.6 }}
+        animate={{ opacity: visivel ? 1 : 0, y: visivel ? [0, 3, 0] : 0 }}
+        transition={{
+          opacity: { duration: 0.5 },
+          y: { duration: 1.8, repeat: Infinity, ease: 'easeInOut' },
+        }}
       >
         toque para continuar
+        <ChevronDown className="size-4" />
       </motion.span>
 
       <div className="flex items-center gap-1.5">

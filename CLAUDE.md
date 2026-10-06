@@ -273,8 +273,13 @@ Quarenta força uma frase com sujeito e motivo — dez aceitavam `"sei la nao"`,
 a regra sem dizer nada a quem lesse depois, inclusive a própria pessoa ao comparar mapas.
 
 **A revelação abre com o retrato do próprio mapa, não com o ganho do estudo.** A primeira
-tela mostra as 9 áreas por pilar e só então liga o resultado ao dado das Blue Zones. Abrir
-com o número agregado punha algo abstrato antes de a pessoa ver o próprio resultado.
+tela mostra as 9 áreas **em três colunas, uma por pilar**, e só então liga o resultado ao
+dado das Blue Zones. Abrir com o número agregado punha algo abstrato antes de a pessoa ver
+o próprio resultado; empilhar as 9 na vertical passava de 1200px, exigia rolagem e matava
+a leitura de conjunto, que é o ponto de um mapa.
+
+**O indicador "toque para continuar" fica no fluxo, não em `absolute`.** Sobreposto, ele
+colidia com o texto nas telas mais altas e sumia no meio da leitura.
 
 **A tela de projeção foi removida da revelação.** `montarProjecao()` compõe texto a partir
 de **contagens** de cor, sem nunca citar as áreas da pessoa — servia para qualquer mapa com
@@ -362,6 +367,9 @@ gargalo de funil, sobretudo na Turma 1, que não a tinha.
 ## Objetivos e Radar de Coerência
 
 Objetivo tem pilar, prazo (curto/médio/longo), status e lembrete opcional.
+
+**Não há limite de objetivos por prazo.** Existiu um teto de 3, que bloqueava a criação e
+pintava o contador de vermelho. A contagem continua visível — informa sem impedir.
 
 O **Radar de Coerência** são duas perguntas obrigatórias na criação/edição:
 

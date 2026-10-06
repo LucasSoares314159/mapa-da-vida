@@ -43,7 +43,7 @@ export function Sidebar({ onClose, totalMembros }: Props) {
         <div className="flex size-7 items-center justify-center rounded-lg bg-mt-green">
           <Map className="size-4 text-white" />
         </div>
-        <span className="font-heading text-[15px] font-medium text-mt-black">Trilha da Produtividade</span>
+        <span className="font-heading text-[15px] font-medium text-mt-black">Trilha</span>
       </div>
 
       {/* Nav */}
