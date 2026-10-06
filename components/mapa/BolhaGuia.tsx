@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { motion } from 'motion/react'
 import { useTypewriter } from '@/hooks/useTypewriter'
+import type { NivelFala } from '@/lib/onboarding'
 
 type Props = {
   texto: string
@@ -10,7 +11,10 @@ type Props = {
   ativo?: boolean
   /** Avisa o pai que a escrita terminou, para encadear a fala seguinte. */
   onConcluir?: () => void
-  destaque?: boolean
+  /** Hierarquia: só tamanho e peso, para a tela seguir parecendo um chat. */
+  nivel?: NivelFala
+  /** Negrito pontual. */
+  forte?: boolean
 }
 
 /**
@@ -20,7 +24,7 @@ type Props = {
  * texto completo vai num nó sr-only, para o leitor de tela anunciar a frase uma
  * vez em vez de tagarelar letra por letra.
  */
-export function BolhaGuia({ texto, ativo = true, onConcluir, destaque = false }: Props) {
+export function BolhaGuia({ texto, ativo = true, onConcluir, nivel = 'corpo', forte = false }: Props) {
   const { textoVisivel, concluido, concluirAgora } = useTypewriter(texto, { ativo })
 
   // Avisa o pai uma única vez por fala, para encadear a seguinte.
@@ -44,13 +48,11 @@ export function BolhaGuia({ texto, ativo = true, onConcluir, destaque = false }:
       className="relative"
     >
       <p
-        className={destaque ? 'font-editorial italic' : ''}
         style={{
-          color: destaque ? '#a8c4bc' : '#EDF2EF',
-          fontSize: destaque ? 16 : 18,
-          lineHeight: 1.7,
-          borderLeft: destaque ? '2px solid #57AA8F' : undefined,
-          paddingLeft: destaque ? 16 : undefined,
+          color: '#EDF2EF',
+          fontSize: nivel === 'titulo' ? 26 : 18,
+          fontWeight: nivel === 'titulo' ? 600 : forte ? 600 : 400,
+          lineHeight: nivel === 'titulo' ? 1.35 : 1.7,
         }}
       >
         {/* Camada visual: a digitação. Invisível para leitores de tela. */}

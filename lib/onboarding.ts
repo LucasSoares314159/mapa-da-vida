@@ -6,8 +6,25 @@ import type { NomeArea, NomePilar, StatusArea } from '@/types'
 
 export const ORDEM_PILARES: NomePilar[] = ['corpo', 'mente', 'espirito']
 
-/** Segundos por pergunta usados na estimativa exibida ao usuário. */
+/**
+ * Segundos por pergunta usados na estimativa exibida ao usuário.
+ *
+ * Calibrado para ler a pergunta, escolher e escrever uma frase de pelo menos
+ * MIN_OBSERVACAO caracteres. Mantém o total anunciado em 7 minutos, o número
+ * que a abertura promete — os dois saem daqui, então não podem divergir.
+ */
 const SEGUNDOS_POR_PERGUNTA = 45
+
+/** Nível tipográfico de uma fala. Só muda tamanho e peso — a tela é um chat,
+ *  não uma landing: nada de eyebrow, borda ou itálico editorial. */
+export type NivelFala = 'titulo' | 'corpo'
+
+export type Fala = {
+  texto: string
+  nivel?: NivelFala
+  /** Negrito pontual, para a frase que pede foco. */
+  forte?: boolean
+}
 
 export type Passo =
   | { tipo: 'contexto' }
@@ -81,28 +98,46 @@ export const TEMPO_ESTIMADO_TOTAL = `${Math.ceil(
 )} minutos`
 
 /**
- * Falas da abertura. Primeiro mapa explica por que o diagnóstico vem antes do
- * conteúdo; quem está refazendo já sabe e recebe a versão curta.
+ * Falas da abertura.
+ *
+ * Quatro beats, nesta ordem: o que é → em que se baseia → para que serve →
+ * o que se espera de quem responde. A pessoa chega sem contexto nenhum, e sem
+ * esses quatro ela responde 9 perguntas íntimas sem saber para quê.
+ *
+ * A Blue Zones entra como credibilidade da metodologia, nunca como promessa de
+ * anos de vida: o Mapa é termômetro do impacto da Trilha, não um estudo de
+ * longevidade pessoal.
  */
-export function falasContexto(ehPrimeiroMapa: boolean): string[] {
+export function falasContexto(ehPrimeiroMapa: boolean): Fala[] {
   if (!ehPrimeiroMapa) {
     return [
-      'Bom te ver de volta.',
-      `Vamos refazer seu Mapa da Vida: as mesmas 9 perguntas, respondidas pelo que é verdade hoje. Leva cerca de ${TEMPO_ESTIMADO_TOTAL}.`,
-      'Comparar com o mapa anterior é o que mostra o que mudou de verdade.',
+      { texto: 'Bom te ver de volta.', nivel: 'titulo' },
+      {
+        texto: `Vamos medir de novo: as mesmas 9 perguntas, respondidas pelo que é verdade hoje. Cerca de ${TEMPO_ESTIMADO_TOTAL}.`,
+      },
+      { texto: 'Comparar com o seu mapa anterior é o que mostra o progresso de verdade.' },
     ]
   }
 
   return [
-    'Antes de qualquer aula, preciso de uma coisa sua.',
-    'O Mapa da Vida é um diagnóstico de como está a sua vida hoje, em 9 áreas.',
-    'Ele vem primeiro porque é o pilar de tudo o que você vai aplicar aqui: sem saber onde você está, o método não tem onde se apoiar.',
-    `São 9 perguntas, uma por vez, em cerca de ${TEMPO_ESTIMADO_TOTAL}. Não existe resposta certa — só a verdadeira.`,
+    {
+      texto: 'O Mapa da Vida é um primeiro diagnóstico de como está a sua vida.',
+      nivel: 'titulo',
+    },
+    { texto: 'Ele é baseado no maior estudo de longevidade do planeta: as Blue Zones.' },
+    {
+      texto:
+        'O mapa vai ser um guia do impacto da Trilha na sua vida. Esse é o primeiro termômetro — você pode criar novos mapas com o tempo e acompanhar seu progresso.',
+    },
+    {
+      texto: `O mapa dura em média ${TEMPO_ESTIMADO_TOTAL}. É fundamental que seja feito com foco.`,
+      forte: true,
+    },
   ]
 }
 
 /** Fala de transição exibida antes do passo de perfil. */
-export const FALAS_PERFIL = [
-  'Primeiro, duas informações rápidas sobre você.',
-  'Elas ficam salvas e eu não vou perguntar de novo.',
+export const FALAS_PERFIL: Fala[] = [
+  { texto: 'Primeiro, duas informações rápidas sobre você.', nivel: 'titulo' },
+  { texto: 'Elas ficam salvas e eu não vou perguntar de novo.' },
 ]

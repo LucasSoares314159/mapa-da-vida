@@ -13,6 +13,7 @@ import {
   contarRespondidas,
   falasContexto,
   montarPassos,
+  type Fala,
   type Respostas,
 } from '@/lib/onboarding'
 import { PILARES } from '@/types'
@@ -49,6 +50,10 @@ export function MapaConversa({ ehPrimeiroMapa, pedirPerfil }: Props) {
   const [respostas, setRespostas] = useState<Respostas>({})
   const [perfil, setPerfil] = useState<PerfilRascunho>(PERFIL_VAZIO)
   const [falasVisiveis, setFalasVisiveis] = useState(1)
+  // A escrita da última fala é o que libera as opções. Sem isso, um passo de
+  // fala única teria `falasVisiveis >= falas.length` verdadeiro no primeiro
+  // render e as opções nasceriam fixas enquanto a pergunta era digitada.
+  const [escritaConcluida, setEscritaConcluida] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [rascunhoOferecido, setRascunhoOferecido] = useState<Rascunho | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -96,21 +101,27 @@ export function MapaConversa({ ehPrimeiroMapa, pedirPerfil }: Props) {
   // --- Falas encadeadas e foco ao trocar de passo ---
   useEffect(() => {
     setFalasVisiveis(1)
+    setEscritaConcluida(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
     // Foca o heading, e não a primeira opção: focar o botão faria o leitor de
     // tela anunciar a resposta antes da pergunta.
     headingRef.current?.focus()
   }, [indice])
 
-  const falas = useMemo(() => {
+  const falas = useMemo<Fala[]>(() => {
     if (passo.tipo === 'contexto') return falasContexto(ehPrimeiroMapa)
     if (passo.tipo === 'perfil') return FALAS_PERFIL
-    if (passo.tipo === 'pergunta') return [PILARES[passo.pilar].perguntas[passo.area]]
-    return ['Montando seu mapa…']
+    if (passo.tipo === 'pergunta')
+      return [{ texto: PILARES[passo.pilar].perguntas[passo.area], nivel: 'titulo' as const }]
+    return [{ texto: 'Montando seu mapa…' }]
   }, [passo, ehPrimeiroMapa])
 
-  const todasFalasDitas = falasVisiveis >= falas.length
+  const naUltimaFala = falasVisiveis >= falas.length
+  /** Só depois de a última fala terminar de ser escrita as opções aparecem. */
+  const revelarInteracao = naUltimaFala && escritaConcluida
+
   const avancarFala = useCallback(() => setFalasVisiveis((n) => n + 1), [])
+  const marcarEscritaConcluida = useCallback(() => setEscritaConcluida(true), [])
 
   // --- Validação do passo atual ---
   const perfilValido =
@@ -124,7 +135,7 @@ export function MapaConversa({ ehPrimeiroMapa, pedirPerfil }: Props) {
 
   const podeAvancar =
     passo.tipo === 'contexto'
-      ? todasFalasDitas
+      ? revelarInteracao
       : passo.tipo === 'perfil'
       ? perfilValido
       : passo.tipo === 'pergunta'
@@ -280,14 +291,20 @@ export function MapaConversa({ ehPrimeiroMapa, pedirPerfil }: Props) {
 
           {/* Falas encadeadas do guia */}
           <div className="flex flex-col gap-4">
-            {falas.slice(0, falasVisiveis).map((fala, i) => (
-              <BolhaGuia
-                key={`${indice}-${i}`}
-                texto={fala}
-                destaque={passo.tipo === 'contexto' && i === falas.length - 1}
-                onConcluir={i === falasVisiveis - 1 && !todasFalasDitas ? avancarFala : undefined}
-              />
-            ))}
+            {falas.slice(0, falasVisiveis).map((fala, i) => {
+              const ehAtual = i === falasVisiveis - 1
+              return (
+                <BolhaGuia
+                  key={`${indice}-${i}`}
+                  texto={fala.texto}
+                  nivel={fala.nivel}
+                  forte={fala.forte}
+                  onConcluir={
+                    ehAtual ? (naUltimaFala ? marcarEscritaConcluida : avancarFala) : undefined
+                  }
+                />
+              )
+            })}
           </div>
 
           {/* Conteúdo interativo do passo */}
@@ -295,7 +312,7 @@ export function MapaConversa({ ehPrimeiroMapa, pedirPerfil }: Props) {
             <PassoPergunta
               area={passo.area}
               resposta={respostas[passo.area]}
-              revelado={todasFalasDitas}
+              revelado={revelarInteracao}
               onStatus={(s) => setStatus(passo.area, s)}
               onObservacao={(t) => setObservacao(passo.area, t)}
             />
@@ -304,7 +321,7 @@ export function MapaConversa({ ehPrimeiroMapa, pedirPerfil }: Props) {
           {passo.tipo === 'perfil' && (
             <PassoPerfil
               perfil={perfil}
-              revelado={todasFalasDitas}
+              revelado={revelarInteracao}
               erro={erro}
               onChange={setPerfil}
             />

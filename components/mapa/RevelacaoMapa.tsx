@@ -1,12 +1,31 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { ArrowLeft, FileText, Sparkles } from 'lucide-react'
-import { MapaFlow } from './MapaFlow'
 import { RevelacaoDiagnostico } from './RevelacaoDiagnostico'
 import type { Diagnostico } from '@/lib/analise'
 import type { Mapa } from '@/types'
+
+/**
+ * O fluxograma carrega só quando a aba é aberta.
+ *
+ * MapaFlow puxa @xyflow/react e seu CSS; importado de forma estática, ninguém
+ * via o diagnóstico até todo o fluxograma baixar — mesmo sem nunca abrir esta
+ * aba, que é o caso da maioria no primeiro acesso.
+ */
+const MapaFlow = dynamic(() => import('./MapaFlow').then((m) => m.MapaFlow), {
+  ssr: false,
+  loading: () => (
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="size-6 animate-spin rounded-full border-2 border-mt-green border-t-transparent" />
+        <p className="text-sm text-mt-muted">Desenhando seu mapa…</p>
+      </div>
+    </div>
+  ),
+})
 
 type Props = {
   mapa: Mapa

@@ -209,7 +209,7 @@ texto, sem FK — ver [Conteúdo dos módulos](#conteúdo-dos-módulos-admin-mod
 - **Espírito** — Propósito, Experiências, Espiritualidade
 
 Status: 🟢 verde (bem) · 🟡 amarelo (atenção) · 🔴 vermelho (mudança urgente).
-Observação **obrigatória** (mínimo 10 caracteres): *"O que está por trás dessa escolha?"*
+Observação **obrigatória** (mínimo 40 caracteres): *"O que está por trás dessa escolha?"*
 Ver [Mapa conversacional](#mapa-conversacional-e-gate-de-primeiro-acesso).
 
 ---
@@ -265,11 +265,32 @@ abertura (`falasContexto()`). A rota permanece porque é o destino de links já 
 os dois crons de e-mail, a Sidebar, o dashboard, a calculadora e a landing page. Manter
 duas telas de "antes de começar" seria repetir a mesma mensagem em dois lugares.
 
-**Observação obrigatória, coluna nullable.** O mínimo de 10 caracteres é validado no
-cliente *e* em `criarMapa()`, mas `areas.observacao` segue aceitando nulo no banco: pôr
-`NOT NULL` invalidaria retroativamente os mapas anteriores à feature. Mesmo padrão do
-Radar de Coerência. O mínimo é baixo de propósito — 9 descrições obrigatórias é o maior
-risco de abandono do onboarding, e uma frase honesta basta.
+**Observação obrigatória, coluna nullable.** O mínimo de 40 caracteres (`MIN_OBSERVACAO`,
+fonte única em `lib/validations.ts`) é validado no cliente *e* em `criarMapa()`, mas
+`areas.observacao` segue aceitando nulo no banco: pôr `NOT NULL` invalidaria
+retroativamente os mapas anteriores à feature. Mesmo padrão do Radar de Coerência.
+Quarenta força uma frase com sujeito e motivo — dez aceitavam `"sei la nao"`, que cumpria
+a regra sem dizer nada a quem lesse depois, inclusive a própria pessoa ao comparar mapas.
+
+**A abertura explica o Mapa antes de pedir qualquer resposta.** Quatro beats em
+`falasContexto()`: o que é → em que se baseia (Blue Zones) → para que serve (termômetro do
+impacto da Trilha, repetível) → tempo e foco. A pessoa chega sem contexto nenhum; sem
+isso, responde 9 perguntas íntimas sem saber para quê. A Blue Zones entra como
+credibilidade da metodologia, **nunca** como promessa de anos de vida — o número do ganho
+é enquadramento do diagnóstico, não gancho de abertura.
+
+**A tela é um chat, não uma landing.** A hierarquia das falas é só tamanho e peso
+(`nivel` e `forte` em `BolhaGuia`). Eyebrow maiúsculo, borda à esquerda e itálico
+editorial foram deliberadamente removidos: ornamento quebra a ilusão de conversa.
+
+**As opções só aparecem depois de a pergunta terminar de ser escrita.** O gatilho é a
+conclusão da digitação da última fala, não a contagem de falas visíveis — num passo de
+fala única a contagem já nasce satisfeita e as opções apareceriam fixas durante a escrita.
+
+**O fluxograma carrega sob demanda.** `MapaFlow` entra por `next/dynamic` dentro de
+`RevelacaoMapa`: importado estaticamente, ele puxava `@xyflow/react` e ninguém via o
+diagnóstico até o fluxograma inteiro baixar — mesmo sem nunca abrir aquela aba. O First
+Load de `/mapa/[id]` caiu de 210 kB para 143 kB.
 
 **Rascunho em `sessionStorage`, não `localStorage`.** Nove respostas são trabalho demais
 para se perder num F5. Mas um rascunho de semanas atrás reaparecendo quando a pessoa vai

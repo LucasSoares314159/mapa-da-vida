@@ -73,7 +73,7 @@ export type ListaEsperaFormData = z.infer<typeof listaEsperaSchema>
 // A observação virou obrigatória: o fluxo de uma pergunta por tela existe para
 // a pessoa justificar cada escolha. O mínimo é baixo de propósito — uma frase
 // basta, e exigir parágrafo aumentaria o abandono no meio do onboarding.
-export const MIN_OBSERVACAO = 10
+export const MIN_OBSERVACAO = 40
 
 export const areaConversaSchema = z.object({
   area: z.string(),
@@ -82,7 +82,7 @@ export const areaConversaSchema = z.object({
   observacao: z
     .string()
     .trim()
-    .min(MIN_OBSERVACAO, 'Escreva pelo menos uma frase — uma linha já basta.'),
+    .min(MIN_OBSERVACAO, 'Escreva uma frase com o motivo da sua escolha.'),
 })
 
 export const mapaConversaSchema = z.object({

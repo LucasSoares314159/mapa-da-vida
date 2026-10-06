@@ -170,7 +170,7 @@ export function PassoPergunta({ area, resposta, revelado, onStatus, onObservacao
                     rows={3}
                     required
                     aria-describedby={`ajuda-${area}`}
-                    placeholder="Uma frase basta."
+                    placeholder="Ex: não treino há 3 meses, sempre falta tempo"
                     className="w-full resize-none text-sm outline-none transition-colors placeholder:text-[#6f8f87]"
                     style={{
                       border: '1.5px solid #3d5a62',
@@ -186,8 +186,8 @@ export function PassoPergunta({ area, resposta, revelado, onStatus, onObservacao
                   />
                   <p id={`ajuda-${area}`} className="mt-2 text-xs" style={{ color: '#6f8f87' }}>
                     {faltam > 0
-                      ? `Escreva um pouco mais — faltam ${faltam} caractere${faltam > 1 ? 's' : ''}.`
-                      : 'Pronto. Uma linha honesta vale mais que um parágrafo.'}
+                      ? `Uma frase com o motivo — faltam ${faltam} caractere${faltam > 1 ? 's' : ''}.`
+                      : 'Pronto. Uma frase honesta vale mais que um parágrafo.'}
                   </p>
                 </div>
               </motion.div>
