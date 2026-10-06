@@ -1,7 +1,9 @@
 'use server'
 
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { COOKIE_MAPA_OK, opcoesCookieMapaOk } from '@/lib/gate-mapa'
 import { createAdminSupabaseClient } from '@/lib/supabase-admin'
 import { buscarConviteCompra } from '@/lib/acesso-compra'
 import { loginSchema, cadastroConviteSchema, esqueciSenhaSchema, redefinirSenhaSchema } from '@/lib/validations'
@@ -39,7 +41,13 @@ export async function login(state: AuthState, formData: FormData): Promise<AuthS
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user!.id)
 
-  redirect(count && count > 0 ? '/objetivos' : '/content')
+  if (count && count > 0) {
+    cookies().set(COOKIE_MAPA_OK, '1', opcoesCookieMapaOk())
+    redirect('/objetivos')
+  }
+
+  // Sem mapa, o fluxo obrigatório vem antes de qualquer conteúdo.
+  redirect('/mapa/novo')
 }
 
 export async function cadastroPorConvite(state: AuthState, formData: FormData): Promise<AuthState> {
@@ -144,6 +152,8 @@ export async function cadastroPorConvite(state: AuthState, formData: FormData): 
 export async function logout() {
   const supabase = createServerSupabaseClient()
   await supabase.auth.signOut()
+  // Sem isso, a próxima conta neste navegador herdaria o gate já aberto.
+  cookies().delete(COOKIE_MAPA_OK)
   redirect('/auth/login')
 }
 
@@ -191,5 +201,11 @@ export async function redefinirSenha(state: AuthState, formData: FormData): Prom
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user!.id)
 
-  redirect(count && count > 0 ? '/objetivos' : '/content')
+  if (count && count > 0) {
+    cookies().set(COOKIE_MAPA_OK, '1', opcoesCookieMapaOk())
+    redirect('/objetivos')
+  }
+
+  // Sem mapa, o fluxo obrigatório vem antes de qualquer conteúdo.
+  redirect('/mapa/novo')
 }

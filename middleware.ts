@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { COOKIE_MAPA_OK, isentoDoGate, opcoesCookieMapaOk } from '@/lib/gate-mapa'
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -45,6 +46,26 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone()
       url.pathname = '/content'
       return NextResponse.redirect(url)
+    }
+  }
+
+  // Gate do primeiro Mapa da Vida: o diagnóstico sustenta todo o método, então
+  // nada abre antes dele. O cookie é só cache da resposta — ver lib/gate-mapa.ts.
+  if (user && !isentoDoGate(request.nextUrl.pathname)) {
+    if (!request.cookies.get(COOKIE_MAPA_OK)) {
+      const { count } = await supabase
+        .from('mapas')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+
+      if (!count) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/mapa/novo'
+        return NextResponse.redirect(url)
+      }
+
+      // Já tem mapa: guarda a resposta para não consultar de novo a cada página.
+      supabaseResponse.cookies.set(COOKIE_MAPA_OK, '1', opcoesCookieMapaOk())
     }
   }
 

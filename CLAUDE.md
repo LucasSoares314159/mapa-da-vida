@@ -91,7 +91,8 @@ npm run build             # só com o dev parado
 | `/auth/*` | login, cadastro, esqueci/redefinir senha, verificar e-mail, callback | pública |
 | `/content` | Trilha: módulos e lives | ✅ |
 | `/content/modulo/[id]`, `/content/live/[id]` | Aula individual | ✅ |
-| `/mapa/preparacao` → `/mapa/novo` → `/mapa/[id]` | Fluxo do AHA moment | ✅ |
+| `/mapa/novo` → `/mapa/[id]` | Fluxo conversacional do AHA moment | ✅ |
+| `/mapa/preparacao` | Redirect para `/mapa/novo` — mantida pelos links já publicados | ✅ |
 | `/diagnostico/[id]` | Diagnóstico completo | ✅ |
 | `/momento` | Momento de Vida | ✅ |
 | `/objetivos` | Objetivos + Radar de Coerência | ✅ |
@@ -142,6 +143,8 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 | `modulos.ts` / `lives.ts` | Catálogo de conteúdo — título, duração, `videoId` (fonte de verdade) |
 | `conteudo-modulos.ts` | Leitura/escrita dos blocos de texto de cada módulo (tabela `modulos_conteudo`) |
 | `rotina.ts` | Cálculo de horas livres e Zona |
+| `onboarding.ts` | Passos, progresso e falas do Mapa conversacional |
+| `gate-mapa.ts` | Cookie e isenções do gate do primeiro mapa |
 | `prazo.ts` | Labels de prazo de objetivo |
 | `membros.ts` | Contagem de cadastrados |
 | `email.ts` / `email-templates.ts` | Envio e montagem |
@@ -160,7 +163,7 @@ as novas migrações versionadas em `supabase/migrations`.
 
 | Tabela | Campos-chave |
 |---|---|
-| `profiles` | `id`, `nome`, `criado_em`, `aulas_concluidas` (legado), `excluir_das_metricas` |
+| `profiles` | `id`, `nome`, `criado_em`, `aulas_concluidas` (legado), `excluir_das_metricas`, `data_nascimento`, `profissao`, `profissao_outro` |
 | `mapas` | `id`, `user_id`, `titulo`, `criado_em` |
 | `areas` | `mapa_id`, `pilar`, `area`, `status`, `observacao` |
 | `objetivos` | `texto`, `pilar`, `prazo`, `status`, `data_alvo`, `motivo`, `frequencia_lembrete`, `radar_faz_sentido`, `radar_por_mim` |
@@ -206,7 +209,8 @@ texto, sem FK — ver [Conteúdo dos módulos](#conteúdo-dos-módulos-admin-mod
 - **Espírito** — Propósito, Experiências, Espiritualidade
 
 Status: 🟢 verde (bem) · 🟡 amarelo (atenção) · 🔴 vermelho (mudança urgente).
-Observação opcional: *"O que está por trás dessa escolha?"*
+Observação **obrigatória** (mínimo 10 caracteres): *"O que está por trás dessa escolha?"*
+Ver [Mapa conversacional](#mapa-conversacional-e-gate-de-primeiro-acesso).
 
 ---
 
@@ -227,6 +231,70 @@ em três camadas:
 O ganho estimado usa um **número agregado** do estudo Blue Zones, não a soma dos
 ganhos por área: os achados vêm de populações e metodologias diferentes e seus
 efeitos se sobrepõem.
+
+---
+
+## Mapa conversacional e gate de primeiro acesso
+
+Feature de **outubro/2026**. O Mapa deixou de ser um questionário de 3 telas (uma por
+pilar) e virou um fluxo conversacional: **uma pergunta por tela**, com animação de escrita
+e revelação progressiva das opções. As 9 perguntas continuam vindo de `PILARES` —
+`lib/onboarding.ts` só as achata na ordem corpo → mente → espírito.
+
+**O Mapa é obrigatório no primeiro acesso.** Sem nenhum mapa salvo, nada da plataforma
+abre. O diagnóstico é o pilar sobre o qual o método se aplica; estudar antes dele é
+aplicar conteúdo no vácuo.
+
+### Decisões que o código não explica
+
+**O gate é cookie, não query por request.** `lib/gate-mapa.ts` guarda `mapa_ok`. O
+middleware consulta `mapas` **uma única vez** — enquanto o cookie não existe — e depois
+nunca mais. Checar o banco em toda navegação custaria uma query por page view de todo
+usuário, para sempre, por uma resposta que só muda uma vez na vida da conta. O cookie é
+**cache, nunca autoridade**: quem o forjar apenas evita um redirect, porque cada página
+segue lendo do banco com RLS. `logout()` o apaga — sem isso a próxima conta no mesmo
+navegador herdaria o gate aberto.
+
+**`/admin` é isento do gate.** Quem dá suporte precisa abrir o back office sem ser
+obrigado a fazer o próprio diagnóstico. A rota já é protegida por `ADMIN_EMAILS`.
+
+**`/mapa/*` também é isento** — sem isso o fluxo obrigatório redirecionaria para si mesmo.
+
+**`/mapa/preparacao` virou redirect.** A tela de preparação foi absorvida pelas falas de
+abertura (`falasContexto()`). A rota permanece porque é o destino de links já publicados:
+os dois crons de e-mail, a Sidebar, o dashboard, a calculadora e a landing page. Manter
+duas telas de "antes de começar" seria repetir a mesma mensagem em dois lugares.
+
+**Observação obrigatória, coluna nullable.** O mínimo de 10 caracteres é validado no
+cliente *e* em `criarMapa()`, mas `areas.observacao` segue aceitando nulo no banco: pôr
+`NOT NULL` invalidaria retroativamente os mapas anteriores à feature. Mesmo padrão do
+Radar de Coerência. O mínimo é baixo de propósito — 9 descrições obrigatórias é o maior
+risco de abandono do onboarding, e uma frase honesta basta.
+
+**Rascunho em `sessionStorage`, não `localStorage`.** Nove respostas são trabalho demais
+para se perder num F5. Mas um rascunho de semanas atrás reaparecendo quando a pessoa vai
+**refazer** o mapa seria pior que perder: ela acharia que já respondeu. A retomada é
+sempre oferecida, nunca aplicada em silêncio.
+
+**Tempo é expectativa, não cronômetro.** `estimarTempoRestante()` mostra "~4 min", nunca
+contagem regressiva ao vivo: cronômetro correndo induz resposta rápida, o oposto da
+reflexão que o Mapa pede. O total anunciado na abertura deriva da mesma constante, então
+os dois números não podem divergir.
+
+**Perfil (nascimento + profissão) é gravado ao sair da sua tela**, não junto com o mapa —
+abandono no meio das 9 perguntas não deve perder o dado de mentoria. Vai pelo **cliente
+admin**, como todo write em `profiles`: um UPDATE sem policy de RLS correspondente
+retornaria sucesso com zero linhas, falhando em silêncio; a action confere a linha afetada.
+
+**`profiles.data_nascimento IS NULL` significa "nunca respondeu"**, não "não quis". É o
+que faz a tela de perfil aparecer. As 13 contas anteriores à feature ficam nulas de
+propósito — preenchê-las com estimativa criaria segmentação falsa de mentoria.
+
+**Acessibilidade:** a animação de escrita respeita `prefers-reduced-motion` (texto
+completo no primeiro frame) e é interrompível com um clique. O span animado é
+`aria-hidden`; o texto completo vai num nó `sr-only`, para o leitor de tela anunciar a
+frase uma vez em vez de letra por letra. As 3 opções são um `radiogroup` navegável por
+setas, e o status nunca é comunicado só por cor.
 
 ---
 
