@@ -1,3 +1,5 @@
+import type { PROFISSOES_ONBOARDING } from '@/lib/validations'
+
 export type StatusArea = 'verde' | 'amarelo' | 'vermelho'
 export type NomePilar = 'corpo' | 'mente' | 'espirito'
 
@@ -125,7 +127,16 @@ export interface Profile {
   id: string
   nome: string
   criado_em: string
+  // Coletados uma única vez, no primeiro acesso, antes do primeiro Mapa.
+  // Nullable: os perfis anteriores à feature não têm esses dados.
+  data_nascimento?: string | null // date (YYYY-MM-DD)
+  profissao?: GrupoProfissao | null
+  profissao_outro?: string | null // preenchido somente quando profissao = 'Outro'
 }
+
+// Grupos de ICP oferecidos no onboarding. Derivado de PROFISSOES_ONBOARDING em
+// lib/validations.ts — fonte de verdade única, para a lista não divergir do Zod.
+export type GrupoProfissao = (typeof PROFISSOES_ONBOARDING)[number]
 
 export const PILARES: Record<NomePilar, { label: string; areas: NomeArea[]; perguntas: Record<NomeArea, string> }> = {
   corpo: {
