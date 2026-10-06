@@ -22,6 +22,7 @@ export default async function NovoMapaPage() {
 
   return (
     <MapaConversa
+      userId={user.id}
       ehPrimeiroMapa={!count}
       pedirPerfil={!profile?.data_nascimento || !profile?.profissao}
     />

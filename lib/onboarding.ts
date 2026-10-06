@@ -81,12 +81,16 @@ export function calcularProgresso(respondidas: number): number {
 }
 
 /**
- * Estimativa textual de quanto falta. Arredonda para cima e nunca mostra "0 min"
- * — é expectativa, não cronômetro: contagem regressiva ao vivo induziria resposta
- * rápida, o oposto da reflexão que o Mapa pede.
+ * Estimativa textual de quanto falta, a partir da posição no fluxo (não da
+ * contagem de respostas: com um rascunho restaurado, a contagem já nasce cheia
+ * e o rótulo travaria em "último passo" desde a primeira tela).
+ *
+ * Arredonda para cima e nunca mostra "0 min" — é expectativa, não cronômetro:
+ * contagem regressiva ao vivo induziria resposta rápida, o oposto da reflexão
+ * que o Mapa pede.
  */
-export function estimarTempoRestante(respondidas: number): string {
-  const restantes = Math.max(0, TOTAL_PERGUNTAS - respondidas)
+export function estimarTempoRestante(perguntasConcluidas: number): string {
+  const restantes = Math.max(0, TOTAL_PERGUNTAS - perguntasConcluidas)
   if (restantes === 0) return 'último passo'
   const minutos = Math.max(1, Math.ceil((restantes * SEGUNDOS_POR_PERGUNTA) / 60))
   return `~${minutos} min`

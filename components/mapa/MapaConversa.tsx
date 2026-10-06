@@ -10,6 +10,7 @@ import {
   FALAS_PERFIL,
   ORDEM_PILARES,
   PERGUNTAS,
+  TOTAL_PERGUNTAS,
   contarRespondidas,
   falasContexto,
   montarPassos,
@@ -24,12 +25,19 @@ import { PassoPerfil, type PerfilRascunho } from './PassoPerfil'
 import { ProgressoConversa } from './ProgressoConversa'
 
 type Props = {
+  /** Compõe a chave do rascunho: sem isso, trocar de conta na mesma aba
+   *  herdaria as respostas da conta anterior. */
+  userId: string
   ehPrimeiroMapa: boolean
   pedirPerfil: boolean
 }
 
-const CHAVE_RASCUNHO = 'mapa-conversa-rascunho'
-const VERSAO_RASCUNHO = 1
+const VERSAO_RASCUNHO = 2
+
+/** O rascunho é por usuário: sessionStorage é por origem, não por conta. */
+function chaveRascunho(userId: string): string {
+  return `mapa-conversa-rascunho:${userId}`
+}
 
 type Rascunho = {
   versao: number
@@ -43,7 +51,8 @@ const PERFIL_VAZIO: PerfilRascunho = {
   profissao_outro: '',
 }
 
-export function MapaConversa({ ehPrimeiroMapa, pedirPerfil }: Props) {
+export function MapaConversa({ userId, ehPrimeiroMapa, pedirPerfil }: Props) {
+  const chave = useMemo(() => chaveRascunho(userId), [userId])
   const passos = useMemo(() => montarPassos({ pedirPerfil }), [pedirPerfil])
 
   const [indice, setIndice] = useState(0)
@@ -60,6 +69,19 @@ export function MapaConversa({ ehPrimeiroMapa, pedirPerfil }: Props) {
 
   const headingRef = useRef<HTMLHeadingElement>(null)
   const passo = passos[indice]
+  /**
+   * Posição no fluxo: quantas perguntas ficaram para trás. É o que move a barra
+   * junto com a pessoa — contar respostas preenchidas faria a barra nascer cheia
+   * quando um rascunho é restaurado, e não recuar ao voltar uma pergunta.
+   */
+  const perguntasConcluidas =
+    passo.tipo === 'pergunta'
+      ? passo.indicePergunta
+      : passo.tipo === 'enviando'
+      ? TOTAL_PERGUNTAS
+      : 0
+
+  /** Quantas respostas estão completas de fato — guarda do envio. */
   const respondidas = contarRespondidas(respostas, MIN_OBSERVACAO)
 
   // --- Rascunho: sobrevive a um refresh acidental, não a uma nova sessão ---
@@ -67,32 +89,35 @@ export function MapaConversa({ ehPrimeiroMapa, pedirPerfil }: Props) {
   // refazer o mapa faria a pessoa achar que já respondeu.
   useEffect(() => {
     try {
-      const bruto = sessionStorage.getItem(CHAVE_RASCUNHO)
+      // Remove rascunhos de versões anteriores, que não eram isolados por conta.
+      sessionStorage.removeItem('mapa-conversa-rascunho')
+
+      const bruto = sessionStorage.getItem(chave)
       if (!bruto) return
       const salvo = JSON.parse(bruto) as Rascunho
       if (salvo.versao !== VERSAO_RASCUNHO) {
-        sessionStorage.removeItem(CHAVE_RASCUNHO)
+        sessionStorage.removeItem(chave)
         return
       }
       if (Object.keys(salvo.respostas ?? {}).length > 0) setRascunhoOferecido(salvo)
     } catch {
       // Navegação privada ou storage bloqueado: segue sem rascunho.
     }
-  }, [])
+  }, [chave])
 
   useEffect(() => {
     if (Object.keys(respostas).length === 0) return
     try {
       const dados: Rascunho = { versao: VERSAO_RASCUNHO, indice, respostas }
-      sessionStorage.setItem(CHAVE_RASCUNHO, JSON.stringify(dados))
+      sessionStorage.setItem(chave, JSON.stringify(dados))
     } catch {
       // Sem storage, o fluxo continua — é só conveniência.
     }
-  }, [indice, respostas])
+  }, [chave, indice, respostas])
 
   function limparRascunho() {
     try {
-      sessionStorage.removeItem(CHAVE_RASCUNHO)
+      sessionStorage.removeItem(chave)
     } catch {
       /* nada a fazer */
     }
@@ -158,6 +183,16 @@ export function MapaConversa({ ehPrimeiroMapa, pedirPerfil }: Props) {
 
   function enviarMapa() {
     setErro(null)
+
+    // Guarda contra envio incompleto: um rascunho restaurado pode posicionar a
+    // pessoa adiante sem que todas as 9 estejam preenchidas, e os acessos com
+    // `!` abaixo quebrariam. O servidor revalida de todo jeito.
+    if (respondidas < TOTAL_PERGUNTAS) {
+      setErro('Faltam respostas. Volte e complete as 9 áreas antes de continuar.')
+      setIndice(passos.findIndex((p) => p.tipo === 'pergunta'))
+      return
+    }
+
     const areas: AreaInput[] = ORDEM_PILARES.flatMap((pilar) =>
       PILARES[pilar].areas.map((area) => ({
         area,
@@ -214,7 +249,7 @@ export function MapaConversa({ ehPrimeiroMapa, pedirPerfil }: Props) {
         {/* Progresso — sempre visível */}
         <div className="mb-10">
           <ProgressoConversa
-            respondidas={respondidas}
+            perguntasConcluidas={perguntasConcluidas}
             perguntaAtual={passo.tipo === 'pergunta' ? passo.indicePergunta + 1 : undefined}
           />
         </div>

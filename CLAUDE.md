@@ -297,6 +297,16 @@ para se perder num F5. Mas um rascunho de semanas atrás reaparecendo quando a p
 **refazer** o mapa seria pior que perder: ela acharia que já respondeu. A retomada é
 sempre oferecida, nunca aplicada em silêncio.
 
+A chave **inclui o `user_id`** (`mapa-conversa-rascunho:<id>`): `sessionStorage` é por
+origem, não por conta, então sem isso trocar de usuário na mesma aba herdaria as respostas
+do anterior — e `logout()` não tem como limpá-lo, porque é server action e o storage é do
+browser.
+
+**A barra de progresso mede a posição no fluxo, não as respostas preenchidas.** Contar
+respostas completas fazia a barra nascer cheia (e travar em "último passo") quando um
+rascunho era restaurado, além de não recuar ao voltar uma pergunta. A contagem de respostas
+continua existindo, como guarda contra envio incompleto.
+
 **Tempo é expectativa, não cronômetro.** `estimarTempoRestante()` mostra "~4 min", nunca
 contagem regressiva ao vivo: cronômetro correndo induz resposta rápida, o oposto da
 reflexão que o Mapa pede. O total anunciado na abertura deriva da mesma constante, então
