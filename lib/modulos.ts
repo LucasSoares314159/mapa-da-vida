@@ -6,7 +6,7 @@ export type Modulo = {
 }
 
 export const MODULOS: Modulo[] = [
-  { id: 'modulo-0', titulo: 'Módulo 0 — Prefácio', duracao: '02:45', videoId: 'DyTxUyH9fkE' },
+  { id: 'modulo-0', titulo: 'Módulo 0 — Prefácio', duracao: '02:45', videoId: 'TYgikGM2HSY' },
   { id: 'modulo-1', titulo: 'Módulo 1 — Mínima Organização Viável', duracao: '12:30', videoId: 'tO3nKRN3PYQ' },
   { id: 'modulo-2', titulo: 'Módulo 2 — Definindo Seu Momento de Vida', duracao: '19:17', videoId: 'a2rD2rS2ILU' },
   { id: 'modulo-3', titulo: 'Módulo 3 — Mapa da Vida', duracao: '05:09', videoId: '1hEpXT2PepA' },
