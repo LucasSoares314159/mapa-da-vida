@@ -241,11 +241,24 @@ pilar) e virou um fluxo conversacional: **uma pergunta por tela**, com animaçã
 e revelação progressiva das opções. As 9 perguntas continuam vindo de `PILARES` —
 `lib/onboarding.ts` só as achata na ordem corpo → mente → espírito.
 
-**O Mapa é obrigatório no primeiro acesso.** Sem nenhum mapa salvo, nada da plataforma
-abre. O diagnóstico é o pilar sobre o qual o método se aplica; estudar antes dele é
-aplicar conteúdo no vácuo.
+**O Mapa é obrigatório no primeiro acesso** — para quem se cadastrou a partir de
+**08/10/2026** (`GATE_VALE_DESDE`). Sem nenhum mapa salvo, nada da plataforma abre. O
+diagnóstico é o pilar sobre o qual o método se aplica; estudar antes dele é aplicar
+conteúdo no vácuo.
 
 ### Decisões que o código não explica
+
+**O gate não é retroativo.** Quando ele foi para produção, 7 dos 16 alunos pagantes não
+tinham mapa algum — dois da Turma 1, cadastrados em junho e julho. Aplicar a regra a
+todos trancaria quem já pagou fora da plataforma até responder 9 perguntas com
+observação obrigatória, para corrigir uma ausência que o produto nunca exigiu deles.
+`gateValeParaConta()` compara `profiles.criado_em` com `GATE_VALE_DESDE`: quem entra
+depois conhece o Mapa como porta de entrada, quem já estava dentro é convidado, nunca
+barrado. A função responde `false` quando a data não dá para ler — deixar navegar é
+melhor que trancar um cliente por causa de um dado ilegível.
+
+O cookie `mapa_ok` também é gravado para a conta isenta: a isenção não muda, então
+reconsultar `profiles` a cada navegação seria desperdício.
 
 **O gate é cookie, não query por request.** `lib/gate-mapa.ts` guarda `mapa_ok`. O
 middleware consulta `mapas` **uma única vez** — enquanto o cookie não existe — e depois

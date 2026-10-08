@@ -1,6 +1,11 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { COOKIE_MAPA_OK, isentoDoGate, opcoesCookieMapaOk } from '@/lib/gate-mapa'
+import {
+  COOKIE_MAPA_OK,
+  gateValeParaConta,
+  isentoDoGate,
+  opcoesCookieMapaOk,
+} from '@/lib/gate-mapa'
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -53,18 +58,32 @@ export async function middleware(request: NextRequest) {
   // nada abre antes dele. O cookie é só cache da resposta — ver lib/gate-mapa.ts.
   if (user && !isentoDoGate(request.nextUrl.pathname)) {
     if (!request.cookies.get(COOKIE_MAPA_OK)) {
-      const { count } = await supabase
-        .from('mapas')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
+      // Contas anteriores ao gate nunca são barradas — ver GATE_VALE_DESDE. O
+      // cookie também é gravado para elas: a isenção não muda, então não vale
+      // reconsultar o perfil a cada navegação.
+      const { data: perfil } = await supabase
+        .from('profiles')
+        .select('criado_em')
+        .eq('id', user.id)
+        .single()
 
-      if (!count) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/mapa/novo'
-        return NextResponse.redirect(url)
+      const precisaDeMapa = gateValeParaConta(perfil?.criado_em)
+
+      if (precisaDeMapa) {
+        const { count } = await supabase
+          .from('mapas')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+
+        if (!count) {
+          const url = request.nextUrl.clone()
+          url.pathname = '/mapa/novo'
+          return NextResponse.redirect(url)
+        }
       }
 
-      // Já tem mapa: guarda a resposta para não consultar de novo a cada página.
+      // Isento, ou já tem mapa: guarda a resposta para não consultar de novo a
+      // cada página. Nos dois casos ela não muda mais.
       supabaseResponse.cookies.set(COOKIE_MAPA_OK, '1', opcoesCookieMapaOk())
     }
   }
