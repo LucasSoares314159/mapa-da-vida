@@ -170,7 +170,7 @@ as novas migrações versionadas em `supabase/migrations`.
 | `profiles` | `id`, `nome`, `criado_em`, `aulas_concluidas` (legado), `excluir_das_metricas`, `data_nascimento`, `profissao`, `profissao_outro` |
 | `mapas` | `id`, `user_id`, `titulo`, `criado_em` |
 | `areas` | `mapa_id`, `pilar`, `area`, `status`, `observacao` |
-| `objetivos` | `texto`, `pilar`, `prazo`, `status`, `data_alvo`, `motivo`, `frequencia_lembrete`, `radar_faz_sentido`, `radar_por_mim` |
+| `objetivos` | `texto`, `pilar`, `prazo`, `status`, `data_alvo`, `motivo`, `frequencia_lembrete`, `radar_faz_sentido`, `radar_por_mim`, `ritmo`, `ordem` |
 | `rotinas` | `horas_sono/trabalho/basicas/tela`, `dias_trabalho`, `percentual_livre`, `zona` — 1 por usuário |
 | `momentos_vida` | `estacao`, `frase`, `duracao`, `data_revisao`, `ativo` — 1 ativo por usuário |
 | `progresso_aulas` | `user_id`, `modulo_id`, `concluido_em`, `data_confiavel` |
@@ -196,6 +196,14 @@ todos os links anteriores ainda ativos; `used_at` impede reutilização depois d
 **`profiles.excluir_das_metricas`** — contas internas somem do back office e do
 contador de membros, mas a plataforma funciona normal para elas. Apagar dados de conta
 interna seria o oposto do pretendido.
+
+**`objetivos.ritmo IS NULL` significa "nunca declarou"**, não "está parado". É o que faz
+o card mostrar "Definir ritmo" em tom neutro em vez de vermelho. Os objetivos anteriores à
+feature ficam nulos de propósito — derivar o ritmo do prazo inventaria uma declaração que a
+pessoa nunca fez. Mesmo padrão do Radar de Coerência e de `profiles.data_nascimento`.
+
+**`objetivos.ordem` é por `(user_id, prazo)`**, não global. Reordenar numa aba não mexe nas
+outras. `NULL` cai no fim da lista (`nullsFirst: false` na query), nunca no topo.
 
 **`modulo_id` é texto** (`'modulo-3'`), não índice. Índice é posicional: reordenar
 módulos corromperia o progresso de todos. `modulos_conteudo.modulo_id` usa o mesmo
@@ -404,6 +412,61 @@ O **Radar de Coerência** são duas perguntas obrigatórias na criação/ediçã
 Qualquer `false` exibe um selo de alerta no card — sinaliza objetivo possivelmente
 nascido de comparação, **sem impedir** o uso. Nullable no banco para não quebrar
 objetivos anteriores à feature; obrigatório na action.
+
+### Refatoração de outubro/2026 — ritmo, ordem e hierarquia
+
+A tela era sobre o Momento de Vida: o card dele ocupava ~170px e tinha a frase em 18px,
+contra 15px do texto do objetivo. O componente tinha sido desenhado para "reinar
+visualmente" e conseguiu — a funcionalidade principal virou coadjuvante. Virou faixa de
+~90px, que mantém o fundo na cor da estação mas perde o eyebrow, o rodapé de revisão e a
+sombra alta. **A revisão só aparece quando está vencida:** "revisar em 48 dias" era ruído
+no topo de toda visita; "passou da hora de revisar" é a única variante que pede ação.
+
+**O ritmo é declarado, não calculado.** `ritmo` (verde avançando / amarelo travado /
+vermelho parado, `RITMOS` em `types/index.ts`) é escolhido pela pessoa no card. Derivar do
+prazo era a alternativa mais barata e foi descartada: prazo folgado não significa que o
+objetivo está andando, e prazo apertado não significa que travou — o dado derivado mediria
+o calendário, não a realidade. O custo aceito é um toque a mais por objetivo.
+
+**O atraso pinta a data, não o semáforo.** São dois sinais que querem dizer coisas
+diferentes: a bolinha é a percepção declarada, a data é o fato do calendário. Deixar o
+atraso sobrescrever a bolinha apagaria a declaração da pessoa — ela marca "avançando" e o
+card insiste em vermelho. O chip "Prazo passou" foi removido porque a informação migrou
+para a própria data, e a linha de chips já acumulava até quatro elementos.
+
+**O atraso agora vale para `pausado` também.** Antes só era calculado para `status ===
+'ativo'`, então pausar um objetivo vencido fazia o aviso desaparecer — exatamente o caso
+em que ele importa mais.
+
+**Concluídos afundam para o fim da aba**, atrás de um separador, e saem da reordenação: a
+ordem manual é sobre o que ainda exige ação. Ficam visíveis (riscados, opacidade reduzida)
+em vez de escondidos atrás de um toggle — esconder a conquista tira o retorno de marcar o
+checkbox.
+
+**A reordenação é por aba, com `Reorder` do `motion`** (já instalado; nenhuma dep nova) e
+**handle dedicado** em vez do card inteiro arrastável: o card tem 4 alvos de toque e, no
+mobile, arrastar para rolar a página moveria o objetivo sem intenção. O handle move o item
+com ↑/↓ quando focado — DnD só com ponteiro exclui quem navega por teclado.
+
+A gravação tem **debounce de 600ms**, e três detalhes não óbvios: a aba é capturada no
+momento do arrasto (não na hora de gravar, senão trocar de aba grava os ids sob o prazo
+errado); o rollback guarda o estado de antes do **primeiro** arrasto da rajada; e trocar de
+aba ou desmontar a tela **dispara a gravação pendente** em vez de só limpar o timer.
+
+**A lista arrastável entra por `next/dynamic`.** `Reorder` puxa o motor de animação do
+`motion` inteiro: importado estaticamente, o First Load de `/objetivos` ia de 121 kB para
+180 kB numa rota que antes não usava `motion`. Mesmo motivo e mesmo padrão do `MapaFlow`
+em `RevelacaoMapa`. Com o dynamic, ficou em 134 kB.
+
+**O modal virou `components/ui/dialog.tsx`** (shadcn sobre `@radix-ui/react-dialog`, que
+estava instalado e nunca tinha sido importado). Era um overlay manual de 440px em `style`
+inline, sem Esc, focus trap, scroll lock nem ARIA. A largura passou a 560px na escala
+Tailwind — número mágico inline é o que faz o próximo modal reinventar a medida.
+
+Também nasceu `components/ui/indicador-status.tsx`, porque o semáforo verde/amarelo/vermelho
+estava reimplementado em **seis** lugares com hex divergentes (e o `COR_STATUS` de
+`types/index.ts` é código morto). Os seis usos antigos **não** foram migrados — não era o
+pedido; o componente está pronto para quem encostar neles.
 
 ---
 

@@ -6,6 +6,8 @@ export default function ObjetivosLoading() {
       <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 flex flex-col gap-4">
         <Skeleton className="h-7 w-44" />
         <Skeleton className="h-3 w-56 -mt-2" />
+        {/* Faixa do Momento de Vida — sem este placeholder a tela saltava na hidratação */}
+        <Skeleton className="h-[62px] w-full rounded-[14px]" />
         <div className="flex gap-1 rounded-[10px] border border-mt-border bg-white p-1">
           {[0, 1, 2].map((i) => (
             <Skeleton key={i} className="flex-1 h-12 rounded-lg" />

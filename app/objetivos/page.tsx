@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { contarMembros } from '@/lib/membros'
 import { AuthLayout } from '@/components/AuthLayout'
-import { ObjetivosLista } from '@/components/ObjetivosLista'
+import { ObjetivosLista } from '@/components/objetivos/ObjetivosLista'
 import type { Objetivo, MomentoVida } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -20,6 +20,8 @@ export default async function ObjetivosPage() {
       .select('*')
       .eq('user_id', user.id)
       .neq('status', 'arquivado')
+      // Ordem manual primeiro; sem ordem (objetivo anterior à feature) cai no fim.
+      .order('ordem', { ascending: true, nullsFirst: false })
       .order('criado_em', { ascending: false }),
     supabase
       .from('rotinas')
