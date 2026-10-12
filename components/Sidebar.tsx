@@ -13,6 +13,17 @@ type Props = {
   totalMembros?: number | null
 }
 
+// Ordem da navegação: a trilha primeiro, depois as ferramentas na sequência em
+// que o método as usa (momento define a intenção → rotina mostra o espaço real →
+// objetivos saem dos dois), e os mapas por último, como histórico.
+const ITENS_NAV = [
+  { href: '/content',   label: 'Conteúdo',        icone: BookOpen },
+  { href: '/momento',   label: 'Momento de Vida', icone: Compass },
+  { href: '/rotina',    label: 'Minha Rotina',    icone: Clock },
+  { href: '/objetivos', label: 'Meus Objetivos',  icone: Target },
+  { href: '/dashboard', label: 'Meus Mapas',      icone: Map },
+] as const
+
 function LogoutButton() {
   const { pending } = useFormStatus()
   return (
@@ -30,11 +41,6 @@ function LogoutButton() {
 
 export function Sidebar({ onClose, totalMembros }: Props) {
   const pathname = usePathname()
-  const isDashboard = pathname === '/dashboard'
-  const isRotina = pathname === '/rotina'
-  const isObjetivos = pathname === '/objetivos'
-  const isContent = pathname === '/content'
-  const isMomento = pathname === '/momento'
 
   return (
     <aside className="flex h-full w-[220px] shrink-0 flex-col bg-white" style={{ borderRight: '0.5px solid #c8d8d2' }}>
@@ -48,75 +54,26 @@ export function Sidebar({ onClose, totalMembros }: Props) {
 
       {/* Nav */}
       <nav className="flex flex-col gap-1 p-3 flex-1">
-        <Link
-          href="/content"
-          onClick={onClose}
-          className={cn(
-            'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200',
-            isContent
-              ? 'bg-mt-off-white text-mt-green-dark'
-              : 'text-mt-muted hover:bg-mt-off-white hover:text-mt-green-dark'
-          )}
-        >
-          <BookOpen className="size-4 shrink-0" />
-          Conteúdo
-        </Link>
+        {ITENS_NAV.map(({ href, label, icone: Icone }) => {
+          const ativo = pathname === href
 
-        <Link
-          href="/momento"
-          onClick={onClose}
-          className={cn(
-            'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200',
-            isMomento
-              ? 'bg-mt-off-white text-mt-green-dark'
-              : 'text-mt-muted hover:bg-mt-off-white hover:text-mt-green-dark'
-          )}
-        >
-          <Compass className="size-4 shrink-0" />
-          Momento de Vida
-        </Link>
-
-        <Link
-          href="/objetivos"
-          onClick={onClose}
-          className={cn(
-            'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200',
-            isObjetivos
-              ? 'bg-mt-off-white text-mt-green-dark'
-              : 'text-mt-muted hover:bg-mt-off-white hover:text-mt-green-dark'
-          )}
-        >
-          <Target className="size-4 shrink-0" />
-          Meus Objetivos
-        </Link>
-
-        <Link
-          href="/rotina"
-          onClick={onClose}
-          className={cn(
-            'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200',
-            isRotina
-              ? 'bg-mt-off-white text-mt-green-dark'
-              : 'text-mt-muted hover:bg-mt-off-white hover:text-mt-green-dark'
-          )}
-        >
-          <Clock className="size-4 shrink-0" />
-          Minha Rotina
-        </Link>
-
-        <Link
-          href="/dashboard"
-          onClick={onClose}
-          className={cn(
-            'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200',
-            isDashboard
-              ? 'bg-mt-off-white text-mt-green-dark'
-              : 'text-mt-muted hover:bg-mt-off-white hover:text-mt-green-dark'
-          )}
-        >
-          <Map className="size-4 shrink-0" />
-          Meus Mapas
-        </Link>
+          return (
+            <Link
+              key={href}
+              href={href}
+              onClick={onClose}
+              className={cn(
+                'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200',
+                ativo
+                  ? 'bg-mt-off-white text-mt-green-dark'
+                  : 'text-mt-muted hover:bg-mt-off-white hover:text-mt-green-dark'
+              )}
+            >
+              <Icone className="size-4 shrink-0" />
+              {label}
+            </Link>
+          )
+        })}
 
         <Link
           href="/mapa/preparacao"

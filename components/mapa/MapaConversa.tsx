@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react'
@@ -246,6 +247,26 @@ export function MapaConversa({ userId, ehPrimeiroMapa, pedirPerfil }: Props) {
       }}
     >
       <div className="mx-auto flex w-full max-w-lg flex-1 flex-col">
+        {/* Saída do fluxo.
+            O fluxo é tela cheia, sem sidebar, e o "Voltar" do rodapé só recua uma
+            pergunta — sem isto não havia como sair de um remapeamento a não ser
+            terminando as 9 perguntas.
+
+            Só aparece em remapeamento: no primeiro acesso o Mapa é obrigatório
+            (ver lib/gate-mapa.ts) e um link para a Trilha seria redirecionado de
+            volta pelo middleware — a pessoa clicaria e nada aconteceria, o que é
+            pior que não ter botão. */}
+        {!ehPrimeiroMapa && (
+          <Link
+            href="/content"
+            className="mb-6 inline-flex items-center gap-1.5 self-start text-sm font-medium transition-opacity hover:opacity-80"
+            style={{ color: '#a8c4bc' }}
+          >
+            <ArrowLeft className="size-4" />
+            Voltar para a Trilha
+          </Link>
+        )}
+
         {/* Progresso — sempre visível */}
         <div className="mb-10">
           <ProgressoConversa
