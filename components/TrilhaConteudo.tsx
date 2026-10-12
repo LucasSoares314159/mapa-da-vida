@@ -101,7 +101,7 @@ export function TrilhaConteudo({ nomeUsuario, aulasConcluidas }: Props) {
               )}
             </button>
             <span className="text-sm font-semibold" style={{ color: '#1a2e29' }}>
-              Aulas Trilha da Produtividade
+              Aulas da TRILHA
             </span>
             <span className="text-xs" style={{ color: '#4a6b62' }}>
               {TOTAL_AULAS} aulas • {DURACAO_TOTAL}
