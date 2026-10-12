@@ -92,7 +92,8 @@ npm run build             # só com o dev parado
 | `/lista-espera`, `/obrigado` | Captação e agradecimento | pública |
 | `/auth/*` | login, cadastro, esqueci/redefinir senha, verificar e-mail, callback | pública |
 | `/content` | Trilha: módulos e lives | ✅ |
-| `/content/modulo/[id]`, `/content/live/[id]` | Aula individual | ✅ |
+| `/content/modulo/[id]` | Aula individual | ✅ |
+| `/content/material/[id]` | Material de apoio — quadro do Excalidraw | ✅ |
 | `/mapa/novo` → `/mapa/[id]` | Fluxo conversacional do AHA moment | ✅ |
 | `/mapa/preparacao` | Redirect para `/mapa/novo` — mantida pelos links já publicados | ✅ |
 | `/diagnostico/[id]` | Diagnóstico completo | ✅ |
@@ -142,7 +143,8 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 | `blue-zones.ts` | Base científica por área, usada pela camada 3 |
 | `metricas.ts` | **Todas** as agregações do back office |
 | `progresso.ts` | Ponte índice da UI ↔ `modulo_id` do banco |
-| `modulos.ts` / `lives.ts` | Catálogo de conteúdo — título, duração, `videoId` (fonte de verdade) |
+| `modulos.ts` | Catálogo das aulas — título, duração, `videoId` (fonte de verdade) |
+| `materiais.ts` | Catálogo dos materiais de apoio — título e URL do quadro |
 | `conteudo-modulos.ts` | Leitura/escrita dos blocos de texto de cada módulo (tabela `modulos_conteudo`) |
 | `rotina.ts` | Cálculo de horas livres e Zona |
 | `onboarding.ts` | Passos, progresso e falas do Mapa conversacional |
@@ -442,16 +444,49 @@ RLS para usuário comum; escrita e upload passam pelo cliente admin).
 ficava bloqueado na trilha; migrar o texto é um processo manual e gradual, então todo
 módulo com `videoId` já é navegável mesmo com `blocos` vazio.
 
-**O bloco `embed` tem allowlist de domínio** (`HOSTS_EMBED` em
-`lib/conteudo-modulos.ts`), hoje só Excalidraw. O bloco monta um `iframe`, então URL
-livre seria código de terceiro rodando dentro da aula. A checagem roda em três
-lugares de propósito: no editor (feedback), na action (um bloco montado fora da UI não
-passa pelo editor) e na leitura (um bloco salvo antes da allowlist não deve virar
-iframe). O campo aceita o `<iframe>` inteiro colado e extrai o `src` — pedir que o
-admin garimpe a URL no HTML era atrito sem ganho.
+**O bloco `embed` tem allowlist de domínio** (`HOSTS_EMBED` e
+`normalizarUrlEmbed()` em `lib/conteudo-modulos.ts`), hoje só Excalidraw. O bloco monta
+um `iframe`, então URL livre seria código de terceiro rodando dentro da aula. A
+checagem roda em três lugares de propósito: no editor (feedback), na action (um bloco
+montado fora da UI não passa pelo editor) e na leitura (um bloco salvo antes da
+allowlist não deve virar iframe). O campo aceita o `<iframe>` inteiro colado e extrai o
+`src` — pedir que o admin garimpe a URL no HTML era atrito sem ganho.
 
 O embed estoura a coluna de leitura de 640px até ~900px no desktop: um quadro do
 Excalidraw em largura de texto fica pequeno demais para ser usado.
+
+O bloco continua disponível no editor, mas **nenhuma aula o usa hoje**: os dois quadros
+do Excalidraw ficam na seção de materiais — ver
+[Materiais & Frameworks](#materiais--frameworks). `normalizarUrlEmbed()` é compartilhada
+pelos dois caminhos, então a allowlist vale para ambos.
+
+---
+
+## Materiais & Frameworks
+
+Compilado de material de apoio em `/content`, abaixo das aulas. Catálogo estático em
+`lib/materiais.ts`; cada entrada abre em `/content/material/[id]` com o quadro do
+Excalidraw embutido, validado pela allowlist de `lib/conteudo-modulos.ts`.
+
+**Substituiu a seção de lives em outubro/2026.** Eram 3 gravações com links de Canva e
+um podcast no Drive (`lib/lives.ts`, `components/LiveAula.tsx`, `/content/live/[id]` —
+tudo recuperável no git). A seção já funcionava como compilado de apoio, não como
+trilha: virar materiais foi nomear o que ela era.
+
+**Não mostra duração nem contagem de itens.** A seção de aulas mostra
+`{N} aulas • {duração total}` porque lá isso é o progresso da trilha; aqui seria
+ruído — ninguém "assiste 1h02" de um framework. A assimetria com a seção de aulas é
+deliberada: não "corrija" devolvendo os números.
+
+**Materiais não têm tabela no banco**, ao contrário do texto das aulas
+(`modulos_conteudo`). São duas URLs em catálogo estático, como `MODULOS` sempre foi;
+criar tabela, RLS e tela de admin para isso seria desproporcional. O custo é real:
+editar material exige commit e deploy. Se o volume crescer, o padrão de
+`modulos_conteudo` é o caminho.
+
+**Materiais não entram em métricas nem em progresso** — as lives também nunca
+entraram. Não há `progresso_aulas`, funil, nem soma de duração: `MODULOS` segue sendo a
+fonte única da contagem da trilha.
 
 ---
 

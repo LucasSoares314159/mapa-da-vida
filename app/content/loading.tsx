@@ -24,7 +24,7 @@ export default function ContentLoading() {
         </div>
       ))}
 
-      {/* Seção lives */}
+      {/* Seção materiais */}
       <div className="rounded-xl border p-5 flex flex-col gap-3 mt-2" style={{ borderColor: '#c8d8d2' }}>
         <div className="flex items-center justify-between">
           <Skeleton className="h-5 w-32" />

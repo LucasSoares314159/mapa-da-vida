@@ -55,49 +55,9 @@ UPDATE public.modulos_conteudo
    SET modulo_id = 'modulo-7'
  WHERE modulo_id = 'modulo-8';
 
--- 5) Quadros do Excalidraw no fim do conteúdo das duas aulas novas.
---    Anexa ao que já existe (o 'modulo-6' tem 67 blocos de texto migrados) em
---    vez de substituir, e o WHERE NOT ... @> impede duplicar o quadro se este
---    arquivo rodar duas vezes.
-INSERT INTO public.modulos_conteudo (modulo_id, blocos)
-VALUES ('modulo-7', '[]'::jsonb)
-ON CONFLICT (modulo_id) DO NOTHING;
-
-UPDATE public.modulos_conteudo
-   SET blocos = blocos || jsonb_build_array(
-         jsonb_build_object('tipo', 'divisor'),
-         jsonb_build_object('tipo', 'titulo', 'nivel', 2, 'texto', 'Quadro da aula'),
-         jsonb_build_object(
-           'tipo', 'embed',
-           'url', 'https://link.excalidraw.com/readonly/XIXRBGN7uvNs2YC5iFvR',
-           'altura', 560,
-           'legenda', 'Material da aula no Excalidraw — arraste para navegar.'
-         )
-       ),
-       atualizado_em = now()
- WHERE modulo_id = 'modulo-6'
-   AND NOT blocos @> '[{"tipo":"embed","url":"https://link.excalidraw.com/readonly/XIXRBGN7uvNs2YC5iFvR"}]'::jsonb;
-
-UPDATE public.modulos_conteudo
-   SET blocos = blocos || jsonb_build_array(
-         jsonb_build_object('tipo', 'divisor'),
-         jsonb_build_object('tipo', 'titulo', 'nivel', 2, 'texto', 'Quadro da aula'),
-         jsonb_build_object(
-           'tipo', 'embed',
-           'url', 'https://link.excalidraw.com/readonly/V8IBfsX2AzzQYE2aVflc',
-           'altura', 560,
-           'legenda', 'Material da aula no Excalidraw — arraste para navegar.'
-         )
-       ),
-       atualizado_em = now()
- WHERE modulo_id = 'modulo-7'
-   AND NOT blocos @> '[{"tipo":"embed","url":"https://link.excalidraw.com/readonly/V8IBfsX2AzzQYE2aVflc"}]'::jsonb;
-
 COMMIT;
 
 -- Conferência: deve listar modulo-0..modulo-7 (sem modulo-8) em progresso_aulas,
 -- e modulos_conteudo deve ter modulo-0..modulo-7 + modulo-7-arquivado.
 -- SELECT modulo_id, count(*) FROM public.progresso_aulas GROUP BY 1 ORDER BY 1;
 -- SELECT modulo_id FROM public.modulos_conteudo ORDER BY 1;
--- SELECT modulo_id, jsonb_array_length(blocos) FROM public.modulos_conteudo
---  WHERE modulo_id IN ('modulo-6','modulo-7') ORDER BY 1;

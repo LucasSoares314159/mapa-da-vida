@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { ChevronUp, ChevronDown, Check } from 'lucide-react'
 import { marcarAula } from '@/app/actions/progresso'
-import { LIVES } from '@/lib/lives'
+import { MATERIAIS } from '@/lib/materiais'
 import { duracaoTotalTrilha, MODULOS } from '@/lib/modulos'
 
 const TOTAL_AULAS = MODULOS.length
@@ -17,7 +17,7 @@ type Props = {
 
 export function TrilhaConteudo({ nomeUsuario, aulasConcluidas }: Props) {
   const [aberto, setAberto] = useState(true)
-  const [abertoLives, setAbertoLives] = useState(true)
+  const [abertoMateriais, setAbertoMateriais] = useState(true)
   const [concluidas, setConcluidas] = useState<number[]>(aulasConcluidas)
 
   const primeiroNome = nomeUsuario.split(' ')[0]
@@ -170,7 +170,7 @@ export function TrilhaConteudo({ nomeUsuario, aulasConcluidas }: Props) {
           </div>
         )}
       </div>
-      {/* Seção Lives & Materiais */}
+      {/* Seção Materiais & Frameworks */}
       <div
         className="w-full rounded-xl overflow-hidden"
         style={{ border: '0.5px solid #c8d8d2', backgroundColor: '#ffffff' }}
@@ -180,59 +180,53 @@ export function TrilhaConteudo({ nomeUsuario, aulasConcluidas }: Props) {
           className="flex items-center justify-between px-5 py-4"
           style={{
             backgroundColor: '#f0f7f5',
-            borderBottom: abertoLives ? '0.5px solid #c8d8d2' : 'none',
+            borderBottom: abertoMateriais ? '0.5px solid #c8d8d2' : 'none',
           }}
         >
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setAbertoLives((v) => !v)}
+              onClick={() => setAbertoMateriais((v) => !v)}
               className="flex items-center gap-1.5"
-              aria-label={abertoLives ? 'Ocultar lives' : 'Mostrar lives'}
+              aria-label={abertoMateriais ? 'Ocultar materiais' : 'Mostrar materiais'}
             >
-              {abertoLives ? (
+              {abertoMateriais ? (
                 <ChevronUp className="size-4" style={{ color: '#4a6b62' }} />
               ) : (
                 <ChevronDown className="size-4" style={{ color: '#4a6b62' }} />
               )}
             </button>
             <span className="text-sm font-semibold" style={{ color: '#1a2e29' }}>
-              Lives & Materiais
-            </span>
-            <span className="text-xs" style={{ color: '#4a6b62' }}>
-              {LIVES.length} aulas
+              Materiais &amp; Frameworks
             </span>
           </div>
 
           <button
-            onClick={() => setAbertoLives((v) => !v)}
+            onClick={() => setAbertoMateriais((v) => !v)}
             className="text-xs font-medium transition-opacity hover:opacity-70"
             style={{ color: '#57AA8F' }}
           >
-            {abertoLives ? 'Ocultar todas as seções' : 'Mostrar todas as seções'}
+            {abertoMateriais ? 'Ocultar todas as seções' : 'Mostrar todas as seções'}
           </button>
         </div>
 
-        {/* Lista de lives */}
-        {abertoLives && (
+        {/* Lista de materiais */}
+        {abertoMateriais && (
           <div>
-            {LIVES.map((live, index) => (
+            {MATERIAIS.map((material, index) => (
               <div
-                key={live.id}
-                className="flex items-center justify-between px-5 py-3.5"
+                key={material.id}
+                className="px-5 py-3.5"
                 style={{
-                  borderBottom: index < LIVES.length - 1 ? '0.5px solid #c8d8d2' : 'none',
+                  borderBottom: index < MATERIAIS.length - 1 ? '0.5px solid #c8d8d2' : 'none',
                 }}
               >
                 <Link
-                  href={`/content/live/${live.id}`}
-                  className="text-sm font-medium transition-opacity hover:opacity-70"
+                  href={`/content/material/${material.id}`}
+                  className="block text-sm font-medium transition-opacity hover:opacity-70"
                   style={{ color: '#57AA8F' }}
                 >
-                  {live.titulo}
+                  {material.titulo}
                 </Link>
-                <span className="text-xs shrink-0 ml-4" style={{ color: '#4a6b62' }}>
-                  {live.duracao}
-                </span>
               </div>
             ))}
           </div>
