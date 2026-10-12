@@ -6,6 +6,9 @@ export type NomePilar = 'corpo' | 'mente' | 'espirito'
 export type PrazoObjetivo = 'curto' | 'medio' | 'longo'
 export type StatusObjetivo = 'ativo' | 'pausado' | 'concluido' | 'arquivado'
 export type FrequenciaLembrete = 'semanal' | 'quinzenal' | 'mensal'
+// Ritmo é DECLARADO pela pessoa, não derivado do prazo: prazo folgado não quer
+// dizer que o objetivo está andando, e prazo curto não quer dizer que travou.
+export type RitmoObjetivo = 'avancando' | 'travado' | 'parado'
 
 // --- Momento de Vida ---
 // A camada de intenção que fica acima dos objetivos e da rotina: uma declaração
@@ -93,6 +96,22 @@ export interface Objetivo {
   // Radar de Coerência — respondido obrigatoriamente ao criar/editar o objetivo
   radar_faz_sentido?: boolean | null
   radar_por_mim?: boolean | null
+  // Semáforo declarado pela pessoa. null = nunca declarou (≠ parado).
+  ritmo?: RitmoObjetivo | null
+  // Posição manual dentro da aba de prazo. null = vai para o fim da lista.
+  ordem?: number | null
+}
+
+// Metadados do semáforo de ritmo. As cores são os mesmos tokens do semáforo do
+// Mapa da Vida (mt-green / mt-yellow / mt-red), para as duas telas se lerem igual.
+export const RITMOS: Record<RitmoObjetivo, {
+  label: string
+  tom: StatusArea
+  descricao: string
+}> = {
+  avancando: { label: 'Avançando', tom: 'verde',    descricao: 'Estou dando passos nesse objetivo' },
+  travado:   { label: 'Travado',   tom: 'amarelo',  descricao: 'Comecei, mas emperrei' },
+  parado:    { label: 'Parado',    tom: 'vermelho', descricao: 'Não saiu do lugar' },
 }
 
 export type NomeArea =
