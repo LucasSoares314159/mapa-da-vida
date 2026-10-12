@@ -9,7 +9,9 @@
 ## Produto
 
 **Trilha da Produtividade** (MindTrail) é um programa pago que ensina a pessoa a
-construir seu próprio sistema de organização pessoal. São 9 módulos e lives.
+construir seu próprio sistema de organização pessoal. São 8 módulos (`modulo-0` a
+`modulo-7`) e lives. **Fonte de verdade: `MODULOS` em `lib/modulos.ts`** — a contagem
+e a duração total da trilha derivam dela.
 
 O **Mapa da Vida** é o Módulo 3 e o AHA moment: um diagnóstico reflexivo em que a
 pessoa classifica 9 áreas da vida como verde/amarelo/vermelho e recebe um
@@ -196,6 +198,14 @@ interna seria o oposto do pretendido.
 **`modulo_id` é texto** (`'modulo-3'`), não índice. Índice é posicional: reordenar
 módulos corromperia o progresso de todos. `modulos_conteudo.modulo_id` usa o mesmo
 texto, sem FK — ver [Conteúdo dos módulos](#conteúdo-dos-módulos-admin-modulos).
+
+O texto protege contra **reordenar**, não contra **renumerar**: se o id passa a
+designar outra aula, o progresso continua válido apontando para a coisa errada. Foi o
+caso da fusão de outubro/2026 (`supabase/migrations/20261012120000_remapeia_modulos_6_7.sql`),
+em que o antigo `modulo-8` virou `modulo-7` — sem o remapeamento, quem concluiu
+"O Segredo da Consistência" apareceria como tendo concluído um módulo que saiu da
+trilha. Mexer na cauda de `MODULOS` exige migração de `progresso_aulas` **e** de
+`modulos_conteudo`.
 
 ---
 
@@ -431,6 +441,17 @@ RLS para usuário comum; escrita e upload passam pelo cliente admin).
 **Módulos não têm mais estado "indisponível".** Antes um módulo sem link do Notion
 ficava bloqueado na trilha; migrar o texto é um processo manual e gradual, então todo
 módulo com `videoId` já é navegável mesmo com `blocos` vazio.
+
+**O bloco `embed` tem allowlist de domínio** (`HOSTS_EMBED` em
+`lib/conteudo-modulos.ts`), hoje só Excalidraw. O bloco monta um `iframe`, então URL
+livre seria código de terceiro rodando dentro da aula. A checagem roda em três
+lugares de propósito: no editor (feedback), na action (um bloco montado fora da UI não
+passa pelo editor) e na leitura (um bloco salvo antes da allowlist não deve virar
+iframe). O campo aceita o `<iframe>` inteiro colado e extrai o `src` — pedir que o
+admin garimpe a URL no HTML era atrito sem ganho.
+
+O embed estoura a coluna de leitura de 640px até ~900px no desktop: um quadro do
+Excalidraw em largura de texto fica pequeno demais para ser usado.
 
 ---
 

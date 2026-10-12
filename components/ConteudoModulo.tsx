@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Check } from 'lucide-react'
-import type { Bloco } from '@/lib/conteudo-modulos'
+import { ALTURA_EMBED_PADRAO, normalizarUrlEmbed, type Bloco } from '@/lib/conteudo-modulos'
 import { renderizarTextoFormatado } from '@/lib/texto-formatado'
 
 const CORES_DESTAQUE: Record<string, { bg: string; texto: string }> = {
@@ -219,6 +219,40 @@ function BlocoRenderizado({ bloco }: { bloco: Bloco }) {
           )}
         </figure>
       )
+
+    case 'embed': {
+      // Revalida na leitura, não só no editor: um bloco salvo antes da
+      // allowlist (ou editado direto no banco) não deve virar iframe.
+      const url = normalizarUrlEmbed(bloco.url)
+      if (!url) return null
+
+      return (
+        <figure className="flex flex-col gap-2">
+          {/* O quadro estoura a coluna de 640px: em largura de leitura o
+              material do Excalidraw fica pequeno demais para ser usado. */}
+          <div className="w-full lg:mx-[-130px] lg:w-[calc(100%+260px)]">
+            <iframe
+              src={url}
+              title={bloco.legenda ?? 'Quadro interativo da aula'}
+              loading="lazy"
+              sandbox="allow-scripts allow-same-origin allow-popups"
+              referrerPolicy="no-referrer"
+              className="w-full rounded-xl"
+              style={{
+                height: bloco.altura ?? ALTURA_EMBED_PADRAO,
+                border: '0.5px solid #c8d8d2',
+                backgroundColor: '#ffffff',
+              }}
+            />
+          </div>
+          {bloco.legenda && (
+            <figcaption className="text-center text-sm italic" style={{ color: '#4a6b62' }}>
+              {bloco.legenda}
+            </figcaption>
+          )}
+        </figure>
+      )
+    }
 
     case 'divisor':
       return <hr style={{ border: 'none', borderTop: '0.5px solid #c8d8d2' }} />

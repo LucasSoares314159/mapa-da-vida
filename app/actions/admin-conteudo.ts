@@ -3,7 +3,7 @@
 import { randomUUID } from 'crypto'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createAdminSupabaseClient } from '@/lib/supabase-admin'
-import { salvarConteudoModulo, type Bloco } from '@/lib/conteudo-modulos'
+import { normalizarUrlEmbed, salvarConteudoModulo, type Bloco } from '@/lib/conteudo-modulos'
 
 // Mesma allowlist do middleware — server actions não passam por ele, então a
 // checagem de admin precisa ser repetida aqui.
@@ -31,6 +31,15 @@ export async function salvarConteudo(
     await exigirAdmin()
   } catch {
     return { error: 'Acesso negado.' }
+  }
+
+  // A allowlist do embed também vale no servidor: a validação do editor é
+  // feedback de UI, e um bloco montado fora dele não passaria por ela.
+  const embedInvalido = blocos.some(
+    (b) => b.tipo === 'embed' && b.url.trim() !== '' && !normalizarUrlEmbed(b.url)
+  )
+  if (embedInvalido) {
+    return { error: 'Há um quadro com URL de domínio não aceito.' }
   }
 
   try {

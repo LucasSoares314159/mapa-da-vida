@@ -12,7 +12,14 @@ import {
   Check,
 } from 'lucide-react'
 import { salvarConteudo, uploadImagemModulo } from '@/app/actions/admin-conteudo'
-import { blocoVazio, paragrafosDe, type Bloco } from '@/lib/conteudo-modulos'
+import {
+  ALTURA_EMBED_PADRAO,
+  blocoVazio,
+  HOSTS_EMBED,
+  normalizarUrlEmbed,
+  paragrafosDe,
+  type Bloco,
+} from '@/lib/conteudo-modulos'
 import { ConteudoModulo } from '@/components/ConteudoModulo'
 import { RascunhoComSelecao } from './RascunhoComSelecao'
 import { TextareaComFormatacao } from './TextareaComFormatacao'
@@ -25,6 +32,7 @@ const TIPOS: { tipo: Bloco['tipo']; label: string }[] = [
   { tipo: 'callout', label: 'Callout' },
   { tipo: 'destaque', label: 'Destaque' },
   { tipo: 'imagem', label: 'Imagem' },
+  { tipo: 'embed', label: 'Quadro (Excalidraw)' },
   { tipo: 'citacao', label: 'Citação' },
   { tipo: 'divisor', label: 'Divisor' },
 ]
@@ -370,6 +378,9 @@ function CampoBloco({ bloco, onChange }: { bloco: Bloco; onChange: (b: Bloco) =>
     case 'imagem':
       return <CampoImagem bloco={bloco} onChange={onChange} />
 
+    case 'embed':
+      return <CampoEmbed bloco={bloco} onChange={onChange} />
+
     case 'divisor':
       return (
         <p className="text-sm" style={{ color: '#4a6b62' }}>
@@ -522,6 +533,77 @@ function CampoImagem({
         className={campoTextoClasse}
         style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
       />
+    </div>
+  )
+}
+
+function CampoEmbed({
+  bloco,
+  onChange,
+}: {
+  bloco: Extract<Bloco, { tipo: 'embed' }>
+  onChange: (b: Bloco) => void
+}) {
+  // O admin cola o iframe inteiro do Excalidraw: extrair o src daqui evita
+  // pedir que ele edite HTML à mão só para achar a URL.
+  function aoColar(valor: string) {
+    const doIframe = valor.match(/src=["']([^"']+)["']/i)
+    onChange({ ...bloco, url: doIframe ? doIframe[1] : valor })
+  }
+
+  const urlValida = bloco.url ? normalizarUrlEmbed(bloco.url) : null
+
+  return (
+    <div className="flex flex-col gap-2">
+      <TextareaComFormatacao
+        value={bloco.url}
+        onChange={aoColar}
+        placeholder='Cole a URL ou o <iframe src="https://link.excalidraw.com/readonly/…">'
+        rows={2}
+        className={campoTextoClasse}
+        style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
+      />
+
+      {bloco.url && !urlValida && (
+        <p className="text-xs" style={{ color: '#C05050' }}>
+          URL não aceita. Só https de: {HOSTS_EMBED.join(', ')}.
+        </p>
+      )}
+
+      <div className="flex items-center gap-2">
+        <label className="text-xs" style={{ color: '#4a6b62' }}>
+          Altura (px)
+        </label>
+        <input
+          type="number"
+          min={240}
+          max={1200}
+          value={bloco.altura ?? ALTURA_EMBED_PADRAO}
+          onChange={(e) => onChange({ ...bloco, altura: Number(e.target.value) })}
+          className="w-24 rounded-lg px-2 py-1.5 text-sm"
+          style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
+        />
+      </div>
+
+      <input
+        value={bloco.legenda ?? ''}
+        onChange={(e) => onChange({ ...bloco, legenda: e.target.value })}
+        placeholder="Legenda (opcional)"
+        className={campoTextoClasse}
+        style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
+      />
+
+      {urlValida && (
+        <iframe
+          src={urlValida}
+          title="Pré-visualização do quadro"
+          loading="lazy"
+          sandbox="allow-scripts allow-same-origin allow-popups"
+          referrerPolicy="no-referrer"
+          className="w-full rounded-lg"
+          style={{ height: 240, border: '1px solid #c8d8d2' }}
+        />
+      )}
     </div>
   )
 }

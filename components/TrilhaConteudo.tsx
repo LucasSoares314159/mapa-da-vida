@@ -5,12 +5,10 @@ import Link from 'next/link'
 import { ChevronUp, ChevronDown, Check } from 'lucide-react'
 import { marcarAula } from '@/app/actions/progresso'
 import { LIVES } from '@/lib/lives'
-import { MODULOS } from '@/lib/modulos'
+import { duracaoTotalTrilha, MODULOS } from '@/lib/modulos'
 
 const TOTAL_AULAS = MODULOS.length
-
-// Soma total: 5:00+12:30+19:17+30:00+10:37+15:01+30:00+1:30:00+15:00 = 3h47min
-const DURACAO_TOTAL = '3 h 47 min'
+const DURACAO_TOTAL = duracaoTotalTrilha()
 
 type Props = {
   nomeUsuario: string

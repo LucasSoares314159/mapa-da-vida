@@ -2,7 +2,8 @@ import { createAdminSupabaseClient } from './supabase-admin'
 
 // Blocos do conteúdo escrito de um módulo. Cobre o que existia no material
 // migrado do Notion: parágrafo, título, listas, checklist, callout, trecho em
-// destaque, imagem, divisor e citação com fonte.
+// destaque, imagem, divisor e citação com fonte — mais o embed de quadro
+// interativo (Excalidraw), que o material do Notion não tinha.
 export type Bloco =
   | { tipo: 'paragrafo'; texto: string }
   | { tipo: 'titulo'; nivel: 2 | 3; texto: string }
@@ -13,6 +14,32 @@ export type Bloco =
   | { tipo: 'imagem'; url: string; legenda?: string }
   | { tipo: 'divisor' }
   | { tipo: 'citacao'; texto: string; fonte?: string }
+  | { tipo: 'embed'; url: string; altura?: number; legenda?: string }
+
+/**
+ * Domínios aceitos no bloco de embed. O bloco monta um iframe, então uma URL
+ * arbitrária seria execução de terceiro dentro da aula: a allowlist é o que
+ * mantém o editor do admin incapaz de injetar origem desconhecida, mesmo por
+ * engano ao colar. Para liberar outro serviço, adicione o host aqui.
+ */
+export const HOSTS_EMBED = ['link.excalidraw.com', 'excalidraw.com'] as const
+
+export const ALTURA_EMBED_PADRAO = 480
+
+/** URL https de host da allowlist. Devolve null (não lança) para o editor exibir erro. */
+export function normalizarUrlEmbed(url: string): string | null {
+  let parsed: URL
+  try {
+    parsed = new URL(url.trim())
+  } catch {
+    return null
+  }
+
+  if (parsed.protocol !== 'https:') return null
+  if (!HOSTS_EMBED.includes(parsed.hostname as (typeof HOSTS_EMBED)[number])) return null
+
+  return parsed.toString()
+}
 
 export function blocoVazio(tipo: Bloco['tipo']): Bloco {
   return blocoComTexto(tipo, '')
@@ -39,6 +66,8 @@ export function blocoComTexto(tipo: Bloco['tipo'], texto: string): Bloco {
       return { tipo }
     case 'citacao':
       return { tipo, texto, fonte: '' }
+    case 'embed':
+      return { tipo, url: '', altura: ALTURA_EMBED_PADRAO, legenda: texto }
   }
 }
 
