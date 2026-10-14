@@ -125,7 +125,10 @@
   /* HERO */
   .hero {
     position: relative;
-    background: var(--verde-escuro);
+    background: var(--off-white);
+    /* A seção seguinte também é off-white: sem a borda os dois blocos fundem
+       e o hero perde o limite inferior. */
+    border-bottom: 1px solid var(--borda);
     min-height: 680px;
     display: flex;
     align-items: center;
@@ -164,6 +167,14 @@
     border: 1px solid rgba(87, 170, 143, 0.3);
   }
 
+  /* O hero ficou claro: o fundo translúcido da .tag foi desenhado para brilhar
+     sobre o verde escuro e some sobre off-white. Escopado para não mexer nas
+     outras seções, que seguem em fundo escuro. */
+  .hero .tag {
+    background: var(--verde-sup);
+    border-color: rgba(87, 170, 143, 0.45);
+  }
+
   .tag-dot {
     width: 6px;
     height: 6px;
@@ -173,10 +184,10 @@
   }
 
   .hero h1.hero-headline {
-    font-size: 48px;
+    font-size: 46px;
     font-weight: 500;
     line-height: 1.15;
-    color: var(--off-white);
+    color: var(--verde-escuro);
     margin: 0 auto 12px;
   }
 
@@ -188,7 +199,7 @@
   .hero-sub {
     font-size: 19px;
     font-weight: 400;
-    color: #a8c4bc;
+    color: var(--texto-sec);
     margin: 24px auto 0;
     line-height: 1.75;
     max-width: 420px;
@@ -1076,6 +1087,14 @@
     max-width: 680px;
   }
 
+  /* Mesmo tratamento de .cta-suporte a — sem isto o link da resposta cairia no
+     azul padrão do browser, que não existe em nenhum outro ponto da página. */
+  .faq-resposta a {
+    color: var(--verde);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
   .faq-item.open .faq-resposta { display: block; }
 
   /* BLOCO DE OBJEÇÃO (mini-seção pergunta → resposta) */
@@ -1281,7 +1300,7 @@
     .hero { min-height: 560px; }
     .hero-container { padding: 70px 20px 80px; }
     .hero-texto { max-width: 100%; }
-    .hero h1.hero-headline { font-size: 32px; }
+    .hero h1.hero-headline { font-size: 31px; }
 
     /* Tipografia */
     h2 { font-size: 28px; }
@@ -1548,12 +1567,15 @@
   /* HERO — sem foto: título ganha largura maior para não quebrar em linhas curtas */
   .hero-texto { max-width: 900px; }
   .hero-texto .hero-headline { max-width: 100%; }
-  .hero-texto .hero-sub { max-width: 620px; margin-left: auto; margin-right: auto; }
+  /* 206 caracteres: em 620px o texto quebrava em 4 linhas. 760px rende ~70 por
+     linha, que fecha em 3 com folga para variação de render da fonte. */
+  .hero-texto .hero-sub { max-width: 760px; margin-left: auto; margin-right: auto; }
 
-  /* Legenda e linha de apoio sobre o fundo escuro do hero precisam de contraste */
+  /* O hero agora é claro; estas duas classes não estão no markup hoje, mas se
+     voltarem precisam do texto secundário da paleta, não do cinza-claro antigo. */
   .hero .legenda,
   .hero .cta-apoio {
-    color: #a8c4bc;
+    color: var(--texto-sec);
     max-width: 100%;
     text-align: center;
   }
@@ -1778,49 +1800,23 @@
 <body>
 
 <!-- 1 · HEADER -->
-<nav>
-  <div class="nav-logo">
-    <a href="#" class="nav-logo-link">
-      <img src="logo-mindtrail.png" alt="MindTrail">
-    </a>
-  </div>
-  <div class="nav-links">
-    <a href="#comunidade">Comunidade</a>
-    <span class="nav-sep">+</span>
-    <a href="#plataforma">Plataforma</a>
-    <span class="nav-sep">+</span>
-    <a href="#aulas">Aulas</a>
-    <span class="nav-sep">+</span>
-    <a href="#comprar">Frameworks</a>
-    <a href="#comprar" class="btn-nav">ENTRAR NA TRILHA</a>
-  </div>
-  <button class="nav-hamburger" onclick="toggleMenu(this)" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
-</nav>
-<div class="nav-mobile-menu" id="nav-mobile-menu">
-  <a href="#plataforma" onclick="closeMenu()">Plataforma</a>
-  <a href="#comprar" onclick="closeMenu()">Frameworks</a>
-  <a href="#aulas" onclick="closeMenu()">Aulas</a>
-  <a href="#comunidade" onclick="closeMenu()">Comunidade</a>
-  <a href="#comprar" class="btn-nav" onclick="closeMenu()">entrar na trilha</a>
-</div>
+<!-- Header removido: o hero abre a página. -->
 
 <!-- 2 · HERO -->
 <section class="hero">
   <div class="hero-container">
     <div class="hero-texto">
-      <span class="tag">Plataforma de Organização · Aulas · Comunidade</span>
+      <span class="tag">Plataforma de Organização · Aulas · Frameworks</span>
 
-      <h1 class="hero-headline hero-headline-abaixo">Descubra exatamente qual é o seu <em>próximo passo</em> para se tornar <em>consistente</em> nos seus objetivos pessoais.</h1>
+      <h1 class="hero-headline hero-headline-abaixo">Pare de <em>procrastinar</em> e seja <em>consistente</em> nos seus objetivos pessoais usando <em>sistemas</em>.</h1>
       <p class="hero-sub">Em 2 horas, você ganha clareza sobre o seu momento de vida, define objetivos coerentes com ele e desenha os sistemas que sustentam seu plano nas semanas caóticas, com uma plataforma que guia todo o processo</p>
-      <a href="#comprar" class="btn-cta" onclick="smoothScroll(event)">ENTRAR NA TRILHA — R$397</a>
+      <a href="#comprar" class="btn-cta" onclick="smoothScroll(event)">QUERO PARAR DE PROCRASTINAR - <B>R$ 397</B></a>
     </div>
   </div>
 </section>
 
 <!-- 3 · O RETRATO -->
-<section class="sec-clara">
+<section class="sec-branca">
   <div class="container-texto container-leitura">
     <div class="retrato-linhas">
       <p class="retrato-linha">Segunda-feira você monta o plano da semana.</p>
@@ -2124,24 +2120,24 @@
     <div class="sec-features-carousel">
       <div class="sec-features-track" id="features-track">
         <div class="sec-feature">
-          <div class="sec-feature-icon">◈</div>
-          <h4>Comunidade</h4>
-          <p>esteja com pessoas incríveis na mesma jornada</p>
+          <div class="sec-feature-icon">▶</div>
+          <h4>Jornada guiada</h4>
+          <p>em cerca de 2 horas, a plataforma te leva do diagnóstico ao plano pronto</p>
         </div>
         <div class="sec-feature">
-          <div class="sec-feature-icon">▶</div>
-          <h4>Plataforma</h4>
-          <p>siga a trilha e tenha uma plataforma que te ajuda em todas as etapas</p>
+          <div class="sec-feature-icon">◈</div>
+          <h4>Ferramentas por 12 meses</h4>
+          <p>mapa da vida, calculadora de rotina e definidor de objetivos para usar o ano inteiro</p>
         </div>
         <div class="sec-feature">
           <div class="sec-feature-icon">✦</div>
-          <h4>Desafios</h4>
-          <p>participe de desafios que te ajudam a aplicar o que aprendeu</p>
+          <h4>Frameworks</h4>
+          <p>os modelos para montar seu sistema e ajustar quando a vida mudar</p>
         </div>
         <div class="sec-feature">
           <div class="sec-feature-icon">◉</div>
-          <h4>Sessões ao Vivo</h4>
-          <p>Sessões ao vivo com a comunidade por 4 semanas (pegue a turma que se encaixar na sua rotina)</p>
+          <h4>Grupo no WhatsApp</h4>
+          <p>grupo com outros participantes para compartilhar experiências e dúvidas</p>
         </div>
       </div>
 
@@ -2150,20 +2146,6 @@
         <button class="sec-features-btn" id="features-next" onclick="scrollFeatures(1)" aria-label="Próximo">›</button>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- 10 · PERSEVERANÇA COLETIVA -->
-<section id="comunidade" class="sec-branca sec-respiro">
-  <div class="container-texto container-leitura perseveranca">
-    <h2>Tenha pessoas incríveis na mesma jornada 🫂</h2>
-
-    <div class="corpo-sec">
-      <p>O ChatGPT não entende que você ficou gripado e não conseguiu treinar. O Notion não sabia que a sua semana desandou.</p>
-      <p>Ter pessoas na mesma jornada é um reforço positivo — para os dias em que não houver motivação e sobrar culpa.</p>
-    </div>
-
-    <p class="fecho-destaque">A vida é mais leve quando compartilhamos a jornada.</p>
   </div>
 </section>
 
@@ -2274,7 +2256,6 @@
         <li><span class="check-icon">✓</span> aulas gravadas</li>
         <li><span class="check-icon">✓</span> plataforma própria de gestão de organização pessoal</li>
         <li><span class="check-icon">✓</span> frameworks próprios</li>
-        <li><span class="check-icon">✓</span> lives com especialistas</li>
         <li><span class="check-icon">✓</span> <strong class="preco-destaque-item">garantia de 7 dias</strong></li>
       </ul>
 
@@ -2306,34 +2287,10 @@
 
       <div class="faq-item">
         <div class="faq-pergunta" onclick="toggleFaq(this)">
-          qual o compromisso de tempo por semana?
+          quanto tempo leva?
           <span class="faq-seta">+</span>
         </div>
-        <div class="faq-resposta">em média 1 hora de estudo + 1 hora de prática por semana é o suficiente para mudar sua rotina e te tornar consistente nos seus objetivos.</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pergunta" onclick="toggleFaq(this)">
-          e se eu não tiver tempo de me dedicar?
-          <span class="faq-seta">+</span>
-        </div>
-        <div class="faq-resposta">o público da Trilha são pessoas extremamente ocupadas — por isso o primeiro desafio da jornada é criar um planejamento mínimo que te dê um respiro e abra espaço na agenda para continuar. founders, médicos e médicas, executivos e executivas, artistas e outras rotinas caóticas já passaram pela jornada e chegaram até o final.</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pergunta" onclick="toggleFaq(this)">
-          não vou conseguir acompanhar os encontros ao vivo. e aí?
-          <span class="faq-seta">+</span>
-        </div>
-        <div class="faq-resposta">fica gravado, e você não perde nada: a turma é um evento da comunidade, não um prazo. se essa não der, você pega a próxima.</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pergunta" onclick="toggleFaq(this)">
-          vou ter que esperar a turma começar?
-          <span class="faq-seta">+</span>
-        </div>
-        <div class="faq-resposta">não. você entra e já faz o Mapa da Vida, as aulas e um desafio no mesmo dia. a turma ao vivo é o próximo passo, não a porta de entrada.</div>
+        <div class="faq-resposta">Cerca de 2 horas para fazer a Trilha. Depois, você usa o seu sistema no seu ritmo.</div>
       </div>
 
       <div class="faq-item">
@@ -2341,39 +2298,7 @@
           já tentei de tudo e parei. por que aqui seria diferente?
           <span class="faq-seta">+</span>
         </div>
-        <div class="faq-resposta">porque você tentou o sistema dos outros. aqui você monta o seu, a partir da sua semana real, e aprende a voltar pra ele quando cair. e não faz isso sozinho(a).</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pergunta" onclick="toggleFaq(this)">
-          como funciona a comunidade e os desafios?
-          <span class="faq-seta">+</span>
-        </div>
-        <div class="faq-resposta">você tem contato direto com os alunos da sua turma e, assim que acabar o programa de 4 semanas, se junta à turma de alumnis. Essa comunicação é via WhatsApp, e vocês também vão se conhecer nas aulas ao vivo. Os desafios são por temas: alimentação, exercício físico, estudos, consistência. Não é orientação profissional, mas facilitação social — você compartilha diariamente de acordo com a meta estabelecida para aquele tema, com pessoas que estão em uma jornada parecida. Utilizamos ferramentas de ciência comportamental, como a persistência coletiva e a curva de automaticidade, para te ajudar nos desafios e na construção de novos hábitos.</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pergunta" onclick="toggleFaq(this)">
-          as aulas são todas ao vivo? como funcionam os módulos?
-          <span class="faq-seta">+</span>
-        </div>
-        <div class="faq-resposta">são 8 módulos, sendo 3 com aulas ao vivo durante as 4 semanas — o restante do conteúdo é escrito e gravado, alguns transformados em podcasts para facilitar a sua vida. Todas as aulas ficam gravadas, mas é fundamental que haja um esforço para estar presente.<br><br>os 8 módulos são:<br>1. Mínima Organização Viável (MOV)<br>2. Definindo seu Momento de Vida<br>3. Mapa da Vida<br>4. Rotina vs Projetos<br>5. Definindo Objetivos<br>6. Sistema de Objetivos<br>7. Sistema de Organização Pessoal<br>8. O Segredo da Consistência</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pergunta" onclick="toggleFaq(this)">
-          quando começa a próxima turma?
-          <span class="faq-seta">+</span>
-        </div>
-        <div class="faq-resposta">não tem data fixa, e é de propósito. você não espera turma para começar: entra hoje e já faz o Mapa da Vida, as aulas e um desafio. as turmas ao vivo são combinadas dentro da comunidade, com quem já está lá — data e horário saem de votação, para encaixar no ritmo de todo mundo.</div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pergunta" onclick="toggleFaq(this)">
-          em que dia e horário vão ser as aulas ao vivo?
-          <span class="faq-seta">+</span>
-        </div>
-        <div class="faq-resposta">a turma vota. os períodos são manhã, hora do almoço e noite — se a votação ficar dividida entre dois, abrimos os dois horários. a data segue a mesma lógica: quem está dentro combina junto.</div>
+        <div class="faq-resposta">Antes você tentou cumprir objetivos que não cabiam na sua vida, com o sistema de outra pessoa. Aqui você corrige os dois: define objetivos coerentes com o seu momento de vida e monta um sistema seu para sustentar esses objetivos.</div>
       </div>
 
       <div class="faq-item">
@@ -2381,15 +2306,23 @@
           o que é a plataforma da Trilha?
           <span class="faq-seta">+</span>
         </div>
-        <div class="faq-resposta">não somos uma plataforma que serve como repositório de conteúdo, como o Circle — a plataforma da Trilha é 100% desenvolvida para esse programa. Você tem um software completo para aplicar a trilha e fica com ele por 12 meses.</div>
+        <div class="faq-resposta">Não é um repositório de conteúdo. A plataforma foi desenvolvida para guiar a Trilha: você tem o Mapa da Vida, a Calculadora de Rotina e o Definidor de Objetivos para montar o seu plano e usar ao longo do ano.</div>
       </div>
 
       <div class="faq-item">
         <div class="faq-pergunta" onclick="toggleFaq(this)">
-          mapa da vida, calculadora de rotina? o que é isso?
+          e se eu travar no meio?
           <span class="faq-seta">+</span>
         </div>
-        <div class="faq-resposta">nós criamos uma plataforma para tangibilizar o método: imagine que, além do conteúdo, você vai ter o seu próprio software de gestão de objetivos; uma ferramenta para criar um mapa da sua vida e conectar com sua rotina; e uma ferramenta para analisar seus objetivos definidos e te dizer se fazem sentido com o seu momento de vida — entre outras. Você não está entrando em uma plataforma com um monte de conteúdo solto e sem conexão: você vai ter o seu próprio software de gestão da sua rotina, dos seus objetivos e do seu planejamento.</div>
+        <div class="faq-resposta">Você tem o grupo no WhatsApp para tirar dúvidas comigo por 12 meses.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pergunta" onclick="toggleFaq(this)">
+          por quanto tempo tenho acesso?
+          <span class="faq-seta">+</span>
+        </div>
+        <div class="faq-resposta">12 meses de plataforma e de grupo no WhatsApp.</div>
       </div>
 
       <div class="faq-item">
@@ -2397,7 +2330,15 @@
           como funciona a garantia?
           <span class="faq-seta">+</span>
         </div>
-        <div class="faq-resposta">entre, faça o Mapa da Vida e assista às duas primeiras aulas. se depois disso achar que não é pra você, me manda mensagem em até 7 dias e devolvo o valor integral. sem formulário.</div>
+        <div class="faq-resposta">Faça o Mapa da Vida e comece a Trilha. Se em até 7 dias achar que não é para você, me manda uma mensagem e eu devolvo o valor integral. Sem formulário.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pergunta" onclick="toggleFaq(this)">
+          e se eu quiser um acompanhamento individual?
+          <span class="faq-seta">+</span>
+        </div>
+        <div class="faq-resposta">Tenho uma mentoria 1:1. A gente passa pela jornada juntos, eu desenho seus sistemas e te acompanho por 30 dias. Se te interessar, <a href="https://wa.me/5561982425139?text=Oi%20Lucas%2C%20vim%20da%20p%C3%A1gina%20da%20Trilha%20e%20quero%20saber%20da%20mentoria%201%3A1" target="_blank" rel="noopener noreferrer" onclick="gtag('event', 'click_whatsapp_mentoria', { location: 'faq' });">me chama no WhatsApp →</a></div>
       </div>
 
     </div>
@@ -2410,7 +2351,7 @@
   <form action="/api/stripe/checkout" method="post" class="checkout-form">
     <button type="submit" class="btn-cta" data-cta-local="final-pagina" onclick="gtag('event', 'click_checkout', { local_botao: 'final-pagina' });">ENTRAR NA TRILHA — R$397</button>
   </form>
-  <p class="cta-suporte">tem dúvida antes de decidir? <a href="https://wa.me/5561982425139" target="_blank" rel="noopener noreferrer" onclick="gtag('event', 'click_whatsapp_duvida');">me manda uma mensagem.</a></p>
+  <p class="cta-suporte">tem dúvida antes de decidir? <a href="https://wa.me/5561982425139" target="_blank" rel="noopener noreferrer" onclick="gtag('event', 'click_whatsapp_duvida', { location: 'fechamento' });">me manda uma mensagem.</a></p>
 </section>
 
 <!-- 16 · RODAPÉ -->
@@ -2432,16 +2373,6 @@ function smoothScroll(event) {
   if (element) {
     element.scrollIntoView({ behavior: 'smooth' });
   }
-}
-
-function toggleMenu(btn) {
-  btn.classList.toggle('open');
-  document.getElementById('nav-mobile-menu').classList.toggle('open');
-}
-
-function closeMenu() {
-  document.querySelector('.nav-hamburger').classList.remove('open');
-  document.getElementById('nav-mobile-menu').classList.remove('open');
 }
 
 function showTrilha(id, btn) {
