@@ -1583,14 +1583,168 @@
     margin-top: 40px;
   }
 
-  /* Pergunta final: usa o bloco de destaque com barra lateral (.fecho-destaque,
-     23px — menor que o h2 de 36px por construção). Aqui só o respiro extra e o
-     balance; cor/tamanho/barra vêm da classe compartilhada. */
-  .tentativas-pergunta {
-    margin-top: 40px;
-    margin-bottom: 0;
+  /* Pergunta-chave: componente de citação próprio, não uma variação do
+     .fecho-destaque (que é fecho de parágrafo, não clímax de seção). O peso vem
+     de três coisas, não de uma caixa: muito ar isolando o bloco do fluxo, a
+     escala (Lora itálico 30px — abaixo do h2 de 36px) e a aspa tipográfica que
+     o marca como citação. Centrado em coluna estreita = epígrafe, não corpo. */
+  .pergunta-chave {
+    position: relative;
+    max-width: 16em;
+    margin: 72px auto;
+    padding-top: 36px;
+    text-align: center;
+  }
+  /* Aspa de abertura grande atrás da pergunta — o sinal universal de citação.
+     Verde da marca, decorativa (aria-hidden não é preciso em ::before, que o
+     leitor de tela ignora). */
+  .pergunta-chave::before {
+    content: '\201C';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 80px;
+    line-height: 1;
+    color: var(--verde);
+  }
+  .pergunta-chave p {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 1.35;
+    color: var(--verde-escuro);
+    margin: 0;
     text-wrap: balance;
   }
+
+  /* === OS TRÊS PILARES (seção 5b) === */
+  .pilares-cabecalho { text-align: center; max-width: 720px; margin: 0 auto; }
+  /* Eyebrow em --verde-escuro aqui: o .sec-label global é --verde, que sobre o
+     branco desta seção dá 2.78:1 e reprova o AA (é texto). Escopado, sem mexer
+     no eyebrow das outras seções, que ficam sobre fundos escuros. */
+  .pilares-cabecalho .sec-label { color: var(--verde-escuro); }
+  .pilares-titulo { margin-bottom: 16px; }
+  /* Trecho em itálico com sublinhado desenhado (traço levemente irregular) na
+     cor de acento. Lora itálico — a serifada do projeto, como na referência. */
+  .pilares-titulo-grifo {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--verde-escuro);
+    position: relative;
+    white-space: nowrap;
+  }
+  .pilares-titulo-grifo::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 6px;
+    background: var(--verde);
+    /* traço irregular, não uma reta: curva sutil com clip-path em zigue-zague leve */
+    clip-path: polygon(0 55%, 8% 40%, 22% 60%, 38% 42%, 55% 62%, 72% 44%, 88% 60%, 100% 48%, 100% 100%, 0 100%);
+    opacity: 0.85;
+  }
+  .pilares-sub {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--verde-escuro);
+    max-width: 30em;
+    margin: 0 auto;
+  }
+
+  .pilares-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    align-items: center;
+    gap: 0;
+    margin: 56px 0 44px;
+  }
+
+  /* Card branco com sombra, sem contorno — o padrão .sec-feature. Sobre a seção
+     off-white, o branco salta por luminância; a sombra dá profundidade. */
+  .pilar-card {
+    background: #fff;
+    border: none;
+    border-radius: 16px;
+    padding: 36px 28px;
+    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  /* Ícone num quadrado arredondado: fundo --off-white (sutil sobre o card
+     branco), sem borda — separa por tom, não por contorno. */
+  .pilar-icone {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    background: var(--off-white);
+    border: none;
+    border-radius: 14px;
+    margin-bottom: 20px;
+  }
+  .pilar-card h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--verde-escuro);
+    margin-bottom: 12px;
+  }
+  .pilar-card p {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--verde-escuro);
+    max-width: 22em;
+  }
+
+  /* Conector entre cards: setas em ciclo + duas linhas de texto (2ª negrito). */
+  .pilar-conector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+  }
+  /* Setas em --verde-escuro (não o cinza --texto-sec): mais presença, compõem
+     como elemento visual do ciclo. Retas bidirecionais — ida em cima, volta
+     embaixo — em vez de curvas, que ficavam desalinhadas. */
+  .pilar-setas {
+    width: 58px;
+    height: 40px;
+    color: var(--verde-escuro);
+  }
+  .pilar-conector-texto {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--verde-escuro);
+    text-align: center;
+  }
+  .pilar-conector-texto strong { font-weight: 600; }
+
+  /* Linha final: texto atenuado por tamanho/peso, cor escura (--texto-sec
+     reprovaria 4.5:1 sobre branco). */
+  .pilares-rodape {
+    text-align: center;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--verde-escuro);
+    max-width: 30em;
+    margin: 0 auto;
+  }
+
+  /* === fim OS TRÊS PILARES === */
 
   /* --- 4 e 7. Grid de 3 cards (reusa a linguagem de .dor-card) --- */
   .cards-3 {
@@ -1715,6 +1869,12 @@
     .cards-3 { grid-template-columns: 1fr; }
     .trilha-itens { grid-template-columns: 1fr; }
     .sec-respiro { padding: 90px 40px; }
+    /* Pilares empilham numa coluna; conectores entre eles na vertical, com as
+       setas giradas 90° (ciclo vira cima/baixo) e o texto mantido. */
+    .pilares-grid { grid-template-columns: 1fr; gap: 0; }
+    .pilar-conector { flex-direction: row; gap: 12px; padding: 16px 0; }
+    .pilar-setas { transform: rotate(90deg); width: 48px; height: 36px; }
+    .pilar-conector-texto { text-align: left; }
   }
 
   @media (max-width: 600px) {
@@ -1722,6 +1882,9 @@
     .retrato-fecho { font-size: 23px; }
     .fecho-destaque { font-size: 20px; }
     .perseveranca h2 { font-size: 30px; }
+    .pergunta-chave { margin: 52px auto; }
+    .pergunta-chave p { font-size: 24px; }
+    .pergunta-chave::before { font-size: 64px; }
   }
 
 
@@ -2065,7 +2228,65 @@
 
     <p class="tentativas-transicao">Acontece que procrastinar é sintoma. E começa antes do plano, numa pergunta que quase ninguém faz:</p>
 
-    <p class="tentativas-pergunta fecho-destaque">Os objetivos que eu tenho são coerentes com o meu momento de vida?</p>
+    <blockquote class="pergunta-chave">
+      <p>Os objetivos que eu tenho são coerentes com o meu momento de vida?</p>
+    </blockquote>
+  </div>
+</section>
+
+<!-- 5b · OS TRÊS PILARES -->
+<section class="sec-clara">
+  <div class="container">
+    <div class="pilares-cabecalho">
+      <p class="sec-label">Os três pilares</p>
+      <h2 class="pilares-titulo">
+        Todos os métodos te ensinam a correr<br>
+        <em class="pilares-titulo-grifo">para o lado errado.</em>
+      </h2>
+      <p class="pilares-sub">Nenhum te ensina a voltar quando a semana te atropela.</p>
+    </div>
+
+    <div class="pilares-grid">
+      <div class="pilar-card">
+        <span class="pilar-icone" aria-hidden="true">🧭</span>
+        <h3>Direção</h3>
+        <p>Mapa da Vida, Momento de Vida e Definidor de Objetivos Coerentes: você para de perseguir objetivos que não cabem na sua vida de hoje.</p>
+      </div>
+
+      <div class="pilar-conector">
+        <svg class="pilar-setas" viewBox="0 0 64 44" fill="none" aria-hidden="true">
+          <line x1="6" y1="15" x2="55" y2="15" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M49 9 L57 15 L49 21" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="58" y1="29" x2="9" y2="29" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M15 23 L7 29 L15 35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="pilar-conector-texto">pra onde,<br><strong>antes de como</strong></span>
+      </div>
+
+      <div class="pilar-card">
+        <span class="pilar-icone" aria-hidden="true">🧩</span>
+        <h3>Sistemas</h3>
+        <p>Mínima Organização Viável, Sistema de Organização Pessoal e Sistemas de Objetivos: a estrutura que segura o plano, do tamanho da sua rotina real.</p>
+      </div>
+
+      <div class="pilar-conector">
+        <svg class="pilar-setas" viewBox="0 0 64 44" fill="none" aria-hidden="true">
+          <line x1="6" y1="15" x2="55" y2="15" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M49 9 L57 15 L49 21" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="58" y1="29" x2="9" y2="29" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M15 23 L7 29 L15 35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="pilar-conector-texto">voltar,<br><strong>não recomeçar</strong></span>
+      </div>
+
+      <div class="pilar-card">
+        <span class="pilar-icone" aria-hidden="true">🔁</span>
+        <h3>Consistência</h3>
+        <p>Monitor de Hábitos, Lembretes de Rotina e Calendários: quando a semana te atropelar, você sabe exatamente por onde voltar.</p>
+      </div>
+    </div>
+
+    <p class="pilares-rodape">Os três pilares ficam prontos em 2 horas, dentro da plataforma.</p>
   </div>
 </section>
 
