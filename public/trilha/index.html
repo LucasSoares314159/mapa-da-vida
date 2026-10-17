@@ -183,12 +183,22 @@
     background: var(--verde);
   }
 
+  /* Hero de vendas: H1 grande e largo domina o espaço (presença), e o subtítulo
+     recua numa coluna mais estreita abaixo. É o subtítulo que recua, não o
+     título. Antes o H1 estava travado em 620px — ficava pequeno e espremido num
+     monitor largo, com ar morto nas laterais. clamp escala do mobile ao desktop. */
+  /* Largura calibrada pelo render real: a 58px, a linha mais longa ("Mantenha
+     seus objetivos de pé", 29 chars) precisa de ~1130px para o H1 fechar em 2
+     linhas. Em 820px quebrava em 3. min(94vw, …) evita estouro em telas menores
+     antes de o clamp reduzir a fonte. */
   .hero h1.hero-headline {
-    font-size: 46px;
+    font-size: clamp(32px, 5vw, 58px);
     font-weight: 500;
-    line-height: 1.15;
+    line-height: 1.12;
     color: var(--verde-escuro);
-    margin: 0 auto 12px;
+    max-width: min(94vw, 1150px);
+    margin: 0 auto 20px;
+    text-wrap: balance;
   }
 
   .hero h1.hero-headline em {
@@ -196,18 +206,35 @@
     color: var(--verde);
   }
 
+  /* --texto-sec (#6f8f87) sobre o off-white dá só ~3.4:1 e reprova no AA de
+     texto normal. --verde-escuro sobre o mesmo fundo dá ~10.8:1. */
+  /* Subtítulo recua numa coluna MAIS ESTREITA que o H1 (520 vs 820px): é o apoio
+     que recua, não o título — padrão de hero de vendas. A subordinação vem da
+     largura menor + tamanho (19 vs ~58) + peso (400 vs 500), com a cor mantida
+     escura (--texto-sec reprovaria o AA sobre o fundo claro). */
   .hero-sub {
     font-size: 19px;
     font-weight: 400;
-    color: var(--texto-sec);
-    margin: 24px auto 0;
-    line-height: 1.75;
-    max-width: 420px;
+    color: var(--verde-escuro);
+    margin: 20px auto 0;
+    line-height: 1.6;
+    max-width: 520px;
+    text-wrap: pretty;
   }
 
   .hero-sub strong {
     font-weight: 700;
     color: inherit;
+  }
+
+  /* Linha de preço: discreta pelo tamanho e peso, não pela cor — cinza claro
+     sobre branco reprovaria no AA. --verde-escuro dá ~10.8:1. */
+  .hero-preco {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--verde-escuro);
+    margin: 16px auto 0;
+    letter-spacing: 0.01em;
   }
 
   .btn-cta {
@@ -227,6 +254,33 @@
   }
 
   .btn-cta:hover { opacity: 0.9; }
+  .btn-cta:active { transform: translateY(1px); opacity: 0.85; }
+  /* Foco visível por teclado: o botão não tinha outline. Offset de 3px para
+     o contorno não encostar na borda arredondada. */
+  .btn-cta:focus-visible {
+    outline: 3px solid var(--verde-escuro);
+    outline-offset: 3px;
+  }
+
+  /* CTA do hero: garante 44px de alvo de toque (padding 18+18 + ~19px de linha
+     já passa, mas min-height trava o mínimo em qualquer render).
+     Fundo em --verde-escuro: o hero é claro, e o verde padrão (#57AA8F) com
+     texto branco dá 2.78:1 — reprova no AA. --verde-escuro dá 11:1 no texto e
+     9.8:1 contra a seção. Nas demais seções (fundo escuro) o botão segue verde. */
+  .btn-cta-hero {
+    min-height: 44px;
+    box-sizing: border-box;
+    background: var(--verde-escuro);
+  }
+  .btn-cta-hero:hover { opacity: 0.92; }
+  /* Botão escuro: o outline --verde-escuro encostaria nele e sumiria. O anel
+     branco (box-shadow) separa botão e outline; o outline escuro então fica
+     sobre o off-white da seção (9.8:1). Visível contra ambos os fundos. */
+  .btn-cta-hero:focus-visible {
+    outline: 3px solid var(--verde-escuro);
+    outline-offset: 5px;
+    box-shadow: 0 0 0 3px var(--off-white);
+  }
 
   .checkout-form { margin: 0; }
   .checkout-form .btn-cta { border: 0; }
@@ -1298,9 +1352,14 @@
 
     /* Hero */
     .hero { min-height: 560px; }
-    .hero-container { padding: 70px 20px 80px; }
+    .hero-container { padding: 56px 20px 64px; }
     .hero-texto { max-width: 100%; }
-    .hero h1.hero-headline { font-size: 31px; }
+    /* H1 e subtítulo não precisam mais de largura fixa no mobile: o clamp do H1
+       e as colunas (820/520px) já encolhem abaixo de 100% da tela. */
+    .hero h1.hero-headline { max-width: 100%; }
+    .hero-sub { max-width: 100%; }
+    /* Botão em largura total do container no mobile; natural no desktop. */
+    .btn-cta-hero { display: block; width: 100%; text-align: center; }
 
     /* Tipografia */
     h2 { font-size: 28px; }
@@ -1393,11 +1452,14 @@
 
   /* --- 3. O RETRATO: linhas soltas com respiro --- */
   .retrato-linhas { margin: 8px 0 46px; }
+  /* 58ch em Lora rende ~63 caracteres reais de texto (o glifo "0" do ch é mais
+     largo que a média), dentro da faixa de leitura pedida (60–65). Antes eram
+     21em (~42 chars), curto demais para a carta nova. */
   .retrato-linha {
     font-family: 'Lora', serif;
     font-size: 21px;
     line-height: 1.6;
-    max-width: 21em;
+    max-width: 58ch;
     margin-bottom: 30px;
     color: var(--preto);
   }
@@ -1410,6 +1472,124 @@
     color: var(--verde-escuro);
     border-left: 3px solid var(--verde);
     padding-left: 24px;
+  }
+
+  /* Última linha da carta — pensamento do leitor, em itálico. O <em> já
+     inclina; aqui só o respiro acima, que separa do loop. Sem barra lateral:
+     é continuação da carta, não um bloco de citação. */
+  .retrato-pensamento { margin-top: 44px; }
+
+  /* O loop vive dentro da carta (dobra "A semana"), não num grid de 2 colunas.
+     Centralizado, com respiro largo acima para separar do fim da carta —
+     o rótulo "Trabalho" fica a -28px do círculo, então o topo precisa de folga. */
+  .sec-branca .custo-loop { margin: 80px auto 40px; }
+
+
+  /* Destaques da carta: poucos, nas frases mais fortes. O texto fica escuro e
+     legível; o sinal é um sublinhado na cor da marca. Verde-escuro sobre preto
+     não se separava (borrado) e o verde como cor de texto reprova contraste —
+     como sublinhado, o verde dá o realce sem precisar atingir 4.5:1 de texto.
+     Lora só tem a variante itálica carregada, então não uso peso aqui. */
+  .retrato-linha strong {
+    font-weight: inherit;
+    font-style: inherit;
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--verde);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+
+  /* H2 da dobra "Você já tentou": 18px em vez dos 36px globais. A seção é uma
+     leitura corrida, não um marco visual — o título entra como abertura discreta. */
+  /* Eyebrow conversacional acima do h2. A página não usa .sec-label em nenhuma
+     seção (todas abrem direto no h2), então um eyebrow verde uppercase seria um
+     elemento novo. Aqui é texto secundário no tamanho de corpo, caixa normal —
+     continua a voz da carta logo acima e não inventa um padrão. */
+  /* --texto-sec não atinge 4.5:1 sobre o off-white (3.11), e isto é texto.
+     Atenuação vem da família (DM Sans de corpo, vs Space Grotesk do h2) e do
+     tamanho, com cor --preto que passa AA. */
+  .tentativas-eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--preto);
+    margin-bottom: 8px;
+  }
+
+  /* Lista das tentativas: ul/li sem marcador. Card com a borda sutil que a
+     página já usa (.trilha-box: 0.5px var(--borda)) — a borda --texto-sec
+     anterior pesava sobre o off-white. Separa pelo fundo branco + borda leve. */
+  .tentativas-lista {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 28px;
+  }
+  .tentativa-bloco {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background: #fff;
+    border: 0.5px solid var(--borda);
+    border-radius: 14px;
+    padding: 22px 24px;
+  }
+  /* Check no mesmo molde dos marcadores circulares verdes (.custo-item-numero):
+     fundo off-white, contorno verde da marca. Decorativo (aria-hidden no HTML). */
+  .tentativa-check {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--off-white);
+    border: 2px solid var(--verde);
+    color: var(--verde);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .tentativa-texto { display: block; }
+  /* 1ª linha (tentativa): peso médio de label da página — Space Grotesk 500,
+     --verde-escuro. 2ª linha (resultado): atenuada por família (DM Sans de
+     corpo), peso 400 e tamanho menor, não por cor clara — --texto-sec não
+     passaria 4.5:1 sobre o card. Diferença clara por cor + peso + família. */
+  .tentativa-acao {
+    display: block;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--verde-escuro);
+  }
+  .tentativa-resultado {
+    display: block;
+    margin-top: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--preto);
+  }
+
+  /* Transição: estilo de corpo da página, com respiro acima que separa dos cards. */
+  .tentativas-transicao {
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--preto);
+    margin-top: 40px;
+  }
+
+  /* Pergunta final: usa o bloco de destaque com barra lateral (.fecho-destaque,
+     23px — menor que o h2 de 36px por construção). Aqui só o respiro extra e o
+     balance; cor/tamanho/barra vêm da classe compartilhada. */
+  .tentativas-pergunta {
+    margin-top: 40px;
+    margin-bottom: 0;
+    text-wrap: balance;
   }
 
   /* --- 4 e 7. Grid de 3 cards (reusa a linguagem de .dor-card) --- */
@@ -1565,11 +1745,11 @@
 
 
   /* HERO — sem foto: título ganha largura maior para não quebrar em linhas curtas */
-  .hero-texto { max-width: 900px; }
+  .hero-texto { max-width: 1180px; }
   .hero-texto .hero-headline { max-width: 100%; }
-  /* 206 caracteres: em 620px o texto quebrava em 4 linhas. 760px rende ~70 por
-     linha, que fecha em 3 com folga para variação de render da fonte. */
-  .hero-texto .hero-sub { max-width: 760px; margin-left: auto; margin-right: auto; }
+  /* Subheadline limitada a ~62 caracteres por linha (faixa de leitura 60–65).
+     Em ch a medida acompanha a fonte sem número mágico em px. */
+  .hero-texto .hero-sub { max-width: 520px; margin-left: auto; margin-right: auto; }
 
   /* O hero agora é claro; estas duas classes não estão no markup hoje, mas se
      voltarem precisam do texto secundário da paleta, não do cinza-claro antigo. */
@@ -1709,10 +1889,12 @@
     white-space: nowrap;
     transform: translate(-50%, 0);
   }
-  .custo-loop-label[data-n="1"] { top: 46%; left: -6%; transform: translate(-100%, -50%); text-align: right; }
-  .custo-loop-label[data-n="2"] { top: -28px; left: 50%; }
-  .custo-loop-label[data-n="3"] { top: 46%; left: 106%; transform: translate(0, -50%); }
-  .custo-loop-label[data-n="4"] { top: 108%; left: 50%; }
+  /* Rótulos afastados do círculo para respirarem: laterais com folga horizontal,
+     topo e base com folga vertical. Antes colavam na borda (-6% / 106% / -28px / 108%). */
+  .custo-loop-label[data-n="1"] { top: 50%; left: -14%; transform: translate(-100%, -50%); text-align: right; }
+  .custo-loop-label[data-n="2"] { top: -40px; left: 50%; }
+  .custo-loop-label[data-n="3"] { top: 50%; left: 114%; transform: translate(0, -50%); }
+  .custo-loop-label[data-n="4"] { top: 116%; left: 50%; }
 
   .custo-loop-marcador {
     position: absolute;
@@ -1806,108 +1988,84 @@
 <section class="hero">
   <div class="hero-container">
     <div class="hero-texto">
-      <span class="tag">Plataforma de Organização · Aulas · Frameworks</span>
-
-      <h1 class="hero-headline hero-headline-abaixo">Pare de <em>procrastinar</em> e seja <em>consistente</em> nos seus objetivos pessoais usando <em>sistemas</em>.</h1>
-      <p class="hero-sub">Em 2 horas, você ganha clareza sobre o seu momento de vida, define objetivos coerentes com ele e desenha os sistemas que sustentam seu plano nas semanas caóticas, com uma plataforma que guia todo o processo</p>
-      <a href="#comprar" class="btn-cta" onclick="smoothScroll(event)">QUERO PARAR DE PROCRASTINAR - <B>R$ 397</B></a>
+      <h1 class="hero-headline">Mantenha seus objetivos de pé mesmo nas <em>semanas caóticas</em></h1>
+      <p class="hero-sub">Em 2 horas, a plataforma da Trilha te guia para definir objetivos que cabem na sua vida de hoje e montar os sistemas que seguram o plano.</p>
+      <a href="#comprar" class="btn-cta btn-cta-hero" onclick="smoothScroll(event)">QUERO MONTAR MEU PLANO</a>
+      <p class="hero-preco">R$ 397 · pagamento único · 12 meses de acesso</p>
     </div>
   </div>
 </section>
 
-<!-- 3 · O RETRATO -->
+<!-- 3 · A SEMANA (carta + loop) -->
 <section class="sec-branca">
-  <div class="container-texto container-leitura">
+  <div class="container-texto">
     <div class="retrato-linhas">
-      <p class="retrato-linha">Segunda-feira você monta o plano da semana.</p>
-      <p class="retrato-linha">Quarta você está apagando incêndio.</p>
-      <p class="retrato-linha">Sexta você não abriu o seu projeto pessoal, não foi na academia, comeu o que deu — e ainda terminou o dia às onze da noite respondendo mensagem.</p>
-      <p class="retrato-linha">Domingo você pensa: semana que vem vai ser diferente.</p>
+      <p class="retrato-linha">Segunda, você monta o plano. Academia três vezes. Comer melhor. Uma hora por dia pro seu projeto.</p>
+      <p class="retrato-linha">No meio da semana, o almoço é o que deu, na frente do computador. A academia fica pra amanhã.</p>
+      <p class="retrato-linha">À noite, cansado demais pra qualquer coisa, você abre o Instagram só pra desligar um pouco.</p>
+      <p class="retrato-linha">Quando olha a hora, é meia-noite. <strong>O polegar continua rolando.</strong></p>
+      <p class="retrato-linha">Domingo, chega a notificação do tempo de tela: média de 4 horas por dia.</p>
+      <p class="retrato-linha">Você faz as contas. Nenhum treino. Três pedidos de delivery. Nenhuma hora no projeto.</p>
+      <p class="retrato-linha">E chega à conclusão de sempre: preciso parar de <strong>procrastinar</strong>.</p>
     </div>
 
-    <p class="retrato-fecho">Essa é a realidade da maioria das pessoas que trabalham no corporativo.</p>
+    <div class="custo-loop" role="img" aria-label="Ciclo da semana: acorda, trabalho, Reels, dorme">
+      <div class="custo-loop-trilho"></div>
+      <div class="custo-loop-estacao" data-n="1"><span class="custo-loop-icone">☼</span></div>
+      <div class="custo-loop-estacao" data-n="2"><span class="custo-loop-icone">◆</span></div>
+      <div class="custo-loop-estacao" data-n="3"><span class="custo-loop-icone">✉</span></div>
+      <div class="custo-loop-estacao" data-n="4"><span class="custo-loop-icone">☾</span></div>
+      <div class="custo-loop-label" data-n="1">Acorda</div>
+      <div class="custo-loop-label" data-n="2">Trabalho</div>
+      <div class="custo-loop-label" data-n="3">Reels</div>
+      <div class="custo-loop-label" data-n="4">Dorme</div>
+      <div class="custo-loop-marcador"></div>
+      <div class="custo-loop-centro"><span>o loop da semana</span></div>
+    </div>
+
   </div>
 </section>
 
-<!-- 4 · O CUSTO -->
-<section class="sec-branca">
-  <div class="container">
-    <div class="custo-grid">
-      <div class="custo-loop">
-        <div class="custo-loop-trilho"></div>
-        <div class="custo-loop-estacao" data-n="1"><span class="custo-loop-icone">☼</span></div>
-        <div class="custo-loop-estacao" data-n="2"><span class="custo-loop-icone">◆</span></div>
-        <div class="custo-loop-estacao" data-n="3"><span class="custo-loop-icone">✉</span></div>
-        <div class="custo-loop-estacao" data-n="4"><span class="custo-loop-icone">☾</span></div>
-        <div class="custo-loop-label" data-n="1">acorda</div>
-        <div class="custo-loop-label" data-n="2">trabalho</div>
-        <div class="custo-loop-label" data-n="3">redes sociais</div>
-        <div class="custo-loop-label" data-n="4">dorme</div>
-        <div class="custo-loop-marcador"></div>
-        <div class="custo-loop-centro"><span>o loop da semana</span></div>
-      </div>
-
-      <div class="custo-texto">
-        <div class="custo-item">
-          <div class="custo-item-titulo">
-            <span class="custo-item-numero">1</span>
-            <h3>No dia a dia</h3>
-          </div>
-          <p>O trabalho ocupa o dia inteiro e transborda pra noite. O que é seu fica pro fim de uma fila que nunca acaba.</p>
-        </div>
-        <div class="custo-item">
-          <div class="custo-item-titulo">
-            <span class="custo-item-numero">2</span>
-            <h3>No Trabalho</h3>
-          </div>
-          <p>Você organiza a vida dos outros com competência e não consegue organizar a sua. E a culpa vem junto.</p>
-        </div>
-        <div class="custo-item">
-          <div class="custo-item-titulo">
-            <span class="custo-item-numero">3</span>
-            <h3>E isso está errado</h3>
-          </div>
-          <p><strong>Ninguém deveria precisar escolher entre ser bom no trabalho e ter uma vida fora dele.</strong></p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 5 · POR QUE NÃO PEGOU -->
+<!-- 5 · VOCÊ JÁ TENTOU -->
 <section class="sec-clara">
   <div class="container-texto container-leitura">
-    <h2>Você já tentou. Várias vezes</h2>
+    <p class="tentativas-eyebrow">Vamos ser sinceros.</p>
+    <h2>Você já tentou consertar.</h2>
 
-    <div class="trilhas-tabs">
-      <button class="trilha-tab active" onclick="showTrilha('cinco', this)">ACORDAR ÀS 5H</button>
-      <button class="trilha-tab" onclick="showTrilha('gtd', this)">GTD / NOTION</button>
-      <button class="trilha-tab" onclick="showTrilha('pomodoro', this)">CHATGPT / CLAUDE</button>
-    </div>
+    <ul class="tentativas-lista">
+      <li class="tentativa-bloco">
+        <span class="tentativa-check" aria-hidden="true">✓</span>
+        <span class="tentativa-texto">
+          <span class="tentativa-acao">Já tentou acordar às 5h.</span>
+          <span class="tentativa-resultado">Durou uma semana.</span>
+        </span>
+      </li>
+      <li class="tentativa-bloco">
+        <span class="tentativa-check" aria-hidden="true">✓</span>
+        <span class="tentativa-texto">
+          <span class="tentativa-acao">Já viu vídeo de neurocientista explicando dopamina.</span>
+          <span class="tentativa-resultado">Saiu motivado até segunda.</span>
+        </span>
+      </li>
+      <li class="tentativa-bloco">
+        <span class="tentativa-check" aria-hidden="true">✓</span>
+        <span class="tentativa-texto">
+          <span class="tentativa-acao">Já comprou curso de produtividade.</span>
+          <span class="tentativa-resultado">Parou no módulo 3.</span>
+        </span>
+      </li>
+      <li class="tentativa-bloco">
+        <span class="tentativa-check" aria-hidden="true">✓</span>
+        <span class="tentativa-texto">
+          <span class="tentativa-acao">Já pediu pra IA um plano perfeito, com planilha e tudo.</span>
+          <span class="tentativa-resultado">Nunca mais abriu.</span>
+        </span>
+      </li>
+    </ul>
 
-    <div id="trilha-cinco" class="trilha-content active">
-      <div class="trilha-box">
-        <p>Funciona pra quem dorme às 21h, não tem filho e não mora onde você mora. Você fecha o notebook às 23h.</p>
-      </div>
-    </div>
+    <p class="tentativas-transicao">Acontece que procrastinar é sintoma. E começa antes do plano, numa pergunta que quase ninguém faz:</p>
 
-    <div id="trilha-gtd" class="trilha-content">
-      <div class="trilha-box">
-        <p>Você montou o sistema num domingo com energia. Ele exigia uma manutenção diária que a sua terça-feira não tem.</p>
-      </div>
-    </div>
-
-    <div id="trilha-pomodoro" class="trilha-content">
-      <div class="trilha-box">
-        <p>Você já pediu um cronograma pronto, baixou toda skill de produtividade que achou, montou uma planilha incrível. Nenhuma delas sabia que a sua terça-feira ia virar de cabeça pra baixo.</p>
-      </div>
-    </div>
-
-    <div class="corpo-sec" style="margin-top: 36px;">
-      <p>Nenhum desses métodos falhou por sua causa. Todos assumiram uma vida que não é a sua.</p>
-    </div>
-
-    <p class="fecho-destaque">É por isso que você tem um cemitério de ferramentas.</p>
+    <p class="tentativas-pergunta fecho-destaque">Os objetivos que eu tenho são coerentes com o meu momento de vida?</p>
   </div>
 </section>
 
@@ -2373,13 +2531,6 @@ function smoothScroll(event) {
   if (element) {
     element.scrollIntoView({ behavior: 'smooth' });
   }
-}
-
-function showTrilha(id, btn) {
-  document.querySelectorAll('.trilha-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.trilha-tab').forEach(el => el.classList.remove('active'));
-  document.getElementById('trilha-' + id).classList.add('active');
-  btn.classList.add('active');
 }
 
 function toggleFaq(el) {
