@@ -995,6 +995,78 @@
   .depoimento-card.dark .depoimento-nome { color: var(--off-white); }
   .depoimento-card.dark .depoimento-citacao { color: #a8c4bc; }
 
+  /* Citação em destaque: depoimento avulso no corpo de uma seção, sem card —
+     a fala fica direto sobre o fundo. A aspa decorativa grande (--verde em
+     baixa opacidade) abre o bloco; o texto é a mesma serifada itálica dos
+     depoimentos, ~1,4× o corpo (24px ≈ 17px × 1,4), travado em 560px. O respiro
+     vertical é da ordem do espaçamento entre seções (72px) para dar o mesmo
+     peso de pausa. Centralizado — as duas seções onde entra são centralizadas,
+     então os dois ficam idênticos. */
+  .citacao-destaque {
+    max-width: 560px;
+    margin: 72px auto;
+    text-align: center;
+  }
+  .citacao-destaque::before {
+    content: "\201C";
+    display: block;
+    font-family: 'Lora', serif;
+    font-size: 80px;
+    line-height: 0.6;
+    color: var(--verde);
+    opacity: 0.28;
+    margin-bottom: 8px;
+  }
+  .citacao-destaque-texto {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 24px;
+    line-height: 1.5;
+    color: var(--verde-escuro);
+  }
+  /* Atribuição numa linha: avatar 32px + nome negrito + função muted.
+     flex-wrap para não estourar a largura a 360px — onde cabe (desktop) fica
+     numa linha; onde não cabe (nome + cargo longos no mobile) a função quebra
+     para a linha de baixo, centralizada, sem scroll horizontal. */
+  .citacao-destaque-autor {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px 10px;
+    margin-top: 24px;
+  }
+  .citacao-destaque-foto {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--verde-sup);
+    color: var(--verde);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+  }
+  .citacao-destaque-nome {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--verde-escuro);
+  }
+  .citacao-destaque-cargo {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--texto-sec);
+  }
+
+  /* Preserva as quebras de linha do depoimento do Jonathan sem <br>. */
+  .depoimento-citacao-multilinha { white-space: pre-line; }
+
   /* PREÇO */
   .preco-box {
     max-width: 600px;
@@ -1661,23 +1733,27 @@
   .pilares-grid {
     display: grid;
     grid-template-columns: 1fr auto 1fr auto 1fr;
-    align-items: center;
+    align-items: stretch;
     gap: 0;
     margin: 56px 0 44px;
   }
 
   /* Card branco com sombra, sem contorno — o padrão .sec-feature. Sobre a seção
-     off-white, o branco salta por luminância; a sombra dá profundidade. */
+     off-white, o branco salta por luminância; a sombra dá profundidade.
+     Conteúdo alinhado à esquerda agora (subtítulo + frase + chips pedem leitura
+     de texto corrido, não centralizada). A coluna flex com os chips no fim
+     (margin-top:auto) mantém os três chips alinhados na base mesmo com frases
+     de alturas diferentes. */
   .pilar-card {
     background: #fff;
     border: none;
     border-radius: 16px;
-    padding: 36px 28px;
-    text-align: center;
+    padding: 32px 28px;
+    text-align: left;
     height: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
   /* Ícone num quadrado arredondado: fundo --off-white (sutil sobre o card
@@ -1699,39 +1775,70 @@
     font-size: 20px;
     font-weight: 500;
     color: var(--verde-escuro);
-    margin-bottom: 12px;
+    margin-bottom: 4px;
   }
-  .pilar-card p {
+  /* Subtítulo curto: itálico, muted. --texto-sec reprova AA sobre branco? Não:
+     o card é branco (#fff), onde --texto-sec dá ~4.0:1 — ok para 16px itálico. */
+  .pilar-subtitulo {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 16px;
+    line-height: 1.4;
+    color: var(--texto-sec);
+    margin-bottom: 14px;
+  }
+  .pilar-frase {
     font-size: 15px;
     line-height: 1.65;
     color: var(--verde-escuro);
-    max-width: 22em;
+  }
+  /* Divisória fina antes do rótulo + chips. margin-top:auto empurra o bloco de
+     ferramentas para a base, igualando a linha dos chips entre os cards. */
+  .pilar-ferramentas {
+    margin-top: auto;
+    width: 100%;
+  }
+  .pilar-divisoria {
+    border: none;
+    border-top: 1px solid var(--borda);
+    margin: 24px 0 16px;
+  }
+  .pilar-rotulo {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--texto-sec);
+    margin-bottom: 12px;
+  }
+  .pilar-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pilar-chip {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    line-height: 1.3;
+    color: var(--verde-escuro);
+    background: var(--verde-sup);
+    border-radius: 999px;
+    padding: 5px 11px;
   }
 
-  /* Conector entre cards: setas em ciclo + duas linhas de texto (2ª negrito). */
-  .pilar-conector {
+  /* Conector de sequência entre cards: uma seta simples (→ no desktop, ↓ no
+     mobile via media query). Sem texto — os antigos rótulos entre cards foram
+     para dentro deles como subtítulo. */
+  .pilar-seta {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
     padding: 0 16px;
-  }
-  /* Setas em --verde-escuro (não o cinza --texto-sec): mais presença, compõem
-     como elemento visual do ciclo. Retas bidirecionais — ida em cima, volta
-     embaixo — em vez de curvas, que ficavam desalinhadas. */
-  .pilar-setas {
-    width: 58px;
-    height: 40px;
+    font-size: 24px;
     color: var(--verde-escuro);
   }
-  .pilar-conector-texto {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    line-height: 1.45;
-    color: var(--verde-escuro);
-    text-align: center;
-  }
-  .pilar-conector-texto strong { font-weight: 600; }
+  .pilar-seta::before { content: "\2192"; }
 
   /* Linha final: texto atenuado por tamanho/peso, cor escura (--texto-sec
      reprovaria 4.5:1 sobre branco). */
@@ -1869,12 +1976,11 @@
     .cards-3 { grid-template-columns: 1fr; }
     .trilha-itens { grid-template-columns: 1fr; }
     .sec-respiro { padding: 90px 40px; }
-    /* Pilares empilham numa coluna; conectores entre eles na vertical, com as
-       setas giradas 90° (ciclo vira cima/baixo) e o texto mantido. */
+    /* Pilares empilham numa coluna; o conector de sequência vira a seta pra
+       baixo (↓), centralizada entre os cards empilhados. */
     .pilares-grid { grid-template-columns: 1fr; gap: 0; }
-    .pilar-conector { flex-direction: row; gap: 12px; padding: 16px 0; }
-    .pilar-setas { transform: rotate(90deg); width: 48px; height: 36px; }
-    .pilar-conector-texto { text-align: left; }
+    .pilar-seta { padding: 12px 0; }
+    .pilar-seta::before { content: "\2193"; }
   }
 
   @media (max-width: 600px) {
@@ -1885,6 +1991,10 @@
     .pergunta-chave { margin: 52px auto; }
     .pergunta-chave p { font-size: 24px; }
     .pergunta-chave::before { font-size: 64px; }
+    /* Citação em destaque: reduz pra caber em ≤6 linhas a 360px. */
+    .citacao-destaque { margin: 56px auto; }
+    .citacao-destaque-texto { font-size: 20px; }
+    .citacao-destaque::before { font-size: 64px; }
   }
 
 
@@ -2091,6 +2201,26 @@
     color: var(--texto-sec);
   }
 
+  /* Bloco "dez anos": continuação da carta, logo após o loop. Reusa
+     .retrato-linha (mesmo tamanho e espaçamento da narrativa da semana) e o
+     destaque de .retrato-linha strong na primeira frase — o mesmo da linha
+     "O polegar continua rolando.".
+     O rótulo "Dorme" do loop fica em top:116% (≈348px no loop de 300px) e
+     transborda ~50px abaixo da caixa do loop — cuja margem inferior de 40px é
+     engolida por esse rótulo. Por isso a folga real até a primeira linha é
+     pequena: 120px separam "Dorme" da linha e dão respiro de continuação. */
+  .custo-dez-anos { margin-top: 120px; }
+  /* Linha de fontes: legenda pequena no padrão de .custo-loop-centro (DM Sans,
+     --texto-sec), mas como frase legível — sem caixa-alta, que quebraria os
+     nomes próprios e os números do crédito. */
+  .custo-dez-anos-fontes {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--texto-sec);
+    margin-top: 6px;
+  }
+
   .custo-texto { display: flex; flex-direction: column; gap: 28px; }
   .custo-item-titulo {
     display: flex;
@@ -2186,6 +2316,14 @@
       <div class="custo-loop-centro"><span>o loop da semana</span></div>
     </div>
 
+    <div class="retrato-linhas custo-dez-anos">
+      <p class="retrato-linha"><strong>Agora multiplica essa semana por dez anos.</strong></p>
+      <p class="retrato-linha">Pra maioria das pessoas, o salário cresce quase todo nos primeiros dez anos de carreira. Depois dos 35, ele estaciona.</p>
+      <p class="retrato-linha">O corpo segue a mesma curva. A partir dos 30, você perde de 3% a 8% de músculo por década.</p>
+      <p class="retrato-linha">A procrastinação de hoje cobra a conta aos 40: no seu salário e no seu corpo.</p>
+      <p class="custo-dez-anos-fontes">Fontes: Federal Reserve Bank of New York (estudo com 5 milhões de trabalhadores, 2015); Biomedicines, 2023.</p>
+    </div>
+
   </div>
 </section>
 
@@ -2226,6 +2364,15 @@
       </li>
     </ul>
 
+    <figure class="citacao-destaque">
+      <p class="citacao-destaque-texto">Eu sou uma pessoa com dificuldade em manter organização e rotina, e nunca gostei de exercícios físicos. […] Já tô no segundo mês com exercícios regulares.</p>
+      <figcaption class="citacao-destaque-autor">
+        <img src="natasha.jpeg" alt="Natasha Ribeiro" class="citacao-destaque-foto" onerror="this.onerror=null;this.removeAttribute('src');this.textContent='NR';">
+        <span class="citacao-destaque-nome">Natasha Ribeiro</span>
+        <span class="citacao-destaque-cargo">Product Ops Manager, K21</span>
+      </figcaption>
+    </figure>
+
     <p class="tentativas-transicao">Acontece que procrastinar é sintoma. E começa antes do plano, numa pergunta que quase ninguém faz:</p>
 
     <blockquote class="pergunta-chave">
@@ -2250,43 +2397,65 @@
       <div class="pilar-card">
         <span class="pilar-icone" aria-hidden="true">🧭</span>
         <h3>Direção</h3>
-        <p>Mapa da Vida, Momento de Vida e Definidor de Objetivos Coerentes: você para de perseguir objetivos que não cabem na sua vida de hoje.</p>
+        <p class="pilar-subtitulo">pra onde, antes de como</p>
+        <p class="pilar-frase">Você descobre o que cabe no seu momento de vida e para de perseguir objetivo que não cabe.</p>
+        <div class="pilar-ferramentas">
+          <hr class="pilar-divisoria">
+          <p class="pilar-rotulo">Na plataforma</p>
+          <div class="pilar-chips">
+            <span class="pilar-chip">Mapa da Vida</span>
+            <span class="pilar-chip">Calculadora de Rotina</span>
+            <span class="pilar-chip">Definidor de Objetivos</span>
+          </div>
+        </div>
       </div>
 
-      <div class="pilar-conector">
-        <svg class="pilar-setas" viewBox="0 0 64 44" fill="none" aria-hidden="true">
-          <line x1="6" y1="15" x2="55" y2="15" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M49 9 L57 15 L49 21" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <line x1="58" y1="29" x2="9" y2="29" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M15 23 L7 29 L15 35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="pilar-conector-texto">pra onde,<br><strong>antes de como</strong></span>
-      </div>
+      <div class="pilar-seta" aria-hidden="true"></div>
 
       <div class="pilar-card">
         <span class="pilar-icone" aria-hidden="true">🧩</span>
         <h3>Sistemas</h3>
-        <p>Mínima Organização Viável, Sistema de Organização Pessoal e Sistemas de Objetivos: a estrutura que segura o plano, do tamanho da sua rotina real.</p>
+        <p class="pilar-subtitulo">do tamanho da sua rotina</p>
+        <p class="pilar-frase">Você monta a estrutura que segura o plano, a partir do tempo que você tem de verdade.</p>
+        <div class="pilar-ferramentas">
+          <hr class="pilar-divisoria">
+          <p class="pilar-rotulo">Na plataforma</p>
+          <div class="pilar-chips">
+            <span class="pilar-chip">Mínima Organização Viável</span>
+            <span class="pilar-chip">Sistema de Organização Pessoal</span>
+          </div>
+        </div>
       </div>
 
-      <div class="pilar-conector">
-        <svg class="pilar-setas" viewBox="0 0 64 44" fill="none" aria-hidden="true">
-          <line x1="6" y1="15" x2="55" y2="15" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M49 9 L57 15 L49 21" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <line x1="58" y1="29" x2="9" y2="29" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M15 23 L7 29 L15 35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="pilar-conector-texto">voltar,<br><strong>não recomeçar</strong></span>
-      </div>
+      <div class="pilar-seta" aria-hidden="true"></div>
 
       <div class="pilar-card">
         <span class="pilar-icone" aria-hidden="true">🔁</span>
         <h3>Consistência</h3>
-        <p>Monitor de Hábitos, Lembretes de Rotina e Calendários: quando a semana te atropelar, você sabe exatamente por onde voltar.</p>
+        <p class="pilar-subtitulo">voltar, não recomeçar</p>
+        <p class="pilar-frase">Quando a semana te atropelar, você sabe exatamente por onde voltar.</p>
+        <div class="pilar-ferramentas">
+          <hr class="pilar-divisoria">
+          <p class="pilar-rotulo">Na plataforma</p>
+          <div class="pilar-chips">
+            <span class="pilar-chip">Monitor de Hábitos</span>
+            <span class="pilar-chip">Lembretes de Rotina</span>
+            <span class="pilar-chip">Calendários</span>
+          </div>
+        </div>
       </div>
     </div>
 
     <p class="pilares-rodape">Os três pilares ficam prontos em 2 horas, dentro da plataforma.</p>
+
+    <figure class="citacao-destaque">
+      <p class="citacao-destaque-texto">[…] o meu ciclo de começar e parar era sempre porque eu queria colocar mais coisas do que cabiam na minha vida.</p>
+      <figcaption class="citacao-destaque-autor">
+        <img src="joanna.png" alt="Joanna Delgado" class="citacao-destaque-foto" onerror="this.onerror=null;this.removeAttribute('src');this.textContent='JD';">
+        <span class="citacao-destaque-nome">Joanna Delgado</span>
+        <span class="citacao-destaque-cargo">Product Manager</span>
+      </figcaption>
+    </figure>
   </div>
 </section>
 
@@ -2559,23 +2728,17 @@
       </div>
       <div class="depoimento-card">
         <div class="depoimento-header">
-          <img src="natasha.jpeg" alt="Natasha Ribeiro" class="depoimento-foto" onerror="this.onerror=null;this.removeAttribute('src');this.textContent='NR';">
+          <img src="jonathan.jpeg" alt="Jonathan Domingues" class="depoimento-foto" onerror="this.onerror=null;this.removeAttribute('src');this.textContent='JD';">
           <div>
-            <div class="depoimento-nome">Natasha Ribeiro</div>
-            <div class="depoimento-cargo">Product Ops Manager · K21</div>
+            <div class="depoimento-nome">Jonathan Domingues</div>
+            <div class="depoimento-cargo">Fundador · VetGrow</div>
           </div>
         </div>
-        <p class="depoimento-citacao">"A aula de ontem me fez procurar a personal de novo, pra tentar malhar mesmo sem personal presente em cada treino."</p>
-      </div>
-      <div class="depoimento-card">
-        <div class="depoimento-header">
-          <img src="joanna.png" alt="Joanna Delgado" class="depoimento-foto" onerror="this.onerror=null;this.removeAttribute('src');this.textContent='JD';">
-          <div>
-            <div class="depoimento-nome">Joanna Delgado</div>
-            <div class="depoimento-cargo">Product Manager</div>
-          </div>
-        </div>
-        <p class="depoimento-citacao">"Foi um misto de terapia + aulas de faculdade + cervejinha depois do trabalho. Eram todos conceitos conhecidos que quando colocados cada um no seu lugar na trilha reduz muito a complexidade de entendê-los e executar."</p>
+        <p class="depoimento-citacao depoimento-citacao-multilinha">"Essa semana foi uma semana vitoriosa. Em todos os aspectos.
+Tô treinando, mano.
+Resolvi muita coisa que tava sendo um peso mental.
+O Instagram mesmo: o Opal foi uma solução matadora.
+No final, como na maioria das vezes, o problema era maior na minha mente e não na vida real."</p>
       </div>
       <div class="depoimento-card">
         <div class="depoimento-header">
