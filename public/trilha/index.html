@@ -292,6 +292,18 @@
     padding: 90px 40px;
   }
 
+  /* Duas seções off-white seguidas (5 → Três pilares → Trilha) somavam
+     90px (bottom) + 90px (top) = 180px de vazio entre elas — buraco grande,
+     porque não há mudança de cor nem borda para justificá-lo. Zerando o
+     padding-top da segunda, fica só o bottom da primeira (~90px). Vale só na
+     junção entre off-whites; junções com troca de cor seguem com os 90px cheios. */
+  .sec-clara + .sec-clara { padding-top: 0; }
+  /* A pergunta-chave fecha a seção 5 e tem margin: 72px auto — o bottom somava
+     ao padding-bottom da seção (72 + 90 = 162px) antes da próxima off-white.
+     Quando é o último elemento do container, zeramos só a margem de baixo; a de
+     cima (que a separa do texto como clímax) e os demais usos ficam intactos. */
+  .container > .pergunta-chave:last-child { margin-bottom: 0; }
+
   .sec-branca {
     background: #fff;
     padding: 90px 40px;
@@ -2112,6 +2124,261 @@
   }
   .relevo-etapa.chegada .relevo-etapa-texto h3 { color: var(--verde); }
 
+  /* ===== LINHA DO TEMPO DOS PRIMEIROS 30 DIAS =====
+     Substituiu o framework + trilho "A largada/O caminho/A chegada" em out/2026.
+     No desktop: cabeçalho (título + esforço) → rótulos de fase → curva SVG de
+     progresso → grid de 5 colunas de cards → depoimento + fecho. No mobile a
+     curva some e volta o padrão de trilho vertical de .relevo-etapa (círculos
+     ligados por linha tracejada), um por marco. O marco de 15 dias usa --amarelo
+     como cor de contraste; o de 30 dias herda o halo verde de "A chegada". */
+
+  /* Painel interno: cartão branco que envolve a dobra inteira e a separa das
+     duas seções off-white vizinhas (5 "Você já tentou" e 5b "Os três pilares").
+     O destaque vem da estrutura — um quadro dentro da seção —, não de trocar a
+     cor do fundo. Raio 16px como .pilar-card; borda 0.5px como o resto da folha.
+     Como o painel é branco, os cards dentro passam a --verde-sup (ver .lt-card). */
+  .lt-painel {
+    background: #fff;
+    border: 0.5px solid var(--borda);
+    border-radius: 16px;
+    padding: 48px 40px;
+  }
+
+  /* Cabeçalho: título à esquerda, blocos de esforço à direita. */
+  .lt-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  /* H1/H2 cresce e empurra os esforços para a direita; min-width:0 deixa a
+     balança quebrar antes de estourar a largura. */
+  .lt-cabecalho h2 { margin-bottom: 0; flex: 1 1 320px; min-width: 0; }
+  .lt-esforcos { display: flex; gap: 12px; flex-shrink: 0; }
+  /* Bloco de esforço: valor grande + rótulo muted. Fundo --verde-sup pelo mesmo
+     motivo dos cards — vive sobre o painel branco, então um fundo branco sumiria. */
+  .lt-esforco {
+    background: var(--verde-sup);
+    border: 0.5px solid var(--borda);
+    border-radius: 14px;
+    padding: 14px 20px;
+    text-align: center;
+    min-width: 120px;
+  }
+  .lt-esforco-valor {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1.1;
+    color: var(--verde-escuro);
+  }
+  .lt-esforco-rotulo {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #4a6b62; /* não --texto-sec: sobre --verde-sup daria 3.15:1; #4a6b62 dá 5.25:1 (AA) */
+    margin-top: 4px;
+  }
+
+  /* Rótulos de fase: acima dos cards, cada um com uma linha fina embaixo.
+     Fase 1 cobre colunas 1-2, fase 2 cobre colunas 3-5. */
+  .lt-fases {
+    display: grid;
+    grid-template-columns: 2fr 3fr;
+    gap: 20px;
+    margin-top: 48px;
+  }
+  .lt-fase-rotulo {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--texto-sec);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--borda);
+  }
+
+  /* Curva de progresso: entre os rótulos de fase e os cards. A linha é um SVG
+     decorativo ao fundo; os 5 pontos ficam num grid igual ao dos cards (mesmas
+     colunas, mesmo gap), então cada ponto cai exatamente no centro da sua coluna
+     sem depender de porcentagens que o gap de 16px desalinharia. */
+  .lt-curva-wrap {
+    position: relative;
+    height: 96px;
+    margin: 4px 0 8px;
+  }
+  .lt-curva {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  /* Grid espelhando .lt-grid: um ponto por coluna, centrado. Alturas por coluna
+     seguem o desenho da curva (sobe, desce no 15d, pico no 30d). */
+  .lt-curva-pontos {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+  }
+  .lt-curva-ponto { position: relative; }
+  .lt-curva-ponto::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 48px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--verde);
+    transform: translate(-50%, -50%);
+  }
+  /* Altura de cada ponto acompanha o desenho da curva (sobe, desce no 15d, pico
+     no 30d). Padrão data-n, como .custo-loop-estacao nesta mesma folha. */
+  .lt-curva-ponto[data-n="1"]::before { top: 62px; }
+  .lt-curva-ponto[data-n="2"]::before { top: 48px; }
+  .lt-curva-ponto[data-n="3"]::before { top: 40px; }
+  .lt-curva-ponto[data-n="4"]::before { top: 60px; width: 13px; height: 13px; background: var(--amarelo); }
+  .lt-curva-ponto[data-n="5"]::before { top: 18px; }
+  /* Legenda do 15 dias logo abaixo do seu ponto, centrada na coluna 3. Cor
+     #745818 (amarelo escurecido): --amarelo puro sobre o painel branco dá só
+     2.21:1 e reprova o AA em texto de 12px; #745818 dá 6.66:1. O ponto/círculo
+     do marco segue em --amarelo puro — é gráfico, não texto. */
+  .lt-curva-ponto .lt-curva-legenda {
+    position: absolute;
+    top: 74px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 12px;
+    font-style: italic;
+    font-family: 'Lora', serif;
+    color: #745818;
+  }
+
+  /* Grid de 5 colunas, cards de altura igual. */
+  .lt-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  /* Card de marco enxuto: título + chip no topo, divisor, uma frase de resultado.
+     Sem rótulos "Você faz/sai" — o divisor sozinho separa ação de resultado.
+     Fundo --verde-sup (o painel que os envolve é branco). Padding vertical curto
+     para tirar o espaço morto. */
+  .lt-card {
+    background: var(--verde-sup);
+    border: 0.5px solid var(--borda);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+  }
+  .lt-card-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .lt-card-topo h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--verde-escuro);
+    margin: 0;
+  }
+  /* Chip de tempo com destaque: pílula --verde-escuro com texto branco (antes era
+     branco apagado sobre o card). Puxa o olho para "quanto custa" e salta sobre o
+     card --verde-sup. Branco sobre --verde reprovaria o AA (2.78:1); sobre
+     --verde-escuro dá 11:1. */
+  .lt-chip {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+    color: #fff;
+    background: var(--verde-escuro);
+    border-radius: 999px;
+    padding: 5px 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  /* Ação (o que a pessoa faz): texto normal. */
+  .lt-faz {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--preto);
+  }
+  .lt-divisor {
+    border: none;
+    border-top: 1px solid var(--borda);
+    margin: 12px 0;
+  }
+  /* Resultado empurrado para a base, para alinhar entre cards de alturas
+     diferentes. Em negrito, cor forte — é a "recompensa" do marco. */
+  .lt-resultado-bloco { margin-top: auto; }
+  .lt-resultado {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 700;
+    color: var(--verde-escuro);
+  }
+
+  /* Dia 1 e 2 — "as 2 horas que você monta" — ganham fundo --verde-escuro para
+     se distinguir dos marcos de acompanhamento (7/15/30). Texto claro; o divisor
+     clareia; o chip vira claro sobre o fundo escuro. */
+  .lt-card.montar {
+    background: var(--verde-escuro);
+    border-color: var(--verde-escuro);
+  }
+  .lt-card.montar .lt-card-topo h3 { color: var(--off-white); }
+  .lt-card.montar .lt-faz { color: #cdddd7; }
+  .lt-card.montar .lt-resultado { color: #fff; }
+  .lt-card.montar .lt-divisor { border-top-color: rgba(255, 255, 255, 0.18); }
+  .lt-card.montar .lt-chip {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+  }
+
+  /* Depoimento da Suzana ancorado nos 7 dias: começa na coluna 3 (o marco de 7
+     dias) e vai até o fim, logo abaixo da grid — ele fala de cansaço/carga
+     mental, que é o resultado daquele marco. Sem o bloco "depois dos 30 dias". */
+  .lt-rodape {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+  }
+  /* Colunas 2–4 (não 3–5): o centro da faixa cai no centro da coluna 3, que é o
+     card de 7 dias — é lá que o depoimento deve parecer ancorado, não espalhado
+     até os 30 dias. A largura de 3 colunas dá linha de leitura confortável. */
+  .lt-depoimento-wrap { grid-column: 2 / 5; }
+  /* A citação avulsa tem margin: 72px auto por padrão (depoimento solto). Aqui
+     vive na faixa ancorada aos 7 dias, então zeramos o margin vertical. */
+  .lt-depoimento-wrap .citacao-destaque { margin: 0 auto; max-width: 100%; }
+  /* Fonte menor que o padrão (24px) só nesta dobra: o depoimento é apoio do
+     marco de 7 dias, não a estrela da seção. Escopado — não mexe nas citações
+     das seções 5 e 11, que seguem em 24px. Vale desktop e trilho mobile. */
+  .lt-depoimento-wrap .citacao-destaque-texto,
+  .lt-trilho-depoimento .citacao-destaque-texto { font-size: 19px; }
+
+  /* Trilho vertical do mobile: escondido no desktop, aparece no lugar da curva
+     SVG abaixo de 768px (ver media query). Reusa .relevo-etapa idêntico. */
+  .lt-trilho { display: none; }
+
+  /* ===== fim LINHA DO TEMPO ===== */
+
   /* Seção 4 — loop visual em vez de cards: círculo com estações que representam o ciclo sem saída */
   .custo-grid {
     display: grid;
@@ -2261,6 +2528,51 @@
   @media (max-width: 768px) {
     .custo-grid { grid-template-columns: 1fr; gap: 40px; justify-items: center; }
     .trilha-duas-colunas { grid-template-columns: 1fr; gap: 40px; }
+  }
+
+  /* LINHA DO TEMPO — troca para o trilho vertical em ≤1000px, não nos 768px das
+     demais seções: o grid de 5 colunas só respira acima de ~1000px (abaixo
+     disso, "15 dias" + o chip "1h/semana" não cabem lado a lado na coluna). */
+  @media (max-width: 1000px) {
+    .lt-cabecalho { align-items: flex-start; }
+    /* Dois esforços lado a lado quando cabem; flex-wrap deixa o segundo cair para
+       baixo sozinho quando não cabem — sem breakpoint mágico. flex:1 faz os dois
+       dividirem a largura por igual quando lado a lado, e ocuparem 100% quando um
+       por linha. min-width:150px garante que, se não couberem a dois, quebram. */
+    .lt-esforcos { width: 100%; flex-wrap: wrap; }
+    .lt-esforco { flex: 1 1 150px; min-width: 150px; }
+
+    /* Curva (wrap inteiro, com SVG + pontos + legenda), rótulos de fase, grid de
+       5 colunas e rodapé de desktop somem; o trilho vertical os substitui. */
+    .lt-curva-wrap, .lt-fases, .lt-grid, .lt-rodape { display: none; }
+
+    /* Trilho vertical aparece: um marco por item, igual a .relevo-etapa. */
+    .lt-trilho { display: block; }
+    .lt-grupo-rotulo {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--texto-sec);
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--borda);
+      margin: 36px 0 24px;
+    }
+    .lt-grupo-rotulo:first-child { margin-top: 32px; }
+
+    /* O card no mobile ocupa a coluna de texto do trilho; o de 30 dias herda o
+       halo verde de .chegada no marco. */
+    .lt-trilho .relevo-etapa-texto { padding-top: 0; }
+    .lt-trilho .lt-card {
+      margin-top: 0;
+      padding: 16px 16px;
+    }
+    /* Depoimento logo abaixo do card de 7 dias. A citação avulsa é centralizada
+       e sem moldura, então ocupa a largura toda do trilho; o margin vertical
+       padrão (72px) é reduzido para o respiro do trilho. */
+    .lt-trilho-depoimento { margin: 8px 0 24px; }
+    .lt-trilho-depoimento .citacao-destaque { margin: 0 auto; }
   }
 
   @media (max-width: 420px) {
@@ -2462,40 +2774,230 @@
 <!-- 6 · COMO É FAZER A TRILHA -->
 <section class="sec-clara">
   <div class="container">
-    <h2>A gente te mostra a <span class="destaque">TRILHA</span> para sair desse loop ⛰️</h2>
+   <!-- Painel interno branco: separa esta dobra das duas off-white vizinhas. -->
+   <div class="lt-painel">
+    <div class="lt-cabecalho">
+      <h2>A gente te mostra a <span class="destaque">TRILHA</span> para sair desse loop ⛰️</h2>
+      <div class="lt-esforcos">
+        <div class="lt-esforco">
+          <div class="lt-esforco-valor">2h</div>
+          <div class="lt-esforco-rotulo">para montar</div>
+        </div>
+        <div class="lt-esforco">
+          <div class="lt-esforco-valor">1h/semana</div>
+          <div class="lt-esforco-rotulo">para manter</div>
+        </div>
+      </div>
+    </div>
 
-    <div class="trilha-duas-colunas">
-      <div class="fw-col">
-        <img src="framework.png" alt="Framework proprietário da Trilha: as 6 etapas da jornada, do caos à consistência" loading="lazy" decoding="async" width="2500" height="2255">
-        <p class="legenda">Um framework construído com mais de 10 anos de estudo e consistência</p>
+    <!-- Rótulos de fase: fase 1 cobre colunas 1-2, fase 2 cobre colunas 3-5. -->
+    <div class="lt-fases">
+      <div class="lt-fase-rotulo">As 2 horas · na plataforma</div>
+      <div class="lt-fase-rotulo">Na sua rotina · 1h por semana</div>
+    </div>
+
+    <!-- Curva de progresso (desktop): sobe do Dia 1 aos 7 dias, desce nos 15
+         dias e sobe até o ponto mais alto nos 30 dias. Linha SVG decorativa ao
+         fundo; os pontos são um grid igual ao dos cards, centrados por coluna.
+         As coordenadas Y do path acompanham os --y dos pontos. -->
+    <div class="lt-curva-wrap">
+      <svg class="lt-curva" viewBox="0 0 500 96" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <path d="M50,62 C90,54 110,50 150,48 C190,46 210,42 250,40 C290,38 320,58 350,60 C390,62 415,34 450,18"
+              fill="none" stroke="var(--verde)" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <div class="lt-curva-pontos" aria-hidden="true">
+        <div class="lt-curva-ponto" data-n="1"></div>
+        <div class="lt-curva-ponto" data-n="2"></div>
+        <div class="lt-curva-ponto" data-n="3"></div>
+        <div class="lt-curva-ponto" data-n="4">
+          <span class="lt-curva-legenda">a semana desanda — e você volta</span>
+        </div>
+        <div class="lt-curva-ponto" data-n="5"></div>
+      </div>
+    </div>
+
+    <!-- Grid de 5 colunas (desktop). Dia 1 e 2 em verde-escuro (as 2 horas que
+         você monta); 7/15/30 são os marcos de acompanhamento. -->
+    <div class="lt-grid">
+      <article class="lt-card montar">
+        <div class="lt-card-topo">
+          <h3>Dia 1</h3>
+          <span class="lt-chip">1 hora</span>
+        </div>
+        <p class="lt-faz">Faz o Mapa da Vida e vê onde seu tempo vai de verdade.</p>
+        <div class="lt-resultado-bloco">
+          <hr class="lt-divisor">
+          <p class="lt-resultado">Diagnóstico e o seu primeiro sistema de organização.</p>
+        </div>
+      </article>
+
+      <article class="lt-card montar">
+        <div class="lt-card-topo">
+          <h3>Dia 2</h3>
+          <span class="lt-chip">1 hora</span>
+        </div>
+        <p class="lt-faz">Define objetivos e desenha os sistemas.</p>
+        <div class="lt-resultado-bloco">
+          <hr class="lt-divisor">
+          <p class="lt-resultado">O plano dos próximos 3 meses.</p>
+        </div>
+      </article>
+
+      <article class="lt-card">
+        <div class="lt-card-topo">
+          <h3>7 dias</h3>
+          <span class="lt-chip">1h/sem</span>
+        </div>
+        <p class="lt-faz">Aplica os sistemas na sua semana.</p>
+        <div class="lt-resultado-bloco">
+          <hr class="lt-divisor">
+          <p class="lt-resultado">Termina a semana menos cansado(a).</p>
+        </div>
+      </article>
+
+      <article class="lt-card">
+        <div class="lt-card-topo">
+          <h3>15 dias</h3>
+          <span class="lt-chip">1h/sem</span>
+        </div>
+        <p class="lt-faz">A semana desanda — e você volta de onde parou.</p>
+        <div class="lt-resultado-bloco">
+          <hr class="lt-divisor">
+          <p class="lt-resultado">As manhãs voltam. Você sai da culpa.</p>
+        </div>
+      </article>
+
+      <article class="lt-card">
+        <div class="lt-card-topo">
+          <h3>30 dias</h3>
+          <span class="lt-chip">1h/sem</span>
+        </div>
+        <p class="lt-faz">Consolida os primeiros hábitos.</p>
+        <div class="lt-resultado-bloco">
+          <hr class="lt-divisor">
+          <p class="lt-resultado">Os primeiros objetivos curtos.</p>
+        </div>
+      </article>
+    </div>
+
+    <!-- Depoimento da Suzana, ancorado nos 7 dias (fala de cansaço). -->
+    <div class="lt-rodape">
+      <div class="lt-depoimento-wrap">
+        <figure class="citacao-destaque">
+          <p class="citacao-destaque-texto">"Essa semana, apesar de ter sido muito corrida, parece que alinhei mais as expectativas comigo mesma. A carga mental foi muito menor."</p>
+          <figcaption class="citacao-destaque-autor">
+            <img src="suzana.png" alt="Suzana de Miranda" class="citacao-destaque-foto" onerror="this.onerror=null;this.removeAttribute('src');this.textContent='SM';">
+            <span class="citacao-destaque-nome">Suzana de Miranda</span>
+            <span class="citacao-destaque-cargo">Founder · Enableurs</span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- Trilho vertical (mobile): substitui a curva. Reusa .relevo-etapa. -->
+    <div class="lt-trilho">
+      <div class="lt-grupo-rotulo">As 2 horas · na plataforma</div>
+      <div class="relevo-etapas">
+        <div class="relevo-etapa">
+          <div class="relevo-etapa-marco">①</div>
+          <div class="relevo-etapa-texto">
+            <article class="lt-card montar">
+              <div class="lt-card-topo">
+                <h3>Dia 1</h3>
+                <span class="lt-chip">1 hora</span>
+              </div>
+              <p class="lt-faz">Faz o Mapa da Vida e vê onde seu tempo vai de verdade.</p>
+              <div class="lt-resultado-bloco">
+                <hr class="lt-divisor">
+                <p class="lt-resultado">Diagnóstico e o seu primeiro sistema de organização.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+        <div class="relevo-etapa">
+          <div class="relevo-etapa-marco">②</div>
+          <div class="relevo-etapa-texto">
+            <article class="lt-card montar">
+              <div class="lt-card-topo">
+                <h3>Dia 2</h3>
+                <span class="lt-chip">1 hora</span>
+              </div>
+              <p class="lt-faz">Define objetivos e desenha os sistemas.</p>
+              <div class="lt-resultado-bloco">
+                <hr class="lt-divisor">
+                <p class="lt-resultado">O plano dos próximos 3 meses.</p>
+              </div>
+            </article>
+          </div>
+        </div>
       </div>
 
-      <div class="relevo-col">
-        <div class="relevo-etapas">
-          <div class="relevo-etapa">
-            <div class="relevo-etapa-marco">🏁</div>
-            <div class="relevo-etapa-texto">
-              <h3>A largada</h3>
-              <p>Faça o Mapa da Vida em 10 minutos e análise os pilares da sua vida de forma sistêmica. Monte seu primeiro sistema de organização pessoal já na primeira aula.</p>
-            </div>
+      <div class="lt-grupo-rotulo">Na sua rotina · 1h por semana</div>
+      <div class="relevo-etapas">
+        <div class="relevo-etapa">
+          <div class="relevo-etapa-marco">7d</div>
+          <div class="relevo-etapa-texto">
+            <article class="lt-card">
+              <div class="lt-card-topo">
+                <h3>7 dias</h3>
+                <span class="lt-chip">1h/sem</span>
+              </div>
+              <p class="lt-faz">Aplica os sistemas na sua semana.</p>
+              <div class="lt-resultado-bloco">
+                <hr class="lt-divisor">
+                <p class="lt-resultado">Termina a semana menos cansado(a).</p>
+              </div>
+            </article>
           </div>
-          <div class="relevo-etapa">
-            <div class="relevo-etapa-marco">⛰️</div>
-            <div class="relevo-etapa-texto">
-              <h3>O caminho</h3>
-              <p>Entenda o seu momento de vida, quanto tempo realmente tem na rotina e crie objetivos coerentes que não serão esquecidos daqui 2 semanas.</p>
-            </div>
+        </div>
+
+        <!-- Depoimento logo abaixo do card de 7 dias (fala de cansaço). -->
+        <div class="lt-trilho-depoimento">
+          <figure class="citacao-destaque">
+            <p class="citacao-destaque-texto">"Essa semana, apesar de ter sido muito corrida, parece que alinhei mais as expectativas comigo mesma. A carga mental foi muito menor."</p>
+            <figcaption class="citacao-destaque-autor">
+              <img src="suzana.png" alt="Suzana de Miranda" class="citacao-destaque-foto" onerror="this.onerror=null;this.removeAttribute('src');this.textContent='SM';">
+              <span class="citacao-destaque-nome">Suzana de Miranda</span>
+              <span class="citacao-destaque-cargo">Founder · Enableurs</span>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="relevo-etapa">
+          <div class="relevo-etapa-marco">15d</div>
+          <div class="relevo-etapa-texto">
+            <article class="lt-card">
+              <div class="lt-card-topo">
+                <h3>15 dias</h3>
+                <span class="lt-chip">1h/sem</span>
+              </div>
+              <p class="lt-faz">A semana desanda — e você volta de onde parou.</p>
+              <div class="lt-resultado-bloco">
+                <hr class="lt-divisor">
+                <p class="lt-resultado">As manhãs voltam. Você sai da culpa.</p>
+              </div>
+            </article>
           </div>
-          <div class="relevo-etapa chegada">
-            <div class="relevo-etapa-marco">🚩</div>
-            <div class="relevo-etapa-texto">
-              <h3>A chegada</h3>
-              <p>Suas manhãs voltam a ser suas. O projeto pessoal sai do papel. E quando a semana desandar, você volta do ponto onde parou, sem recomeçar do zero e sem culpa.</p>
-            </div>
+        </div>
+        <div class="relevo-etapa chegada">
+          <div class="relevo-etapa-marco">30d</div>
+          <div class="relevo-etapa-texto">
+            <article class="lt-card">
+              <div class="lt-card-topo">
+                <h3>30 dias</h3>
+                <span class="lt-chip">1h/sem</span>
+              </div>
+              <p class="lt-faz">Consolida os primeiros hábitos.</p>
+              <div class="lt-resultado-bloco">
+                <hr class="lt-divisor">
+                <p class="lt-resultado">Os primeiros objetivos curtos.</p>
+              </div>
+            </article>
           </div>
         </div>
       </div>
     </div>
+   </div><!-- /.lt-painel -->
   </div>
 </section>
 
