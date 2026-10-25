@@ -81,33 +81,39 @@ function TelaVsl({ config, resultado }: Props) {
   }
 
   return (
-    <div className="flex flex-1 flex-col justify-center">
-      <h1 className="font-heading text-[22px] font-bold leading-tight text-mt-black sm:text-[28px]">
-        {config.vsl.titulo}
-      </h1>
-      <p className="mt-3 text-base leading-7 text-mt-muted">{config.vsl.subtitulo}</p>
+    // Fundo solido cobrindo a viewport inteira (fixed, nao so a altura do
+    // conteudo): e o que da a sensacao de importancia pedida — um ambiente
+    // proprio e serio para assistir, nao mais uma secao dentro da pagina
+    // off-white do resto do quiz. fixed inset-0 em vez de margem negativa
+    // porque o padding do <main> pai (QuizConversa) e o unico outro lugar que
+    // sabe o valor exato a compensar, e overflow-y-auto deixa o conteudo
+    // rolar se a tela for baixa demais para caber tudo.
+    <div className="fixed inset-0 z-20 flex flex-col items-center justify-center overflow-y-auto bg-mt-green-dark px-5 py-10 text-center sm:px-8">
+      <p className="mb-6 font-heading text-xl font-bold leading-snug text-white sm:text-2xl">
+        {config.vsl.chamada}
+      </p>
 
-      <div className="mt-7">
-        <VslPlayer vsl={config.vsl} onPlay={registrarPlay} onLiberarCta={liberarCta} />
-      </div>
+      <VslPlayer vsl={config.vsl} onPlay={registrarPlay} onLiberarCta={liberarCta} />
 
       {ctaLiberado && (
-        <div className="mt-8 text-center">
+        <div className="mt-8 w-full max-w-[400px] text-center">
           <button
             type="button"
             onClick={comprar}
             disabled={indoParaCheckout}
-            className="w-full rounded-xl bg-mt-green-dark px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mt-green focus-visible:ring-offset-2 disabled:opacity-70"
+            // Fundo claro, nao mt-green-dark: sobre a pagina inteira ja
+            // escura, o mesmo tom do botao ficaria quase invisivel.
+            className="w-full rounded-xl bg-white px-6 py-4 text-sm font-bold uppercase tracking-wide text-mt-green-dark transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-mt-green-dark disabled:opacity-60"
           >
             {indoParaCheckout ? 'Abrindo o pagamento...' : config.vsl.rotuloCta}
           </button>
 
           {config.vsl.apoioCta && (
-            <p className="mt-3 text-sm leading-6 text-mt-muted">{config.vsl.apoioCta}</p>
+            <p className="mt-3 text-sm leading-6 text-white/70">{config.vsl.apoioCta}</p>
           )}
 
           {erro && (
-            <p role="alert" className="mt-3 text-sm font-medium text-mt-red">
+            <p role="alert" className="mt-3 text-sm font-medium text-red-300">
               Não foi possível abrir o pagamento. Tente novamente.
             </p>
           )}

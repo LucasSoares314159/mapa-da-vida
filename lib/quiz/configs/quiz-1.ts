@@ -218,10 +218,7 @@ export const quiz1: ConfigQuiz = {
     // de imediato, sem player, em vez de um retângulo quebrado.
     videoId: '',
     contaId: '',
-    titulo:
-      'Seu diagnóstico está pronto. Agora descubra como construir objetivos e sistemas que façam sentido para sua vida.',
-    subtitulo:
-      'Assista ao vídeo abaixo para entender por que você continua deixando seus objetivos para depois e como começar a mudar isso de maneira prática.',
+    chamada: 'Seu diagnóstico está pronto.',
     ctaAtSeconds: 0,
     rotuloCta: 'ENTRAR NA TRILHA',
     apoioCta: 'Seu acesso começa hoje. Se não for para você, me manda uma mensagem em até 7 dias e eu devolvo tudo.',

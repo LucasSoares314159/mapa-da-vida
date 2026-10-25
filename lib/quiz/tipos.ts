@@ -74,8 +74,12 @@ export type ConfigVsl = {
   videoId: string
   /** Conta/player da VTurb, quando o provider exige (ver configs/quiz-1.ts). */
   contaId?: string
-  titulo: string
-  subtitulo: string
+  /**
+   * Frase curta acima do player, estilo direct-response — nunca um título com
+   * subtítulo. A tela da VSL é para assistir, não para ler: qualquer bloco de
+   * texto competindo com o vídeo é atenção tirada dele.
+   */
+  chamada: string
   /** Segundos de reprodução até o botão de compra aparecer. */
   ctaAtSeconds: number
   rotuloCta: string

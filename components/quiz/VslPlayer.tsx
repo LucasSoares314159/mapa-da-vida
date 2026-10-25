@@ -37,11 +37,16 @@ export function VslPlayer({ vsl, onPlay, onLiberarCta }: Props) {
   }, [semVideo, onLiberarCta])
 
   if (semVideo) {
+    // Mesma caixa 9:16 do player real (ver VturbPlayer abaixo), nao uma caixa
+    // de padding com altura automatica: o placeholder deve ocupar exatamente
+    // o espaco que a VSL gravada vai ocupar, para o layout nao pular quando o
+    // videoId for preenchido.
     return (
       <div
-        className={`mx-auto w-full ${LARGURA_DESKTOP} rounded-2xl border border-dashed border-mt-border bg-white/60 p-8 text-center`}
+        className={`mx-auto flex w-full ${LARGURA_DESKTOP} items-center justify-center rounded-2xl border border-dashed border-white/30 bg-white/5 p-6 text-center`}
+        style={{ aspectRatio: '9 / 16' }}
       >
-        <p className="text-sm text-mt-muted">
+        <p className="text-sm text-white/60">
           O vídeo da análise estará disponível aqui em instantes.
         </p>
       </div>
