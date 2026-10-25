@@ -4,10 +4,9 @@ import Script from 'next/script'
 
 // Carregador do Pixel da Meta, parametrizado pelo id.
 //
-// Generaliza o MetaPixelListaEspera, que tinha o id da lista de espera fixo no
-// componente. O funil do quiz usa um pixel proprio, e a pagina de sucesso
-// precisa carregar o mesmo pixel do funil que gerou a venda — sem parametro,
-// seria preciso um componente por pixel.
+// O funil do quiz usa um pixel proprio, e a pagina de sucesso precisa carregar
+// o mesmo pixel do funil que gerou a venda — por isso o id vem por prop, em vez
+// de fixo no componente.
 
 type Props = {
   pixelId: string | undefined

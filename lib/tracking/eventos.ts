@@ -84,7 +84,7 @@ export function track(evento: EventoQuiz, params: ParamsEvento = {}): string {
  * do funil (quiz_view na entrada) disparam antes de window.fbq existir. Sem
  * essa espera, o fbq?.(...) descartava o evento em silencio e so o PageView
  * do proprio init chegava — o funil inteiro se perdia. Mesmo retry que o
- * useMetaPixel ja usava na lista de espera.
+ * Pixel ja usava no site antigo.
  */
 function dispararPixel(evento: string, payload: Record<string, unknown>, eventId: string): void {
   function enviar(): boolean {

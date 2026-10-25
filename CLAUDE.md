@@ -89,7 +89,6 @@ npm run build             # só com o dev parado
 | Rota | Descrição | Auth |
 |---|---|---|
 | `/` | Landing page | pública |
-| `/lista-espera`, `/obrigado` | Captação e agradecimento | pública |
 | `/auth/*` | login, cadastro, esqueci/redefinir senha, verificar e-mail, callback | pública |
 | `/content` | Trilha: módulos e lives | ✅ |
 | `/content/modulo/[id]` | Aula individual | ✅ |
@@ -104,7 +103,6 @@ npm run build             # só com o dev parado
 | `/admin` | Back office de métricas | ✅ + `ADMIN_EMAILS` |
 | `/admin/modulos`, `/admin/modulos/[id]` | Editor do conteúdo escrito das aulas | ✅ + `ADMIN_EMAILS` |
 | `/api/cron/emails` | Disparo diário (21h UTC) | `CRON_SECRET` |
-| `/api/lista-espera` | Webhook de captação | pública |
 | `/api/stripe/checkout` | Cria Checkout Session de pagamento único | pública (POST) |
 | `/api/stripe/webhook` | Confirma pagamento e dispara acesso | assinatura Stripe |
 | `/api/admin/compras/reenviar-acesso` | Regenera link de uma compra | ✅ + `ADMIN_EMAILS` |
@@ -123,13 +121,13 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 /app
   /actions        auth · mapa · momento · objetivos · progresso · rotina
   /admin          back office
-  /api            cron/emails · cron/teste · lista-espera
+  /api            cron/emails · cron/teste · stripe · admin
   /auth /content /mapa /diagnostico /momento /objetivos /rotina /dashboard
 /components
   /ui             shadcn/ui
   /admin          Kpi · Funil · PainelMetricas · TabelaAlunos · Dedicacao · DistribuicaoModulos
   /mapa           MapaFlow · RevelacaoMapa · RevelacaoDiagnostico · AreaDestaqueOverlay
-  /lp /lista-espera
+  /lp
 /lib              ver tabela abaixo
 /emails           6 templates react-email
 /hooks            useMetaPixel · useUTMForward
@@ -758,8 +756,6 @@ Os e-mails citam o Momento de Vida ativo como fio condutor. Buscas de usuário s
 | `CRON_SECRET` | autenticação do cron da Vercel |
 | `SMTP_*` | host, port, secure, user, pass, from |
 | `NEXT_PUBLIC_SITE_URL` | links absolutos em e-mails |
-| `MAKE_WEBHOOK_URL` | integração da lista de espera |
-| `NEXT_PUBLIC_META_PIXEL_LISTA_ESPERA_ID` | pixel de captação |
 | `STRIPE_SECRET_KEY` | chave server-side do Stripe (`sk_test_` no sandbox) |
 | `STRIPE_PRICE_ID` | preço único vendido pelo Checkout |
 | `STRIPE_WEBHOOK_SECRET` | valida assinatura do webhook (`whsec_`) |

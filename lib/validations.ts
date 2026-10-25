@@ -45,30 +45,6 @@ export type RedefinirSenhaFormData = z.infer<typeof redefinirSenhaSchema>
 export type AreaFormData = z.infer<typeof areaSchema>
 export type MapaFormData = z.infer<typeof mapaSchema>
 
-// Grupos de profissão da lista de espera. Mantidos separados dos grupos do
-// onboarding (PROFISSOES_ONBOARDING) porque alterar estes rótulos mudaria o
-// histórico já captado pelo webhook da lista.
-export const PROFISSOES_LISTA_ESPERA = [
-  'Tecnologia (Produto, Design, TI)',
-  'Marketing (creator, analista, growth, social media)',
-  'Executivos (founder, CMO, CPO, COO)',
-  'Autônomos (empreendedor, artista, artesão)',
-  'Saúde (medicina, fisioterapia, psicologia, enfermagem)',
-  'Outro',
-] as const
-
-export const listaEsperaSchema = z.object({
-  nome: z.string().min(2, 'O nome deve ter pelo menos 2 caracteres'),
-  email: z.string().email('Email inválido'),
-  whatsapp: z.string().min(14, 'Informe seu WhatsApp'),
-  profissao: z.enum(PROFISSOES_LISTA_ESPERA).refine(Boolean, { message: 'Selecione sua profissão' }),
-  utm_source: z.string().optional(),
-  utm_medium: z.string().optional(),
-  utm_campaign: z.string().optional(),
-})
-
-export type ListaEsperaFormData = z.infer<typeof listaEsperaSchema>
-
 // --- Mapa da Vida conversacional ---
 // A observação virou obrigatória: o fluxo de uma pergunta por tela existe para
 // a pessoa justificar cada escolha. O mínimo é baixo de propósito — uma frase
