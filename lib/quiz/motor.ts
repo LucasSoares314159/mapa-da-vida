@@ -1,7 +1,6 @@
 import type {
   ConfigQuiz,
   Dimensao,
-  Perfil,
   Pergunta,
   Pontos,
   RegraAplicada,
