@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
+import { Play } from 'lucide-react'
 import type { ConfigVsl } from '@/lib/quiz/tipos'
 
 // Player da VSL em formato de adapter.
@@ -37,17 +38,23 @@ export function VslPlayer({ vsl, onPlay, onLiberarCta }: Props) {
   }, [semVideo, onLiberarCta])
 
   if (semVideo) {
-    // Mesma caixa 9:16 do player real (ver VturbPlayer abaixo), nao uma caixa
-    // de padding com altura automatica: o placeholder deve ocupar exatamente
-    // o espaco que a VSL gravada vai ocupar, para o layout nao pular quando o
-    // videoId for preenchido.
+    // Mesma caixa 9:16 do player real (ver VturbPlayer abaixo): o placeholder
+    // ocupa exatamente o espaco que a VSL gravada vai ocupar, para o layout
+    // nao pular quando o videoId for preenchido.
+    //
+    // Vazio, um 9:16 so com texto parece um retangulo quebrado. O icone de
+    // play centralizado e o gradiente dao cara de "player aguardando video"
+    // em vez de area vazia — intencional, nao defeito.
     return (
       <div
-        className={`mx-auto flex w-full ${LARGURA_DESKTOP} items-center justify-center rounded-2xl border border-dashed border-white/30 bg-white/5 p-6 text-center`}
+        className={`mx-auto flex w-full ${LARGURA_DESKTOP} flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-gradient-to-b from-black/40 to-black/20 px-6 text-center`}
         style={{ aspectRatio: '9 / 16' }}
       >
-        <p className="text-sm text-white/60">
-          O vídeo da análise estará disponível aqui em instantes.
+        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
+          <Play className="ml-1 h-7 w-7 fill-white/90 text-white/90" aria-hidden="true" />
+        </span>
+        <p className="max-w-[220px] text-sm leading-6 text-white/60">
+          Seu vídeo com a análise completa aparece aqui em instantes.
         </p>
       </div>
     )

@@ -220,7 +220,7 @@ export const quiz1: ConfigQuiz = {
     contaId: '',
     chamada: 'Seu diagnóstico está pronto.',
     ctaAtSeconds: 0,
-    rotuloCta: 'ENTRAR NA TRILHA',
+    rotuloCta: 'ENTRAR AGORA PARA A TRILHA',
     // apoioCta foi absorvido pelo bloco de garantia abaixo — a mesma promessa
     // de 7 dias não deve aparecer duas vezes na mesma tela.
     garantia: {
