@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { Check } from 'lucide-react'
+import { Check, MessageCircle } from 'lucide-react'
 import type { Pergunta } from '@/lib/quiz/tipos'
 
 // Tela de uma pergunta. Uma por vez, mobile-first.
@@ -50,11 +50,27 @@ export function TelaPergunta({ pergunta, selecionada, onSelecionar, onAvancar }:
 
   return (
     <div className="flex flex-1 flex-col">
-      {pergunta.contexto?.map((linha, i) => (
-        <p key={i} className="mb-2 text-base leading-7 text-mt-muted">
-          {linha}
-        </p>
-      ))}
+      {pergunta.contexto && pergunta.contexto.length > 0 && (
+        // O contexto e uma observacao/insight antes da pergunta ("E curioso
+        // como sempre encontramos tempo para as obrigacoes. Mas nem sempre
+        // para os nossos proprios objetivos.") — e conteudo que deve ser lido
+        // como mensagem com peso proprio, nao como legenda apagada acima do
+        // titulo. Mesmo tratamento de card da tela-ponte (ver TelaTexto),
+        // compacto e sem botao proprio porque a pergunta real vem logo
+        // abaixo no mesmo passo.
+        <div className="mb-5 flex items-start gap-3 rounded-2xl border border-mt-border bg-white p-4 shadow-sm sm:p-5">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mt-green/10">
+            <MessageCircle className="h-4 w-4 text-mt-green-dark" aria-hidden="true" />
+          </span>
+          <div className="space-y-1 pt-0.5">
+            {pergunta.contexto.map((linha, i) => (
+              <p key={i} className="text-[15px] leading-6 text-mt-black sm:text-base">
+                {linha}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
 
       <h1
         id={`pergunta-${pergunta.id}`}
