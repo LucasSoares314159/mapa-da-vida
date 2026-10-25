@@ -69,7 +69,16 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
 
   // Entrada: captura a origem do trafego antes de qualquer evento, para que o
   // quiz_view ja saia com UTM.
+  //
+  // A trava de execucao unica nao e so pelo StrictMode do dev: o efeito
+  // re-rodaria tambem se config trocasse de referencia, e um quiz_view a mais
+  // por pessoa inflaria o topo do funil, fazendo toda a conversao parecer
+  // metade do que e.
+  const jaEntrou = useRef(false)
   useEffect(() => {
+    if (jaEntrou.current) return
+    jaEntrou.current = true
+
     capturarAtribuicao()
     track('quiz_view', { quiz_slug: config.slug })
 

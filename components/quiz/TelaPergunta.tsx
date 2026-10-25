@@ -38,7 +38,11 @@ export function TelaPergunta({ pergunta, selecionada, onSelecionar, onAvancar }:
 
     evento.preventDefault()
     const total = pergunta.opcoes.length
-    const proximo = (indice + passo + total) % total
+
+    // Sem nada escolhido ainda, a primeira seta seleciona a opcao focada em vez
+    // de pular para a seguinte: quem chega pelo teclado espera que a navegacao
+    // comece onde o foco esta, nao um item adiante.
+    const proximo = selecionada ? (indice + passo + total) % total : indice
 
     refs.current[proximo]?.focus()
     onSelecionar(pergunta.opcoes[proximo].id)
