@@ -66,11 +66,7 @@ export function track(evento: EventoQuiz, params: ParamsEvento = {}): string {
     ...params,
   })
 
-  try {
-    window.fbq?.('trackCustom', evento, payload, { eventID: eventId })
-  } catch {
-    // Pixel bloqueado por adblock nao deve impedir o GA4 nem travar a UI.
-  }
+  dispararPixel(evento, payload, eventId)
 
   try {
     window.gtag?.('event', evento, { ...payload, event_id: eventId })
@@ -79,4 +75,34 @@ export function track(evento: EventoQuiz, params: ParamsEvento = {}): string {
   }
 
   return eventId
+}
+
+/**
+ * Envia o evento ao Pixel, esperando o fbq carregar se preciso.
+ *
+ * O pixel carrega com strategy="afterInteractive", entao os primeiros eventos
+ * do funil (quiz_view na entrada) disparam antes de window.fbq existir. Sem
+ * essa espera, o fbq?.(...) descartava o evento em silencio e so o PageView
+ * do proprio init chegava — o funil inteiro se perdia. Mesmo retry que o
+ * useMetaPixel ja usava na lista de espera.
+ */
+function dispararPixel(evento: string, payload: Record<string, unknown>, eventId: string): void {
+  function enviar(): boolean {
+    if (typeof window.fbq !== 'function') return false
+    try {
+      window.fbq('trackCustom', evento, payload, { eventID: eventId })
+    } catch {
+      // Pixel bloqueado por adblock: nada a fazer, o GA4 e a CAPI cobrem.
+    }
+    return true
+  }
+
+  if (enviar()) return
+
+  // fbq ainda nao carregou — tenta por ate ~2s antes de desistir.
+  let tentativas = 0
+  const intervalo = setInterval(() => {
+    tentativas++
+    if (enviar() || tentativas >= 40) clearInterval(intervalo)
+  }, 50)
 }
