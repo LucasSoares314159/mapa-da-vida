@@ -140,15 +140,6 @@ function TelaVsl({ config, resultado }: Props) {
       {ctaLiberado && config.vsl.garantia && (
         <section className="flex flex-col items-center px-5 pb-12 text-center sm:px-8">
           <BlocoGarantia garantia={config.vsl.garantia} />
-
-          <button
-            type="button"
-            onClick={comprar}
-            disabled={indoParaCheckout}
-            className="mt-6 w-full max-w-[440px] rounded-xl bg-white px-6 py-4 text-sm font-bold uppercase tracking-wide text-mt-green-dark transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-mt-green-dark disabled:opacity-60"
-          >
-            {indoParaCheckout ? 'Abrindo o pagamento...' : config.vsl.rotuloCta}
-          </button>
         </section>
       )}
     </div>
