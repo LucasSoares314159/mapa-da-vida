@@ -82,45 +82,74 @@ function TelaVsl({ config, resultado }: Props) {
   }
 
   return (
-    // Fundo solido cobrindo a viewport inteira (fixed, nao so a altura do
-    // conteudo): e o que da a sensacao de importancia pedida — um ambiente
-    // proprio e serio para assistir, nao mais uma secao dentro da pagina
-    // off-white do resto do quiz. fixed inset-0 em vez de margem negativa
-    // porque o padding do <main> pai (QuizConversa) e o unico outro lugar que
-    // sabe o valor exato a compensar, e overflow-y-auto deixa o conteudo
-    // rolar se a tela for baixa demais para caber tudo.
-    <div className="fixed inset-0 z-20 flex flex-col items-center justify-center overflow-y-auto bg-mt-green-dark px-5 py-10 text-center sm:px-8">
-      <p className="mb-6 font-heading text-xl font-bold leading-snug text-white sm:text-2xl">
-        {config.vsl.chamada}
-      </p>
+    // Fundo solido cobrindo a viewport inteira (fixed): ambiente proprio para
+    // assistir, separado da pagina off-white do resto do quiz. overflow-y-auto
+    // porque o conteudo agora passa de uma tela — a garantia vive abaixo da
+    // dobra.
+    //
+    // fixed inset-0 em vez de margem negativa porque o padding do <main> pai
+    // (QuizConversa) e o unico outro lugar que saberia o valor a compensar.
+    <div className="fixed inset-0 z-20 overflow-y-auto bg-mt-green-dark">
+      {/* Primeira dobra: chamada + VSL + CTA cabem juntos numa tela. A
+          garantia so aparece ao rolar — e a estrutura de VSL que converte:
+          foco total no video e na oferta antes de qualquer outra coisa. */}
+      <section className="flex min-h-dvh flex-col items-center justify-center px-5 py-8 text-center sm:px-8">
+        <p className="mb-5 font-heading text-xl font-bold leading-snug text-white sm:text-2xl">
+          {config.vsl.chamada}
+        </p>
 
-      <VslPlayer vsl={config.vsl} onPlay={registrarPlay} onLiberarCta={liberarCta} />
+        <VslPlayer
+          vsl={config.vsl}
+          onPlay={registrarPlay}
+          onLiberarCta={liberarCta}
+          // Teto de altura para a VSL deixar espaco para a chamada e o CTA na
+          // mesma dobra: sem isso o 9:16 em telas estreitas empurra o botao
+          // para fora da tela, que e exatamente o que nao pode acontecer numa
+          // VSL — o CTA precisa estar visivel junto do video.
+          maxAlturaClasse="max-h-[min(70vh,620px)]"
+        />
 
-      {ctaLiberado && (
-        <div className="mt-8 w-full max-w-[400px] text-center">
+        {ctaLiberado && (
+          <div className="mt-6 w-full max-w-[400px] text-center">
+            <button
+              type="button"
+              onClick={comprar}
+              disabled={indoParaCheckout}
+              // Fundo claro, nao mt-green-dark: sobre a pagina ja escura, o
+              // mesmo tom do botao ficaria quase invisivel.
+              className="w-full rounded-xl bg-white px-6 py-4 text-sm font-bold uppercase tracking-wide text-mt-green-dark transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-mt-green-dark disabled:opacity-60"
+            >
+              {indoParaCheckout ? 'Abrindo o pagamento...' : config.vsl.rotuloCta}
+            </button>
+
+            {config.vsl.apoioCta && (
+              <p className="mt-3 text-sm leading-6 text-white/70">{config.vsl.apoioCta}</p>
+            )}
+
+            {erro && (
+              <p role="alert" className="mt-3 text-sm font-medium text-red-300">
+                Não foi possível abrir o pagamento. Tente novamente.
+              </p>
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* Segunda dobra: a garantia. So entra depois que a oferta ja foi vista,
+          como reforco para quem rolou procurando "e se nao for pra mim?". */}
+      {ctaLiberado && config.vsl.garantia && (
+        <section className="flex flex-col items-center px-5 pb-12 text-center sm:px-8">
+          <BlocoGarantia garantia={config.vsl.garantia} />
+
           <button
             type="button"
             onClick={comprar}
             disabled={indoParaCheckout}
-            // Fundo claro, nao mt-green-dark: sobre a pagina inteira ja
-            // escura, o mesmo tom do botao ficaria quase invisivel.
-            className="w-full rounded-xl bg-white px-6 py-4 text-sm font-bold uppercase tracking-wide text-mt-green-dark transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-mt-green-dark disabled:opacity-60"
+            className="mt-6 w-full max-w-[440px] rounded-xl bg-white px-6 py-4 text-sm font-bold uppercase tracking-wide text-mt-green-dark transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-mt-green-dark disabled:opacity-60"
           >
             {indoParaCheckout ? 'Abrindo o pagamento...' : config.vsl.rotuloCta}
           </button>
-
-          {config.vsl.apoioCta && (
-            <p className="mt-3 text-sm leading-6 text-white/70">{config.vsl.apoioCta}</p>
-          )}
-
-          {erro && (
-            <p role="alert" className="mt-3 text-sm font-medium text-red-300">
-              Não foi possível abrir o pagamento. Tente novamente.
-            </p>
-          )}
-
-          {config.vsl.garantia && <BlocoGarantia garantia={config.vsl.garantia} />}
-        </div>
+        </section>
       )}
     </div>
   )

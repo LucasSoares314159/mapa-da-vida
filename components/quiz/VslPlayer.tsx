@@ -21,11 +21,18 @@ type Props = {
   onPlay?: () => void
   /** Chamado quando ctaAtSeconds e alcancado. */
   onLiberarCta?: () => void
+  /**
+   * Teto de altura (classe max-h-*) para o player caber na dobra junto com a
+   * chamada e o CTA. Como a proporcao 9:16 e mantida, limitar a altura encolhe
+   * a largura — o player fica mais estreito que 400px em telas baixas, em vez
+   * de empurrar o CTA para fora da tela.
+   */
+  maxAlturaClasse?: string
 }
 
 const LARGURA_DESKTOP = 'sm:max-w-[400px]'
 
-export function VslPlayer({ vsl, onPlay, onLiberarCta }: Props) {
+export function VslPlayer({ vsl, onPlay, onLiberarCta, maxAlturaClasse = '' }: Props) {
   const jaDeuPlay = useRef(false)
 
   // Sem videoId o player nao e montado — ver a pendencia na config. Libera o
@@ -47,8 +54,7 @@ export function VslPlayer({ vsl, onPlay, onLiberarCta }: Props) {
     // em vez de area vazia — intencional, nao defeito.
     return (
       <div
-        className={`mx-auto flex w-full ${LARGURA_DESKTOP} flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-gradient-to-b from-black/40 to-black/20 px-6 text-center`}
-        style={{ aspectRatio: '9 / 16' }}
+        className={`mx-auto flex aspect-[9/16] w-auto max-w-full flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-gradient-to-b from-black/40 to-black/20 px-6 text-center ${maxAlturaClasse} ${LARGURA_DESKTOP}`}
       >
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
           <Play className="ml-1 h-7 w-7 fill-white/90 text-white/90" aria-hidden="true" />
@@ -64,6 +70,7 @@ export function VslPlayer({ vsl, onPlay, onLiberarCta }: Props) {
     return (
       <VturbPlayer
         vsl={vsl}
+        maxAlturaClasse={maxAlturaClasse}
         onPlay={() => {
           if (jaDeuPlay.current) return
           jaDeuPlay.current = true
@@ -77,6 +84,7 @@ export function VslPlayer({ vsl, onPlay, onLiberarCta }: Props) {
   return (
     <Html5Player
       vsl={vsl}
+      maxAlturaClasse={maxAlturaClasse}
       onPlay={() => {
         if (jaDeuPlay.current) return
         jaDeuPlay.current = true
@@ -96,25 +104,22 @@ export function VslPlayer({ vsl, onPlay, onLiberarCta }: Props) {
  * assumida: quem pausa ve o botao antes do ponto exato do roteiro. Preferir
  * isso a prender o CTA atras de um evento que o provider pode nao emitir.
  */
-function VturbPlayer({ vsl, onPlay, onLiberarCta }: Props) {
+function VturbPlayer({ vsl, onPlay, onLiberarCta, maxAlturaClasse = '' }: Props) {
   useTemporizadorCta(vsl.ctaAtSeconds, onLiberarCta)
 
   return (
-    <div className={`mx-auto w-full ${LARGURA_DESKTOP}`}>
+    <div
+      className={`relative mx-auto aspect-[9/16] w-auto max-w-full overflow-hidden rounded-2xl bg-black ${maxAlturaClasse} ${LARGURA_DESKTOP}`}
+      onPointerDown={onPlay}
+    >
+      {/* O embed da VTurb injeta o player dentro deste container. */}
       <div
-        className="relative w-full overflow-hidden rounded-2xl bg-black"
-        style={{ aspectRatio: '9 / 16' }}
-        onPointerDown={onPlay}
-      >
-        {/* O embed da VTurb injeta o player dentro deste container. */}
-        <div
-          id={`vid-${vsl.videoId}`}
-          className="absolute inset-0"
-          dangerouslySetInnerHTML={{
-            __html: `<vturb-smartplayer id="vid-player-${vsl.videoId}" style="display:block;width:100%;height:100%"></vturb-smartplayer>`,
-          }}
-        />
-      </div>
+        id={`vid-${vsl.videoId}`}
+        className="absolute inset-0"
+        dangerouslySetInnerHTML={{
+          __html: `<vturb-smartplayer id="vid-player-${vsl.videoId}" style="display:block;width:100%;height:100%"></vturb-smartplayer>`,
+        }}
+      />
       <Script
         id={`vturb-${vsl.videoId}`}
         strategy="afterInteractive"
@@ -129,29 +134,26 @@ function VturbPlayer({ vsl, onPlay, onLiberarCta }: Props) {
 }
 
 /** Fallback com <video> nativo: usado em teste local e se a VTurb sair. */
-function Html5Player({ vsl, onPlay, onLiberarCta }: Props) {
+function Html5Player({ vsl, onPlay, onLiberarCta, maxAlturaClasse = '' }: Props) {
   const ref = useRef<HTMLVideoElement>(null)
   const liberado = useRef(false)
 
   return (
-    <div className={`mx-auto w-full ${LARGURA_DESKTOP}`}>
-      <video
-        ref={ref}
-        src={vsl.videoId}
-        controls
-        playsInline
-        className="w-full rounded-2xl bg-black"
-        style={{ aspectRatio: '9 / 16' }}
-        onPlay={onPlay}
-        onTimeUpdate={() => {
-          if (liberado.current) return
-          if ((ref.current?.currentTime ?? 0) >= vsl.ctaAtSeconds) {
-            liberado.current = true
-            onLiberarCta?.()
-          }
-        }}
-      />
-    </div>
+    <video
+      ref={ref}
+      src={vsl.videoId}
+      controls
+      playsInline
+      className={`mx-auto aspect-[9/16] w-auto max-w-full rounded-2xl bg-black ${maxAlturaClasse} ${LARGURA_DESKTOP}`}
+      onPlay={onPlay}
+      onTimeUpdate={() => {
+        if (liberado.current) return
+        if ((ref.current?.currentTime ?? 0) >= vsl.ctaAtSeconds) {
+          liberado.current = true
+          onLiberarCta?.()
+        }
+      }}
+    />
   )
 }
 
