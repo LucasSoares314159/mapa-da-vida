@@ -15,7 +15,7 @@ export default function QuizNaoEncontrado() {
         </p>
         <Link
           href="/trilha"
-          className="mt-8 inline-block rounded-xl bg-mt-green px-8 py-4 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-mt-green-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mt-green focus-visible:ring-offset-2"
+          className="mt-8 inline-block rounded-xl bg-mt-green-dark px-8 py-4 text-sm font-bold uppercase tracking-wide text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mt-green focus-visible:ring-offset-2"
         >
           Conhecer a Trilha
         </Link>

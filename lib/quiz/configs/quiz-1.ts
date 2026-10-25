@@ -171,10 +171,7 @@ export const quiz1: ConfigQuiz = {
       paragrafos: [
         'Suas respostas sugerem que você tem objetivos importantes, mas encontra dificuldades para transformá-los em ações que se mantenham ao longo do tempo.',
         'Talvez você já tenha tentado montar uma rotina perfeita.',
-        'Comprou uma agenda.',
-        'Baixou aplicativos.',
-        'Fez listas.',
-        'Prometeu que, dessa vez, seria diferente.',
+        ['Comprou uma agenda.', 'Baixou aplicativos.', 'Fez listas.', 'Prometeu que, dessa vez, seria diferente.'],
         'Mas bastou uma semana complicada para tudo começar a sair do lugar.',
         '**Talvez você não precise de mais um planejamento que funciona apenas quando tudo está sob controle.**',
         'Talvez precise de uma forma de organização que considere como sua vida realmente funciona.',
@@ -186,9 +183,7 @@ export const quiz1: ConfigQuiz = {
       titulo: 'Sua rotina pode estar ocupando o espaço que deveria ser seu.',
       paragrafos: [
         'Suas respostas sugerem que suas responsabilidades estão consumindo boa parte do seu tempo ou da sua energia.',
-        'Você resolve problemas.',
-        'Cumpre compromissos.',
-        'Atende às demandas do trabalho e das pessoas ao seu redor.',
+        ['Você resolve problemas.', 'Cumpre compromissos.', 'Atende às demandas do trabalho e das pessoas ao seu redor.'],
         'Mas, quando chega a hora de fazer algo por você, muitas vezes já não sobra disposição.',
         '**Talvez a resposta não seja adicionar ainda mais tarefas à sua agenda.**',
         'Pode ser necessário reconsiderar prioridades, reconhecer limites e descobrir o que realmente cabe na sua rotina atual.',

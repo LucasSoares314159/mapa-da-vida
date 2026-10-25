@@ -178,10 +178,12 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
 
       <main className="flex flex-1 flex-col px-5 py-8 sm:px-8 sm:py-12">
         <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col">
-          {passo.tipo === 'abertura' && <TelaTexto tela={passo.tela} onAvancar={avancar} />}
+          {passo.tipo === 'abertura' && (
+            <TelaTexto tela={passo.tela} onAvancar={avancar} variante="abertura" />
+          )}
 
           {passo.tipo === 'interstituicao' && (
-            <TelaTexto tela={passo.tela} onAvancar={avancar} />
+            <TelaTexto tela={passo.tela} onAvancar={avancar} variante="ponte" />
           )}
 
           {passo.tipo === 'pergunta' && (

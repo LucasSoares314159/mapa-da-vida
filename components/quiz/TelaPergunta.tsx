@@ -117,7 +117,7 @@ export function TelaPergunta({ pergunta, selecionada, onSelecionar, onAvancar }:
           type="button"
           onClick={onAvancar}
           disabled={!selecionada}
-          className="w-full rounded-xl bg-mt-green px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-mt-green-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mt-green focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-mt-border disabled:text-mt-muted sm:w-auto sm:px-10"
+          className="w-full rounded-xl bg-mt-green-dark px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mt-green focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-mt-border disabled:text-mt-muted sm:w-auto sm:px-10"
         >
           {pergunta.rotuloBotao}
         </button>

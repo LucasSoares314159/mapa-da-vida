@@ -37,17 +37,29 @@ export type Pergunta = {
   rotuloBotao: string
 }
 
+/**
+ * Um item de conteudo: texto corrido, ou um grupo de frases curtas que deve
+ * ser lido como lista.
+ *
+ * Os docs do quiz escrevem sequencias como "Comprou uma agenda." / "Baixou
+ * aplicativos." / "Fez listas." como paragrafos de uma linha cada — bom para
+ * cadencia de locucao na VSL, pessimo para leitura em tela: vira uma coluna
+ * de linhas soltas sem hierarquia. Agrupar essas frases num array as marca
+ * como lista sem reescrever uma unica palavra do texto aprovado.
+ */
+export type Paragrafo = string | string[]
+
 /** Tela de copy sem pergunta — telas 01 e 05 dos docs. */
 export type Interstituicao = {
   id: string
   titulo?: string
-  paragrafos: string[]
+  paragrafos: Paragrafo[]
   rotuloBotao: string
 }
 
 export type ResultadoPerfil = {
   titulo: string
-  paragrafos: string[]
+  paragrafos: Paragrafo[]
   rotuloBotao: string
 }
 

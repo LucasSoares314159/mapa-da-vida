@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react'
 import type { ConfigQuiz, ResultadoQuiz } from '@/lib/quiz/tipos'
 import { track } from '@/lib/tracking/eventos'
 import { iniciarCheckoutDoQuiz } from '@/lib/quiz/checkout-cliente'
-import { TextoQuiz } from './TextoQuiz'
+import { BlocoTexto } from './BlocoTexto'
 import { VslPlayer } from './VslPlayer'
 
 // Telas 10 e da Mini-VSL.
@@ -33,19 +33,15 @@ export function TelaResultado({ config, resultado }: Props) {
           {texto.titulo}
         </h1>
 
-        <div className="mt-5 space-y-4">
-          {texto.paragrafos.map((paragrafo, i) => (
-            <p key={i} className="text-base leading-7 text-mt-green-dark sm:text-[17px]">
-              <TextoQuiz texto={paragrafo} />
-            </p>
-          ))}
+        <div className="mt-5">
+          <BlocoTexto paragrafos={texto.paragrafos} />
         </div>
 
         <div className="mt-10">
           <button
             type="button"
             onClick={() => setMostrandoVsl(true)}
-            className="w-full rounded-xl bg-mt-green px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-mt-green-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mt-green focus-visible:ring-offset-2"
+            className="w-full rounded-xl bg-mt-green-dark px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mt-green focus-visible:ring-offset-2"
           >
             {texto.rotuloBotao}
           </button>
@@ -101,7 +97,7 @@ function TelaVsl({ config, resultado }: Props) {
             type="button"
             onClick={comprar}
             disabled={indoParaCheckout}
-            className="w-full rounded-xl bg-mt-green px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-mt-green-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mt-green focus-visible:ring-offset-2 disabled:opacity-70"
+            className="w-full rounded-xl bg-mt-green-dark px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mt-green focus-visible:ring-offset-2 disabled:opacity-70"
           >
             {indoParaCheckout ? 'Abrindo o pagamento...' : config.vsl.rotuloCta}
           </button>
