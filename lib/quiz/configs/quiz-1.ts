@@ -221,6 +221,16 @@ export const quiz1: ConfigQuiz = {
     chamada: 'Seu diagnóstico está pronto.',
     ctaAtSeconds: 0,
     rotuloCta: 'ENTRAR NA TRILHA',
-    apoioCta: 'Seu acesso começa hoje. Se não for para você, me manda uma mensagem em até 7 dias e eu devolvo tudo.',
+    // apoioCta foi absorvido pelo bloco de garantia abaixo — a mesma promessa
+    // de 7 dias não deve aparecer duas vezes na mesma tela.
+    garantia: {
+      selo: '/quiz/selo-garantia-7-dias.png',
+      eyebrow: 'GARANTIA INCONDICIONAL DE 7 DIAS',
+      titulo: 'Teste a Trilha inteira *sem risco nenhum.*',
+      texto: [
+        'Entre, faça seu Mapa da Vida e comece a aplicar o método. Se em 7 dias você achar que não é pra você, me manda uma mensagem e eu devolvo cada centavo.',
+        '**Sem formulário, sem pergunta, sem letra miúda.**',
+      ],
+    },
   },
 }

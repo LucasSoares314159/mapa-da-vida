@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react'
 import type { ConfigQuiz, ResultadoQuiz } from '@/lib/quiz/tipos'
 import { track } from '@/lib/tracking/eventos'
 import { iniciarCheckoutDoQuiz } from '@/lib/quiz/checkout-cliente'
+import { BlocoGarantia } from './BlocoGarantia'
 import { BlocoTexto } from './BlocoTexto'
 import { VslPlayer } from './VslPlayer'
 
@@ -117,6 +118,8 @@ function TelaVsl({ config, resultado }: Props) {
               Não foi possível abrir o pagamento. Tente novamente.
             </p>
           )}
+
+          {config.vsl.garantia && <BlocoGarantia garantia={config.vsl.garantia} />}
         </div>
       )}
     </div>

@@ -65,6 +65,25 @@ export type ResultadoPerfil = {
 
 export type ProviderVsl = 'vturb' | 'html5'
 
+/**
+ * Bloco de garantia abaixo do CTA da VSL.
+ *
+ * É prova de remoção de risco — a razão de existir é tirar o medo da decisão
+ * de compra —, então ganha destaque proprio (selo + headline + reforço) em vez
+ * de uma linha apagada no rodapé. Opcional: um quiz sem garantia declarada
+ * simplesmente não mostra o bloco.
+ */
+export type GarantiaVsl = {
+  /** Caminho do selo em /public (ex. /quiz/selo-garantia-7-dias.png). Vazio esconde o selo. */
+  selo?: string
+  /** Rótulo pequeno acima da headline, em maiúsculas. */
+  eyebrow: string
+  /** Headline do bloco. **negrito** e *itálico* são renderizados. */
+  titulo: string
+  /** Parágrafos de reforço. */
+  texto: string[]
+}
+
 export type ConfigVsl = {
   provider: ProviderVsl
   /**
@@ -83,8 +102,10 @@ export type ConfigVsl = {
   /** Segundos de reprodução até o botão de compra aparecer. */
   ctaAtSeconds: number
   rotuloCta: string
-  /** Texto curto abaixo do botão (garantia, preço). */
+  /** Texto curto abaixo do botão (preço). A garantia tem bloco próprio. */
   apoioCta?: string
+  /** Bloco de garantia destacado abaixo do CTA. Ausente, não aparece. */
+  garantia?: GarantiaVsl
 }
 
 /**
