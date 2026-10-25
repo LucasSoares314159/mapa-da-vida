@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { enviarLinkAcessoCompra, normalizarEmail } from '@/lib/acesso-compra'
 import { createAdminSupabaseClient } from '@/lib/supabase-admin'
 import { getStripe } from '@/lib/stripe'
+import { capiConfigurada, enviarEventoCapi, eventIdDaCompra } from '@/lib/tracking/capi'
 
 export const runtime = 'nodejs'
 
@@ -58,6 +59,45 @@ async function processarCheckoutPago(session: Stripe.Checkout.Session): Promise<
   }
 
   await enviarLinkAcessoCompra(compra.id, email)
+  await registrarPurchase(session, email)
+}
+
+/**
+ * Purchase para a Conversions API.
+ *
+ * Roda depois do e-mail de acesso e nunca lanca: tracking nao pode ser motivo
+ * para o Stripe reenviar o evento, porque o reenvio reprocessaria a compra. O
+ * event_id vem da Checkout Session, igual ao que a pagina de sucesso dispara
+ * no Pixel — a Meta recebe os dois e conta uma venda.
+ */
+async function registrarPurchase(
+  session: Stripe.Checkout.Session,
+  email: string
+): Promise<void> {
+  if (!capiConfigurada()) return
+
+  const metadata = session.metadata ?? {}
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? '').replace(/\/$/, '')
+
+  try {
+    await enviarEventoCapi({
+      nome: 'Purchase',
+      eventId: eventIdDaCompra(session.id),
+      email,
+      fbp: metadata.fbp,
+      fbc: metadata.fbc,
+      valor: session.amount_total ? session.amount_total / 100 : undefined,
+      moeda: session.currency?.toUpperCase(),
+      sourceUrl: siteUrl ? `${siteUrl}/compra/sucesso` : undefined,
+      customData: {
+        source: metadata.source ?? 'lp-trilha',
+        ...(metadata.quiz_slug ? { quiz_slug: metadata.quiz_slug } : {}),
+        ...(metadata.result_profile ? { result_profile: metadata.result_profile } : {}),
+      },
+    })
+  } catch (error) {
+    console.error('[stripe-webhook] Purchase da CAPI falhou:', error)
+  }
 }
 export async function POST(request: Request) {
   const signature = request.headers.get('stripe-signature')
