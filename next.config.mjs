@@ -22,7 +22,11 @@ const nextConfig = {
     serverComponentsExternalPackages: ['nodemailer'],
   },
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    // Mantem alertas operacionais nos Runtime Logs da Vercel. Logs de debug e
+    // informacao continuam removidos do bundle de producao.
+    removeConsole: process.env.NODE_ENV === 'production'
+      ? { exclude: ['error', 'warn'] }
+      : false,
   },
 }
 
