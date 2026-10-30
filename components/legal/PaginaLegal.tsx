@@ -39,7 +39,7 @@ export function PaginaLegal({
               Cancelamento e Reembolso
             </Link>
             <Link href="/trilha" className="text-mt-green hover:underline">
-              Voltar para a Trilha
+              Voltar para a TRILHA
             </Link>
           </nav>
         </footer>

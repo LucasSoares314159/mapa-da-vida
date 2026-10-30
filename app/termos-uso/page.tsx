@@ -6,14 +6,14 @@ import { EMPRESA, PROCESSADOR_PAGAMENTO, TRILHA_PARCELAS_MAX, TRILHA_PRECO } fro
 export const metadata: Metadata = {
   title: 'Termos de Uso',
   description:
-    'Condições de compra e de uso da Trilha da Produtividade e da plataforma MindTrail.',
+    'Condições de compra e de uso da TRILHA e da plataforma MindTrail.',
 }
 
 export default function TermosUsoPage() {
   return (
     <PaginaLegal titulo="Termos de Uso">
       <p>
-        Estes Termos regulam a compra e o uso da <strong>Trilha da Produtividade</strong> e da
+        Estes Termos regulam a compra e o uso da <strong>TRILHA</strong> e da
         plataforma {EMPRESA.nomeFantasia} ({EMPRESA.site}), oferecidas pela {EMPRESA.razaoSocial},
         inscrita no CNPJ sob o nº {EMPRESA.cnpj}, com sede na {EMPRESA.endereco} (&quot;
         {EMPRESA.nomeFantasia}&quot;, &quot;nós&quot;).
@@ -27,7 +27,7 @@ export default function TermosUsoPage() {
       </p>
 
       <Secao titulo="1. O que está sendo contratado">
-        <p>A Trilha da Produtividade é um programa online que inclui:</p>
+        <p>A TRILHA é um programa online que inclui:</p>
         <Lista>
           <li>aulas gravadas, organizadas em módulos;</li>
           <li>
@@ -46,7 +46,7 @@ export default function TermosUsoPage() {
 
       <Secao titulo="2. Preço e pagamento">
         <p>
-          A Trilha é vendida por <strong>pagamento único</strong> de{' '}
+          A TRILHA é vendida por <strong>pagamento único</strong> de{' '}
           <strong>{TRILHA_PRECO} à vista</strong>, ou parcelado em até {TRILHA_PARCELAS_MAX} vezes no
           cartão de crédito, <strong>com juros</strong>.
         </p>
@@ -103,7 +103,7 @@ export default function TermosUsoPage() {
 
       <Secao titulo="6. Natureza do conteúdo e resultados">
         <p>
-          A Trilha é um programa educacional de organização pessoal. Os resultados dependem da aplicação
+          A TRILHA é um programa educacional de organização pessoal. Os resultados dependem da aplicação
           de cada pessoa e <strong>não são garantidos</strong>. Depoimentos exibidos na página de venda
           refletem experiências individuais.
         </p>
@@ -125,7 +125,7 @@ export default function TermosUsoPage() {
       <Secao titulo="8. Privacidade e dados pessoais">
         <p>
           Tratamos seus dados conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), apenas para
-          prestar o serviço, liberar o acesso, enviar comunicações sobre a Trilha e cumprir obrigações
+          prestar o serviço, liberar o acesso, enviar comunicações sobre a TRILHA e cumprir obrigações
           legais. As respostas que você registra na plataforma (Mapa da Vida, objetivos, rotina) são
           suas: não são vendidas nem compartilhadas com terceiros para fins comerciais.
         </p>

@@ -6,14 +6,14 @@ import { EMPRESA, PROCESSADOR_PAGAMENTO, TRILHA_PARCELAS_MAX, TRILHA_PRECO } fro
 export const metadata: Metadata = {
   title: 'Política de Cancelamento e Reembolso',
   description:
-    'Direito de arrependimento de 7 dias, como pedir o reembolso e como funciona o estorno de compras parceladas da Trilha da Produtividade.',
+    'Direito de arrependimento de 7 dias, como pedir o reembolso e como funciona o estorno de compras parceladas da TRILHA.',
 }
 
 export default function CancelamentoPage() {
   return (
     <PaginaLegal titulo="Política de Cancelamento e Reembolso">
       <p>
-        Esta política vale para a compra da <strong>Trilha da Produtividade</strong>, vendida pela{' '}
+        Esta política vale para a compra da <strong>TRILHA</strong>, vendida pela{' '}
         {EMPRESA.razaoSocial} (CNPJ {EMPRESA.cnpj}), sob a marca {EMPRESA.nomeFantasia}. Ela
         complementa os <Link href="/termos-uso" className="text-mt-green underline">Termos de Uso</Link>.
       </p>
@@ -66,7 +66,7 @@ export default function CancelamentoPage() {
 
       <Secao titulo="4. Compras parceladas">
         <p>
-          A Trilha é um <strong>pagamento único</strong> de {TRILHA_PRECO} à vista, que pode ser
+          A TRILHA é um <strong>pagamento único</strong> de {TRILHA_PRECO} à vista, que pode ser
           parcelado em até {TRILHA_PARCELAS_MAX} vezes no cartão com juros. O parcelamento é apenas a
           forma de pagar esse valor — não é assinatura nem mensalidade, e não há renovação automática.
         </p>
@@ -96,7 +96,7 @@ export default function CancelamentoPage() {
 
       <Secao titulo="5. Depois dos 7 dias">
         <p>
-          Passado o prazo de arrependimento, a compra não é mais reembolsável. A Trilha é um conteúdo
+          Passado o prazo de arrependimento, a compra não é mais reembolsável. A TRILHA é um conteúdo
           digital com acesso imediato e integral desde o primeiro dia.
         </p>
         <p>
