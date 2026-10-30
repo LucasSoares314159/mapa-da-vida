@@ -7,12 +7,12 @@ import { PurchasePixel } from '@/components/PurchasePixel'
 export const metadata = {
   title: 'Pagamento confirmado | MindTrail',
 }
-// O session_id vem do redirect do Stripe e e o que deduplica o Purchase com o
-// par enviado pela CAPI no webhook.
+// A referencia vem do redirect do provedor e deduplica o Purchase com o par
+// enviado pela CAPI no webhook. session_id mantem links Stripe antigos validos.
 export default function CompraSucessoPage({
   searchParams,
 }: {
-  searchParams: { session_id?: string }
+  searchParams: { checkout_ref?: string; session_id?: string }
 }) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-mt-off-white px-4">
@@ -21,7 +21,7 @@ export default function CompraSucessoPage({
         comPageView={false}
         id="meta-pixel-compra"
       />
-      <PurchasePixel idSessao={searchParams.session_id} />
+      <PurchasePixel idCheckout={searchParams.checkout_ref ?? searchParams.session_id} />
       <section className="w-full max-w-lg text-center">
         <CheckCircle2 className="mx-auto mb-6 h-12 w-12 text-mt-green" aria-hidden="true" />
         <h1 className="text-3xl font-semibold text-mt-dark">Pagamento recebido</h1>

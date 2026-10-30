@@ -4,18 +4,6 @@ import { PARAMS_UTM } from '@/lib/tracking/atribuicao'
 
 export const runtime = 'nodejs'
 
-// Rota unica de inicio de pagamento, usada pela LP e pelo quiz.
-//
-// O caminho da LP (public/trilha/index.html) e um <form method="post"> sem
-// corpo, e continua valendo: sem body, a rota cria a cobranca como antes. O
-// quiz manda JSON com slug, perfil e atribuicao, que viram metadado da
-// cobranca. Por isso a leitura do corpo e tolerante — um corpo invalido nao
-// pode impedir alguem de comprar.
-//
-// O caminho continua em /api/stripe/ apesar de o provider ser configuravel:
-// mover a URL quebraria os dois formularios da LP, que e HTML estatico. O que
-// decide o provider e CHECKOUT_PROVIDER, nao o caminho da rota.
-
 function texto(valor: unknown): string | undefined {
   return typeof valor === 'string' && valor.trim() ? valor.trim() : undefined
 }
@@ -27,8 +15,8 @@ async function lerParams(request: Request): Promise<ParamsCheckout> {
     if (tipo.includes('application/json')) {
       const corpo = (await request.json()) as Record<string, unknown>
       const utmBruto = (corpo.utm ?? {}) as Record<string, unknown>
-
       const utm: Record<string, string | undefined> = {}
+
       for (const chave of PARAMS_UTM) {
         utm[chave] = texto(utmBruto[chave])
       }
@@ -44,10 +32,10 @@ async function lerParams(request: Request): Promise<ParamsCheckout> {
       }
     }
 
-    // Formulario da LP: sem campos hoje, mas se ganhar inputs eles chegam aqui.
     if (tipo.includes('form')) {
       const form = await request.formData()
       const utm: Record<string, string | undefined> = {}
+
       for (const chave of PARAMS_UTM) {
         utm[chave] = texto(form.get(chave))
       }
@@ -60,7 +48,7 @@ async function lerParams(request: Request): Promise<ParamsCheckout> {
       }
     }
   } catch {
-    // Corpo ilegivel: trata como o POST sem corpo da LP.
+    // Corpo ausente ou ilegivel: mantem o fluxo da landing page estatica.
   }
 
   return { source: 'lp-trilha' }
@@ -70,19 +58,16 @@ export async function POST(request: Request) {
   try {
     const requestOrigin = new URL(request.url).origin
     const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || requestOrigin).replace(/\/$/, '')
-
     const params = await lerParams(request)
     const { url } = await startCheckout(params, siteUrl)
 
-    // O quiz chama por fetch e precisa da URL para redirecionar; a LP posta um
-    // formulario e precisa do 303.
     if ((request.headers.get('content-type') ?? '').includes('application/json')) {
       return NextResponse.json({ url })
     }
 
     return NextResponse.redirect(url, 303)
   } catch (error) {
-    console.error('[checkout] Falha ao criar sessao:', error)
+    console.error('[abacatepay-checkout] Falha ao criar checkout:', error)
     return NextResponse.json(
       { error: 'Nao foi possivel iniciar o pagamento. Tente novamente.' },
       { status: 500 }

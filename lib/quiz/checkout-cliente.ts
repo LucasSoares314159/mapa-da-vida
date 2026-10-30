@@ -23,7 +23,7 @@ export async function iniciarCheckoutDoQuiz({
 }: ParamsCheckoutQuiz): Promise<string> {
   const atribuicao = lerAtribuicao()
 
-  const resposta = await fetch('/api/stripe/checkout', {
+  const resposta = await fetch('/api/abacatepay/checkout', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

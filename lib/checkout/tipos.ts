@@ -40,9 +40,8 @@ export interface ProviderCheckout {
 /**
  * Metadado da cobranca, em snake_case e chaves curtas.
  *
- * O Stripe aceita 50 chaves de ate 500 caracteres por objeto, o que cabe tudo
- * isto com folga. Um provider que aceite menos deve truncar aqui, nao no
- * chamador — e por isso que a montagem e compartilhada.
+ * Um provider que imponha limites menores deve truncar aqui, nao no chamador —
+ * e por isso que a montagem e compartilhada.
  */
 export function montarMetadata(params: ParamsCheckout): Record<string, string> {
   const metadata: Record<string, string> = {
