@@ -12,3 +12,10 @@ export const EMPRESA = {
 } as const
 
 export const LEGAL_ATUALIZADO_EM = '30 de outubro de 2026'
+
+// Condições de venda citadas nos Termos. A página de venda (HTML estático) repete
+// o preço à mão — e o valor cobrado de fato é o configurado no provider de
+// pagamento. Os três precisam bater.
+export const TRILHA_PRECO = 'R$ 297,00'
+export const TRILHA_PARCELAS_MAX = 12
+export const PROCESSADOR_PAGAMENTO = 'AbacatePay'

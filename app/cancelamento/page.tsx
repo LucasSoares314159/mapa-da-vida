@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { PaginaLegal, Secao, Lista, LinkWhatsApp } from '@/components/legal/PaginaLegal'
-import { EMPRESA } from '@/lib/empresa'
+import { EMPRESA, PROCESSADOR_PAGAMENTO, TRILHA_PARCELAS_MAX, TRILHA_PRECO } from '@/lib/empresa'
 
 export const metadata: Metadata = {
   title: 'Política de Cancelamento e Reembolso',
@@ -26,7 +26,7 @@ export default function CancelamentoPage() {
         </p>
         <p>
           Nesse prazo, o reembolso é <strong>integral</strong>: devolvemos todos os valores pagos,
-          inclusive eventuais encargos de parcelamento, mesmo que você já tenha acessado as aulas, feito
+          inclusive os juros do parcelamento, mesmo que você já tenha acessado as aulas, feito
           o Mapa da Vida ou entrado no grupo.
         </p>
       </Secao>
@@ -50,22 +50,31 @@ export default function CancelamentoPage() {
       <Secao titulo="3. Prazo e forma do reembolso">
         <p>
           O reembolso é feito pelo mesmo meio de pagamento usado na compra. Solicitamos o estorno ao
-          processador de pagamentos em até <strong>5 (cinco) dias úteis</strong> após o pedido.
+          processador de pagamentos ({PROCESSADOR_PAGAMENTO}) em até{' '}
+          <strong>5 (cinco) dias úteis</strong> após o pedido.
         </p>
-        <p>
-          A partir daí, o prazo para o valor aparecer depende da instituição financeira — normalmente de
-          5 a 10 dias úteis no cartão de crédito, podendo levar até duas faturas para constar no
-          extrato.
-        </p>
+        <Lista>
+          <li>
+            <strong>Pix:</strong> o valor é devolvido para a conta de origem do pagamento.
+          </li>
+          <li>
+            <strong>Cartão de crédito:</strong> o prazo para o valor aparecer depende do banco emissor —
+            normalmente de 5 a 10 dias úteis, podendo levar até duas faturas para constar no extrato.
+          </li>
+        </Lista>
       </Secao>
 
       <Secao titulo="4. Compras parceladas">
         <p>
-          A Trilha é um <strong>pagamento único</strong>. O parcelamento no cartão é apenas a forma de
-          pagar esse valor — não é assinatura nem mensalidade, e não há renovação automática.
+          A Trilha é um <strong>pagamento único</strong> de {TRILHA_PRECO} à vista, que pode ser
+          parcelado em até {TRILHA_PARCELAS_MAX} vezes no cartão com juros. O parcelamento é apenas a
+          forma de pagar esse valor — não é assinatura nem mensalidade, e não há renovação automática.
         </p>
         <p>Se você cancelar dentro dos 7 dias, o estorno é do valor total da compra:</p>
         <Lista>
+          <li>
+            o estorno inclui os <strong>juros do parcelamento</strong>, não só o preço à vista;
+          </li>
           <li>
             comunicamos a administradora do cartão para que as <strong>parcelas futuras não sejam
             lançadas</strong> na sua fatura;

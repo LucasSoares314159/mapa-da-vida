@@ -699,6 +699,12 @@ Criadas em **outubro/2026** como draft padrão de infoproduto — **não passara
 jurídica**. Dados da empresa em `lib/empresa.ts`; o rodapé de `public/trilha/index.html`
 repete o CNPJ à mão, porque é HTML estático. Mudou um, mude o outro.
 
+**Preço e processador estão escritos nos Termos** (`TRILHA_PRECO`,
+`TRILHA_PARCELAS_MAX`, `PROCESSADOR_PAGAMENTO` em `lib/empresa.ts`): R$ 297 à vista ou até
+12x com juros, pela AbacatePay — as páginas existem para a ativação da conta lá. O preço
+também está à mão em `public/trilha/index.html` e o valor cobrado de fato vem do provider:
+os três precisam bater, senão a página anuncia um valor e cobra outro.
+
 **A cobrança é pagamento único, mesmo parcelada.** A política diz explicitamente que
 desistir depois dos 7 dias não cancela as parcelas restantes — o parcelamento é dívida
 com a administradora do cartão, não mensalidade. Dentro dos 7 dias (art. 49 do CDC) o

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { PaginaLegal, Secao, Lista, LinkWhatsApp } from '@/components/legal/PaginaLegal'
-import { EMPRESA } from '@/lib/empresa'
+import { EMPRESA, PROCESSADOR_PAGAMENTO, TRILHA_PARCELAS_MAX, TRILHA_PRECO } from '@/lib/empresa'
 
 export const metadata: Metadata = {
   title: 'Termos de Uso',
@@ -46,9 +46,9 @@ export default function TermosUsoPage() {
 
       <Secao titulo="2. Preço e pagamento">
         <p>
-          A Trilha é vendida por <strong>pagamento único</strong>, no valor exibido na página de compra
-          no momento da contratação. O pagamento pode ser feito à vista ou parcelado no cartão de
-          crédito, nas condições mostradas no checkout.
+          A Trilha é vendida por <strong>pagamento único</strong> de{' '}
+          <strong>{TRILHA_PRECO} à vista</strong>, ou parcelado em até {TRILHA_PARCELAS_MAX} vezes no
+          cartão de crédito, <strong>com juros</strong>.
         </p>
         <Lista>
           <li>
@@ -56,11 +56,13 @@ export default function TermosUsoPage() {
             mensalidade ou cobrança recorrente, e não há renovação automática.
           </li>
           <li>
-            Eventuais encargos de parcelamento são informados no checkout antes da confirmação.
+            No parcelamento, o valor de cada parcela, a taxa de juros e o valor total a pagar são
+            exibidos no checkout antes da confirmação da compra. O valor total parcelado é, portanto,
+            maior que o preço à vista.
           </li>
           <li>
-            O pagamento é processado por empresa terceirizada (Stripe). Não armazenamos os dados do seu
-            cartão.
+            O pagamento é processado por empresa terceirizada ({PROCESSADOR_PAGAMENTO}). Não
+            armazenamos os dados do seu cartão.
           </li>
         </Lista>
       </Secao>
