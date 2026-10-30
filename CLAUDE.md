@@ -89,7 +89,6 @@ npm run build             # só com o dev parado
 | Rota | Descrição | Auth |
 |---|---|---|
 | `/` | Landing page | pública |
-| `/lista-espera`, `/obrigado` | Captação e agradecimento | pública |
 | `/auth/*` | login, cadastro, esqueci/redefinir senha, verificar e-mail, callback | pública |
 | `/content` | Trilha: módulos e lives | ✅ |
 | `/content/modulo/[id]` | Aula individual | ✅ |
@@ -104,11 +103,11 @@ npm run build             # só com o dev parado
 | `/admin` | Back office de métricas | ✅ + `ADMIN_EMAILS` |
 | `/admin/modulos`, `/admin/modulos/[id]` | Editor do conteúdo escrito das aulas | ✅ + `ADMIN_EMAILS` |
 | `/api/cron/emails` | Disparo diário (21h UTC) | `CRON_SECRET` |
-| `/api/lista-espera` | Webhook de captação | pública |
 | `/api/abacatepay/checkout` | Cria Checkout hospedado de pagamento único | pública (POST) |
 | `/api/abacatepay/webhook` | Confirma pagamento e dispara acesso | secret + HMAC AbacatePay |
 | `/api/admin/compras/reenviar-acesso` | Regenera link de uma compra | ✅ + `ADMIN_EMAILS` |
 | `/compra/sucesso` | Confirmação visual após o Checkout | pública |
+| `/quiz/[slug]` | Funil de quiz: perguntas → diagnóstico → VSL → checkout | pública |
 
 Toda rota autenticada passa pelo `matcher` do middleware, que além de barrar
 visitante também **renova a sessão**. Ao criar rota protegida, adicione ao matcher —
@@ -122,13 +121,13 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 /app
   /actions        auth · mapa · momento · objetivos · progresso · rotina
   /admin          back office
-  /api            cron/emails · cron/teste · lista-espera
+  /api            abacatepay · cron/emails · cron/teste · admin
   /auth /content /mapa /diagnostico /momento /objetivos /rotina /dashboard
 /components
   /ui             shadcn/ui
   /admin          Kpi · Funil · PainelMetricas · TabelaAlunos · Dedicacao · DistribuicaoModulos
   /mapa           MapaFlow · RevelacaoMapa · RevelacaoDiagnostico · AreaDestaqueOverlay
-  /lp /lista-espera
+  /lp
 /lib              ver tabela abaixo
 /emails           6 templates react-email
 /hooks            useMetaPixel · useUTMForward
@@ -155,6 +154,9 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 | `abacatepay.ts` | Cliente server-side da API AbacatePay v2 |
 | `acesso-compra.ts` | Emissão, hash, validação e envio de links de acesso |
 | `cron-auth.ts` | Validação do `CRON_SECRET` |
+| `checkout/` | Abstração do provider de pagamento — ver [Funil de quiz](#funil-de-quiz) |
+| `quiz/` | Motor de pontuação, passos, sessão e configs dos quizzes |
+| `tracking/` | `track()` do funil, captura de atribuição e Conversions API |
 | `supabase.ts` / `-server.ts` / `-admin.ts` | Clientes browser / server / service-role |
 | `validations.ts` | Schemas Zod |
 
@@ -553,6 +555,134 @@ fonte única da contagem da trilha.
 
 ---
 
+## Funil de quiz
+
+Feature de **outubro/2026**, construída como **teste de hipótese**: anúncio →
+`/quiz/[slug]` → diagnóstico → VSL vertical → checkout. É um caminho de venda
+paralelo à LP `/trilha`, não um substituto — os dois apontam para o mesmo checkout.
+
+O quiz **não captura contato**: nada de e-mail ou WhatsApp, nada gravado em banco.
+As respostas vivem em `sessionStorage` e morrem com a aba. O que sobrevive é o que
+vira metadado da cobrança de quem compra.
+
+Regras, perguntas e textos são **fonte de verdade dos docs** em `docs/`
+(`REGRAS DE PONTUAÇÃO DO QUIZ.md` e `[Lucas Soares] Quiz.md`). Os docs são
+explícitos: não alterar a redação sem aprovação.
+
+### Como criar um novo quiz
+
+1. Copie `lib/quiz/configs/quiz-1.ts` para `quiz-2.ts` e mude o `slug`.
+2. Edite perguntas, pesos, textos de resultado e a config da VSL.
+3. Registre em `QUIZZES` de `lib/quiz/registro.ts`.
+4. `npm test` — os testes de integridade conferem a config.
+
+Pronto: `/quiz/quiz-2` existe. **Nenhuma tela nova, nenhuma rota nova.** Um
+componente renderiza qualquer `ConfigQuiz`; se criar um quiz exigir escrever
+componente, a config é que está com campo faltando.
+
+Ao mudar perguntas ou pesos de um quiz **já no ar**, incremente `versao`: ela
+invalida os rascunhos em `sessionStorage`, que de outro modo pontuariam respostas
+antigas com a matriz nova.
+
+### Decisões que o código não explica
+
+**Os limiares da classificação vivem na config, não no motor.** Mínimo de 4 pontos,
+vantagem de 2 e ordem de desempate são "hipóteses operacionais" segundo os docs, a
+recalibrar com respostas reais. No motor, recalibrar o quiz-1 mudaria o quiz-2 junto.
+
+**O desempate dispara por vantagem insuficiente, não por empate exato.** O Exemplo 5
+dos docs (A=5, B=2, C=4) espera desempate embora A e C não estejam empatadas. Ler
+"empatadas" como igualdade estrita jogaria aquele caso em Análise Geral, contra o
+resultado que o próprio doc declara esperado.
+
+**A pergunta 2 não pontua em alternativa nenhuma.** Não é peso esquecido: ela
+identifica o desejo principal para segmentação, e os docs proíbem usá-la como critério.
+Há teste cobrindo isso, porque é o tipo de "correção" que alguém faria de boa fé.
+
+**Q6-C soma B+2, não C+2.** Fala de rotina e imprevisto, mas a matriz a classifica
+como falha de sustentação — e o Exemplo 3 só fecha assim.
+
+**A rota é `noindex`.** O tráfego é pago e a página só faz sentido com a origem do
+anúncio; indexada, competiria com a LP na busca.
+
+**Layout sem Header, Sidebar nem rodapé.** Quem chega de anúncio tem uma tarefa.
+Qualquer navegação visível aqui é uma saída do funil.
+
+**`/quiz/*` fica fora do `matcher` do middleware.** É rota pública e sem sessão: passar
+pelo middleware custaria uma consulta de auth por visita de tráfego frio, para nada.
+
+**Estado em `useReducer`, não dois `useState`.** Índice e respostas mudam juntos ao
+avançar; separados, a gravação do rascunho poderia rodar entre as duas atualizações e
+persistir um par inconsistente.
+
+**A barra mede a posição no fluxo, não as respostas preenchidas** — mesma lição do
+Mapa conversacional: restaurar rascunho faria a barra nascer cheia, e voltar não a faria
+recuar. O denominador conta só as perguntas; as telas de copy não são etapas que a
+pessoa cumpre.
+
+**Rascunho em `sessionStorage`, limpo ao chegar no resultado.** Perder seis respostas
+num F5 é ruim, mas um rascunho antigo reaparecendo para quem volta pelo anúncio seria
+pior: a pessoa veria um resultado que não respondeu agora.
+
+### Checkout agnóstico de provider
+
+`startCheckout()` em `lib/checkout/` resolve o provider por `CHECKOUT_PROVIDER` e
+devolve a URL de pagamento. **O quiz nunca importa o cliente AbacatePay:** chama
+`/api/abacatepay/checkout` por `fetch` e recebe a URL. Os dois `<form>` da LP usam a
+mesma rota e recebem um redirect `303`.
+
+A leitura do corpo é retrocompatível: a LP posta form sem corpo e recebe `303`, o quiz
+manda JSON e recebe a URL. Corpo inválido cai no caminho da LP em vez de falhar — nada
+no tracking justifica impedir alguém de comprar.
+
+O adapter ativo é `lib/checkout/abacatepay-provider.ts`: cria checkout com PIX e cartão,
+até 12 parcelas, e envia origem, perfil, UTM, `fbp` e `fbc` em metadata. O webhook v2
+valida secret e HMAC, deduplica por `(provider, event_id)`, registra a compra e envia o
+convite. O `externalId` aparece também em `checkout_ref` na URL de sucesso para o Pixel e
+a CAPI derivarem o mesmo `event_id` sem depender de identificadores internos do provedor.
+
+### Tracking
+
+`track()` em `lib/tracking/eventos.ts` manda cada evento para o **Pixel e o GA4** na
+mesma chamada: o Pixel alimenta a otimização da campanha, o GA4 dá o relatório de funil
+com abandono por etapa — que no Gerenciador da Meta exigiria uma conversão personalizada
+por passo.
+
+Eventos: `quiz_view` · `quiz_start` · `quiz_answer` (com etapa) · `quiz_complete` (com
+perfil, regra e pontuações) · `vsl_play` · `cta_click`.
+
+São **eventos customizados**, não padrão da Meta: mapeá-los a `Lead` ou `ViewContent`
+misturaria o funil do quiz com o da lista de espera no mesmo relatório. Para virarem
+objetivo de campanha, precisam de **conversão personalizada** criada no Gerenciador.
+
+**O Purchase não existia no projeto** — a compra era cega para a Meta. Agora dispara em
+par: Pixel em `/compra/sucesso` e CAPI no webhook, com `event_id` derivado da referência
+externa do checkout. Os dois lados chegam ao mesmo id sem trocar nada entre si, a Meta
+deduplica e um retry do provedor não vira segunda venda.
+
+**A CAPI nunca lança e roda depois do e-mail de acesso.** Falhar ali faria o provedor
+reenviar o evento e reprocessar a compra: perder um evento de tracking é muito mais
+barato que duplicar uma venda ou um e-mail.
+
+**A atribuição é capturada na entrada**, não no clique do CTA, que acontece várias telas
+depois e já perdeu a query string. A primeira captura com origem real ganha; os cookies
+do Pixel são reatualizados, porque podem ter sido gravados depois da primeira tela.
+
+### Pendências
+
+- **`videoId` da VTurb** está vazio em `lib/quiz/configs/quiz-1.ts`. Sem ele o player não
+  é montado e o CTA aparece de imediato — a tela de compra nunca fica sem saída.
+- **`ctaAtSeconds` está em 0** enquanto não há vídeo. Com vídeo, ajustar ao ponto do
+  roteiro.
+- **Na VTurb o CTA é liberado por temporizador** desde a montagem, não pelo tempo real de
+  reprodução: o custom element não expõe progresso de forma estável. Quem pausa vê o botão
+  antes do ponto do roteiro — assumido para não prender o CTA atrás de um evento que pode
+  nunca chegar.
+- **`META_CAPI_TEST_CODE` deve ser removido** depois de validar no Gerenciador, senão os
+  eventos seguem chegando como teste e não contam para a campanha.
+
+---
+
 ## Back office (`/admin`)
 
 Protegido por `ADMIN_EMAILS` (lista separada por vírgula) no middleware. Toda leitura
@@ -601,7 +731,7 @@ Um cron diário (21h UTC, `vercel.json`) em `/api/cron/emails` decide o que disp
 | `lembrete-objetivo` | conforme `frequencia_lembrete`; para de cobrar prazo vencido |
 | `momento-revisao` | ao chegar a `data_revisao` |
 | `objetivo-concluido` | na conclusão |
-| `acesso-plataforma` | após confirmação do pagamento pelo webhook Stripe |
+| `acesso-plataforma` | após confirmação do pagamento pelo webhook AbacatePay |
 
 Os e-mails citam o Momento de Vida ativo como fio condutor. Buscas de usuário são em
 **batch** — não faça query por pessoa dentro de loop.
@@ -618,12 +748,16 @@ Os e-mails citam o Momento de Vida ativo como fio condutor. Buscas de usuário s
 | `CRON_SECRET` | autenticação do cron da Vercel |
 | `SMTP_*` | host, port, secure, user, pass, from |
 | `NEXT_PUBLIC_SITE_URL` | links absolutos em e-mails |
-| `MAKE_WEBHOOK_URL` | integração da lista de espera |
-| `NEXT_PUBLIC_META_PIXEL_LISTA_ESPERA_ID` | pixel de captação |
 | `ABACATEPAY_API_KEY` | chave server-side (`abc_dev_` em testes, `abc_prod_` em produção) |
 | `ABACATEPAY_PRODUCT_ID` | produto avulso vendido pelo Checkout |
 | `ABACATEPAY_WEBHOOK_SECRET` | autentica o secret enviado na URL do webhook |
 | `ACCESS_LINK_TTL_HOURS` | validade do link de cadastro; padrão 168h |
+| `CHECKOUT_PROVIDER` | provider de pagamento ativo; padrão `abacatepay` |
+| `NEXT_PUBLIC_QUIZ_ATIVO` | `false` desliga o funil de quiz (404 em todo slug) |
+| `NEXT_PUBLIC_META_PIXEL_QUIZ_ID` | pixel do funil de quiz — separado do de captação |
+| `NEXT_PUBLIC_GA_ID` | GA4 nas rotas do quiz; o mesmo id da LP |
+| `META_PIXEL_ID` / `META_CAPI_ACCESS_TOKEN` | Purchase server-side pela Conversions API |
+| `META_CAPI_TEST_CODE` | só durante a validação no Gerenciador — **remover depois** |
 
 Ao adicionar variável nova: **`.env.local` e Vercel**, e a Vercel precisa de redeploy —
 variáveis não se aplicam a builds existentes.

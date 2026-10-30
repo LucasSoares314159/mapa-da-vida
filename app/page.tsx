@@ -27,10 +27,10 @@ export default async function HomePage() {
           Em breve este espaço vai contar toda a história.
         </p>
         <Link
-          href="/lista-espera"
+          href="/trilha"
           className="text-sm text-zinc-400 underline underline-offset-4 hover:text-white transition-colors"
         >
-          Entrar na lista de espera →
+          Conhecer a Trilha →
         </Link>
       </div>
     </main>

@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from 'crypto'
 import { NextResponse } from 'next/server'
 import { enviarLinkAcessoCompra, normalizarEmail } from '@/lib/acesso-compra'
 import { createAdminSupabaseClient } from '@/lib/supabase-admin'
+import { capiConfigurada, enviarEventoCapi, eventIdDaCompra } from '@/lib/tracking/capi'
 
 export const runtime = 'nodejs'
 
@@ -20,6 +21,7 @@ type AbacatePayEvent = {
   data?: {
     checkout?: {
       id?: unknown
+      externalId?: unknown
       status?: unknown
       amount?: unknown
       paidAmount?: unknown
@@ -28,6 +30,7 @@ type AbacatePayEvent = {
       installmentsCount?: unknown
       updatedAt?: unknown
       items?: CheckoutItem[]
+      metadata?: Record<string, unknown>
     }
     customer?: {
       name?: unknown
@@ -135,6 +138,54 @@ async function processarCheckoutPago(payload: AbacatePayEvent): Promise<void> {
   }
 
   await enviarLinkAcessoCompra(compra.id, email)
+  await registrarPurchase(payload, email)
+}
+
+function metadataString(metadata: Record<string, unknown> | undefined, chave: string) {
+  const valor = metadata?.[chave]
+  return typeof valor === 'string' ? valor : undefined
+}
+
+async function registrarPurchase(payload: AbacatePayEvent, email: string): Promise<void> {
+  if (!capiConfigurada()) return
+
+  const checkout = payload.data?.checkout
+  if (!checkout || typeof checkout.id !== 'string') return
+
+  const metadata = checkout.metadata
+  const referencia = typeof checkout.externalId === 'string'
+    ? checkout.externalId
+    : checkout.id
+  const amount = typeof checkout.paidAmount === 'number'
+    ? checkout.paidAmount
+    : typeof checkout.amount === 'number'
+      ? checkout.amount
+      : undefined
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? '').replace(/\/$/, '')
+
+  try {
+    await enviarEventoCapi({
+      nome: 'Purchase',
+      eventId: eventIdDaCompra(referencia),
+      email,
+      fbp: metadataString(metadata, 'fbp'),
+      fbc: metadataString(metadata, 'fbc'),
+      valor: amount !== undefined ? amount / 100 : undefined,
+      moeda: 'BRL',
+      sourceUrl: siteUrl ? `${siteUrl}/compra/sucesso` : undefined,
+      customData: {
+        source: metadataString(metadata, 'source') ?? 'lp-trilha',
+        ...(metadataString(metadata, 'quiz_slug')
+          ? { quiz_slug: metadataString(metadata, 'quiz_slug') as string }
+          : {}),
+        ...(metadataString(metadata, 'result_profile')
+          ? { result_profile: metadataString(metadata, 'result_profile') as string }
+          : {}),
+      },
+    })
+  } catch (error) {
+    console.error('[abacatepay-webhook] Purchase da CAPI falhou:', error)
+  }
 }
 
 export async function POST(request: Request) {
