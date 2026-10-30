@@ -1,4 +1,4 @@
-import { stripeProvider } from './stripe-provider'
+import { abacatePayProvider } from './abacatepay-provider'
 import type { ParamsCheckout, ProviderCheckout, ResultadoCheckout } from './tipos'
 
 export type { ParamsCheckout, ProviderCheckout, ResultadoCheckout, OrigemCheckout } from './tipos'
@@ -7,16 +7,15 @@ export { montarMetadata } from './tipos'
 /**
  * Providers disponiveis.
  *
- * A AbacatePay entra aqui como uma segunda entrada quando a estrutura dela
- * subir: implementar ProviderCheckout em lib/checkout/abacatepay-provider.ts,
- * registrar abaixo e apontar CHECKOUT_PROVIDER para ela. O quiz nao muda.
+ * A pagina e o quiz conhecem apenas este contrato. Detalhes da API e das
+ * credenciais ficam isolados no adapter do provedor.
  */
 const PROVIDERS: Record<string, ProviderCheckout> = {
-  stripe: stripeProvider,
+  abacatepay: abacatePayProvider,
 }
 
 export function providerAtivo(): ProviderCheckout {
-  const escolhido = (process.env.CHECKOUT_PROVIDER ?? 'stripe').trim().toLowerCase()
+  const escolhido = (process.env.CHECKOUT_PROVIDER ?? 'abacatepay').trim().toLowerCase()
   const provider = PROVIDERS[escolhido]
 
   if (!provider) {

@@ -3,8 +3,8 @@ import { createHash } from 'node:crypto'
 // Conversions API da Meta — envio server-side de eventos.
 //
 // Existe por causa do Purchase. O navegador pode fechar antes do redirect do
-// Stripe, o adblock pode derrubar o Pixel e o iOS pode cortar o cookie: nos
-// tres casos a venda acontece e a Meta nunca sabe. O webhook do Stripe e o
+// provedor, o adblock pode derrubar o Pixel e o iOS pode cortar o cookie: nos
+// tres casos a venda acontece e a Meta nunca sabe. O webhook de pagamento e o
 // unico ponto do fluxo que ve o pagamento confirmado com certeza.
 //
 // O par browser + servidor manda o MESMO event_id, e a Meta deduplica. Sem
@@ -41,7 +41,7 @@ export function capiConfigurada(): boolean {
 /**
  * Envia um evento para a CAPI.
  *
- * Nunca lanca: quem chama e o webhook do Stripe, e falhar ali faria o Stripe
+ * Nunca lanca: quem chama e o webhook do provedor, e falhar ali causaria
  * reenviar o evento, reprocessando a compra e reenviando o e-mail de acesso.
  * Perder um evento de tracking e muito mais barato que duplicar uma venda.
  */
@@ -104,10 +104,10 @@ export async function enviarEventoCapi(evento: EventoCapi): Promise<boolean> {
 /**
  * Identificador deduplicavel de uma compra.
  *
- * Derivado da Checkout Session, que e unica e estavel: o navegador e o webhook
+ * Derivado da referencia do checkout, que e unica e estavel: navegador e webhook
  * chegam ao mesmo id sem precisar passar nada um para o outro, e um retry do
- * Stripe nao gera um segundo Purchase.
+ * provedor nao gera um segundo Purchase.
  */
-export function eventIdDaCompra(idSessaoCheckout: string): string {
-  return `purchase_${idSessaoCheckout}`
+export function eventIdDaCompra(idCheckout: string): string {
+  return `purchase_${idCheckout}`
 }

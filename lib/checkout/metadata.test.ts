@@ -13,7 +13,7 @@ describe('montarMetadata', () => {
   })
 
   it('o produto e exatamente o que o webhook exige para processar a compra', () => {
-    // O webhook descarta a sessao se metadata.produto divergir; um typo aqui
+    // O webhook descarta a cobranca se o produto divergir; um typo aqui
     // faria o pagamento acontecer sem liberar acesso.
     expect(montarMetadata({ source: 'quiz' }).produto).toBe('trilha-produtividade')
   })
@@ -55,7 +55,7 @@ describe('montarMetadata', () => {
     expect(metadata).not.toHaveProperty('fbp')
   })
 
-  it('trunca valor longo no limite de 500 caracteres do Stripe', () => {
+  it('trunca valor longo para manter o metadata portavel', () => {
     const metadata = montarMetadata({
       source: 'quiz',
       utm: { utm_campaign: 'x'.repeat(900) },
@@ -64,7 +64,7 @@ describe('montarMetadata', () => {
     expect(metadata.utm_campaign).toHaveLength(500)
   })
 
-  it('cabe no limite de 50 chaves do Stripe com todos os campos preenchidos', () => {
+  it('mantem um conjunto pequeno de chaves com todos os campos preenchidos', () => {
     const metadata = montarMetadata({
       source: 'quiz',
       quizSlug: 'quiz-1',

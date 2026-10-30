@@ -103,8 +103,8 @@ npm run build             # só com o dev parado
 | `/admin` | Back office de métricas | ✅ + `ADMIN_EMAILS` |
 | `/admin/modulos`, `/admin/modulos/[id]` | Editor do conteúdo escrito das aulas | ✅ + `ADMIN_EMAILS` |
 | `/api/cron/emails` | Disparo diário (21h UTC) | `CRON_SECRET` |
-| `/api/stripe/checkout` | Cria Checkout Session de pagamento único | pública (POST) |
-| `/api/stripe/webhook` | Confirma pagamento e dispara acesso | assinatura Stripe |
+| `/api/abacatepay/checkout` | Cria Checkout hospedado de pagamento único | pública (POST) |
+| `/api/abacatepay/webhook` | Confirma pagamento e dispara acesso | secret + HMAC AbacatePay |
 | `/api/admin/compras/reenviar-acesso` | Regenera link de uma compra | ✅ + `ADMIN_EMAILS` |
 | `/compra/sucesso` | Confirmação visual após o Checkout | pública |
 | `/quiz/[slug]` | Funil de quiz: perguntas → diagnóstico → VSL → checkout | pública |
@@ -121,7 +121,7 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 /app
   /actions        auth · mapa · momento · objetivos · progresso · rotina
   /admin          back office
-  /api            cron/emails · cron/teste · stripe · admin
+  /api            abacatepay · cron/emails · cron/teste · admin
   /auth /content /mapa /diagnostico /momento /objetivos /rotina /dashboard
 /components
   /ui             shadcn/ui
@@ -151,7 +151,7 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 | `prazo.ts` | Labels de prazo de objetivo |
 | `membros.ts` | Contagem de cadastrados |
 | `email.ts` / `email-templates.ts` | Envio e montagem |
-| `stripe.ts` | Cliente server-side do Stripe |
+| `abacatepay.ts` | Cliente server-side da API AbacatePay v2 |
 | `acesso-compra.ts` | Emissão, hash, validação e envio de links de acesso |
 | `cron-auth.ts` | Validação do `CRON_SECRET` |
 | `checkout/` | Abstração do provider de pagamento — ver [Funil de quiz](#funil-de-quiz) |
@@ -177,9 +177,9 @@ as novas migrações versionadas em `supabase/migrations`.
 | `momentos_vida` | `estacao`, `frase`, `duracao`, `data_revisao`, `ativo` — 1 ativo por usuário |
 | `progresso_aulas` | `user_id`, `modulo_id`, `concluido_em`, `data_confiavel` |
 | `modulos_conteudo` | `modulo_id` (PK, texto), `blocos` (jsonb), `atualizado_em` |
-| `compras` | sessão/pagamento Stripe, e-mail, status, `user_id`, datas do funil |
+| `compras` | provedor/checkout, e-mail, status, `user_id`, método, parcelas e datas do funil |
 | `tokens_acesso_compra` | hash do token, expiração, uso e invalidação |
-| `stripe_webhook_events` | IDs de evento já recebidos para idempotência |
+| `payment_webhook_events` | IDs de evento por provedor para idempotência |
 
 ### Invariantes que não podem ser quebrados
 
@@ -193,7 +193,7 @@ validar o back office em produção.
 
 **Links de compra** — apenas o SHA-256 do token é persistido. Um novo envio invalida
 todos os links anteriores ainda ativos; `used_at` impede reutilização depois do cadastro.
-`stripe_webhook_events.event_id` impede e-mail duplicado quando o Stripe reenvia eventos.
+`payment_webhook_events (provider, event_id)` impede e-mail duplicado quando o provedor reenvia eventos.
 
 **`profiles.excluir_das_metricas`** — contas internas somem do back office e do
 contador de membros, mas a plataforma funciona normal para elas. Apagar dados de conta
@@ -627,27 +627,19 @@ pior: a pessoa veria um resultado que não respondeu agora.
 ### Checkout agnóstico de provider
 
 `startCheckout()` em `lib/checkout/` resolve o provider por `CHECKOUT_PROVIDER` e
-devolve a URL de pagamento. **O quiz nunca importa Stripe:** chama a rota por `fetch` e
-recebe a URL.
-
-A rota continua em `/api/stripe/checkout` de propósito — mover a URL quebraria os dois
-`<form>` de `public/trilha/index.html`, que é HTML estático. **O caminho não decide mais
-o provider; a variável decide.**
+devolve a URL de pagamento. **O quiz nunca importa o cliente AbacatePay:** chama
+`/api/abacatepay/checkout` por `fetch` e recebe a URL. Os dois `<form>` da LP usam a
+mesma rota e recebem um redirect `303`.
 
 A leitura do corpo é retrocompatível: a LP posta form sem corpo e recebe `303`, o quiz
 manda JSON e recebe a URL. Corpo inválido cai no caminho da LP em vez de falhar — nada
 no tracking justifica impedir alguém de comprar.
 
-**Para ligar a AbacatePay quando ela subir:** implementar `ProviderCheckout` em
-`lib/checkout/abacatepay-provider.ts`, registrar no mapa de `lib/checkout/index.ts` e
-apontar `CHECKOUT_PROVIDER` para ela. Nada em `components/quiz` muda. O webhook dela
-precisa replicar o que o da Stripe faz: idempotência por id de evento, `upsert` em
-`compras` e `enviarLinkAcessoCompra()`. Se ela não aceitar metadado arbitrário, a
-alternativa é uma tabela própria ligada ao id da cobrança — o slug e o perfil não podem
-se perder, são eles que tornam a origem rastreável.
-
-O metadata é espelhado em `payment_intent_data`: o webhook lê a Session, mas reembolso e
-relatório financeiro veem o Payment Intent, e sem o espelho a origem se perderia lá.
+O adapter ativo é `lib/checkout/abacatepay-provider.ts`: cria checkout com PIX e cartão,
+até 12 parcelas, e envia origem, perfil, UTM, `fbp` e `fbc` em metadata. O webhook v2
+valida secret e HMAC, deduplica por `(provider, event_id)`, registra a compra e envia o
+convite. O `externalId` aparece também em `checkout_ref` na URL de sucesso para o Pixel e
+a CAPI derivarem o mesmo `event_id` sem depender de identificadores internos do provedor.
 
 ### Tracking
 
@@ -664,11 +656,11 @@ misturaria o funil do quiz com o da lista de espera no mesmo relatório. Para vi
 objetivo de campanha, precisam de **conversão personalizada** criada no Gerenciador.
 
 **O Purchase não existia no projeto** — a compra era cega para a Meta. Agora dispara em
-par: Pixel em `/compra/sucesso` e CAPI no webhook, com `event_id` derivado da Checkout
-Session. Os dois lados chegam ao mesmo id sem trocar nada entre si, a Meta deduplica e um
-retry do Stripe não vira segunda venda.
+par: Pixel em `/compra/sucesso` e CAPI no webhook, com `event_id` derivado da referência
+externa do checkout. Os dois lados chegam ao mesmo id sem trocar nada entre si, a Meta
+deduplica e um retry do provedor não vira segunda venda.
 
-**A CAPI nunca lança e roda depois do e-mail de acesso.** Falhar ali faria o Stripe
+**A CAPI nunca lança e roda depois do e-mail de acesso.** Falhar ali faria o provedor
 reenviar o evento e reprocessar a compra: perder um evento de tracking é muito mais
 barato que duplicar uma venda ou um e-mail.
 
@@ -739,7 +731,7 @@ Um cron diário (21h UTC, `vercel.json`) em `/api/cron/emails` decide o que disp
 | `lembrete-objetivo` | conforme `frequencia_lembrete`; para de cobrar prazo vencido |
 | `momento-revisao` | ao chegar a `data_revisao` |
 | `objetivo-concluido` | na conclusão |
-| `acesso-plataforma` | após confirmação do pagamento pelo webhook Stripe |
+| `acesso-plataforma` | após confirmação do pagamento pelo webhook AbacatePay |
 
 Os e-mails citam o Momento de Vida ativo como fio condutor. Buscas de usuário são em
 **batch** — não faça query por pessoa dentro de loop.
@@ -756,11 +748,11 @@ Os e-mails citam o Momento de Vida ativo como fio condutor. Buscas de usuário s
 | `CRON_SECRET` | autenticação do cron da Vercel |
 | `SMTP_*` | host, port, secure, user, pass, from |
 | `NEXT_PUBLIC_SITE_URL` | links absolutos em e-mails |
-| `STRIPE_SECRET_KEY` | chave server-side do Stripe (`sk_test_` no sandbox) |
-| `STRIPE_PRICE_ID` | preço único vendido pelo Checkout |
-| `STRIPE_WEBHOOK_SECRET` | valida assinatura do webhook (`whsec_`) |
+| `ABACATEPAY_API_KEY` | chave server-side (`abc_dev_` em testes, `abc_prod_` em produção) |
+| `ABACATEPAY_PRODUCT_ID` | produto avulso vendido pelo Checkout |
+| `ABACATEPAY_WEBHOOK_SECRET` | autentica o secret enviado na URL do webhook |
 | `ACCESS_LINK_TTL_HOURS` | validade do link de cadastro; padrão 168h |
-| `CHECKOUT_PROVIDER` | provider de pagamento ativo; padrão `stripe` |
+| `CHECKOUT_PROVIDER` | provider de pagamento ativo; padrão `abacatepay` |
 | `NEXT_PUBLIC_QUIZ_ATIVO` | `false` desliga o funil de quiz (404 em todo slug) |
 | `NEXT_PUBLIC_META_PIXEL_QUIZ_ID` | pixel do funil de quiz — separado do de captação |
 | `NEXT_PUBLIC_GA_ID` | GA4 nas rotas do quiz; o mesmo id da LP |
