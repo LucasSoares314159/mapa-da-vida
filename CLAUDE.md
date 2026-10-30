@@ -108,6 +108,7 @@ npm run build             # só com o dev parado
 | `/api/admin/compras/reenviar-acesso` | Regenera link de uma compra | ✅ + `ADMIN_EMAILS` |
 | `/compra/sucesso` | Confirmação visual após o Checkout | pública |
 | `/quiz/[slug]` | Funil de quiz: perguntas → diagnóstico → VSL → checkout | pública |
+| `/termos-uso`, `/cancelamento` | Termos de Uso e Política de Cancelamento e Reembolso | pública |
 
 Toda rota autenticada passa pelo `matcher` do middleware, que além de barrar
 visitante também **renova a sessão**. Ao criar rota protegida, adicione ao matcher —
@@ -159,6 +160,7 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 | `tracking/` | `track()` do funil, captura de atribuição e Conversions API |
 | `supabase.ts` / `-server.ts` / `-admin.ts` | Clientes browser / server / service-role |
 | `validations.ts` | Schemas Zod |
+| `empresa.ts` | Razão social, CNPJ, endereço e contato das páginas legais |
 
 ---
 
@@ -688,6 +690,23 @@ do Pixel são reatualizados, porque podem ter sido gravados depois da primeira t
   nunca chegar.
 - **`META_CAPI_TEST_CODE` deve ser removido** depois de validar no Gerenciador, senão os
   eventos seguem chegando como teste e não contam para a campanha.
+
+---
+
+## Páginas legais (`/termos-uso`, `/cancelamento`)
+
+Criadas em **outubro/2026** como draft padrão de infoproduto — **não passaram por revisão
+jurídica**. Dados da empresa em `lib/empresa.ts`; o rodapé de `public/trilha/index.html`
+repete o CNPJ à mão, porque é HTML estático. Mudou um, mude o outro.
+
+**A cobrança é pagamento único, mesmo parcelada.** A política diz explicitamente que
+desistir depois dos 7 dias não cancela as parcelas restantes — o parcelamento é dívida
+com a administradora do cartão, não mensalidade. Dentro dos 7 dias (art. 49 do CDC) o
+estorno é do valor total, mesmo com o conteúdo já consumido: o CDC não admite exceção para
+"já assistiu".
+
+Ficam fora do `matcher` do middleware: são públicas e precisam abrir para quem ainda não
+comprou.
 
 ---
 

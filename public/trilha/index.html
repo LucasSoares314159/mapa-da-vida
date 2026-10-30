@@ -1342,6 +1342,20 @@
 
   .footer-links a:hover { color: var(--verde); }
 
+  /* Identificação legal: menor que os links sociais — é obrigação, não convite. */
+  .footer-legal {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--texto-sec);
+  }
+
+  .footer-legal a {
+    color: var(--texto-sec);
+    text-decoration: underline;
+  }
+
+  .footer-legal a:hover { color: var(--verde); }
+
   /* HAMBURGER */
   .nav-hamburger {
     display: none;
@@ -3407,6 +3421,11 @@ No final, como na maioria das vezes, o problema era maior na minha mente e não 
     <a href="https://www.youtube.com/@mindtrail_co" target="_blank" rel="noopener noreferrer">YouTube</a>
     <a href="https://themindtrail.substack.com/" target="_blank" rel="noopener noreferrer">Newsletter</a>
   </div>
+  <!-- CNPJ repetido de lib/empresa.ts: esta página é HTML estático. -->
+  <p class="footer-legal">
+    <a href="/termos-uso">Termos de Uso</a> · <a href="/cancelamento">Cancelamento e Reembolso</a><br>
+    LSC Consultoria Ltda. · CNPJ 53.177.351/0001-39
+  </p>
 </footer>
 
 <script>
