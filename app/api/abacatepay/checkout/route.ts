@@ -54,7 +54,7 @@ async function lerParams(request: Request): Promise<ParamsCheckout> {
   return { source: 'lp-trilha' }
 }
 
-export async function POST(request: Request) {
+async function iniciarCheckout(request: Request) {
   try {
     const requestOrigin = new URL(request.url).origin
     const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || requestOrigin).replace(/\/$/, '')
@@ -74,3 +74,9 @@ export async function POST(request: Request) {
     )
   }
 }
+
+// Alguns CTAs e links externos podem abrir a rota como uma navegacao direta.
+// GET e POST compartilham o mesmo fluxo; requisicoes JSON continuam recebendo
+// a URL, enquanto navegacoes do browser recebem o redirect 303.
+export const GET = iniciarCheckout
+export const POST = iniciarCheckout
