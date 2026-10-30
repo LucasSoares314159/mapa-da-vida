@@ -1,8 +1,39 @@
+import { randomUUID } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { startCheckout, type ParamsCheckout } from '@/lib/checkout'
 import { PARAMS_UTM } from '@/lib/tracking/atribuicao'
 
 export const runtime = 'nodejs'
+
+type ErroComDetalhes = Error & {
+  status?: unknown
+  code?: unknown
+  cause?: unknown
+}
+
+function detalhesDoErro(error: unknown) {
+  if (!(error instanceof Error)) {
+    return {
+      name: 'UnknownError',
+      message: String(error),
+      type: typeof error,
+    }
+  }
+
+  const erro = error as ErroComDetalhes
+  const cause = erro.cause instanceof Error
+    ? { name: erro.cause.name, message: erro.cause.message }
+    : undefined
+
+  return {
+    name: erro.name,
+    message: erro.message,
+    status: typeof erro.status === 'number' ? erro.status : undefined,
+    code: typeof erro.code === 'string' ? erro.code : undefined,
+    cause,
+    stack: erro.stack,
+  }
+}
 
 function texto(valor: unknown): string | undefined {
   return typeof valor === 'string' && valor.trim() ? valor.trim() : undefined
@@ -67,9 +98,32 @@ async function iniciarCheckout(request: Request) {
 
     return NextResponse.redirect(url, 303)
   } catch (error) {
-    console.error('[abacatepay-checkout] Falha ao criar checkout:', error)
+    const errorId = randomUUID()
+    const requestUrl = new URL(request.url)
+
+    // String unica para a Vercel preservar todos os campos no mesmo registro.
+    // Somente presenca de configuracao e registrada; valores secretos nunca saem.
+    console.error('[abacatepay-checkout]', JSON.stringify({
+      event: 'checkout_creation_failed',
+      errorId,
+      method: request.method,
+      path: requestUrl.pathname,
+      origin: requestUrl.origin,
+      contentType: request.headers.get('content-type'),
+      vercelId: request.headers.get('x-vercel-id'),
+      config: {
+        apiKeyConfigured: Boolean(process.env.ABACATEPAY_API_KEY),
+        productIdConfigured: Boolean(process.env.ABACATEPAY_PRODUCT_ID),
+        provider: process.env.CHECKOUT_PROVIDER ?? 'abacatepay',
+      },
+      error: detalhesDoErro(error),
+    }))
+
     return NextResponse.json(
-      { error: 'Nao foi possivel iniciar o pagamento. Tente novamente.' },
+      {
+        error: 'Nao foi possivel iniciar o pagamento. Tente novamente.',
+        errorId,
+      },
       { status: 500 }
     )
   }
