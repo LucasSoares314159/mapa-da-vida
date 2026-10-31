@@ -114,6 +114,7 @@ async function iniciarCheckout(request: Request) {
       config: {
         apiKeyConfigured: Boolean(process.env.ABACATEPAY_API_KEY),
         productIdConfigured: Boolean(process.env.ABACATEPAY_PRODUCT_ID),
+        cardEnabled: process.env.ABACATEPAY_CARD_ENABLED?.trim().toLowerCase() === 'true',
         provider: process.env.CHECKOUT_PROVIDER ?? 'abacatepay',
       },
       error: detalhesDoErro(error),
