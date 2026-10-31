@@ -637,8 +637,10 @@ A leitura do corpo é retrocompatível: a LP posta form sem corpo e recebe `303`
 manda JSON e recebe a URL. Corpo inválido cai no caminho da LP em vez de falhar — nada
 no tracking justifica impedir alguém de comprar.
 
-O adapter ativo é `lib/checkout/abacatepay-provider.ts`: cria checkout com PIX e cartão,
-até 12 parcelas, e envia origem, perfil, UTM, `fbp` e `fbc` em metadata. O webhook v2
+O adapter ativo é `lib/checkout/abacatepay-provider.ts`: cria checkout com PIX por padrão.
+Cartão em até 12 parcelas é incluído somente com `ABACATEPAY_CARD_ENABLED=true`, depois
+que a modalidade estiver liberada para a loja. O adapter envia origem, perfil, UTM,
+`fbp` e `fbc` em metadata. O webhook v2
 valida secret e HMAC, deduplica por `(provider, event_id)`, registra a compra e envia o
 convite. O `externalId` aparece também em `checkout_ref` na URL de sucesso para o Pixel e
 a CAPI derivarem o mesmo `event_id` sem depender de identificadores internos do provedor.
@@ -776,6 +778,7 @@ Os e-mails citam o Momento de Vida ativo como fio condutor. Buscas de usuário s
 | `ABACATEPAY_API_KEY` | chave server-side (`abc_dev_` em testes, `abc_prod_` em produção) |
 | `ABACATEPAY_PRODUCT_ID` | produto avulso vendido pelo Checkout |
 | `ABACATEPAY_WEBHOOK_SECRET` | autentica o secret enviado na URL do webhook |
+| `ABACATEPAY_CARD_ENABLED` | `true` habilita cartão em até 12x; padrão `false` (somente PIX) |
 | `ACCESS_LINK_TTL_HOURS` | validade do link de cadastro; padrão 168h |
 | `CHECKOUT_PROVIDER` | provider de pagamento ativo; padrão `abacatepay` |
 | `NEXT_PUBLIC_QUIZ_ATIVO` | `false` desliga o funil de quiz (404 em todo slug) |

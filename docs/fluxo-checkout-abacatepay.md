@@ -15,7 +15,7 @@ sequenceDiagram
 
     Cliente->>Site: POST /api/abacatepay/checkout
     Site->>Abacate: POST /v2/checkouts/create
-    Note over Site,Abacate: PIX + CARD, ate 12 parcelas
+    Note over Site,Abacate: PIX; CARD ate 12x somente quando habilitado
     Abacate-->>Site: data.url
     Site-->>Cliente: HTTP 303 para o Checkout
     Cliente->>Abacate: Informa os dados e paga
@@ -34,8 +34,8 @@ sequenceDiagram
 `app/api/abacatepay/checkout/route.ts` cria um checkout com:
 
 - produto configurado por `ABACATEPAY_PRODUCT_ID`;
-- metodos `PIX` e `CARD`;
-- `card.maxInstallments` igual a `12`;
+- metodo `PIX` por padrao;
+- `CARD` e `card.maxInstallments=12` quando `ABACATEPAY_CARD_ENABLED=true`;
 - `returnUrl` apontando para `/trilha#comprar`;
 - `completionUrl` apontando para `/compra/sucesso`;
 - metadata `produto=trilha-produtividade`;
@@ -102,6 +102,7 @@ Depois de persistir a compra, `lib/acesso-compra.ts`:
 ABACATEPAY_API_KEY=abc_dev_...
 ABACATEPAY_PRODUCT_ID=prod_...
 ABACATEPAY_WEBHOOK_SECRET=um-segredo-aleatorio-forte
+ABACATEPAY_CARD_ENABLED=false
 NEXT_PUBLIC_SITE_URL=http://localhost:3001
 ```
 
@@ -115,8 +116,8 @@ Produto e webhook devem ser criados separadamente em cada ambiente.
 2. Configure as tres variaveis AbacatePay.
 3. Cadastre o webhook para a URL HTTPS publica do ambiente.
 4. Inicie uma compra pela pagina `/trilha`.
-5. Use o cartao aprovado `4242 4242 4242 4242`, uma validade futura e qualquer
-   CVV.
+5. Conclua o pagamento com o metodo disponivel. Para testar cartao, confirme que
+   a loja tem a modalidade liberada e use `ABACATEPAY_CARD_ENABLED=true`.
 6. Confirme no banco a compra, o evento processado e o token de convite.
 7. Abra o e-mail e conclua o cadastro.
 

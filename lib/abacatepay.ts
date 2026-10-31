@@ -8,7 +8,7 @@ export interface CreateAbacatePayCheckoutInput {
     quantity: number
   }>
   methods: AbacatePayPaymentMethod[]
-  card: {
+  card?: {
     maxInstallments: number
   }
   externalId: string

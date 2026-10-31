@@ -21,10 +21,11 @@ export const abacatePayProvider: ProviderCheckout = {
 
     const externalId = `trilha-produtividade-${randomUUID()}`
     const cancelPath = params.cancelPath ?? '/trilha#comprar'
+    const cardEnabled = process.env.ABACATEPAY_CARD_ENABLED?.trim().toLowerCase() === 'true'
     const checkout = await getAbacatePay().createCheckout({
       items: [{ id: productId, quantity: 1 }],
-      methods: ['PIX', 'CARD'],
-      card: { maxInstallments: 12 },
+      methods: cardEnabled ? ['PIX', 'CARD'] : ['PIX'],
+      ...(cardEnabled ? { card: { maxInstallments: 12 } } : {}),
       externalId,
       metadata: montarMetadata(params),
       returnUrl: `${siteUrl}${cancelPath}`,
