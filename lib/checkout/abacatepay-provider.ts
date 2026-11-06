@@ -25,7 +25,9 @@ export const abacatePayProvider: ProviderCheckout = {
     const checkout = await getAbacatePay().createCheckout({
       items: [{ id: productId, quantity: 1 }],
       methods: cardEnabled ? ['PIX', 'CARD'] : ['PIX'],
-      ...(cardEnabled ? { card: { maxInstallments: 12 } } : {}),
+      ...(cardEnabled
+        ? { card: { maxInstallments: 12, passFeesToCustomer: true } }
+        : {}),
       externalId,
       metadata: montarMetadata(params),
       returnUrl: `${siteUrl}${cancelPath}`,
