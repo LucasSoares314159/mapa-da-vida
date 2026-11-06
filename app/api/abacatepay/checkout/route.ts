@@ -39,6 +39,22 @@ function texto(valor: unknown): string | undefined {
   return typeof valor === 'string' && valor.trim() ? valor.trim() : undefined
 }
 
+/**
+ * Volta da AbacatePay para a LP sem perder a origem do clique.
+ *
+ * Montado aqui a partir dos UTMs ja validados, e nao aceito do form: um caminho
+ * livre vindo do browser viraria redirect arbitrario na volta do provedor.
+ */
+function cancelPathTrilha(utm: Record<string, string | undefined>): string {
+  const query = new URLSearchParams()
+  for (const chave of PARAMS_UTM) {
+    const valor = utm[chave]
+    if (valor) query.set(chave, valor)
+  }
+  const busca = query.toString()
+  return `/trilha${busca ? `?${busca}` : ''}#comprar`
+}
+
 async function lerParams(request: Request): Promise<ParamsCheckout> {
   const tipo = request.headers.get('content-type') ?? ''
 
@@ -76,6 +92,7 @@ async function lerParams(request: Request): Promise<ParamsCheckout> {
         utm,
         fbp: texto(form.get('fbp')),
         fbc: texto(form.get('fbc')),
+        cancelPath: cancelPathTrilha(utm),
       }
     }
   } catch {

@@ -10,10 +10,10 @@
 // ganhar par server-side sem mudar quem o dispara.
 
 import { lerAtribuicao } from './atribuicao'
+import { trackMetaCustom } from './meta'
 
 declare global {
   interface Window {
-    fbq?: (...args: unknown[]) => void
     gtag?: (...args: unknown[]) => void
     dataLayer?: unknown[]
   }
@@ -78,31 +78,13 @@ export function track(evento: EventoQuiz, params: ParamsEvento = {}): string {
 }
 
 /**
- * Envia o evento ao Pixel, esperando o fbq carregar se preciso.
+ * Envia o evento ao Pixel pelo modulo unico (public/js/rastreio-meta.js).
  *
  * O pixel carrega com strategy="afterInteractive", entao os primeiros eventos
- * do funil (quiz_view na entrada) disparam antes de window.fbq existir. Sem
- * essa espera, o fbq?.(...) descartava o evento em silencio e so o PageView
- * do proprio init chegava — o funil inteiro se perdia. Mesmo retry que o
- * Pixel ja usava no site antigo.
+ * do funil (quiz_view na entrada) disparam antes de ele existir. trackMetaCustom
+ * espera o carregador por ate ~2s; sem a espera, o evento era descartado em
+ * silencio e o funil inteiro se perdia.
  */
 function dispararPixel(evento: string, payload: Record<string, unknown>, eventId: string): void {
-  function enviar(): boolean {
-    if (typeof window.fbq !== 'function') return false
-    try {
-      window.fbq('trackCustom', evento, payload, { eventID: eventId })
-    } catch {
-      // Pixel bloqueado por adblock: nada a fazer, o GA4 e a CAPI cobrem.
-    }
-    return true
-  }
-
-  if (enviar()) return
-
-  // fbq ainda nao carregou — tenta por ate ~2s antes de desistir.
-  let tentativas = 0
-  const intervalo = setInterval(() => {
-    tentativas++
-    if (enviar() || tentativas >= 40) clearInterval(intervalo)
-  }, 50)
+  trackMetaCustom(evento, payload, { eventID: eventId })
 }

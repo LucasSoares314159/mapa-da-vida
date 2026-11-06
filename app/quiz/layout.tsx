@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export default function QuizLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <MetaPixel pixelId={process.env.NEXT_PUBLIC_META_PIXEL_QUIZ_ID} id="meta-pixel-quiz" />
+      <MetaPixel />
 
       {GA_ID && (
         <>

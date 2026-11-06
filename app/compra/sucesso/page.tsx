@@ -16,11 +16,7 @@ export default function CompraSucessoPage({
 }) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-mt-off-white px-4">
-      <MetaPixel
-        pixelId={process.env.NEXT_PUBLIC_META_PIXEL_QUIZ_ID}
-        comPageView={false}
-        id="meta-pixel-compra"
-      />
+      <MetaPixel comPageView={false} />
       <PurchasePixel idCheckout={searchParams.checkout_ref ?? searchParams.session_id} />
       <section className="w-full max-w-lg text-center">
         <CheckCircle2 className="mx-auto mb-6 h-12 w-12 text-mt-green" aria-hidden="true" />

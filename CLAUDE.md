@@ -157,7 +157,7 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 | `cron-auth.ts` | Validação do `CRON_SECRET` |
 | `checkout/` | Abstração do provider de pagamento — ver [Funil de quiz](#funil-de-quiz) |
 | `quiz/` | Motor de pontuação, passos, sessão e configs dos quizzes |
-| `tracking/` | `track()` do funil, captura de atribuição e Conversions API |
+| `tracking/` | `track()` do funil, ponte React do Pixel (`meta.ts`), captura de atribuição e Conversions API |
 | `supabase.ts` / `-server.ts` / `-admin.ts` | Clientes browser / server / service-role |
 | `validations.ts` | Schemas Zod |
 | `empresa.ts` | Razão social, CNPJ, endereço e contato das páginas legais |
@@ -672,6 +672,36 @@ barato que duplicar uma venda ou um e-mail.
 depois e já perdeu a query string. A primeira captura com origem real ganha; os cookies
 do Pixel são reatualizados, porque podem ter sido gravados depois da primeira tela.
 
+### Pixel da Meta — um só, para o site inteiro
+
+Desde **novembro/2026** existe **um único Pixel** (o mesmo do quiz) e **um único
+`fbq('init')`**, em `public/js/rastreio-meta.js`. É JS puro em `/public` porque precisa
+servir a dois mundos sem bundle comum: a LP estática `/trilha` (`<script src>`) e as rotas
+Next do quiz e de `/compra/sucesso` (`components/MetaPixel.tsx`, via `next/script`). Antes
+cada rota Next montava o snippet com o id vindo de `NEXT_PUBLIC_META_PIXEL_QUIZ_ID`; a
+variável deixou de ser lida. Trocar de Pixel = editar o id nesse arquivo (e o
+`META_PIXEL_ID` da CAPI, que é server-side).
+
+- O carregador expõe `trackMeta`, `trackMetaCustom`, `pageViewMeta` e
+  `trackMetaAntesDeSair` em `window`, todos checando `fbq` — adblock não quebra a página.
+- **PageView é deduplicado por pathname** no próprio carregador; `MetaPixel` o chama a
+  cada troca de rota. `/compra/sucesso` monta sem PageView (quer só o Purchase).
+- Do lado React, `lib/tracking/meta.ts` **espera o carregador** (até ~2s): o script é
+  `afterInteractive` e o `quiz_view`/`Purchase` disparam antes dele.
+- O Pixel **não** está na plataforma autenticada nem na `/` — só nas páginas de funil.
+
+**LP `/trilha`:** PageView + `ViewContent` ao carregar; `InitiateCheckout` no submit dos
+dois forms "ENTRAR NA TRILHA". O valor dos eventos vem de `TRILHA_PRECO` no `<head>` da
+página. O submit é segurado por `trackMetaAntesDeSair` (espera o fbevents carregar, até
+1,5s, + 300ms) porque o POST redireciona com `303` e cancelaria a requisição do Pixel. O
+`gtag('click_checkout')` inline continua no `onclick` do botão.
+
+**UTMs da `/trilha` viajam até a cobrança.** Os forms postavam sem corpo, então a venda pela
+LP chegava sem origem. Agora o submit injeta `utm_*`, `fbp` e `fbc` como campos ocultos
+(UTMs também guardadas em `sessionStorage` na entrada), e a rota de checkout monta o
+`cancelPath` de volta como `/trilha?utm_…#comprar` — no servidor, a partir dos UTMs, nunca
+aceitando caminho livre do browser.
+
 ### Pendências
 
 - **`videoId` da VTurb** está vazio em `lib/quiz/configs/quiz-1.ts`. Sem ele o player não
@@ -696,8 +726,8 @@ repete o CNPJ à mão, porque é HTML estático. Mudou um, mude o outro.
 **Preço e processador estão escritos nos Termos** (`TRILHA_PRECO`,
 `TRILHA_PARCELAS_MAX`, `PROCESSADOR_PAGAMENTO` em `lib/empresa.ts`): R$ 297 à vista ou até
 12x com juros, pela AbacatePay — as páginas existem para a ativação da conta lá. O preço
-também está à mão em `public/trilha/index.html` e o valor cobrado de fato vem do provider:
-os três precisam bater, senão a página anuncia um valor e cobra outro.
+também está à mão em `public/trilha/index.html` (texto e `TRILHA_PRECO` dos eventos da
+Meta) e o valor cobrado de fato vem do provider: todos precisam bater, senão a página anuncia um valor e cobra outro.
 
 **A cobrança é pagamento único, mesmo parcelada.** A política diz explicitamente que
 desistir depois dos 7 dias não cancela as parcelas restantes — o parcelamento é dívida
@@ -782,7 +812,7 @@ Os e-mails citam o Momento de Vida ativo como fio condutor. Buscas de usuário s
 | `ACCESS_LINK_TTL_HOURS` | validade do link de cadastro; padrão 168h |
 | `CHECKOUT_PROVIDER` | provider de pagamento ativo; padrão `abacatepay` |
 | `NEXT_PUBLIC_QUIZ_ATIVO` | `false` desliga o funil de quiz (404 em todo slug) |
-| `NEXT_PUBLIC_META_PIXEL_QUIZ_ID` | pixel do funil de quiz — separado do de captação |
+| ~~`NEXT_PUBLIC_META_PIXEL_QUIZ_ID`~~ | não é mais lida — o id do Pixel vive em `public/js/rastreio-meta.js` |
 | `NEXT_PUBLIC_GA_ID` | GA4 nas rotas do quiz; o mesmo id da LP |
 | `META_PIXEL_ID` / `META_CAPI_ACCESS_TOKEN` | Purchase server-side pela Conversions API |
 | `META_CAPI_TEST_CODE` | só durante a validação no Gerenciador — **remover depois** |

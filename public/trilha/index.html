@@ -11,6 +11,17 @@
 
   gtag('config', 'G-Z01PDPXHWB');
 </script>
+<!-- Meta Pixel: init unico do site em /js/rastreio-meta.js (mesmo Pixel do quiz) -->
+<script src="/js/rastreio-meta.js"></script>
+<script>
+  // Preco da Trilha nos eventos da Meta. Fonte unica para o rastreio desta pagina;
+  // o texto "R$297" do layout e lib/empresa.ts precisam acompanhar.
+  var TRILHA_PRECO = 297;
+  var EVENTO_META_TRILHA = { content_name: 'Trilha', value: TRILHA_PRECO, currency: 'BRL' };
+
+  if (window.pageViewMeta) pageViewMeta();
+  if (window.trackMeta) trackMeta('ViewContent', EVENTO_META_TRILHA);
+</script>
 <base href="/trilha/">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trilha — MindTrail</title>
@@ -3522,6 +3533,80 @@ window.addEventListener('DOMContentLoaded', () => {
     el.classList.add('visivel');
   });
 
+});
+
+// --- Checkout: atribuicao + InitiateCheckout -------------------------------
+// UTMs e fbclid sao guardados na entrada: se a pessoa voltar do checkout ou
+// recarregar sem a query string, a origem do clique continua disponivel.
+var PARAMS_ATRIBUICAO = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid'];
+var CHAVE_ATRIBUICAO = 'trilha-atribuicao';
+
+function lerAtribuicaoTrilha() {
+  var query = new URLSearchParams(window.location.search);
+  var daUrl = {};
+  var temOrigem = false;
+  PARAMS_ATRIBUICAO.forEach(function (chave) {
+    var valor = query.get(chave);
+    if (valor) { daUrl[chave] = valor; temOrigem = true; }
+  });
+  try {
+    if (temOrigem) {
+      sessionStorage.setItem(CHAVE_ATRIBUICAO, JSON.stringify(daUrl));
+      return daUrl;
+    }
+    return JSON.parse(sessionStorage.getItem(CHAVE_ATRIBUICAO) || '{}');
+  } catch (e) {
+    return daUrl;
+  }
+}
+
+function lerCookie(nome) {
+  var linha = document.cookie.split('; ').find(function (l) { return l.indexOf(nome + '=') === 0; });
+  return linha ? linha.slice(nome.length + 1) : '';
+}
+
+function campoOculto(form, nome, valor) {
+  if (!valor) return;
+  var campo = form.querySelector('input[name="' + nome + '"]');
+  if (!campo) {
+    campo = document.createElement('input');
+    campo.type = 'hidden';
+    campo.name = nome;
+    form.appendChild(campo);
+  }
+  campo.value = valor;
+}
+
+// O form posta para /api/abacatepay/checkout, que le utm_*, fbp e fbc do corpo
+// e os grava como metadado da cobranca — e o que liga a venda ao anuncio.
+function preencherAtribuicao(form) {
+  var atribuicao = lerAtribuicaoTrilha();
+  PARAMS_ATRIBUICAO.forEach(function (chave) {
+    if (chave !== 'fbclid') campoOculto(form, chave, atribuicao[chave]);
+  });
+  campoOculto(form, 'fbp', lerCookie('_fbp'));
+  campoOculto(form, 'fbc', lerCookie('_fbc') || (atribuicao.fbclid ? 'fb.1.' + Date.now() + '.' + atribuicao.fbclid : ''));
+}
+
+lerAtribuicaoTrilha();
+
+var formsCheckout = document.querySelectorAll('form.checkout-form');
+formsCheckout.forEach(function (form) {
+  // O onclick do botao (gtag click_checkout) roda antes deste submit.
+  form.addEventListener('submit', function (event) {
+    if (form.dataset.enviando) { event.preventDefault(); return; }
+    preencherAtribuicao(form);
+    if (!window.trackMetaAntesDeSair) return; // Pixel bloqueado: segue o submit normal
+    event.preventDefault();
+    form.dataset.enviando = '1';
+    trackMetaAntesDeSair('InitiateCheckout', EVENTO_META_TRILHA, function () { form.submit(); });
+  });
+});
+
+// Voltar do checkout pelo botao do navegador restaura a pagina do bfcache com
+// o form ainda marcado como enviando.
+window.addEventListener('pageshow', function () {
+  formsCheckout.forEach(function (form) { delete form.dataset.enviando; });
 });
 
 </script>
