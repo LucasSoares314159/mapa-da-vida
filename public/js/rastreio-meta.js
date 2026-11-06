@@ -24,7 +24,7 @@
   // layouts que montam o componente) — nao reinicializa.
   if (w.__mtPixel) return
 
-  var PIXEL_ID = '1426421189053019'
+  var PIXEL_ID = '2130218701193734'
 
   /* eslint-disable */
   !function(f,b,e,v,n,t,s)
