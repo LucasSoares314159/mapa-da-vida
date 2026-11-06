@@ -10,6 +10,7 @@ export interface CreateAbacatePayCheckoutInput {
   methods: AbacatePayPaymentMethod[]
   card?: {
     maxInstallments: number
+    passFeesToCustomer: boolean
   }
   externalId: string
   metadata: Record<string, unknown>
