@@ -1,50 +1,31 @@
 'use client'
 
+import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import Script from 'next/script'
+import { SCRIPT_PIXEL_META, pageViewMeta } from '@/lib/tracking/meta'
 
-// Carregador do Pixel da Meta, parametrizado pelo id.
+// Monta o Pixel da Meta nas rotas Next.js.
 //
-// O funil do quiz usa um pixel proprio, e a pagina de sucesso precisa carregar
-// o mesmo pixel do funil que gerou a venda — por isso o id vem por prop, em vez
-// de fixo no componente.
+// Nao inicializa nada: so carrega public/js/rastreio-meta.js, o modulo unico que
+// faz o fbq('init') para o site inteiro (inclusive a pagina estatica /trilha).
+// O `id` fixo faz o next/script inserir o arquivo uma vez por documento, mesmo
+// que dois layouts montem este componente.
+//
+// PageView dispara a cada troca de pathname, uma vez so — o carregador ignora a
+// repeticao da mesma rota, entao remontagem e StrictMode nao duplicam.
 
 type Props = {
-  pixelId: string | undefined
   /** PageView automatico. A pagina de sucesso quer Purchase, nao PageView. */
   comPageView?: boolean
-  id?: string
 }
 
-export function MetaPixel({ pixelId, comPageView = true, id = 'meta-pixel' }: Props) {
-  if (!pixelId) return null
+export function MetaPixel({ comPageView = true }: Props) {
+  const pathname = usePathname()
 
-  return (
-    <>
-      <Script id={id} strategy="afterInteractive">
-        {`
-          !function(f,b,e,v,n,t,s)
-          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-          n.queue=[];t=b.createElement(e);t.async=!0;
-          t.src=v;s=b.getElementsByTagName(e)[0];
-          s.parentNode.insertBefore(t,s)}(window, document,'script',
-          'https://connect.facebook.net/en_US/fbevents.js');
-          fbq('init', '${pixelId}');
-          ${comPageView ? "fbq('track', 'PageView');" : ''}
-        `}
-      </Script>
-      {comPageView && (
-        <noscript>
-          <img
-            height="1"
-            width="1"
-            style={{ display: 'none' }}
-            src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`}
-            alt=""
-          />
-        </noscript>
-      )}
-    </>
-  )
+  useEffect(() => {
+    if (comPageView) pageViewMeta()
+  }, [pathname, comPageView])
+
+  return <Script id="meta-pixel" src={SCRIPT_PIXEL_META} strategy="afterInteractive" />
 }

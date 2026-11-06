@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { trackMeta } from '@/lib/tracking/meta'
 
 // Purchase do Pixel na pagina de sucesso.
 //
@@ -21,13 +22,9 @@ type Props = {
 export function PurchasePixel({ idCheckout }: Props) {
   useEffect(() => {
     if (!idCheckout) return
-    if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
-
-    try {
-      window.fbq('track', 'Purchase', {}, { eventID: `purchase_${idCheckout}` })
-    } catch {
-      // Pixel bloqueado: a CAPI ainda registra a venda.
-    }
+    // Espera o carregador do Pixel: o efeito roda antes do script afterInteractive.
+    // Pixel bloqueado: o helper descarta em silencio e a CAPI ainda registra a venda.
+    trackMeta('Purchase', {}, { eventID: `purchase_${idCheckout}` })
   }, [idCheckout])
 
   return null
