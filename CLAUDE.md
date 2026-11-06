@@ -702,6 +702,25 @@ LP chegava sem origem. Agora o submit injeta `utm_*`, `fbp` e `fbc` como campos 
 `cancelPath` de volta como `/trilha?utm_…#comprar` — no servidor, a partir dos UTMs, nunca
 aceitando caminho livre do browser.
 
+### Design da LP `/trilha` (novembro/2026)
+
+HTML estático com CSS inline; as decisões estão comentadas no próprio `<style>`. O que
+não dá para inferir lendo um trecho só:
+
+- **Sistema de superfícies em `:root`** — raio, borda, sombra e espaçamento são tokens
+  (`--raio-card`, `--sombra-1`, `--espaco-titulo`…), com as regras escritas no comentário
+  acima deles. Componente novo referencia token; valor solto reabre a divergência que a
+  revisão fechou.
+- **Tipografia:** títulos em Satoshi minúsculo (o `text-transform` vem do CSS, o texto-fonte
+  segue com caixa normal); texto curto de apoio em Lora minúscula; prosa longa (carta do
+  guia, respostas do FAQ) em Lora com caixa normal. "TRILHA" em título é marca: negrito +
+  grifo (`.destaque`).
+- **Os capítulos do vídeo da plataforma** (`data-de`/`data-ate`/`data-inicio`) foram
+  medidos quadro a quadro em `plataforma.mp4`. Trocar o vídeo exige medir de novo.
+- **Imagens publicadas são versões comprimidas** (`*-144`, `cerebro-540`, `lucas-ultra`,
+  `salvador-900`…). Os originais em alta ficam fora do repositório: a página nunca os usa,
+  e versionados iriam para o deploy.
+
 ### Pendências
 
 - **`videoId` da VTurb** está vazio em `lib/quiz/configs/quiz-1.ts`. Sem ele o player não
@@ -726,8 +745,11 @@ repete o CNPJ à mão, porque é HTML estático. Mudou um, mude o outro.
 **Preço e processador estão escritos nos Termos** (`TRILHA_PRECO`,
 `TRILHA_PARCELAS_MAX`, `PROCESSADOR_PAGAMENTO` em `lib/empresa.ts`): R$ 297 à vista ou até
 12x com juros, pela AbacatePay — as páginas existem para a ativação da conta lá. O preço
-também está à mão em `public/trilha/index.html` (texto e `TRILHA_PRECO` dos eventos da
-Meta) e o valor cobrado de fato vem do provider: todos precisam bater, senão a página anuncia um valor e cobra outro.
+também está à mão em `public/trilha/index.html` (texto, `TRILHA_PRECO` dos eventos da
+Meta e o valor da parcela na faixa fixa do topo, "12x de R$ 29,34") e o valor cobrado de
+fato vem do provider: todos precisam bater, senão a página anuncia um valor e cobra outro.
+A parcela da faixa é com juros (R$ 297 ÷ 12 daria R$ 24,75): o adapter repassa a taxa do
+cartão ao cliente (`passFeesToCustomer`), então se o preço ou a taxa mudarem, ela muda junto.
 
 **A cobrança é pagamento único, mesmo parcelada.** A política diz explicitamente que
 desistir depois dos 7 dias não cancela as parcelas restantes — o parcelamento é dívida
