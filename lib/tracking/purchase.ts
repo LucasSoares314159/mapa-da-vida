@@ -4,15 +4,16 @@
 // Para isso funcionar, id, valor e conteudo precisam sair daqui — nao de duas
 // copias que um dia divergem. Este arquivo roda no browser: nada de node:crypto.
 
+import { TRILHA_PRECO_VALOR } from '@/lib/empresa'
+
 /**
  * Receita da Trilha em reais, como o navegador a conhece.
  *
- * O navegador nao consulta o pagamento, entao usa o preco de tabela. O servidor
- * calcula o mesmo numero a partir do webhook (`receitaDoProdutoEmReais`). Se o
- * preco mudar, mude aqui, em `TRILHA_PRECO` de lib/empresa.ts e em
- * public/trilha/index.html.
+ * O navegador nao consulta o pagamento, entao usa o preco de tabela — o mesmo
+ * do InitiateCheckout (lib/tracking/eventos.ts). O servidor calcula o mesmo
+ * numero a partir do webhook (`receitaDoProdutoEmReais`).
  */
-export const VALOR_TRILHA_REAIS = 297
+export const VALOR_TRILHA_REAIS = TRILHA_PRECO_VALOR
 
 export const MOEDA_TRILHA = 'BRL'
 
