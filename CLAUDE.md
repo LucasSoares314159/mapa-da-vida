@@ -749,16 +749,41 @@ não dá para inferir lendo um trecho só:
   `salvador-900`…). Os originais em alta ficam fora do repositório: a página nunca os usa,
   e versionados iriam para o deploy.
 
+### VSL da VTurb e o botão de compra
+
+O botão de compra da tela final só aparece quando a pessoa **assiste** até
+`SEGUNDO_DA_OFERTA_NA_VSL` (5:54, em `lib/quiz/configs/quiz-1.ts`). Os botões de ação da
+VTurb ficam desligados de propósito: o botão é nosso, para preservar `cta_click`,
+`InitiateCheckout` e a atribuição do checkout.
+
+**O tempo vem dos eventos do `<vturb-smartplayer>`, não de timer.** A biblioteca v4 emite
+`video:timeupdate` (`detail.time`, segundos inteiros) e `video:play` só em reprodução real;
+o autoplay mudo emite `smartautoplay:timeupdate`, que não é escutado. É o mesmo evento que
+o `onTime`/`displayHiddenElements` da própria VTurb usa — verificado lendo a biblioteca em
+`scripts.converteai.net/lib/js/smartplayer-wc/v4/smartplayer.js`, porque a central de ajuda
+deles só documenta o `displayHiddenElements`.
+
+**Mede-se a fronteira assistida, não a posição** (`lib/quiz/progresso-vsl.ts`). O player
+tem botões de avançar; comparar a posição (como faz o `displayHiddenElements`) liberaria o
+botão para quem pulasse até a oferta. A fronteira só anda com saltos de até 3s, fica no
+`localStorage` por vídeo e acompanha o "continuar assistindo" da VTurb, que grava a posição
+no mesmo ritmo. Quem já passou da oferta e volta vê o botão direto.
+
+**O autoplay mudo não conta.** O vídeo mudo atrás do "clique para ouvir" é chamariz, e ao
+clicar a VTurb recomeça do zero. É também o padrão da VTurb (`onTime` ignora o autoplay sem
+`inSmartAutoPlay`).
+
+**Sem player, sem espera.** `vslTemVideo()` exige `videoId` **e** `contaId`; faltando um, a
+tela cai no estado sem vídeo e mostra o botão de imediato. Um teste de integridade da
+config falha se só o `videoId` estiver preenchido. Se o script da VTurb não carregar
+(bloqueador, rede), o botão **não** aparece — decisão pendente, ver abaixo.
+
 ### Pendências
 
-- **`videoId` da VTurb** está vazio em `lib/quiz/configs/quiz-1.ts`. Sem ele o player não
-  é montado e o CTA aparece de imediato — a tela de compra nunca fica sem saída.
-- **`ctaAtSeconds` está em 0** enquanto não há vídeo. Com vídeo, ajustar ao ponto do
-  roteiro.
-- **Na VTurb o CTA é liberado por temporizador** desde a montagem, não pelo tempo real de
-  reprodução: o custom element não expõe progresso de forma estável. Quem pausa vê o botão
-  antes do ponto do roteiro — assumido para não prender o CTA atrás de um evento que pode
-  nunca chegar.
+- **`contaId` da VTurb** está vazio em `lib/quiz/configs/quiz-1.ts` (o teste de integridade
+  fica vermelho até preencher). Vem da URL do script na aba Embed.
+- **No celular o botão aparece abaixo da dobra**: o 9:16 em largura total ocupa ~620px. Quem
+  está assistindo precisa rolar para vê-lo.
 - **`META_CAPI_TEST_CODE` deve ser removido** depois de validar no Gerenciador, senão os
   eventos seguem chegando como teste e não contam para a campanha.
 

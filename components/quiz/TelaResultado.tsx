@@ -9,7 +9,7 @@ import { BlocoGarantia } from './BlocoGarantia'
 import { BlocoTexto } from './BlocoTexto'
 import { BotaoQuiz } from './BotaoQuiz'
 import { TextoQuiz } from './TextoQuiz'
-import { VslPlayer } from './VslPlayer'
+import { PreloadVsl, VslPlayer } from './VslPlayer'
 
 // A "virada" do diagnostico e o paragrafo que os docs marcam inteiro em negrito
 // (ex. "Talvez voce nao precise de mais um planejamento..."). Separa-lo num
@@ -80,6 +80,8 @@ export function TelaResultado({ config, resultado }: Props) {
         <div className="mt-10">
           <BotaoQuiz onClick={() => setMostrandoVsl(true)}>{texto.rotuloBotao}</BotaoQuiz>
         </div>
+
+        <PreloadVsl vsl={config.vsl} />
       </div>
     )
   }
@@ -136,17 +138,13 @@ function TelaVsl({ config, resultado }: Props) {
           <TextoQuiz texto={config.vsl.chamada} tema="escuro" />
         </p>
 
-        <VslPlayer
-          vsl={config.vsl}
-          onPlay={registrarPlay}
-          onLiberarCta={liberarCta}
-          // Teto de altura para a VSL deixar espaco para a chamada e o CTA na
-          // mesma dobra: sem isso o 9:16 em telas estreitas empurra o botao
-          // para fora da tela, que e exatamente o que nao pode acontecer numa
-          // VSL — o CTA precisa estar visivel junto do video.
-          maxAlturaClasse="max-h-[min(70vh,620px)]"
-        />
+        {/* Largura total no celular, ate 400px no desktop, sem teto de altura.
+            O teto antigo existia para o CTA caber na dobra junto do video
+            desde o inicio; agora o CTA so aparece no segundo da oferta. */}
+        <VslPlayer vsl={config.vsl} onPlay={registrarPlay} onLiberarCta={liberarCta} />
 
+        {/* Oculto ate a reproducao alcancar config.vsl.ctaAtSeconds — ver
+            VslPlayer. Ao aparecer, o comportamento do clique e o de sempre. */}
         {ctaLiberado && (
           <div className="mt-6 w-full max-w-[400px] text-center">
             {/* CTA do hero escuro da LP (.btn-cta-hero): pílula --verde com
