@@ -28,6 +28,11 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  // Verificação de domínio do Business Manager da Meta. Precisa sair no HTML do
+  // SSR: o robô da Meta não executa JS.
+  other: {
+    'facebook-domain-verification': '2ias9w5cfah8le8udpfzrplmpzuxxj',
+  },
 }
 
 export default function RootLayout({
