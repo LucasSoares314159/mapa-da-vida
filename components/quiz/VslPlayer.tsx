@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import Script from 'next/script'
 import { Play } from 'lucide-react'
 import type { ConfigVsl } from '@/lib/quiz/tipos'
@@ -26,7 +26,23 @@ type Props = {
   onPlay?: () => void
   /** Chamado quando a reproducao continua alcanca ctaAtSeconds. */
   onLiberarCta?: () => void
+  /**
+   * O player nao carregou (script com erro, bloqueador, rede) em
+   * ESPERA_MAXIMA_PLAYER_MS. Quem chama libera o botao com um aviso.
+   */
+  onFalharCarga?: () => void
+  /** O player chegou depois de onFalharCarga: o aviso pode sair. */
+  onRecuperarCarga?: () => void
 }
+
+/**
+ * Quanto esperar o player da VTurb antes de liberar o botao sem video.
+ *
+ * A trava da oferta e para quem esta assistindo, nao para quem ficou sem o
+ * video: bloqueador de anuncio, rede ruim ou a VTurb fora do ar nao podem
+ * impedir ninguem de comprar.
+ */
+export const ESPERA_MAXIMA_PLAYER_MS = 15_000
 
 const CAIXA_9_16 = 'relative mx-auto aspect-[9/16] w-full max-w-[400px] overflow-hidden rounded-2xl'
 
@@ -37,6 +53,25 @@ export function urlScriptVturb(vsl: ConfigVsl): string {
 
 /** Biblioteca do web component, comum a todo player v4. */
 export const URL_BIBLIOTECA_VTURB = 'https://scripts.converteai.net/lib/js/smartplayer-wc/v4/smartplayer.js'
+
+/** Playlist do arquivo de video (id proprio, diferente do player). */
+export function urlVideoVturb(vsl: ConfigVsl): string | null {
+  if (!vsl.arquivoVideoId) return null
+  return `https://cdn.converteai.net/${vsl.contaId}/${vsl.arquivoVideoId}/main.m3u8`
+}
+
+/**
+ * Tag do bloco 1 do embed, exatamente como a VTurb entrega — inclusive o
+ * placeholder 9:16 preto, que reserva a altura do video antes de o script
+ * chegar e evita o layout pular.
+ */
+function tagEmbedVturb(vsl: ConfigVsl): string {
+  return (
+    `<vturb-smartplayer id="vid-${vsl.videoId}" style="display: block; margin: 0 auto; width: 100%; max-width: 400px;">` +
+    `<div class="vturb-player-placeholder" style="position: relative; width: 100%; padding: 177.77777777777777% 0 0; z-index: 0; background-color: black;"></div>` +
+    `</vturb-smartplayer>`
+  )
+}
 
 /**
  * A VSL tem video de verdade para mostrar. A VTurb sem conta nao monta (a URL
@@ -49,7 +84,7 @@ export function vslTemVideo(vsl: ConfigVsl): boolean {
   return true
 }
 
-export function VslPlayer({ vsl, onPlay, onLiberarCta }: Props) {
+export function VslPlayer({ vsl, onPlay, onLiberarCta, onFalharCarga, onRecuperarCarga }: Props) {
   const jaDeuPlay = useRef(false)
   const temVideo = vslTemVideo(vsl)
 
@@ -85,7 +120,15 @@ export function VslPlayer({ vsl, onPlay, onLiberarCta }: Props) {
   }
 
   if (vsl.provider === 'vturb') {
-    return <VturbPlayer vsl={vsl} onPlay={registrarPlay} onLiberarCta={onLiberarCta} />
+    return (
+      <VturbPlayer
+        vsl={vsl}
+        onPlay={registrarPlay}
+        onLiberarCta={onLiberarCta}
+        onFalharCarga={onFalharCarga}
+        onRecuperarCarga={onRecuperarCarga}
+      />
+    )
   }
 
   return <Html5Player vsl={vsl} onPlay={registrarPlay} onLiberarCta={onLiberarCta} />
@@ -101,13 +144,23 @@ export function VslPlayer({ vsl, onPlay, onLiberarCta }: Props) {
  */
 export function PreloadVsl({ vsl }: { vsl: ConfigVsl }) {
   if (!vslTemVideo(vsl) || vsl.provider !== 'vturb') return null
+  const video = urlVideoVturb(vsl)
+  // Bloco 2 do embed, na ordem e com os valores da VTurb. O _plt (marca de
+  // tempo que o player usa para medir o proprio carregamento) vai por
+  // next/script: um <script> inline renderizado pelo React no cliente nao
+  // executa.
   return (
     <>
-      <link rel="dns-prefetch" href="https://cdn.converteai.net" />
-      <link rel="dns-prefetch" href="https://images.converteai.net" />
-      <link rel="dns-prefetch" href="https://api.vturb.com.br" />
+      <Script id="vturb-plt" strategy="afterInteractive">
+        {`!function(i,n){i._plt=i._plt||(n&&n.timeOrigin?n.timeOrigin+n.now():Date.now())}(window,performance);`}
+      </Script>
       <link rel="preload" href={urlScriptVturb(vsl)} as="script" />
       <link rel="preload" href={URL_BIBLIOTECA_VTURB} as="script" />
+      {video && <link rel="preload" href={video} as="fetch" />}
+      <link rel="dns-prefetch" href="https://cdn.converteai.net" />
+      <link rel="dns-prefetch" href="https://scripts.converteai.net" />
+      <link rel="dns-prefetch" href="https://images.converteai.net" />
+      <link rel="dns-prefetch" href="https://license.vturb.com" />
     </>
   )
 }
@@ -165,43 +218,110 @@ function useLiberacaoPorTempo(videoId: string, segundos: number, onLiberarCta?: 
  * Nao usamos `displayHiddenElements` direto porque ele compara a posicao: um
  * clique em "avancar" ate depois da oferta liberaria o botao.
  */
-function VturbPlayer({ vsl, onPlay, onLiberarCta }: Props) {
+function VturbPlayer({ vsl, onPlay, onLiberarCta, onFalharCarga, onRecuperarCarga }: Props) {
   const caixa = useRef<HTMLDivElement>(null)
   const aoDarPlay = useRef(onPlay)
   aoDarPlay.current = onPlay
   const registrarTempo = useLiberacaoPorTempo(vsl.videoId, vsl.ctaAtSeconds, onLiberarCta)
+  const { falhar, sinalDeVida } = useVigiaCarga(onFalharCarga, onRecuperarCarga)
+
+  const tag = tagEmbedVturb(vsl)
+
+  // A tag do embed e criada aqui, uma vez, e nao pelo JSX. Com
+  // dangerouslySetInnerHTML o React reaplica o innerHTML quando a tela
+  // re-renderiza — e ela re-renderiza justamente quando o botao e liberado (ou o
+  // fallback dispara): o <vturb-smartplayer> era trocado por um novo, o video
+  // voltava a 0:00 pausado e os listeners ficavam presos no elemento antigo.
+  // O div hospedeiro vem vazio do JSX, entao o React nunca mexe no conteudo.
+  // Layout effect: o placeholder 9:16 entra antes da primeira pintura.
+  useLayoutEffect(() => {
+    const hospedeiro = caixa.current
+    if (hospedeiro && !hospedeiro.querySelector('vturb-smartplayer')) hospedeiro.innerHTML = tag
+  }, [tag])
 
   useEffect(() => {
     const player = caixa.current?.querySelector('vturb-smartplayer')
     if (!player) return
 
     const aoAtualizar = (evento: Event) => {
+      sinalDeVida()
       const tempo = (evento as CustomEvent<{ time?: unknown }>).detail?.time
       if (typeof tempo === 'number') registrarTempo(tempo)
     }
-    const aoTocar = () => aoDarPlay.current?.()
+    const aoTocar = () => {
+      sinalDeVida()
+      aoDarPlay.current?.()
+    }
+    // player:ready e o sinal oficial de que o player montou; o autoplay mudo
+    // conta como vida tambem (o video esta la, so sem som).
+    const eventosDeVida = ['player:ready', 'smartautoplay:timeupdate']
 
     player.addEventListener('video:timeupdate', aoAtualizar)
     player.addEventListener('video:play', aoTocar)
+    eventosDeVida.forEach((e) => player.addEventListener(e, sinalDeVida))
     return () => {
       player.removeEventListener('video:timeupdate', aoAtualizar)
       player.removeEventListener('video:play', aoTocar)
+      eventosDeVida.forEach((e) => player.removeEventListener(e, sinalDeVida))
     }
-  }, [registrarTempo])
+  }, [registrarTempo, sinalDeVida])
 
   return (
-    <div ref={caixa} className={`${CAIXA_9_16} bg-black`}>
-      {/* Tag do embed da VTurb. Via innerHTML para o React nunca reconciliar
-          o custom element, que a VTurb preenche por conta propria. */}
-      <div
-        className="absolute inset-0"
-        dangerouslySetInnerHTML={{
-          __html: `<vturb-smartplayer id="vid-${vsl.videoId}" style="display: block; margin: 0 auto; width: 100%;"></vturb-smartplayer>`,
-        }}
+    // Sem aspect-ratio proprio: o placeholder do embed ja reserva o 9:16.
+    <div className="relative mx-auto w-full max-w-[400px] overflow-hidden rounded-2xl bg-black">
+      {/* Bloco 1 do embed, criado no layout effect acima. Vazio no JSX de
+          proposito: o React nao reconcilia o que nao renderizou. */}
+      <div ref={caixa} />
+      {/* O script inline do embed (createElement + async + appendChild)
+          adaptado: next/script carrega uma vez por documento e guarda o src
+          carregado, entao re-render, remontagem da tela ou navegacao
+          client-side nao reinjeta o player — nem registra o custom element
+          de novo. Erro no script (bloqueador, DNS) falha na hora, sem esperar
+          os 15s. */}
+      <Script
+        id={`vturb-${vsl.videoId}`}
+        strategy="afterInteractive"
+        src={urlScriptVturb(vsl)}
+        onError={falhar}
       />
-      <Script id={`vturb-${vsl.videoId}`} strategy="afterInteractive" src={urlScriptVturb(vsl)} />
     </div>
   )
+}
+
+/**
+ * Vigia se o player chegou. Sem sinal de vida em ESPERA_MAXIMA_PLAYER_MS (ou
+ * com erro no script), avisa uma vez. Se o player aparecer depois, avisa a
+ * recuperacao — o botao ja liberado continua, so o aviso sai.
+ */
+function useVigiaCarga(onFalhar?: () => void, onRecuperar?: () => void) {
+  const aoFalhar = useRef(onFalhar)
+  aoFalhar.current = onFalhar
+  const aoRecuperar = useRef(onRecuperar)
+  aoRecuperar.current = onRecuperar
+  const estado = useRef<'aguardando' | 'carregado' | 'falhou'>('aguardando')
+  const relogio = useRef<ReturnType<typeof setTimeout>>()
+
+  const falhar = useCallback(() => {
+    if (estado.current !== 'aguardando') return
+    estado.current = 'falhou'
+    clearTimeout(relogio.current)
+    aoFalhar.current?.()
+  }, [])
+
+  const sinalDeVida = useCallback(() => {
+    if (estado.current === 'carregado') return
+    const falhouAntes = estado.current === 'falhou'
+    estado.current = 'carregado'
+    clearTimeout(relogio.current)
+    if (falhouAntes) aoRecuperar.current?.()
+  }, [])
+
+  useEffect(() => {
+    relogio.current = setTimeout(falhar, ESPERA_MAXIMA_PLAYER_MS)
+    return () => clearTimeout(relogio.current)
+  }, [falhar])
+
+  return { falhar, sinalDeVida }
 }
 
 /** Fallback com <video> nativo: usado em teste local e se a VTurb sair. */

@@ -97,6 +97,11 @@ export type ConfigVsl = {
    */
   contaId?: string
   /**
+   * Arquivo de vídeo na VTurb (id do .m3u8 no preload do embed). Não é o id do
+   * player. Ausente, o vídeo só não é pré-carregado.
+   */
+  arquivoVideoId?: string
+  /**
    * Frase curta acima do player, estilo direct-response — nunca um título com
    * subtítulo. A tela da VSL é para assistir, não para ler: qualquer bloco de
    * texto competindo com o vídeo é atenção tirada dele.

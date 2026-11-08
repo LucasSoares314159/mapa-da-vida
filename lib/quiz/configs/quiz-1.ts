@@ -227,12 +227,12 @@ export const quiz1: ConfigQuiz = {
 
   vsl: {
     provider: 'vturb',
+    // Da aba Embed da VTurb (JavaScript, "Otimizar Velocidade" ligada). O
+    // player e o arquivo de video tem ids diferentes: o segundo so aparece no
+    // preload do .m3u8.
     videoId: '6af0be6770b42fd51594e194',
-    // PENDENCIA: id da conta VTurb, que esta na URL do script da aba Embed
-    // (scripts.converteai.net/<conta>/players/<video>/v4/player.js). Vazio, o
-    // player nao monta e o CTA aparece de imediato — nunca um video que nao
-    // carrega com o botao escondido atras dele.
-    contaId: '',
+    contaId: '9e6f61cc-e76a-4a7d-82d8-b1b1b195a704',
+    arquivoVideoId: '6af0be4e0b42ce3fc9fab152',
     chamada: 'Seu diagnóstico está *pronto*.',
     ctaAtSeconds: SEGUNDO_DA_OFERTA_NA_VSL,
     rotuloCta: 'ENTRAR AGORA PARA A TRILHA',

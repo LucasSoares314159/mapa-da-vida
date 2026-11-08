@@ -83,12 +83,19 @@ const config: Config = {
       },
       animation: {
         'check-spring': 'check-spring 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'entrada-cta': 'entrada-cta 0.45s cubic-bezier(0.22, 1, 0.36, 1) both',
       },
       keyframes: {
         'check-spring': {
           '0%': { transform: 'scale(0)' },
           '50%': { transform: 'scale(1.2)' },
           '100%': { transform: 'scale(1)' },
+        },
+        // Botao de compra da VSL surgindo: sobe pouco e aparece, sem quique —
+        // a pessoa esta assistindo, e movimento chamativo tira o olho do video.
+        'entrada-cta': {
+          '0%': { opacity: '0', transform: 'translateY(24px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         },
       },
     },

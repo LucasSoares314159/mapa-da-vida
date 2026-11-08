@@ -91,10 +91,18 @@ export function TelaResultado({ config, resultado }: Props) {
 
 function TelaVsl({ config, resultado }: Props) {
   const [ctaLiberado, setCtaLiberado] = useState(false)
+  const [videoFalhou, setVideoFalhou] = useState(false)
   const [indoParaCheckout, setIndoParaCheckout] = useState(false)
   const [erro, setErro] = useState(false)
 
   const liberarCta = useCallback(() => setCtaLiberado(true), [])
+  // Sem player nao ha oferta a esperar: o botao sai na hora, com aviso. Se o
+  // video chegar depois, o aviso some e o botao fica.
+  const falharVideo = useCallback(() => {
+    setVideoFalhou(true)
+    setCtaLiberado(true)
+  }, [])
+  const recuperarVideo = useCallback(() => setVideoFalhou(false), [])
   const registrarPlay = useCallback(() => {
     track('vsl_play', { quiz_slug: config.slug, result_profile: resultado.perfil })
   }, [config.slug, resultado.perfil])
@@ -127,7 +135,14 @@ function TelaVsl({ config, resultado }: Props) {
     //
     // fixed inset-0 em vez de margem negativa porque o padding do <main> pai
     // (QuizConversa) e o unico outro lugar que saberia o valor a compensar.
-    <div className="fixed inset-0 z-20 overflow-y-auto bg-mt-green-dark">
+    //
+    // Com o botao liberado, o pb-40 no celular reserva o espaco da barra fixa:
+    // rolando ate o fim, nada (a garantia, o fim do video) fica preso atras dela.
+    <div
+      className={`fixed inset-0 z-20 overflow-y-auto bg-mt-green-dark pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] ${
+        ctaLiberado ? 'pb-40 sm:pb-0' : ''
+      }`}
+    >
       {/* Primeira dobra: chamada + VSL + CTA cabem juntos numa tela. A
           garantia so aparece ao rolar — e a estrutura de VSL que converte:
           foco total no video e na oferta antes de qualquer outra coisa. */}
@@ -141,12 +156,30 @@ function TelaVsl({ config, resultado }: Props) {
         {/* Largura total no celular, ate 400px no desktop, sem teto de altura.
             O teto antigo existia para o CTA caber na dobra junto do video
             desde o inicio; agora o CTA so aparece no segundo da oferta. */}
-        <VslPlayer vsl={config.vsl} onPlay={registrarPlay} onLiberarCta={liberarCta} />
+        <VslPlayer
+          vsl={config.vsl}
+          onPlay={registrarPlay}
+          onLiberarCta={liberarCta}
+          onFalharCarga={falharVideo}
+          onRecuperarCarga={recuperarVideo}
+        />
 
         {/* Oculto ate a reproducao alcancar config.vsl.ctaAtSeconds — ver
-            VslPlayer. Ao aparecer, o comportamento do clique e o de sempre. */}
+            VslPlayer. Ao aparecer, o comportamento do clique e o de sempre.
+
+            Celular: barra fixa na base da viewport, por cima do video. Com o
+            9:16 em largura total, o botao no fluxo nascia abaixo da dobra e
+            quem assistia nao via ele surgir. A barra cobre so a faixa de baixo
+            da tela (onde o video ja continua para fora dela) e respeita a safe
+            area do iOS. Desktop: volta para o fluxo, abaixo do player. */}
         {ctaLiberado && (
-          <div className="mt-6 w-full max-w-[400px] text-center">
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-mt-green-dark/95 pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))] pt-3 text-center shadow-[0_-8px_24px_rgba(0,0,0,0.25)] backdrop-blur motion-safe:animate-entrada-cta sm:static sm:z-auto sm:mt-6 sm:w-full sm:max-w-[400px] sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-none">
+            {videoFalhou && (
+              <p role="status" className="mb-2 font-editorial text-[15px] lowercase leading-6 text-mt-off-white/80">
+                o vídeo não carregou. se preferir, entre direto por aqui:
+              </p>
+            )}
+
             {/* CTA do hero escuro da LP (.btn-cta-hero): pílula --verde com
                 texto branco, foco off-white. Contra o verde escuro da tela o
                 botão fica em ~4:1 — se destaca sem precisar do fundo branco. */}

@@ -775,15 +775,40 @@ clicar a VTurb recomeça do zero. É também o padrão da VTurb (`onTime` ignora
 
 **Sem player, sem espera.** `vslTemVideo()` exige `videoId` **e** `contaId`; faltando um, a
 tela cai no estado sem vídeo e mostra o botão de imediato. Um teste de integridade da
-config falha se só o `videoId` estiver preenchido. Se o script da VTurb não carregar
-(bloqueador, rede), o botão **não** aparece — decisão pendente, ver abaixo.
+config falha se só o `videoId` estiver preenchido. Se o script da VTurb der erro, o botão
+aparece na hora; se o player não der `player:ready` em `ESPERA_MAXIMA_PLAYER_MS` (15s), o
+botão aparece com o aviso "o vídeo não carregou". A trava da oferta é para quem está
+assistindo, não para quem ficou sem o vídeo. Se o player chegar depois, o aviso some e o
+botão fica.
+
+**A tag do embed é criada por código, uma vez — nunca por `dangerouslySetInnerHTML`.** O
+React reaplica o `innerHTML` a cada re-render, e a tela re-renderiza exatamente quando o
+botão é liberado: o `<vturb-smartplayer>` era trocado por outro, o vídeo voltava a 0:00
+pausado no segundo da oferta e os listeners ficavam no elemento antigo. Achado no teste com
+o player real; o player simulado não pegava. O script entra por `next/script` (uma vez por
+documento), então remontar a tela não registra o custom element de novo.
+
+**No celular o botão é uma barra fixa na base, por cima do vídeo.** Com o 9:16 em largura
+total, o botão no fluxo nascia abaixo da dobra e quem assistia não o via surgir. A barra
+respeita a safe area — o que exige `viewport-fit=cover`, declarado **só no layout do quiz**
+(por isso o wrapper dali tem padding lateral de safe area). Com o botão liberado, o
+container ganha `pb-40` para nada ficar preso atrás da barra. No desktop o botão volta ao
+fluxo, abaixo do player.
+
+**O embed é o da aba Embed, literal.** Bloco 1 (tag com placeholder 9:16) no player; bloco
+2 (`_plt`, preloads, dns-prefetch) em `PreloadVsl`, montado na tela do diagnóstico. O
+`.m3u8` do preload tem id próprio (`arquivoVideoId`), diferente do player. O `_plt` vai por
+`next/script` porque `<script>` inline renderizado pelo React no cliente não executa.
+
+**Teste com o player real sem deploy:** apontar `www.mindtrail.com.br` para o servidor local
+(`--host-resolver-rules` no Chrome) — a VTurb só toca em domínio autorizado — e usar o
+Google Chrome (o Chromium do Playwright não tem H.264). O Chrome headless libera autoplay
+com som em qualquer configuração, então o caminho do autoplay mudo só se valida num celular.
 
 ### Pendências
 
-- **`contaId` da VTurb** está vazio em `lib/quiz/configs/quiz-1.ts` (o teste de integridade
-  fica vermelho até preencher). Vem da URL do script na aba Embed.
-- **No celular o botão aparece abaixo da dobra**: o 9:16 em largura total ocupa ~620px. Quem
-  está assistindo precisa rolar para vê-lo.
+- **Validar num celular real**: autoplay mudo + "clique para ouvir", barra do botão acima do
+  indicador de início do iPhone, navegador do Instagram. O headless não reproduz nenhum dos três.
 - **`META_CAPI_TEST_CODE` deve ser removido** depois de validar no Gerenciador, senão os
   eventos seguem chegando como teste e não contam para a campanha.
 
