@@ -9,33 +9,34 @@ import { AlertTriangle, Info, CheckCircle2, X, type LucideIcon } from 'lucide-re
 
 type VarianteAlerta = 'atencao' | 'info' | 'sucesso'
 
+// Classes literais (não montadas) para o Tailwind encontrá-las no build.
 const VARIANTES: Record<VarianteAlerta, {
   icone: LucideIcon
-  cor: string        // cor principal (ícone, título)
-  fundo: string      // fundo do card
-  fundoIcone: string // fundo do círculo do ícone
-  borda: string
+  caixa: string  // fundo e contorno do card
+  icone_: string // círculo do ícone
+  titulo: string
+  fechar: string
 }> = {
   atencao: {
     icone: AlertTriangle,
-    cor: '#C05050',
-    fundo: 'rgba(192, 80, 80, 0.06)',
-    fundoIcone: 'rgba(192, 80, 80, 0.14)',
-    borda: 'rgba(192, 80, 80, 0.25)',
+    caixa: 'bg-mt-red/[0.06] border-mt-red/25',
+    icone_: 'bg-mt-red/[0.14] text-mt-red',
+    titulo: 'text-mt-red',
+    fechar: 'text-mt-red hover:bg-mt-red/[0.14]',
   },
   info: {
     icone: Info,
-    cor: '#b88a30',
-    fundo: 'rgba(212, 168, 67, 0.08)',
-    fundoIcone: 'rgba(212, 168, 67, 0.18)',
-    borda: 'rgba(212, 168, 67, 0.30)',
+    caixa: 'bg-mt-yellow/[0.08] border-mt-yellow/30',
+    icone_: 'bg-mt-yellow/[0.18] text-[#8a6620]',
+    titulo: 'text-[#8a6620]',
+    fechar: 'text-[#8a6620] hover:bg-mt-yellow/[0.18]',
   },
   sucesso: {
     icone: CheckCircle2,
-    cor: '#3d8f72',
-    fundo: 'rgba(87, 170, 143, 0.08)',
-    fundoIcone: 'rgba(87, 170, 143, 0.16)',
-    borda: 'rgba(87, 170, 143, 0.28)',
+    caixa: 'bg-mt-green-sup border-mt-green/30',
+    icone_: 'bg-mt-green/[0.16] text-[#2f7a60]',
+    titulo: 'text-[#2f7a60]',
+    fechar: 'text-[#2f7a60] hover:bg-mt-green/[0.16]',
   },
 }
 
@@ -49,73 +50,29 @@ type Props = {
   onFechar?: () => void
 }
 
+// Card do sistema (rounded-card, hairline), tingido pela variante. O amarelo e o
+// verde do texto são versões escurecidas dos tokens: mt-yellow e mt-green como
+// texto reprovam no AA sobre fundo claro.
 export function Alerta({ variante, titulo, children, icone, onFechar }: Props) {
   const v = VARIANTES[variante]
   const Icone = icone ?? v.icone
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '13px',
-        background: v.fundo,
-        border: `1px solid ${v.borda}`,
-        borderRadius: '14px',
-        padding: '16px 18px',
-      }}
-    >
-      {/* Ícone em círculo */}
-      <span
-        style={{
-          flexShrink: 0,
-          width: '34px',
-          height: '34px',
-          borderRadius: '50%',
-          background: v.fundoIcone,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: v.cor,
-          marginTop: '1px',
-        }}
-      >
+    <div className={`flex items-start gap-3 rounded-card border-linha px-[18px] py-4 ${v.caixa}`}>
+      <span className={`mt-px flex size-[34px] shrink-0 items-center justify-center rounded-full ${v.icone_}`}>
         <Icone size={17} strokeWidth={2.2} />
       </span>
 
-      {/* Título + texto de apoio */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', flex: 1, minWidth: 0 }}>
-        <span style={{ fontSize: '14px', fontWeight: 600, color: v.cor, lineHeight: 1.35 }}>
-          {titulo}
-        </span>
-        <span style={{ fontSize: '13.5px', color: '#4a5f59', lineHeight: 1.6 }}>
-          {children}
-        </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className={`text-[15px] font-semibold leading-snug ${v.titulo}`}>{titulo}</span>
+        <span className="text-sm leading-relaxed text-mt-apoio">{children}</span>
       </div>
 
-      {/* Botão de fechar */}
       {onFechar && (
         <button
           onClick={onFechar}
           aria-label="Fechar aviso"
-          style={{
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '26px',
-            height: '26px',
-            marginTop: '2px',
-            marginRight: '-4px',
-            borderRadius: '8px',
-            background: 'transparent',
-            color: v.cor,
-            cursor: 'pointer',
-            opacity: 0.65,
-            transition: 'opacity 0.15s, background 0.15s',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = v.fundoIcone }}
-          onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.65'; e.currentTarget.style.background = 'transparent' }}
+          className={`-mr-1 mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full opacity-[0.65] transition-[opacity,background-color] hover:opacity-100 focus-visible:opacity-100 ${v.fechar}`}
         >
           <X size={15} strokeWidth={2.4} />
         </button>

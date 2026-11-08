@@ -47,13 +47,14 @@ export function BolhaGuia({ texto, ativo = true, onConcluir, nivel = 'corpo', fo
       onClick={concluirAgora}
       className="relative"
     >
+      {/* Fala de título no padrão dos títulos da LP e das perguntas do quiz:
+          Satoshi minúsculo. As de corpo seguem em DM Sans. */}
       <p
-        style={{
-          color: '#EDF2EF',
-          fontSize: nivel === 'titulo' ? 26 : 18,
-          fontWeight: nivel === 'titulo' ? 600 : forte ? 600 : 400,
-          lineHeight: nivel === 'titulo' ? 1.35 : 1.7,
-        }}
+        className={
+          nivel === 'titulo'
+            ? 'font-heading text-[26px] font-medium lowercase leading-[1.25] tracking-[-0.02em] text-mt-off-white sm:text-[30px]'
+            : `text-lg leading-[1.7] text-mt-off-white ${forte ? 'font-semibold' : 'font-normal'}`
+        }
       >
         {/* Camada visual: a digitação. Invisível para leitores de tela. */}
         <span aria-hidden="true">{textoVisivel}</span>
@@ -61,8 +62,7 @@ export function BolhaGuia({ texto, ativo = true, onConcluir, nivel = 'corpo', fo
         {!concluido && (
           <span
             aria-hidden="true"
-            className="ml-0.5 inline-block animate-pulse"
-            style={{ width: 2, height: '1em', backgroundColor: '#57AA8F', verticalAlign: 'text-bottom' }}
+            className="ml-0.5 inline-block h-[1em] w-0.5 animate-pulse bg-mt-green align-text-bottom"
           />
         )}
         {/* Camada semântica: o texto inteiro, anunciado uma única vez. */}

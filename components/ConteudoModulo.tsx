@@ -69,9 +69,9 @@ function TrechoDeParagrafo({ texto, classeTexto }: { texto: string; classeTexto:
 
   if (ehLista) {
     return (
-      <ul className="flex flex-col gap-2 pl-5" style={{ listStyleType: 'disc' }}>
+      <ul className="flex list-disc flex-col gap-2 pl-5 marker:text-mt-green">
         {linhas.map((linha, i) => (
-          <li key={i} className={classeTexto} style={{ color: '#1a2e29' }}>
+          <li key={i} className={`${classeTexto} text-mt-black`}>
             {renderizarTextoFormatado(linha.replace(REGEX_ITEM_LISTA, ''))}
           </li>
         ))}
@@ -80,7 +80,7 @@ function TrechoDeParagrafo({ texto, classeTexto }: { texto: string; classeTexto:
   }
 
   return (
-    <p className={classeTexto} style={{ color: '#1a2e29' }}>
+    <p className={`${classeTexto} text-mt-black`}>
       {renderizarTextoFormatado(texto)}
     </p>
   )
@@ -122,11 +122,7 @@ function Checklist({ itens }: { itens: string[] }) {
                 {marcado && <Check className="size-2.5 text-white" strokeWidth={3} />}
               </span>
               <span
-                className="text-[16px] leading-[1.6]"
-                style={{
-                  color: marcado ? '#4a6b62' : '#1a2e29',
-                  textDecoration: marcado ? 'line-through' : 'none',
-                }}
+                className={`text-[16px] leading-[1.6] ${marcado ? 'text-mt-apoio line-through' : 'text-mt-black'}`}
               >
                 {item}
               </span>
@@ -154,10 +150,9 @@ function BlocoRenderizado({ bloco }: { bloco: Bloco }) {
         <Tag
           className={
             bloco.nivel === 2
-              ? 'font-heading text-2xl font-bold'
-              : 'font-heading text-xl font-bold'
+              ? 'font-heading text-subtitulo font-medium text-mt-green-dark'
+              : 'font-heading text-titulo-card font-bold text-mt-green-dark'
           }
-          style={{ color: '#1a2e29' }}
         >
           {bloco.texto}
         </Tag>
@@ -166,9 +161,9 @@ function BlocoRenderizado({ bloco }: { bloco: Bloco }) {
 
     case 'lista':
       return (
-        <ul className="flex flex-col gap-2 pl-5" style={{ listStyleType: 'disc' }}>
+        <ul className="flex list-disc flex-col gap-2 pl-5 marker:text-mt-green">
           {bloco.itens.map((item, i) => (
-            <li key={i} className="font-editorial text-[18px] leading-[1.7]" style={{ color: '#1a2e29' }}>
+            <li key={i} className="font-editorial text-[18px] leading-[1.7] text-mt-green-dark">
               {renderizarTextoFormatado(item)}
             </li>
           ))}
@@ -181,8 +176,7 @@ function BlocoRenderizado({ bloco }: { bloco: Bloco }) {
     case 'callout':
       return (
         <div
-          className="flex items-start gap-3 rounded-xl px-5 py-4"
-          style={{ backgroundColor: '#f0f7f5', border: '0.5px solid #c8d8d2' }}
+          className="flex items-start gap-3 rounded-xl px-5 py-4 bg-mt-green-sup border-linha border-mt-border"
         >
           <span className="text-lg leading-none">{bloco.icone}</span>
           <div className="flex-1">
@@ -199,7 +193,7 @@ function BlocoRenderizado({ bloco }: { bloco: Bloco }) {
       const cores = CORES_DESTAQUE[bloco.cor] ?? CORES_DESTAQUE.cinza
       return (
         <p
-          className="rounded-lg px-4 py-3 text-[17px] font-semibold leading-[1.6]"
+          className="rounded-elemento px-4 py-3 text-[17px] font-semibold leading-[1.6]"
           style={{ backgroundColor: cores.bg, color: cores.texto }}
         >
           {renderizarTextoFormatado(bloco.texto)}
@@ -213,7 +207,7 @@ function BlocoRenderizado({ bloco }: { bloco: Bloco }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={bloco.url} alt={bloco.legenda ?? ''} className="w-full rounded-xl" />
           {bloco.legenda && (
-            <figcaption className="text-center text-sm italic" style={{ color: '#4a6b62' }}>
+            <figcaption className="text-center text-sm italic text-mt-apoio">
               {bloco.legenda}
             </figcaption>
           )}
@@ -237,16 +231,12 @@ function BlocoRenderizado({ bloco }: { bloco: Bloco }) {
               loading="lazy"
               sandbox="allow-scripts allow-same-origin allow-popups"
               referrerPolicy="no-referrer"
-              className="w-full rounded-xl"
-              style={{
-                height: bloco.altura ?? ALTURA_EMBED_PADRAO,
-                border: '0.5px solid #c8d8d2',
-                backgroundColor: '#ffffff',
-              }}
+              className="card-mt w-full"
+              style={{ height: bloco.altura ?? ALTURA_EMBED_PADRAO }}
             />
           </div>
           {bloco.legenda && (
-            <figcaption className="text-center text-sm italic" style={{ color: '#4a6b62' }}>
+            <figcaption className="text-center text-sm italic text-mt-apoio">
               {bloco.legenda}
             </figcaption>
           )}
@@ -255,19 +245,18 @@ function BlocoRenderizado({ bloco }: { bloco: Bloco }) {
     }
 
     case 'divisor':
-      return <hr style={{ border: 'none', borderTop: '0.5px solid #c8d8d2' }} />
+      return <hr className="border-0 border-t-linha border-mt-border" />
 
     case 'citacao':
       return (
         <blockquote
-          className="flex flex-col gap-1 pl-4"
-          style={{ borderLeft: '3px solid #c8d8d2' }}
+          className="flex flex-col gap-1 border-l-[3px] border-mt-border pl-4"
         >
-          <span className="text-[16px] italic leading-[1.6]" style={{ color: '#4a6b62' }}>
+          <span className="text-[16px] italic leading-[1.6] text-mt-apoio">
             {renderizarTextoFormatado(bloco.texto)}
           </span>
           {bloco.fonte && (
-            <cite className="text-sm not-italic" style={{ color: '#4a6b62' }}>
+            <cite className="text-sm not-italic text-mt-apoio">
               {bloco.fonte}
             </cite>
           )}

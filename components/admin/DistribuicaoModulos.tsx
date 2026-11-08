@@ -13,7 +13,7 @@ export function DistribuicaoModulos({ itens }: { itens: Item[] }) {
 
   if (comGente.length === 0) {
     return (
-      <p className="rounded-lg border border-mt-border bg-mt-surface px-4 py-3 text-sm text-mt-muted">
+      <p className="rounded-lg border border-mt-border bg-mt-surface px-4 py-3 text-sm text-mt-apoio">
         Ninguém concluiu módulos ainda.
       </p>
     )
@@ -23,7 +23,7 @@ export function DistribuicaoModulos({ itens }: { itens: Item[] }) {
     <div className="flex flex-col gap-1.5 rounded-lg border border-mt-border bg-mt-surface p-4">
       {comGente.map((i) => (
         <div key={i.rotulo} className="flex items-center gap-3">
-          <span className="w-32 shrink-0 truncate text-xs text-mt-muted">{i.rotulo}</span>
+          <span className="w-32 shrink-0 truncate text-xs text-mt-apoio">{i.rotulo}</span>
           <div className="h-4 flex-1 overflow-hidden rounded bg-mt-off-white">
             <div
               className="h-full rounded transition-all"
@@ -34,15 +34,14 @@ export function DistribuicaoModulos({ itens }: { itens: Item[] }) {
             />
           </div>
           <span
-            className="w-5 shrink-0 text-right text-xs font-semibold tabular-nums"
-            style={{ color: '#1a2e29' }}
+            className="w-5 shrink-0 text-right text-xs font-semibold tabular-nums text-mt-green-dark"
           >
             {i.valor}
           </span>
         </div>
       ))}
       {vazios > 0 && (
-        <p className="mt-1 text-[11px] text-mt-muted">
+        <p className="mt-1 text-[11px] text-mt-apoio">
           {vazios} {vazios === 1 ? 'módulo sem ninguém' : 'módulos sem ninguém'}.
         </p>
       )}

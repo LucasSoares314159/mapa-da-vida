@@ -20,7 +20,7 @@ export default function ModuloLoading() {
             </div>
 
             {/* Vídeo */}
-            <Skeleton className="w-full rounded-xl" style={{ aspectRatio: '16/9' }} />
+            <Skeleton className="w-full rounded-xl aspect-video" />
 
             {/* Materiais */}
             <div className="flex flex-col gap-3">
@@ -31,17 +31,15 @@ export default function ModuloLoading() {
 
           {/* Sidebar de módulos */}
           <div
-            className="hidden lg:flex h-fit w-[260px] shrink-0 flex-col rounded-xl overflow-hidden"
-            style={{ border: '0.5px solid #c8d8d2' }}
+            className="hidden lg:flex h-fit w-[260px] shrink-0 flex-col rounded-xl overflow-hidden border-linha border-mt-border"
           >
-            <div className="px-5 py-4" style={{ backgroundColor: '#f0f7f5', borderBottom: '0.5px solid #c8d8d2' }}>
+            <div className="px-5 py-4 bg-mt-green-sup border-b-linha border-mt-border">
               <Skeleton className="h-4 w-20" />
             </div>
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
-                className="flex items-center gap-2.5 px-5 py-3"
-                style={{ borderBottom: '0.5px solid #c8d8d2' }}
+                className="flex items-center gap-2.5 px-5 py-3 border-b-linha border-mt-border"
               >
                 <Skeleton className="size-4 rounded-full shrink-0" />
                 <Skeleton className="h-3.5 w-40" />
@@ -53,8 +51,7 @@ export default function ModuloLoading() {
 
       {/* Ação de conclusão — fixa no rodapé */}
       <div
-        className="sticky bottom-0 flex justify-center px-6 py-4"
-        style={{ backgroundColor: '#ffffff', borderTop: '0.5px solid #c8d8d2' }}
+        className="sticky bottom-0 flex justify-center px-6 py-4 bg-white border-t-linha border-mt-border"
       >
         <Skeleton className="h-10 w-52 rounded-lg" />
       </div>

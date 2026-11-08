@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
-import { FontesMarca } from '@/components/FontesMarca'
 import { MetaPixel } from '@/components/MetaPixel'
 
 // Layout proprio do funil de quiz: sem Header, sem Sidebar, sem rodape.
@@ -23,9 +22,6 @@ export const metadata: Metadata = {
 export default function QuizLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      {/* Fontes da LP /trilha, só no funil — a plataforma não usa. */}
-      <FontesMarca />
-
       <MetaPixel />
 
       {GA_ID && (

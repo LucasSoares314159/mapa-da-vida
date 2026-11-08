@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Compass, Pencil, Clock } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Alerta } from '@/components/ui/alerta'
 import { cn } from '@/lib/utils'
@@ -36,20 +37,10 @@ export function MomentoVida({ momento }: Props) {
       <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 flex flex-col gap-6">
         {/* Cabeçalho */}
         <div className="flex flex-col gap-2">
-          <h1 className="font-heading text-2xl font-semibold text-mt-black">
+          <h1 className="font-heading text-titulo font-medium text-mt-green-dark">
             Meu Momento de Vida
           </h1>
-          <p
-            style={{
-              fontFamily: "'Lora', serif",
-              fontStyle: 'italic',
-              fontSize: '15px',
-              color: '#6f8f87',
-              lineHeight: '1.7',
-              margin: 0,
-              maxWidth: '520px',
-            }}
-          >
+          <p className="max-w-[520px] font-editorial text-[17px] leading-[1.6] text-mt-apoio">
             Antes dos objetivos, antes da rotina: qual é a fase que você está vivendo agora?
             Esse é o princípio que guia todo o resto.
           </p>
@@ -90,84 +81,41 @@ function MomentoDefinido({ momento, onEditar }: { momento: MomentoVida; onEditar
   return (
     <div className="flex flex-col gap-4">
       {/* Card principal do momento */}
-      <div
-        style={{
-          background: '#fff',
-          borderRadius: '16px',
-          border: '1px solid #e2ece8',
-          padding: '28px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '18px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-        }}
-      >
-        {/* Estação */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div className="card-mt flex flex-col gap-[18px] p-card-lg">
+        {/* Estação — a cor vem da estação, por isso fica em style */}
+        <div className="flex items-center gap-2.5">
           <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '7px',
-              padding: '5px 12px',
-              borderRadius: '100px',
-              fontSize: '12px',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: '#fff',
-              background: est.cor,
-            }}
+            className="inline-flex items-center gap-[7px] rounded-full px-3 py-[5px] text-rotulo font-semibold uppercase text-white"
+            style={{ background: est.cor }}
           >
-            <span style={{ fontSize: '14px' }}>{est.emoji}</span>
+            <span className="text-[14px]">{est.emoji}</span>
             {est.label}
           </span>
           <button
             onClick={onEditar}
-            className="ml-auto flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-mt-muted transition-colors hover:bg-mt-off-white hover:text-mt-green-dark"
+            className="ml-auto flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-mt-apoio transition-colors hover:bg-mt-off-white hover:text-mt-green-dark"
           >
             <Pencil size={13} />
             Revisar momento
           </button>
         </div>
 
-        {/* Frase */}
-        <p
-          style={{
-            fontFamily: "'Lora', serif",
-            fontSize: '22px',
-            lineHeight: '1.5',
-            color: '#0C0F0F',
-            margin: 0,
-          }}
-        >
-          Meu momento de vida é <span style={{ fontStyle: 'italic', color: est.cor }}>{momento.frase}</span>
+        {/* Frase — a declaração da pessoa. O destaque é peso + cor da estação,
+            como o <em> dos títulos da LP, não itálico. */}
+        <p className="font-editorial text-[22px] leading-[1.5] text-mt-black">
+          Meu momento de vida é{' '}
+          <span className="font-semibold" style={{ color: est.cor }}>
+            {momento.frase}
+          </span>
         </p>
 
         {/* Rodapé: duração + revisão */}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            gap: '10px',
-            paddingTop: '4px',
-            borderTop: '0.5px solid #e2ece8',
-          }}
-        >
-          <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', color: '#6f8f87', marginTop: '14px' }}>
+        <div className="flex flex-wrap items-center gap-2.5 border-t-linha border-mt-border pt-3.5 text-xs">
+          <span className="flex items-center gap-[5px] text-mt-apoio">
             <Clock size={13} />
             Fase de {DURACOES[momento.duracao].label}
           </span>
-          <span
-            style={{
-              marginTop: '14px',
-              marginLeft: 'auto',
-              fontSize: '12px',
-              fontWeight: 500,
-              color: vencido || proximo ? '#b88a30' : '#6f8f87',
-            }}
-          >
+          <span className={`ml-auto font-medium ${vencido || proximo ? 'text-[#8a6620]' : 'text-mt-apoio'}`}>
             {revisaoLabel}
           </span>
         </div>
@@ -238,39 +186,27 @@ function CapturaMomento({
               <button
                 key={key}
                 onClick={() => setEstacao(key)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '12px',
-                  padding: '14px 16px',
-                  borderRadius: '14px',
-                  border: ativa ? `1.5px solid ${est.cor}` : '1px solid #e2ece8',
-                  background: ativa ? `${est.cor}0F` : '#fff',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'border-color 0.15s, background 0.15s',
-                }}
+                className={cn(
+                  'flex items-start gap-3 rounded-card px-4 py-3.5 text-left transition-[border-color,background-color]',
+                  ativa ? 'border-[1.5px]' : 'border border-mt-border bg-white hover:border-mt-green'
+                )}
+                // Cor por estação: dado, não token — fica em style.
+                style={ativa ? { borderColor: est.cor, background: `${est.cor}0F` } : undefined}
               >
                 <span
-                  style={{
-                    flexShrink: 0,
-                    width: '34px',
-                    height: '34px',
-                    borderRadius: '10px',
-                    background: `${est.cor}1A`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '17px',
-                  }}
+                  className="flex size-[34px] shrink-0 items-center justify-center rounded-elemento text-[17px]"
+                  style={{ background: `${est.cor}1A` }}
                 >
                   {est.emoji}
                 </span>
-                <span style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: ativa ? est.cor : '#0C0F0F' }}>
+                <span className="flex flex-col gap-[3px]">
+                  <span
+                    className={cn('font-heading text-[15px] font-bold', !ativa && 'text-mt-green-dark')}
+                    style={ativa ? { color: est.cor } : undefined}
+                  >
                     {est.label}
                   </span>
-                  <span style={{ fontSize: '12px', color: '#6f8f87', lineHeight: '1.45' }}>
+                  <span className="text-[12px] text-mt-apoio leading-[1.45]">
                     {est.contexto}
                   </span>
                 </span>
@@ -284,15 +220,8 @@ function CapturaMomento({
       {estacao && (
         <div className="flex flex-col gap-3">
           <StepLabel numero={2} texto="Descreva em uma frase o seu momento" />
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: '14px',
-              border: '1px solid #e2ece8',
-              padding: '18px',
-            }}
-          >
-            <p style={{ fontFamily: "'Lora', serif", fontSize: '17px', color: '#0C0F0F', margin: '0 0 10px', lineHeight: 1.5 }}>
+          <div className="card-mt p-card">
+            <p className="mb-2.5 font-editorial text-[17px] leading-[1.5] text-mt-black">
               Meu momento de vida é…
             </p>
             <Textarea
@@ -311,7 +240,7 @@ function CapturaMomento({
       {estacao && frase.trim().length > 0 && (
         <div className="flex flex-col gap-3">
           <StepLabel numero={3} texto="Por quanto tempo essa fase deve durar?" />
-          <p style={{ fontSize: '12px', color: '#6f8f87', margin: '-6px 0 0' }}>
+          <p className="-mt-1.5 text-[13px] text-mt-apoio">
             Quando esse tempo passar, a gente te lembra de revisitar seu momento.
           </p>
           <div className="flex flex-wrap gap-2.5">
@@ -323,14 +252,14 @@ function CapturaMomento({
                   key={key}
                   onClick={() => setDuracao(key)}
                   className={cn(
-                    'flex flex-1 min-w-[110px] flex-col items-center gap-0.5 rounded-[12px] border px-4 py-3 transition-colors',
+                    'flex flex-1 min-w-[110px] flex-col items-center gap-0.5 rounded-elemento border px-4 py-3 transition-colors',
                     ativa
                       ? 'border-mt-green bg-mt-green text-white'
-                      : 'border-mt-border bg-white text-mt-muted hover:border-mt-green'
+                      : 'border-mt-border bg-white text-mt-apoio hover:border-mt-green'
                   )}
                 >
                   <span className="text-sm font-semibold">{d.label}</span>
-                  <span className={cn('text-[11px]', ativa ? 'text-white/75' : 'text-mt-muted')}>
+                  <span className={cn('text-[11px]', ativa ? 'text-white/75' : 'text-mt-apoio')}>
                     {d.sublabel}
                   </span>
                 </button>
@@ -344,22 +273,14 @@ function CapturaMomento({
 
       {/* Ações */}
       <div className="flex flex-col gap-2.5">
-        <button
-          onClick={handleSalvar}
-          disabled={loading}
-          className="flex items-center justify-center gap-2 rounded-lg bg-mt-green px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-mt-green-dark disabled:opacity-60"
-        >
+        <Button onClick={handleSalvar} disabled={loading}>
           <Compass size={16} />
           {loading ? 'Salvando…' : momentoAtual ? 'Atualizar meu momento' : 'Definir meu momento'}
-        </button>
+        </Button>
         {onCancelar && (
-          <button
-            onClick={onCancelar}
-            disabled={loading}
-            className="rounded-lg border border-mt-border px-4 py-3 text-sm font-medium text-mt-muted transition-colors hover:border-mt-green hover:text-mt-green disabled:opacity-60"
-          >
+          <Button variant="outline" onClick={onCancelar} disabled={loading}>
             Cancelar
-          </button>
+          </Button>
         )}
       </div>
     </div>
@@ -372,25 +293,11 @@ function CapturaMomento({
 
 function StepLabel({ numero, texto }: { numero: number; texto: string }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-      <span
-        style={{
-          flexShrink: 0,
-          width: '22px',
-          height: '22px',
-          borderRadius: '50%',
-          background: '#EDF2EF',
-          color: '#57AA8F',
-          fontSize: '12px',
-          fontWeight: 600,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
+    <div className="flex items-center gap-2.5">
+      <span className="flex size-[26px] shrink-0 items-center justify-center rounded-full bg-mt-green font-heading text-[13px] font-bold text-white">
         {numero}
       </span>
-      <span style={{ fontSize: '15px', fontWeight: 600, color: '#0C0F0F' }}>{texto}</span>
+      <span className="font-heading text-titulo-card font-bold text-mt-green-dark">{texto}</span>
     </div>
   )
 }

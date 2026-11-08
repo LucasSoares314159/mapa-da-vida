@@ -23,10 +23,10 @@ export function Dedicacao({ turma }: { turma: VisaoTurma }) {
   if (!turma.temDataReal) {
     return (
       <div className="rounded-lg border border-mt-border bg-mt-surface px-4 py-3">
-        <p className="text-sm text-mt-muted">
+        <p className="text-sm text-mt-apoio">
           Esta turma teve o progresso migrado sem data real, então retorno e
           sequência não podem ser calculados. Só o conteúdo concluído:{' '}
-          <strong style={{ color: '#1a2e29' }}>
+          <strong className="text-mt-green-dark">
             {formatarMinutos(r.minutosTotais)}
           </strong>{' '}
           no total.
@@ -38,7 +38,7 @@ export function Dedicacao({ turma }: { turma: VisaoTurma }) {
   if (comecaram === 0) {
     return (
       <div className="rounded-lg border border-mt-border bg-mt-surface px-4 py-3">
-        <p className="text-sm text-mt-muted">
+        <p className="text-sm text-mt-apoio">
           Ninguém concluiu aulas ainda — sem base para medir dedicação.
         </p>
       </div>
@@ -85,7 +85,7 @@ export function Dedicacao({ turma }: { turma: VisaoTurma }) {
           key={i.rotulo}
           className="flex flex-col gap-0.5 rounded-lg border border-mt-border bg-mt-surface px-3 py-2.5"
         >
-          <span className="text-[10px] font-medium uppercase tracking-wider text-mt-muted">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-mt-apoio">
             {i.rotulo}
           </span>
           <span
@@ -94,7 +94,7 @@ export function Dedicacao({ turma }: { turma: VisaoTurma }) {
           >
             {i.valor}
           </span>
-          <span className="text-[10px] text-mt-muted">{i.nota}</span>
+          <span className="text-[10px] text-mt-apoio">{i.nota}</span>
         </div>
       ))}
     </div>

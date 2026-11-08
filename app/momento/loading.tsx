@@ -8,7 +8,7 @@ export default function MomentoLoading() {
           <Skeleton className="h-7 w-56" />
           <Skeleton className="h-4 w-full max-w-[420px]" />
         </div>
-        <div className="rounded-card bg-white px-7 py-7" style={{ border: '1px solid #e2ece8' }}>
+        <div className="card-mt p-card-lg">
           <Skeleton className="h-6 w-28 rounded-badge" />
           <Skeleton className="h-6 w-full mt-5" />
           <Skeleton className="h-6 w-2/3 mt-2" />

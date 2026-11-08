@@ -57,8 +57,9 @@ export function RevelacaoDiagnostico({ mapaId, diagnostico, areas, onVerMapa }: 
   return (
     <div
       onClick={avancar}
-      className="relative flex min-h-[calc(100vh-52px)] flex-col items-center justify-center px-6 py-12"
-      style={{ backgroundColor: '#2A3F45', cursor: ehUltima ? 'default' : 'pointer' }}
+      className={`relative flex min-h-[calc(100vh-52px)] flex-col items-center justify-center bg-mt-green-dark px-6 py-12 ${
+        ehUltima ? 'cursor-default' : 'cursor-pointer'
+      }`}
     >
       <AnimatePresence mode="wait">
         <motion.div
@@ -72,16 +73,9 @@ export function RevelacaoDiagnostico({ mapaId, diagnostico, areas, onVerMapa }: 
           {etapa.tipo === 'retrato' && <TelaRetrato diagnostico={diagnostico} areas={areas} />}
 
           {etapa.tipo === 'padrao' && (
-            <p
-              className="text-center"
-              style={{
-                fontFamily: 'var(--font-lora), Lora, serif',
-                fontStyle: 'italic',
-                fontSize: '1.45rem',
-                color: '#EDF2EF',
-                lineHeight: 1.65,
-              }}
-            >
+            // Frase-pivô da revelação no padrão da virada da LP: Satoshi
+            // minúsculo, não Lora em itálico.
+            <p className="text-center font-heading text-[26px] font-medium lowercase leading-[1.25] tracking-[-0.02em] text-mt-off-white [text-wrap:balance] sm:text-[30px]">
               {diagnostico.padrao}
             </p>
           )}
@@ -115,30 +109,16 @@ function TelaArea({ area }: { area: Diagnostico['areasDestacadas'][number] }) {
         transition={{ duration: 0.5, delay: 0.15 }}
       >
         <span
-          style={{
-            width: 9,
-            height: 9,
-            borderRadius: '50%',
-            backgroundColor: cor,
-            flexShrink: 0,
-            display: 'inline-block',
-          }}
+          className="inline-block size-[9px] shrink-0 rounded-full"
+          style={{ backgroundColor: cor }}
         />
-        <h3
-          style={{
-            fontFamily: 'var(--font-space-grotesk), sans-serif',
-            fontSize: '1.35rem',
-            fontWeight: 600,
-            color: '#EDF2EF',
-          }}
-        >
+        <h3 className="font-heading text-subtitulo font-bold text-mt-off-white">
           {nome}
         </h3>
       </motion.div>
 
       <motion.p
-        className="text-center"
-        style={{ fontSize: '1.05rem', color: '#EDF2EF', lineHeight: 1.7 }}
+        className="text-center text-corpo text-mt-off-white"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.35 }}
@@ -147,14 +127,7 @@ function TelaArea({ area }: { area: Diagnostico['areasDestacadas'][number] }) {
       </motion.p>
 
       <motion.p
-        style={{
-          fontSize: '0.95rem',
-          color: 'rgba(237,242,239,0.8)',
-          lineHeight: 1.7,
-          borderLeft: '2px solid #57AA8F',
-          paddingLeft: 18,
-          textAlign: 'left',
-        }}
+        className="rounded-card bg-white/[0.06] p-card text-left text-[15px] leading-[1.7] text-mt-off-white/85"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.6 }}
@@ -181,16 +154,7 @@ function TelaAcoes({
     <div className="flex w-full flex-col items-center gap-8">
       {/* Fecho que devolve agência. Vinha da tela de projeção, removida por ser
           genérica — mas esta frase é boa e não podia sair junto. */}
-      <p
-        className="max-w-md text-center"
-        style={{
-          fontFamily: 'var(--font-lora), Lora, serif',
-          fontStyle: 'italic',
-          fontSize: '1.05rem',
-          color: '#EDF2EF',
-          lineHeight: 1.7,
-        }}
-      >
+      <p className="max-w-md text-center font-editorial text-apoio text-mt-off-white/85 [text-wrap:pretty]">
         {diagnostico.escolha}
       </p>
 
@@ -204,19 +168,10 @@ function TelaAcoes({
         ).map(({ tipo, bg, cor, count }) => (
           <span
             key={tipo}
-            className="flex items-center text-sm font-medium"
-            style={{ backgroundColor: bg, color: cor, borderRadius: 20, padding: '4px 10px', gap: 5 }}
+            className="flex items-center gap-[5px] rounded-full px-2.5 py-1 text-sm font-medium"
+            style={{ backgroundColor: bg, color: cor }}
           >
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                backgroundColor: cor,
-                flexShrink: 0,
-                display: 'inline-block',
-              }}
-            />
+            <span className="inline-block size-2 shrink-0 rounded-full" style={{ backgroundColor: cor }} />
             {count}
           </span>
         ))}
@@ -228,14 +183,7 @@ function TelaAcoes({
             e.stopPropagation()
             onVerMapa()
           }}
-          className="flex items-center gap-2 text-white transition-opacity hover:opacity-90"
-          style={{
-            backgroundColor: '#57AA8F',
-            borderRadius: 10,
-            padding: '14px 28px',
-            fontSize: 15,
-            fontWeight: 500,
-          }}
+          className="flex min-h-11 items-center gap-2 rounded-full bg-mt-green px-10 py-[18px] text-base font-medium leading-tight text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-mt-off-white"
         >
           Ver mapa completo →
         </button>
@@ -243,8 +191,7 @@ function TelaAcoes({
         <Link
           href={`/diagnostico/${mapaId}`}
           onClick={(e) => e.stopPropagation()}
-          className="text-sm font-medium transition-opacity hover:opacity-80"
-          style={{ color: 'rgba(237,242,239,0.7)' }}
+          className="text-sm font-medium text-mt-off-white/75 underline decoration-mt-green underline-offset-4 transition-colors hover:text-mt-off-white"
         >
           Ver diagnóstico completo
         </Link>
@@ -279,13 +226,7 @@ function TelaRetrato({ diagnostico, areas }: { diagnostico: Diagnostico; areas: 
   return (
     <div className="flex w-full max-w-2xl flex-col items-center gap-7">
       <motion.p
-        className="text-center uppercase"
-        style={{
-          fontSize: 12,
-          letterSpacing: 2,
-          color: 'rgba(237,242,239,0.55)',
-          fontFamily: 'var(--font-space-grotesk), sans-serif',
-        }}
+        className="text-center font-editorial text-apoio lowercase text-mt-off-white/80"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -304,15 +245,7 @@ function TelaRetrato({ diagnostico, areas }: { diagnostico: Diagnostico; areas: 
             transition={{ duration: 0.5, delay: 0.25 + iPilar * 0.22, ease: [0.16, 1, 0.3, 1] }}
           >
             <span
-              className="uppercase"
-              style={{
-                fontSize: 10,
-                letterSpacing: '1px',
-                fontWeight: 700,
-                color: 'rgba(237,242,239,0.5)',
-                borderBottom: '0.5px solid rgba(237,242,239,0.15)',
-                paddingBottom: 8,
-              }}
+              className="border-b-linha border-mt-off-white/15 pb-2 font-sans text-rotulo font-medium uppercase text-mt-green"
             >
               {PILARES[pilar].label}
             </span>
@@ -328,23 +261,13 @@ function TelaRetrato({ diagnostico, areas }: { diagnostico: Diagnostico; areas: 
                   transition={{ duration: 0.35, delay: 0.4 + iPilar * 0.22 + iArea * 0.07 }}
                 >
                   <span
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      backgroundColor: PONTO_STATUS[status],
-                      flexShrink: 0,
-                      display: 'inline-block',
-                      marginTop: 6,
-                    }}
+                    className="mt-1.5 inline-block size-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: PONTO_STATUS[status] }}
                   />
                   <span
-                    style={{
-                      fontSize: 13,
-                      color: status === 'verde' ? 'rgba(237,242,239,0.65)' : '#EDF2EF',
-                      fontWeight: status === 'vermelho' ? 600 : 400,
-                      lineHeight: 1.4,
-                    }}
+                    className={`text-[13px] leading-[1.4] ${
+                      status === 'verde' ? 'text-mt-off-white/65' : 'text-mt-off-white'
+                    } ${status === 'vermelho' ? 'font-semibold' : 'font-normal'}`}
                   >
                     {area}
                   </span>
@@ -357,24 +280,12 @@ function TelaRetrato({ diagnostico, areas }: { diagnostico: Diagnostico; areas: 
 
       {/* O que esse mapa mostra, ligado ao estudo */}
       <motion.div
-        className="flex w-full flex-col items-center gap-2.5"
-        style={{
-          borderTop: '0.5px solid rgba(237,242,239,0.15)',
-          paddingTop: 24,
-        }}
+        className="flex w-full flex-col items-center gap-2.5 border-t-linha border-mt-off-white/15 pt-6"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 1.2 }}
       >
-        <p
-          className="text-center"
-          style={{
-            fontSize: '1.15rem',
-            color: '#EDF2EF',
-            fontWeight: 600,
-            lineHeight: 1.4,
-          }}
-        >
+        <p className="text-center font-heading text-subtitulo font-medium lowercase text-mt-off-white">
           {pedemMudanca === 0
             ? 'Nenhuma área pedindo mudança hoje.'
             : `${pedemMudanca} ${pedemMudanca === 1 ? 'área pede' : 'áreas pedem'} atenção.`}
@@ -382,8 +293,7 @@ function TelaRetrato({ diagnostico, areas }: { diagnostico: Diagnostico; areas: 
 
         {/* Disclaimer: contexto do estudo, em peso menor que o número acima */}
         <p
-          className="max-w-md text-center"
-          style={{ fontSize: '0.85rem', color: 'rgba(237,242,239,0.55)', lineHeight: 1.6 }}
+          className="max-w-md text-center text-sm leading-relaxed text-mt-off-white/70"
         >
           {pedemMudanca === 0
             ? `Manter esse resultado é o que dá às populações das Blue Zones ${ganhoEstimado.valor} anos a mais livres de doença.`
@@ -411,8 +321,7 @@ function IndicadorAvanco({ indice, total }: { indice: number; total: number }) {
   return (
     <div className="mt-12 flex w-full flex-col items-center gap-4">
       <motion.span
-        className="flex items-center gap-2"
-        style={{ fontSize: 13, color: 'rgba(237,242,239,0.75)' }}
+        className="flex items-center gap-2 font-editorial text-[15px] text-mt-off-white/75"
         initial={{ opacity: 0 }}
         animate={{ opacity: visivel ? 1 : 0, y: visivel ? [0, 3, 0] : 0 }}
         transition={{
@@ -428,14 +337,9 @@ function IndicadorAvanco({ indice, total }: { indice: number; total: number }) {
         {Array.from({ length: total }).map((_, i) => (
           <span
             key={i}
-            style={{
-              width: i === indice ? 18 : 5,
-              height: 5,
-              borderRadius: 3,
-              backgroundColor: i === indice ? '#57AA8F' : 'rgba(237,242,239,0.2)',
-              transition: 'width 0.4s ease, background-color 0.4s ease',
-              display: 'inline-block',
-            }}
+            className={`inline-block h-[5px] rounded-full transition-[width,background-color] duration-[400ms] ${
+              i === indice ? 'w-[18px] bg-mt-green' : 'w-[5px] bg-mt-off-white/20'
+            }`}
           />
         ))}
       </div>

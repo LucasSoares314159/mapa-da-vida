@@ -24,10 +24,10 @@ export function Funil({ etapas }: { etapas: Etapa[] }) {
           >
             {/* Rótulo */}
             <div className="w-44 shrink-0">
-              <p className="truncate text-sm font-medium" style={{ color: '#1a2e29' }}>
+              <p className="truncate text-sm font-medium text-mt-green-dark">
                 {e.rotulo}
               </p>
-              <p className="truncate text-[11px] text-mt-muted">{e.detalhe}</p>
+              <p className="truncate text-[11px] text-mt-apoio">{e.detalhe}</p>
             </div>
 
             {/* Barra */}
@@ -40,10 +40,10 @@ export function Funil({ etapas }: { etapas: Etapa[] }) {
 
             {/* Números */}
             <div className="flex w-24 shrink-0 items-baseline justify-end gap-1.5">
-              <span className="text-sm font-semibold tabular-nums" style={{ color: '#1a2e29' }}>
+              <span className="text-sm font-semibold tabular-nums text-mt-green-dark">
                 {e.valor}
               </span>
-              <span className="text-[11px] tabular-nums text-mt-muted">{e.pct}%</span>
+              <span className="text-[11px] tabular-nums text-mt-apoio">{e.pct}%</span>
             </div>
 
             {/* Queda em relação à etapa anterior */}

@@ -93,13 +93,12 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
   }
 
   return (
-    <div className="w-full min-h-screen bg-[#2A3F45] font-sans">
+    <div className="w-full min-h-screen bg-mt-green-dark font-sans">
       <div className="mx-auto max-w-[560px] px-4 py-8 flex flex-col gap-10">
         {/* Botão Dashboard */}
         <Link
           href="/dashboard"
-          className="flex items-center gap-1.5 text-sm font-medium transition-colors w-fit"
-          style={{ color: '#57AA8F' }}
+          className="flex w-fit items-center gap-1.5 text-sm font-medium text-mt-off-white/80 transition-colors hover:text-mt-off-white"
         >
           <ArrowLeft className="size-4" />
           Dashboard
@@ -107,25 +106,25 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
 
         {/* Intro */}
         <div className="flex flex-col gap-5">
-          <span className="flex items-center gap-2 text-[11px] font-medium tracking-[1.2px] uppercase text-mt-green">
+          <span className="flex items-center gap-2 text-rotulo font-medium uppercase text-mt-green">
             <span className="inline-block w-5 h-[2px] bg-mt-green rounded" />
             Calculadora de Rotina
           </span>
-          <h1 className="font-heading font-medium text-[28px] leading-[1.3] text-[#EDF2EF]">
+          <h1 className="font-heading text-titulo font-medium text-mt-off-white">
             Antes de definir objetivos, veja quanto tempo você realmente tem.
           </h1>
         </div>
 
         {/* Inputs Section */}
         <div className="flex flex-col gap-6">
-        <h2 className="text-[13px] uppercase tracking-[1px] text-mt-muted font-normal font-heading">
+        <h2 className="font-sans text-rotulo font-medium uppercase text-mt-green">
           Ajuste para a sua realidade
         </h2>
         <div className="flex flex-col gap-0">
           {/* Horas de sono */}
-          <div className="flex flex-col gap-2.5 pb-5 border-b border-[#3d5a62]">
+          <div className="flex flex-col gap-2.5 pb-5 border-b border-mt-linha-escura">
             <div className="flex items-end justify-between">
-              <label className="text-sm text-[#EDF2EF]">Horas de sono por noite</label>
+              <label className="text-sm text-mt-off-white">Horas de sono por noite</label>
               <span className="font-heading font-medium text-base text-mt-green">{horasSono}h</span>
             </div>
             <input
@@ -141,9 +140,9 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
           </div>
 
           {/* Horas de trabalho */}
-          <div className="flex flex-col gap-2.5 pb-5 border-b border-[#3d5a62]">
+          <div className="flex flex-col gap-2.5 pb-5 border-b border-mt-linha-escura">
             <div className="flex items-end justify-between">
-              <label className="text-sm text-[#EDF2EF]">Horas de trabalho por dia</label>
+              <label className="text-sm text-mt-off-white">Horas de trabalho por dia</label>
               <span className="font-heading font-medium text-base text-mt-green">{horasTrabalho}h</span>
             </div>
             <input
@@ -159,11 +158,11 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
           </div>
 
           {/* Necessidades básicas */}
-          <div className="flex flex-col gap-2.5 pb-5 border-b border-[#3d5a62]">
+          <div className="flex flex-col gap-2.5 pb-5 border-b border-mt-linha-escura">
             <div className="flex items-end justify-between">
               <div>
-                <label className="text-sm text-[#EDF2EF]">Necessidades básicas por dia</label>
-                <p className="text-xs text-mt-muted mt-1 italic">comer, higiene, casa, descanso, família</p>
+                <label className="text-sm text-mt-off-white">Necessidades básicas por dia</label>
+                <p className="text-xs text-mt-off-white/70 mt-1">comer, higiene, casa, descanso, família</p>
               </div>
               <span className="font-heading font-medium text-base text-mt-green">{horasBasicas}h</span>
             </div>
@@ -180,11 +179,11 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
           </div>
 
           {/* Horas na tela */}
-          <div className="flex flex-col gap-2.5 pb-5 border-b border-[#3d5a62]">
+          <div className="flex flex-col gap-2.5 pb-5 border-b border-mt-linha-escura">
             <div className="flex items-end justify-between">
               <div>
-                <label className="text-sm text-[#EDF2EF]">Horas na tela por dia</label>
-                <p className="text-xs text-mt-muted mt-1 italic">redes sociais, jogos e entretenimento improdutivo</p>
+                <label className="text-sm text-mt-off-white">Horas na tela por dia</label>
+                <p className="text-xs text-mt-off-white/70 mt-1">redes sociais, jogos e entretenimento improdutivo</p>
               </div>
               <span className="font-heading font-medium text-base" style={{ color: horasTela === 0 ? '#a8c4bc' : `rgb(${Math.round(192 + (255 - 192) * horasTela / 12)},${Math.round(80 * (1 - horasTela / 12))},${Math.round(80 * (1 - horasTela / 12))})` }}>{horasTela}h</span>
             </div>
@@ -203,7 +202,7 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
           {/* Dias de trabalho */}
           <div className="flex flex-col gap-2.5">
             <div className="flex items-end justify-between">
-              <label className="text-sm text-[#EDF2EF]">Dias de trabalho por semana</label>
+              <label className="text-sm text-mt-off-white">Dias de trabalho por semana</label>
               <span className="font-heading font-medium text-base text-mt-green">{diasTrabalho} dias</span>
             </div>
             <input
@@ -221,16 +220,16 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
       </div>
 
       {/* Resultado Section */}
-      <div className="bg-[rgba(0,0,0,0.2)] rounded-2xl p-8 border border-[#3d5a62] flex flex-col items-center gap-3">
+      <div className="flex flex-col items-center gap-3 rounded-painel bg-black/20 p-painel">
         <div className="text-[72px] font-heading font-medium leading-none tracking-[-2px]"
              style={{ color: zonaConfig.percentualCor }}>
           {resultado.percentualLivre}%
         </div>
-        <p className="text-sm text-mt-muted -mt-1">do seu tempo acordado está livre</p>
-        <p className="text-base font-medium text-[#EDF2EF]">
+        <p className="text-sm text-mt-off-white/70 -mt-1">do seu tempo acordado está livre</p>
+        <p className="text-base font-medium text-mt-off-white">
           ≈ {resultado.horasLivresSemana} horas livres por semana
         </p>
-        <p className="text-xs text-mt-muted text-center leading-[1.6] max-w-[340px]">
+        <p className="text-xs text-mt-off-white/70 text-center leading-[1.6] max-w-[340px]">
           Calculado sobre as horas que você está acordado durante a jornada — descontando sono, trabalho e necessidades básicas.
         </p>
         <span
@@ -239,27 +238,27 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
         >
           {zonaConfig.badgeLabel}
         </span>
-        <p className="font-editorial italic text-sm text-[#a8c4bc] text-center leading-[1.7] max-w-[380px]">
+        <p className="max-w-[380px] text-center font-editorial text-[15px] leading-[1.7] text-mt-off-white/80">
           {zonaConfig.descricao}
         </p>
-        <div className="w-full border-t border-[#3d5a62] mt-1" />
+        <div className="w-full border-t border-mt-linha-escura mt-1" />
         <div className="w-full grid grid-cols-[1fr_1px_1fr] pt-2">
           <div className="flex flex-col items-center gap-1 px-4">
             <div className="text-[32px] font-heading font-medium leading-none"
                  style={{ color: zonaConfig.percentualCor }}>
               {resultado.horasLivresDiaUtil}h
             </div>
-            <div className="text-[13px] text-mt-muted mt-0.5">horas livres</div>
-            <div className="text-[10px] uppercase tracking-[0.8px] text-mt-muted font-medium mt-1.5">Dia Útil</div>
+            <div className="text-[13px] text-mt-off-white/70 mt-0.5">horas livres</div>
+            <div className="mt-1.5 text-rotulo font-medium uppercase text-mt-off-white/70">Dia Útil</div>
           </div>
-          <div className="bg-[#3d5a62] w-px self-stretch mx-auto" />
+          <div className="bg-mt-linha-escura w-px self-stretch mx-auto" />
           <div className="flex flex-col items-center gap-1 px-4">
             <div className="text-[32px] font-heading font-medium leading-none"
                  style={{ color: zonaConfig.percentualCor }}>
               {resultado.horasLivresDiaFDS}h
             </div>
-            <div className="text-[13px] text-mt-muted mt-0.5">horas livres</div>
-            <div className="text-[10px] uppercase tracking-[0.8px] text-mt-muted font-medium mt-1.5">Fim de semana</div>
+            <div className="text-[13px] text-mt-off-white/70 mt-0.5">horas livres</div>
+            <div className="mt-1.5 text-rotulo font-medium uppercase text-mt-off-white/70">Fim de semana</div>
           </div>
         </div>
         </div>
@@ -269,11 +268,11 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
         <Button
           onClick={handleSalvar}
           disabled={isSaving}
-          className="w-full py-[18px] bg-mt-green hover:bg-[#68bfa0] text-[#0C0F0F] font-medium text-base rounded-[10px] h-auto"
+          size="lg" className="w-full focus-visible:outline-mt-off-white"
         >
           {isSaving ? 'Salvando...' : 'Salvar rotina'}
         </Button>
-        <p className="text-xs text-mt-muted text-center">Você pode ajustar isso a qualquer momento</p>
+        <p className="text-xs text-mt-off-white/70 text-center">Você pode ajustar isso a qualquer momento</p>
         {saveSuccess && (
           <p className="text-center text-sm text-mt-green font-medium">
             ✓ Rotina salva com sucesso!
@@ -284,17 +283,17 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
         {/* Link to Map Section - only show if not already linked to a map */}
         {!mapaId && !linkedMapId && mapas.length > 0 && (
         <div className="flex flex-col gap-3">
-          <h2 className="text-base font-medium font-heading text-[#EDF2EF]">
+          <h2 className="font-heading text-titulo-card font-bold text-mt-off-white">
             Vincular a um mapa
           </h2>
-          <p className="text-sm text-mt-muted">
+          <p className="text-sm text-mt-off-white/70">
             Associe essa rotina a um diagnóstico para preservar o contexto temporal.
           </p>
           <div className="flex gap-3">
             <select
               value={selectedMapId}
               onChange={(e) => setSelectedMapId(e.target.value)}
-              className="flex-1 px-4 py-2.5 border border-[#3d5a62] bg-[#1e2f34] rounded-lg text-sm text-[#EDF2EF] focus:outline-none focus:ring-2 focus:ring-mt-green focus:border-transparent"
+              className="campo-escuro flex-1 bg-[#1e2f34]"
             >
               <option value="">Escolha um mapa...</option>
               {mapas.map((mapa) => (
@@ -306,7 +305,7 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
             <Button
               onClick={handleVincularMapa}
               disabled={!selectedMapId || isLinking}
-              className="bg-mt-green hover:bg-[#68bfa0] text-[#0C0F0F] font-medium px-6"
+              className="focus-visible:outline-mt-off-white"
             >
               {isLinking ? 'Vinculando…' : 'Vincular'}
             </Button>
@@ -317,11 +316,11 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
         {/* No maps message */}
         {!mapaId && !linkedMapId && mapas.length === 0 && (
         <div className="text-center">
-          <p className="text-sm text-mt-muted mb-4">
+          <p className="text-sm text-mt-off-white/70 mb-4">
             Você ainda não tem mapas. Crie seu primeiro diagnóstico para vincular a rotina.
           </p>
           <Link href="/mapa/preparacao">
-            <Button className="bg-mt-green hover:bg-[#68bfa0] text-[#0C0F0F] font-medium">
+            <Button className="focus-visible:outline-mt-off-white">
               Criar meu mapa →
             </Button>
           </Link>
@@ -335,7 +334,7 @@ export default function CalculadoraRotina({ defaultValues, mapas = [], mapaId }:
             ✓ Rotina vinculada ao mapa com sucesso!
           </p>
           <Link href={`/diagnostico/${linkedMapId}`}>
-            <Button className="bg-mt-green hover:bg-[#68bfa0] text-[#0C0F0F] font-medium">
+            <Button className="focus-visible:outline-mt-off-white">
               Ver diagnóstico →
             </Button>
           </Link>

@@ -105,34 +105,27 @@ export function PassoPergunta({ area, resposta, revelado, onStatus, onObservacao
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.06 * i }}
-                  className="flex w-full items-center gap-3 text-left transition-colors duration-150"
-                  style={{
-                    border: selecionado
-                      ? `1.5px solid ${opt.bordaSelecionada}`
-                      : '0.5px solid #3d5a62',
-                    backgroundColor: selecionado ? opt.bgSelecionado : 'rgba(255,255,255,0.03)',
-                    borderRadius: 10,
-                    padding: '14px 16px',
-                  }}
+                  className={`flex w-full items-center gap-3 rounded-elemento px-4 py-3.5 text-left transition-colors duration-150 ${
+                    selecionado ? 'border-[1.5px]' : 'border-linha border-mt-linha-escura bg-white/[0.03] hover:bg-white/[0.06]'
+                  }`}
+                  // Cor por status (verde/amarelo/vermelho): dado da opção.
+                  style={
+                    selecionado
+                      ? { borderColor: opt.bordaSelecionada, backgroundColor: opt.bgSelecionado }
+                      : undefined
+                  }
                 >
                   <span
-                    style={{
-                      width: 9,
-                      height: 9,
-                      borderRadius: '50%',
-                      backgroundColor: opt.ponto,
-                      flexShrink: 0,
-                      display: 'inline-block',
-                    }}
+                    className="inline-block size-[9px] shrink-0 rounded-full"
+                    style={{ backgroundColor: opt.ponto }}
                   />
                   <span className="flex flex-1 flex-col gap-0.5">
                     <span
-                      className="text-sm"
-                      style={{ color: selecionado ? '#2A3F45' : '#EDF2EF', fontWeight: 500 }}
+                      className={`text-[15px] font-medium ${selecionado ? 'text-mt-green-dark' : 'text-mt-off-white'}`}
                     >
                       {opt.titulo}
                     </span>
-                    <span className="text-xs" style={{ color: selecionado ? '#6f8f87' : '#a8c4bc' }}>
+                    <span className={`text-xs ${selecionado ? 'text-mt-apoio' : 'text-mt-off-white/70'}`}>
                       {opt.sublabel}
                     </span>
                   </span>
@@ -157,8 +150,7 @@ export function PassoPergunta({ area, resposta, revelado, onStatus, onObservacao
                 <div className="pt-5">
                   <label
                     htmlFor={`obs-${area}`}
-                    className="mb-2 block text-sm"
-                    style={{ color: '#EDF2EF' }}
+                    className="mb-2 block text-sm text-mt-off-white"
                   >
                     O que está por trás dessa escolha?
                   </label>
@@ -171,20 +163,9 @@ export function PassoPergunta({ area, resposta, revelado, onStatus, onObservacao
                     required
                     aria-describedby={`ajuda-${area}`}
                     placeholder="Ex: não treino há 3 meses, sempre falta tempo"
-                    className="w-full resize-none text-sm outline-none transition-colors placeholder:text-[#6f8f87]"
-                    style={{
-                      border: '1.5px solid #3d5a62',
-                      backgroundColor: 'rgba(255,255,255,0.03)',
-                      borderRadius: 10,
-                      padding: '12px 14px',
-                      color: '#EDF2EF',
-                      lineHeight: 1.6,
-                      fontFamily: 'inherit',
-                    }}
-                    onFocus={(e) => (e.currentTarget.style.borderColor = '#57AA8F')}
-                    onBlur={(e) => (e.currentTarget.style.borderColor = '#3d5a62')}
+                    className="campo-escuro resize-none"
                   />
-                  <p id={`ajuda-${area}`} className="mt-2 text-xs" style={{ color: '#6f8f87' }}>
+                  <p id={`ajuda-${area}`} className="mt-2 text-xs text-mt-off-white/70">
                     {faltam > 0
                       ? `Uma frase com o motivo — faltam ${faltam} caractere${faltam > 1 ? 's' : ''}.`
                       : 'Pronto. Uma frase honesta vale mais que um parágrafo.'}

@@ -4,12 +4,10 @@ export default function MapaLoading() {
   return (
     <div className="flex flex-col h-screen">
       <header
-        className="sticky top-0 z-50 bg-white shrink-0"
-        style={{ borderBottom: '0.5px solid #c8d8d2', height: 52 }}
+        className="sticky top-0 z-50 h-[52px] shrink-0 border-b-linha border-mt-border bg-white"
       >
         <div
-          className="mx-auto grid max-w-5xl items-center px-5 h-full"
-          style={{ gridTemplateColumns: '1fr auto 1fr' }}
+          className="mx-auto grid h-full max-w-5xl grid-cols-[1fr_auto_1fr] items-center px-5"
         >
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-5 w-32" />

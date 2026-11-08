@@ -27,13 +27,13 @@ export function AreaDestaqueOverlay({ nome, status, base }: Props) {
     <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-mt-green-dark/55 p-6">
       <div
         className={cn(
-          'flex w-full max-w-md flex-col gap-4 rounded-card border-[1.5px] bg-mt-surface px-8 py-7 shadow-xl',
+          'flex w-full max-w-md flex-col gap-4 rounded-card border-[1.5px] bg-mt-surface px-8 py-7 shadow-mt-3',
           BORDA_STATUS[status]
         )}
       >
         <div className="flex items-center gap-2">
           <span className={cn('inline-block size-2.5 shrink-0 rounded-full', PONTO_STATUS[status])} />
-          <h3 className="text-base font-semibold text-mt-black">{nome}</h3>
+          <h3 className="font-heading text-titulo-card font-bold text-mt-green-dark">{nome}</h3>
         </div>
 
         <p className="text-[0.95rem] leading-relaxed text-mt-black">{base.fundamento}</p>

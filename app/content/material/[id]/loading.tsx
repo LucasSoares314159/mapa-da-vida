@@ -17,7 +17,7 @@ export default function MaterialLoading() {
         </div>
 
         {/* Quadro */}
-        <Skeleton className="w-full rounded-xl" style={{ height: 'min(70vh, 720px)', minHeight: 420 }} />
+        <Skeleton className="h-[min(70vh,720px)] min-h-[420px] w-full rounded-card" />
         <Skeleton className="h-4 w-48" />
       </div>
     </div>

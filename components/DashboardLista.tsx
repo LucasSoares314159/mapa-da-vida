@@ -33,23 +33,12 @@ function StatusPill({ count, tipo }: { count: number; tipo: 'verde' | 'amarelo' 
   const e = estilos[tipo]
   return (
     <span
-      className="flex items-center gap-1.5 text-sm font-medium"
-      style={{
-        backgroundColor: e.bg,
-        color: e.cor,
-        borderRadius: '20px',
-        padding: '4px 10px',
-      }}
+      className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-medium"
+      style={{ backgroundColor: e.bg, color: e.cor }}
     >
       <span
-        style={{
-          width: 7,
-          height: 7,
-          borderRadius: '50%',
-          backgroundColor: e.ponto,
-          flexShrink: 0,
-          display: 'inline-block',
-        }}
+        className="inline-block size-[7px] shrink-0 rounded-full"
+        style={{ backgroundColor: e.ponto }}
       />
       {count}
     </span>
@@ -94,8 +83,7 @@ export function DashboardLista({ mapas }: Props) {
   if (mapas.length === 0) {
     return (
       <div
-        className="flex flex-col items-center gap-4 rounded-card bg-white py-16 text-center"
-        style={{ border: '0.5px solid #c8d8d2' }}
+        className="card-mt flex flex-col items-center gap-4 py-16 text-center"
       >
         <p className="text-muted-foreground">Você ainda não tem nenhum mapa.</p>
         <Button asChild>
@@ -110,7 +98,7 @@ export function DashboardLista({ mapas }: Props) {
       {/* Controles: tabs + filtro de período */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         {/* Tabs */}
-        <div className="flex items-center gap-1" style={{ background: '#fff', border: '0.5px solid #c8d8d2', borderRadius: 8, padding: 3 }}>
+        <div className="flex items-center gap-1 rounded-full border-linha border-mt-border bg-white p-[3px]">
           {([
             { value: 'todos', label: 'Todos' },
             { value: 'com-vermelho', label: 'Com vermelho' },
@@ -119,13 +107,11 @@ export function DashboardLista({ mapas }: Props) {
             <button
               key={t.value}
               onClick={() => setTabReset(t.value)}
-              className="text-sm px-3 py-1.5 transition-colors duration-150"
-              style={{
-                borderRadius: 6,
-                fontWeight: tab === t.value ? 500 : 400,
-                backgroundColor: tab === t.value ? '#EDF2EF' : 'transparent',
-                color: tab === t.value ? '#2A3F45' : '#6f8f87',
-              }}
+              className={`rounded-full px-3 py-1.5 text-sm transition-colors duration-150 ${
+                tab === t.value
+                  ? 'bg-mt-green-sup font-medium text-mt-green-dark'
+                  : 'font-normal text-mt-apoio hover:text-mt-green-dark'
+              }`}
             >
               {t.label}
             </button>
@@ -136,12 +122,7 @@ export function DashboardLista({ mapas }: Props) {
         <select
           value={periodo}
           onChange={(e) => setPeriodoReset(e.target.value as Periodo)}
-          className="text-sm px-3 py-1.5 bg-white outline-none cursor-pointer"
-          style={{
-            border: '0.5px solid #c8d8d2',
-            borderRadius: 8,
-            color: '#2A3F45',
-          }}
+          className="cursor-pointer rounded-full border-linha border-mt-border bg-white px-3 py-1.5 text-sm text-mt-green-dark outline-none focus-visible:ring-[3px] focus-visible:ring-mt-green/25"
         >
           {PERIODOS.map((p) => (
             <option key={p.value} value={p.value}>{p.label}</option>
@@ -152,8 +133,7 @@ export function DashboardLista({ mapas }: Props) {
       {/* Lista */}
       {mapasPagina.length === 0 ? (
         <div
-          className="flex flex-col items-center gap-2 rounded-card bg-white py-12 text-center"
-          style={{ border: '0.5px solid #c8d8d2' }}
+          className="card-mt flex flex-col items-center gap-2 py-12 text-center"
         >
           <p className="text-sm text-muted-foreground">Nenhum mapa encontrado para esse filtro.</p>
         </div>
@@ -167,8 +147,7 @@ export function DashboardLista({ mapas }: Props) {
             return (
               <div
                 key={mapa.id}
-                className="rounded-card bg-white px-9 py-6"
-                style={{ border: '0.5px solid #c8d8d2' }}
+                className="card-mt p-card-lg"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -182,21 +161,18 @@ export function DashboardLista({ mapas }: Props) {
                   </div>
                 </div>
                 <div
-                  className="mt-4 flex gap-4 border-t pt-3"
-                  style={{ borderColor: '#e8f0ed' }}
+                  className="mt-4 flex gap-4 border-t-linha border-mt-border pt-3"
                 >
                   <Link
                     href={`/mapa/${mapa.id}`}
-                    className="flex items-center gap-1.5 text-sm font-medium transition-colors duration-200"
-                    style={{ color: '#57AA8F' }}
+                    className="flex items-center gap-1.5 text-sm font-medium text-mt-green-dark transition-colors duration-200 hover:text-mt-green"
                   >
                     <Eye className="size-4" />
                     Ver mapa
                   </Link>
                   <Link
                     href={`/diagnostico/${mapa.id}`}
-                    className="flex items-center gap-1.5 text-sm transition-colors duration-200"
-                    style={{ color: '#6f8f87' }}
+                    className="flex items-center gap-1.5 text-sm transition-colors duration-200 text-mt-apoio"
                   >
                     <FileText className="size-4" />
                     Diagnóstico completo
@@ -214,8 +190,7 @@ export function DashboardLista({ mapas }: Props) {
           <button
             onClick={() => irParaPagina(paginaAtual - 1)}
             disabled={paginaAtual === 1}
-            className="flex size-8 items-center justify-center rounded-lg text-sm transition-colors disabled:opacity-30"
-            style={{ border: '0.5px solid #c8d8d2', background: '#fff', color: '#2A3F45' }}
+            className="flex size-9 items-center justify-center rounded-full text-sm transition-colors disabled:opacity-30 border-linha border-mt-border bg-white text-mt-green-dark"
           >
             <ChevronLeft className="size-4" />
           </button>
@@ -224,12 +199,11 @@ export function DashboardLista({ mapas }: Props) {
             <button
               key={p}
               onClick={() => irParaPagina(p)}
-              className="flex size-8 items-center justify-center rounded-lg text-sm font-medium transition-colors"
-              style={{
-                backgroundColor: p === paginaAtual ? '#57AA8F' : '#fff',
-                color: p === paginaAtual ? '#fff' : '#2A3F45',
-                border: p === paginaAtual ? 'none' : '0.5px solid #c8d8d2',
-              }}
+              className={`flex size-9 items-center justify-center rounded-full text-sm font-medium transition-colors ${
+                p === paginaAtual
+                  ? 'bg-mt-green text-white'
+                  : 'border-linha border-mt-border bg-white text-mt-green-dark hover:border-mt-green'
+              }`}
             >
               {p}
             </button>
@@ -238,8 +212,7 @@ export function DashboardLista({ mapas }: Props) {
           <button
             onClick={() => irParaPagina(paginaAtual + 1)}
             disabled={paginaAtual === totalPaginas}
-            className="flex size-8 items-center justify-center rounded-lg text-sm transition-colors disabled:opacity-30"
-            style={{ border: '0.5px solid #c8d8d2', background: '#fff', color: '#2A3F45' }}
+            className="flex size-9 items-center justify-center rounded-full text-sm transition-colors disabled:opacity-30 border-linha border-mt-border bg-white text-mt-green-dark"
           >
             <ChevronRight className="size-4" />
           </button>

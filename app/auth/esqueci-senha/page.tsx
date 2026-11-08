@@ -15,8 +15,8 @@ export default function EsqueciSenhaPage() {
 
   if (state?.message === 'ok') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
-        <Card className="w-full max-w-sm text-center">
+      <div className="flex min-h-screen items-center justify-center bg-mt-off-white px-4">
+        <Card className="w-full max-w-[400px] rounded-painel shadow-mt-3 text-center">
           <CardHeader>
             <CardTitle>Email enviado</CardTitle>
             <CardDescription>
@@ -34,8 +34,8 @@ export default function EsqueciSenhaPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
-      <Card className="w-full max-w-sm">
+    <div className="flex min-h-screen items-center justify-center bg-mt-off-white px-4">
+      <Card className="w-full max-w-[400px] rounded-painel shadow-mt-3">
         <CardHeader>
           <CardTitle>Esqueci minha senha</CardTitle>
           <CardDescription>Informe seu email e enviaremos um link para redefinir sua senha.</CardDescription>
@@ -51,7 +51,7 @@ export default function EsqueciSenhaPage() {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="email">Email</Label>
               <Input id="email" name="email" type="email" placeholder="seu@email.com" autoComplete="email" required />
-              {state?.errors?.email && <p className="text-xs text-destructive">{state.errors.email[0]}</p>}
+              {state?.errors?.email && <p className="text-[13px] text-mt-red">{state.errors.email[0]}</p>}
             </div>
           </CardContent>
 

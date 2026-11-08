@@ -17,7 +17,7 @@ export function FeedbackTally() {
   }, [])
 
   return (
-    <div className="rounded-2xl border border-[#c8d8d2] bg-white overflow-hidden">
+    <div className="rounded-2xl border border-mt-border bg-white overflow-hidden">
       <iframe
         data-tally-src="https://tally.so/embed/ZjYody?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
         width="100%"
@@ -25,8 +25,7 @@ export function FeedbackTally() {
         frameBorder="0"
         marginHeight={0}
         marginWidth={0}
-        title="Feedback Mapa da Vida"
-        style={{ border: "none", background: "transparent" }}
+        title="Feedback Mapa da Vida" className="border-0 bg-transparent"
       />
     </div>
   )

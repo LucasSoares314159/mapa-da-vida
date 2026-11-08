@@ -15,7 +15,7 @@ export default function CancelamentoPage() {
       <p>
         Esta política vale para a compra da <strong>TRILHA</strong>, vendida pela{' '}
         {EMPRESA.razaoSocial} (CNPJ {EMPRESA.cnpj}), sob a marca {EMPRESA.nomeFantasia}. Ela
-        complementa os <Link href="/termos-uso" className="text-mt-green underline">Termos de Uso</Link>.
+        complementa os <Link href="/termos-uso" className="text-mt-green-dark underline decoration-mt-green underline-offset-4 hover:decoration-2">Termos de Uso</Link>.
       </p>
 
       <Secao titulo="1. Direito de arrependimento — 7 dias">

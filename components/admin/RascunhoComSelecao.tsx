@@ -28,7 +28,7 @@ type Props = {
 export function RascunhoComSelecao({ texto, onChangeTexto, onExtrairBloco }: Props) {
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs" style={{ color: '#4a6b62' }}>
+      <p className="text-xs text-mt-apoio">
         Cole o texto aqui. Selecione um trecho para aplicar negrito, itálico, sublinhado,
         bullet points, ou transformá-lo em título, callout, destaque ou citação — o resto
         vira parágrafo normal ao salvar.
@@ -39,8 +39,7 @@ export function RascunhoComSelecao({ texto, onChangeTexto, onExtrairBloco }: Pro
         onChange={onChangeTexto}
         placeholder="Cole aqui o texto completo da aula…"
         rows={16}
-        className="w-full resize-y rounded-xl px-4 py-3 text-[15px] leading-[1.7] outline-none focus:ring-1"
-        style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
+        className="w-full resize-y rounded-xl px-4 py-3 text-[15px] leading-[1.7] outline-none focus:ring-1 border border-mt-border text-mt-green-dark"
         acoesExtra={(trecho, removerSelecao) => (
           <>
             {OPCOES.map(({ tipo, label, Icone }) => (

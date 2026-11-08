@@ -80,8 +80,7 @@ export default async function DiagnosticoPage({ params }: Props) {
         {/* Botão Ver mapa */}
         <Link
           href={`/mapa/${id}`}
-          className="flex items-center gap-1.5 text-sm font-medium transition-colors w-fit"
-          style={{ color: '#57AA8F' }}
+          className="flex w-fit items-center gap-1.5 text-sm font-medium text-mt-green-dark transition-colors hover:text-mt-green"
         >
           <ArrowLeft className="size-4" />
           Ver mapa
@@ -89,8 +88,7 @@ export default async function DiagnosticoPage({ params }: Props) {
 
         {/* Análise Diagnóstica — padrão, projeção e escolha */}
         <div
-          className="flex flex-col gap-5 rounded-card bg-white px-9 py-8"
-          style={{ border: '0.5px solid #c8d8d2' }}
+          className="card-mt flex flex-col gap-5 p-card-lg"
         >
           <p className="text-[1.05rem] font-medium leading-relaxed text-mt-black">
             {diagnostico.padrao}
@@ -103,8 +101,7 @@ export default async function DiagnosticoPage({ params }: Props) {
           ))}
 
           <p
-            className="text-[1rem] leading-relaxed font-editorial italic"
-            style={{ color: '#2A3F45', borderTop: '0.5px solid #c8d8d2', paddingTop: 20 }}
+            className="border-t-linha border-mt-border pt-5 font-editorial text-[17px] leading-relaxed text-mt-green-dark"
           >
             {diagnostico.escolha}
           </p>
@@ -113,15 +110,14 @@ export default async function DiagnosticoPage({ params }: Props) {
         {/* Áreas que pedem atenção — fundamento e evidência de cada uma */}
         {diagnostico.areasDestacadas.length > 0 && (
           <div className="flex flex-col gap-4">
-            <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <h2 className="px-1 font-sans text-rotulo font-medium uppercase text-mt-apoio">
               O que o estudo mostra sobre essas áreas
             </h2>
 
             {diagnostico.areasDestacadas.map(({ nome, status, base }) => (
               <div
                 key={nome}
-                className="flex flex-col gap-3 rounded-card bg-white px-9 py-7"
-                style={{ border: '0.5px solid #c8d8d2' }}
+                className="card-mt flex flex-col gap-3 p-card-lg"
               >
                 <div className="flex items-center gap-2">
                   <span
@@ -130,12 +126,12 @@ export default async function DiagnosticoPage({ params }: Props) {
                       status === 'vermelho' ? 'bg-mt-red' : 'bg-mt-yellow'
                     )}
                   />
-                  <h3 className="text-sm font-semibold text-mt-black">{nome}</h3>
+                  <h3 className="font-heading text-titulo-card font-bold text-mt-green-dark">{nome}</h3>
                 </div>
 
                 <p className="text-[0.95rem] leading-relaxed text-mt-black">{base.fundamento}</p>
 
-                <p className="rounded-md border-l-2 border-mt-green bg-mt-green/10 px-4 py-3.5 text-sm leading-relaxed text-mt-green-dark">
+                <p className="rounded-elemento bg-mt-green-sup px-4 py-3.5 text-sm leading-relaxed text-mt-green-dark">
                   {base.destaque}
                 </p>
               </div>
@@ -144,7 +140,7 @@ export default async function DiagnosticoPage({ params }: Props) {
         )}
 
         {/* Status Badges - Faróis */}
-        <div className="flex items-center gap-2 rounded-card bg-white px-9 py-6" style={{ border: '0.5px solid #c8d8d2' }}>
+        <div className="card-mt flex items-center gap-2 p-card-lg">
           {(
             [
               { tipo: 'verde',    bg: 'rgba(87,170,143,0.15)', cor: '#57AA8F', count: totais.verde },
@@ -154,12 +150,10 @@ export default async function DiagnosticoPage({ params }: Props) {
           ).map(({ tipo, bg, cor, count }) => (
             <span
               key={tipo}
-              className="flex items-center text-sm font-medium"
-              style={{ backgroundColor: bg, color: cor, borderRadius: 20, padding: '4px 10px', gap: 5 }}
+              className="flex items-center gap-[5px] rounded-full px-2.5 py-1 text-sm font-medium"
+              style={{ backgroundColor: bg, color: cor }}
             >
-              <span
-                style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: cor, flexShrink: 0, display: 'inline-block' }}
-              />
+              <span className="inline-block size-2 shrink-0 rounded-full" style={{ backgroundColor: cor }} />
               {count}
             </span>
           ))}
@@ -167,14 +161,14 @@ export default async function DiagnosticoPage({ params }: Props) {
 
         {/* Suas Observações */}
         {areasComObservacao.length > 0 && (
-          <div className="flex flex-col gap-4 rounded-card bg-white px-9 py-6" style={{ border: '0.5px solid #c8d8d2' }}>
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <div className="card-mt flex flex-col gap-4 p-card-lg">
+            <h2 className="font-sans text-rotulo font-medium uppercase text-mt-apoio">
               Suas observações
             </h2>
             <div className="flex flex-col gap-4">
               {areasComObservacao.map((area) => (
                 <div key={area.id}>
-                  <p className="mb-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <p className="mb-0.5 text-rotulo font-medium uppercase text-mt-apoio">
                     {area.area}
                   </p>
                   <p className="text-sm leading-relaxed text-mt-green-dark">{area.observacao}</p>
@@ -186,10 +180,10 @@ export default async function DiagnosticoPage({ params }: Props) {
 
         {/* Sua Rotina */}
         {rotina && zonaConfig && (
-          <div className="rounded-card px-7 py-6 flex flex-col gap-4" style={{ backgroundColor: '#57AA8F', border: '0.5px solid #57AA8F' }}>
+          <div className="flex flex-col gap-4 rounded-card bg-mt-green p-card-lg shadow-mt-2">
             {/* Eyebrow + Badge */}
             <div className="flex flex-col gap-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[1.5px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              <p className="text-rotulo font-medium uppercase text-white/75">
                 Sua Rotina
               </p>
               <span
@@ -203,26 +197,25 @@ export default async function DiagnosticoPage({ params }: Props) {
             {/* Percentual em destaque */}
             <div className="flex flex-col gap-0.5">
               <div className="flex items-baseline gap-2">
-                <span className="text-[2.5rem] font-bold leading-none tracking-tight" style={{ color: zonaConfig.percentualCardCor }}>
+                <span className="font-heading text-[2.5rem] font-bold leading-none tracking-[-0.02em]" style={{ color: zonaConfig.percentualCardCor }}>
                   {rotina.percentual_livre}%
                 </span>
-                <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.75)' }}>de tempo livre</span>
+                <span className="text-sm font-medium text-white/75">de tempo livre</span>
               </div>
-              <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
+              <p className="text-xs font-medium text-white/75">
                 ≈ {horasLivresSemana} horas por semana
               </p>
             </div>
 
             {/* Mensagem da zona */}
-            <p className="text-sm leading-relaxed font-editorial italic" style={{ color: 'rgba(255,255,255,0.85)' }}>
+            <p className="font-editorial text-[15px] leading-relaxed text-white/90">
               {zonaConfig.cardDescricao}
             </p>
 
             {/* Link */}
             <Link
               href={`/rotina?mapaId=${id}`}
-              className="flex items-center gap-1 text-xs w-fit transition-colors"
-              style={{ color: 'rgba(255,255,255,0.55)' }}
+              className="flex w-fit items-center gap-1 text-xs text-white/75 transition-colors hover:text-white"
             >
               <ArrowRight className="size-3" />
               Editar rotina

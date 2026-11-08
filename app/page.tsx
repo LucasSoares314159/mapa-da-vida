@@ -19,18 +19,20 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6">
-      <div className="text-center max-w-sm">
-        <p className="text-sm uppercase tracking-widest text-zinc-500 mb-6">MindTrail</p>
-        <h1 className="text-2xl font-bold mb-4">Estamos construindo algo novo.</h1>
-        <p className="text-zinc-400 text-sm mb-8">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-mt-green-dark px-6">
+      <div className="max-w-md text-center">
+        <p className="rotulo mb-6">MindTrail</p>
+        <h1 className="mb-4 font-heading text-titulo font-medium text-mt-off-white [text-wrap:balance]">
+          Estamos construindo algo novo.
+        </h1>
+        <p className="mb-8 font-editorial text-apoio lowercase text-mt-off-white/80">
           Em breve este espaço vai contar toda a história.
         </p>
         <Link
           href="/trilha"
-          className="text-sm text-zinc-400 underline underline-offset-4 hover:text-white transition-colors"
+          className="inline-flex min-h-11 items-center rounded-full bg-mt-green px-8 py-3 text-base font-medium text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-mt-off-white"
         >
-          Conhecer a Trilha →
+          Conhecer a Trilha
         </Link>
       </div>
     </main>

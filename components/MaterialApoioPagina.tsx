@@ -38,10 +38,10 @@ export function MaterialApoioPagina({
         {/* Cabeçalho com navegação */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <span className="text-sm" style={{ color: '#4a6b62' }}>
+            <span className="text-sm text-mt-apoio">
               Material {index} de {total}
             </span>
-            <h1 className="font-heading text-xl font-bold leading-snug" style={{ color: '#1a2e29' }}>
+            <h1 className="font-heading text-titulo font-medium text-mt-green-dark">
               {material.titulo}
             </h1>
           </div>
@@ -50,13 +50,7 @@ export function MaterialApoioPagina({
             <button
               onClick={() => anteriorId && router.push(`/content/material/${anteriorId}`)}
               disabled={!anteriorId}
-              className="flex size-9 items-center justify-center rounded-full transition-opacity"
-              style={{
-                border: '1px solid #c8d8d2',
-                color: '#1a2e29',
-                opacity: anteriorId ? 1 : 0.35,
-                cursor: anteriorId ? 'pointer' : 'default',
-              }}
+              className="flex size-11 items-center justify-center rounded-full border border-mt-border text-mt-green-dark transition-colors hover:border-mt-green disabled:cursor-default disabled:opacity-35"
               aria-label="Material anterior"
             >
               <ChevronLeft className="size-4" />
@@ -64,13 +58,7 @@ export function MaterialApoioPagina({
             <button
               onClick={() => proximoId && router.push(`/content/material/${proximoId}`)}
               disabled={!proximoId}
-              className="flex size-9 items-center justify-center rounded-full transition-opacity"
-              style={{
-                border: '1px solid #c8d8d2',
-                color: '#1a2e29',
-                opacity: proximoId ? 1 : 0.35,
-                cursor: proximoId ? 'pointer' : 'default',
-              }}
+              className="flex size-11 items-center justify-center rounded-full border border-mt-border text-mt-green-dark transition-colors hover:border-mt-green disabled:cursor-default disabled:opacity-35"
               aria-label="Próximo material"
             >
               <ChevronRight className="size-4" />
@@ -88,20 +76,13 @@ export function MaterialApoioPagina({
               loading="lazy"
               sandbox="allow-scripts allow-same-origin allow-popups"
               referrerPolicy="no-referrer"
-              className="w-full rounded-xl"
-              style={{
-                height: 'min(70vh, 720px)',
-                minHeight: 420,
-                border: '0.5px solid #c8d8d2',
-                backgroundColor: '#ffffff',
-              }}
+              className="h-[min(70vh,720px)] min-h-[420px] w-full rounded-card border-linha border-mt-border bg-white"
             />
             <a
               href={quadroUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-fit items-center gap-1.5 text-sm transition-opacity hover:opacity-70"
-              style={{ color: '#57AA8F' }}
+              className="flex w-fit items-center gap-1.5 text-sm font-medium text-mt-green-dark transition-colors hover:text-mt-green"
             >
               Abrir o quadro em tela cheia
               <ExternalLink className="size-3" />
@@ -109,10 +90,9 @@ export function MaterialApoioPagina({
           </div>
         ) : (
           <div
-            className="flex items-center justify-center rounded-xl px-6 py-12 text-center"
-            style={{ border: '0.5px solid #c8d8d2', backgroundColor: '#f0f7f5' }}
+            className="flex items-center justify-center rounded-xl px-6 py-12 text-center border-linha border-mt-border bg-mt-green-sup"
           >
-            <span className="text-sm" style={{ color: '#4a6b62' }}>
+            <span className="text-sm text-mt-apoio">
               Material em breve.
             </span>
           </div>

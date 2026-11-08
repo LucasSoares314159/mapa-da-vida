@@ -63,10 +63,10 @@ export function ModuloAula({
         {/* Cabeçalho com navegação */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <span className="text-sm" style={{ color: '#4a6b62' }}>
+            <span className="text-sm text-mt-apoio">
               Aula {index} de {total}
             </span>
-            <h1 className="font-heading text-xl font-bold leading-snug" style={{ color: '#1a2e29' }}>
+            <h1 className="font-heading text-titulo font-medium text-mt-green-dark">
               {modulo.titulo}
             </h1>
           </div>
@@ -75,13 +75,7 @@ export function ModuloAula({
             <button
               onClick={() => anteriorId && router.push(`/content/modulo/${anteriorId}`)}
               disabled={!anteriorId}
-              className="flex size-9 items-center justify-center rounded-full transition-opacity"
-              style={{
-                border: '1px solid #c8d8d2',
-                color: '#1a2e29',
-                opacity: anteriorId ? 1 : 0.35,
-                cursor: anteriorId ? 'pointer' : 'default',
-              }}
+              className="flex size-11 items-center justify-center rounded-full border border-mt-border text-mt-green-dark transition-colors hover:border-mt-green disabled:cursor-default disabled:opacity-35"
               aria-label="Aula anterior"
             >
               <ChevronLeft className="size-4" />
@@ -89,13 +83,7 @@ export function ModuloAula({
             <button
               onClick={() => proximoId && router.push(`/content/modulo/${proximoId}`)}
               disabled={!proximoId}
-              className="flex size-9 items-center justify-center rounded-full transition-opacity"
-              style={{
-                border: '1px solid #c8d8d2',
-                color: '#1a2e29',
-                opacity: proximoId ? 1 : 0.35,
-                cursor: proximoId ? 'pointer' : 'default',
-              }}
+              className="flex size-11 items-center justify-center rounded-full border border-mt-border text-mt-green-dark transition-colors hover:border-mt-green disabled:cursor-default disabled:opacity-35"
               aria-label="Próxima aula"
             >
               <ChevronRight className="size-4" />
@@ -106,28 +94,21 @@ export function ModuloAula({
         {/* Vídeo */}
         {modulo.videoId ? (
           <div
-            className="w-full overflow-hidden rounded-xl"
-            style={{ aspectRatio: '16/9', backgroundColor: '#0c0f0f' }}
+            className="w-full overflow-hidden rounded-xl aspect-video bg-mt-black"
           >
             <iframe
               src={`https://www.youtube.com/embed/${modulo.videoId}`}
               title={modulo.titulo}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              className="size-full"
-              style={{ border: 'none' }}
+              className="size-full border-0"
             />
           </div>
         ) : (
           <div
-            className="flex w-full items-center justify-center rounded-xl"
-            style={{
-              aspectRatio: '16/9',
-              backgroundColor: '#f0f7f5',
-              border: '0.5px solid #c8d8d2',
-            }}
+            className="flex w-full items-center justify-center rounded-xl aspect-video bg-mt-green-sup border-linha border-mt-border"
           >
-            <span className="text-sm" style={{ color: '#4a6b62' }}>
+            <span className="text-sm text-mt-apoio">
               Vídeo em breve
             </span>
           </div>
@@ -137,10 +118,9 @@ export function ModuloAula({
         {blocos.length > 0 && (
           <button
             onClick={() => setLeituraAberta(true)}
-            className="flex items-center justify-center gap-2 rounded-xl px-5 py-4 text-sm font-semibold transition-opacity hover:opacity-90"
-            style={{ backgroundColor: '#f0f7f5', border: '0.5px solid #c8d8d2', color: '#1a2e29' }}
+            className="flex items-center justify-center gap-2 rounded-xl px-5 py-4 text-sm font-semibold transition-opacity hover:opacity-90 bg-mt-green-sup border-linha border-mt-border text-mt-green-dark"
           >
-            <BookOpen className="size-4" style={{ color: '#57AA8F' }} />
+            <BookOpen className="size-4 text-mt-green" />
             Ler conteúdo da aula
           </button>
         )}
@@ -159,8 +139,7 @@ export function ModuloAula({
 
     {/* Ação de conclusão — fixa no rodapé */}
     <div
-      className="sticky bottom-0 flex justify-center px-6 py-4"
-      style={{ backgroundColor: '#ffffff', borderTop: '0.5px solid #c8d8d2' }}
+      className="sticky bottom-0 flex justify-center px-6 py-4 bg-white border-t-linha border-mt-border"
     >
       <button
         onClick={toggleConcluida}

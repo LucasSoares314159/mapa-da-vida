@@ -19,8 +19,8 @@ export default async function CadastroPage({ searchParams }: Props) {
 
   if (!convite) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
-        <Card className="w-full max-w-sm">
+      <main className="flex min-h-screen items-center justify-center bg-mt-off-white px-4">
+        <Card className="w-full max-w-[400px] rounded-painel shadow-mt-3">
           <CardHeader>
             <CardTitle>Link indisponível</CardTitle>
             <CardDescription>Este link é inválido, expirou ou já foi utilizado.</CardDescription>

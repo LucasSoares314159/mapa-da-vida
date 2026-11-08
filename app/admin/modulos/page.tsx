@@ -33,17 +33,16 @@ export default async function AdminModulosPage() {
     <AuthLayout titulo="Conteúdo dos módulos" nomeUsuario={nomeUsuario} totalMembros={totalMembros}>
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-8">
         <div>
-          <h1 className="font-heading text-2xl font-bold" style={{ color: '#1a2e29' }}>
+          <h1 className="font-heading text-titulo font-medium text-mt-green-dark">
             Conteúdo dos módulos
           </h1>
-          <p className="text-sm" style={{ color: '#4a6b62' }}>
+          <p className="text-sm text-mt-apoio">
             Escolha um módulo para editar o texto que os alunos leem.
           </p>
         </div>
 
         <div
-          className="w-full rounded-xl overflow-hidden"
-          style={{ border: '0.5px solid #c8d8d2', backgroundColor: '#ffffff' }}
+          className="card-mt w-full overflow-hidden"
         >
           {MODULOS.map((modulo, index) => (
             <Link
@@ -54,7 +53,7 @@ export default async function AdminModulosPage() {
                 borderBottom: index < MODULOS.length - 1 ? '0.5px solid #c8d8d2' : 'none',
               }}
             >
-              <span className="text-sm font-medium" style={{ color: '#1a2e29' }}>
+              <span className="text-sm font-medium text-mt-green-dark">
                 {modulo.titulo}
               </span>
               <span

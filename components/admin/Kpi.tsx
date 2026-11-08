@@ -12,13 +12,13 @@ export function Kpi({ rotulo, valor, sublabel, tom = 'neutro' }: Props) {
 
   return (
     <div className="flex flex-col gap-1 rounded-lg border border-mt-border bg-mt-surface p-5">
-      <span className="text-xs font-medium uppercase tracking-wider text-mt-muted">
+      <span className="text-xs font-medium uppercase tracking-wider text-mt-apoio">
         {rotulo}
       </span>
       <span className="font-heading text-3xl font-bold tabular-nums" style={{ color: cor }}>
         {valor}
       </span>
-      {sublabel && <span className="text-xs text-mt-muted">{sublabel}</span>}
+      {sublabel && <span className="text-xs text-mt-apoio">{sublabel}</span>}
     </div>
   )
 }

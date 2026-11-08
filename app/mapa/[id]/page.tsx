@@ -12,7 +12,7 @@ const RevelacaoMapa = dynamic(
       <div className="flex-1 flex items-center justify-center bg-mt-off-white min-h-screen">
         <div className="flex flex-col items-center gap-3">
           <div className="size-8 rounded-full border-2 border-mt-green border-t-transparent animate-spin" />
-          <p className="text-sm text-mt-muted">Carregando mapa…</p>
+          <p className="text-sm text-mt-apoio">Carregando mapa…</p>
         </div>
       </div>
     ),

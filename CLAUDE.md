@@ -159,6 +159,7 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 | `quiz/` | Motor de pontuação, passos, sessão e configs dos quizzes |
 | `tracking/` | `track()` do funil, ponte React do Pixel (`meta.ts`), captura de atribuição e Conversions API |
 | `supabase.ts` / `-server.ts` / `-admin.ts` | Clientes browser / server / service-role |
+| `utils.ts` | `cn()` com os tokens do sistema visual registrados no `tailwind-merge` |
 | `validations.ts` | Schemas Zod |
 | `empresa.ts` | Razão social, CNPJ, endereço e contato das páginas legais |
 
@@ -633,20 +634,15 @@ pior: a pessoa veria um resultado que não respondeu agora.
 
 ### Visual do quiz = sistema da LP `/trilha` (novembro/2026)
 
-Quem chega do anúncio vê o quiz, a VSL e a LP como uma página só. As regras da LP
-(ver [Design da LP](#design-da-lp-trilha-novembro2026)) foram traduzidas para Tailwind:
-`font-satoshi`, `mt-apoio` (#5B6F73), `mt-green-sup`, `shadow-mt-1/2/3` e
-`rounded-painel` no `tailwind.config.ts`, com os mesmos valores do `:root` da LP.
+Quem chega do anúncio vê o quiz, a VSL e a LP como uma página só. Desde novembro/2026
+o sistema da LP é o da plataforma inteira — ver [Sistema visual](#sistema-visual--o-da-lp-trilha).
 
 - **Abertura e ponte em verde escuro**, como o hero e a virada da LP; perguntas,
   processando e resultado no off-white. `QuizConversa` troca o fundo por passo.
 - **`*trecho*` na config é o `<em>` da LP** (Satoshi 700, `--verde` no escuro). É só
   marcação: a redação dos docs não muda, e `TextoQuiz` a remove.
-- **Satoshi e Lora 600 carregam só em `app/quiz/layout.tsx`**, não no `globals.css`: a
-  plataforma não usa nenhuma das duas.
 - **Botão é `BotaoQuiz`** (pílula `--verde`, texto branco). Branco sobre verde é
   direcionamento de marca, o mesmo da LP: não troque por preto.
-- O `mt-muted` não é mais usado como cor de texto no quiz: dá ~3.4:1 e reprova no AA.
 
 ### Checkout agnóstico de provider
 
@@ -893,6 +889,47 @@ variáveis não se aplicam a builds existentes.
 
 ---
 
+## Sistema visual — o da LP `/trilha`
+
+Em **novembro/2026** a LP virou o padrão de tipografia, espaçamento e superfícies do
+front inteiro. Os valores moram no `:root` de `app/globals.css` (cópia do `:root` da
+LP, com o mesmo recuo abaixo de 640px) e viram classes no `tailwind.config.ts`.
+Componente novo usa token; número solto reabre a divergência que a normalização fechou.
+
+| Para | Use |
+|---|---|
+| Título de página / seção | `font-heading text-titulo font-medium text-mt-green-dark` |
+| Título de bloco · de card | `text-subtitulo` · `text-titulo-card font-bold` |
+| Hero | `text-display` |
+| Apoio curto (Lora reta, minúscula) | `.apoio` ou `font-editorial text-apoio` |
+| Rótulo em caixa alta | `.rotulo` (único texto em caixa alta do sistema) |
+| Card · painel | `.card-mt` + `p-card`/`p-card-lg` · `.painel-mt` + `p-painel` |
+| Elemento dentro de card (campo, ícone) | `rounded-elemento`, sem sombra |
+| Contorno e divisória | `border-linha border-mt-border` (hairline de 0,5px) |
+| Espaço título → conteúdo · entre cards | `mb-titulo` · `gap-pilha` / `gap-grade` |
+| Botão | `<Button>` (pílula verde, texto branco); `variant="outline"` para o secundário |
+| Campo sobre o verde escuro | `.campo-escuro` |
+
+**h1–h4 são Satoshi minúsculo na base** (`globals.css`). O minúsculo vem do CSS: o
+texto-fonte e o leitor de tela seguem com a grafia normal. Título que cita texto
+literal da interface — o botão "Criar minha conta" do e-mail, por exemplo — leva
+`normal-case`, senão a pessoa procura um texto que não existe. A cor **não** está na
+base: título sobre fundo escuro herda o claro do pai, e uma cor padrão o apagaria.
+
+**`cn()` registra os tokens no `tailwind-merge`** (`lib/utils.ts`). Sem isso ele lê
+`text-subtitulo` como cor e o descarta ao lado de `text-mt-green-dark` — o título sai
+no tamanho herdado, sem erro nenhum. Token novo de tamanho, raio, sombra ou espaço
+entra nos dois arquivos.
+
+**Texto de apoio depende do fundo.** `text-mt-apoio` (#5B6F73) no claro;
+`text-mt-off-white/70` no verde escuro — `mt-apoio` ali dá ~1,8:1. `text-mt-muted`
+como texto reprova no AA em qualquer fundo e saiu da plataforma. Link de texto é
+`text-mt-green-dark` com sublinhado `decoration-mt-green`: o verde claro como texto
+sobre branco também reprova.
+
+**Itálico do Lora é só citação** (bloco de citação das aulas, depoimento). Apoio é
+Lora reta, como na LP.
+
 ## Convenções
 
 ### Hierarquia de responsabilidade
@@ -919,8 +956,10 @@ propósito) · Server Components para dados estáveis. **Nunca Redux ou Zustand.
 
 ### Estilo
 
-Só Tailwind — sem CSS inline nem `.css` separado. Paleta `mt-*` no
-`tailwind.config.ts`. Interface e comentários em **português do Brasil**.
+Só Tailwind — sem CSS inline nem `.css` separado. Tokens no `tailwind.config.ts`
+(ver [Sistema visual](#sistema-visual--o-da-lp-trilha)). `style={{}}` só para valor
+que vem de dado (cor da estação/pilar/status, largura de barra). Interface e
+comentários em **português do Brasil**.
 
 ### Commits
 

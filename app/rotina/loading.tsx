@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function RotinaLoading() {
   return (
-    <div className="w-full min-h-screen bg-[#2A3F45]">
+    <div className="w-full min-h-screen bg-mt-green-dark">
       <div className="mx-auto max-w-[560px] px-4 py-8 flex flex-col gap-10">
         <Skeleton className="h-4 w-24 bg-[#3d5a62]" />
         <div className="flex flex-col gap-4">
@@ -22,7 +22,7 @@ export default function RotinaLoading() {
           ))}
         </div>
         <Skeleton className="h-64 w-full rounded-2xl bg-[#3d5a62]" />
-        <Skeleton className="h-12 w-full rounded-[10px] bg-[#3d5a62]" />
+        <Skeleton className="h-12 w-full rounded-elemento bg-[#3d5a62]" />
       </div>
     </div>
   )

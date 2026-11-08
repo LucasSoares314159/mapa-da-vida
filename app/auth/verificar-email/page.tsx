@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 
 export default function VerificarEmailPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
-      <Card className="w-full max-w-sm text-center">
+    <div className="flex min-h-screen items-center justify-center bg-mt-off-white px-4">
+      <Card className="w-full max-w-[400px] rounded-painel shadow-mt-3 text-center">
         <CardHeader>
           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-2xl">
             ✉️

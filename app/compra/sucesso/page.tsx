@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Inbox, Mail, MessageCircle } from 'lucide-react'
-import { FontesMarca } from '@/components/FontesMarca'
 import { MetaPixel } from '@/components/MetaPixel'
 import { PurchasePixel } from '@/components/PurchasePixel'
 import { CelebracaoCompra } from '@/components/compra/CelebracaoCompra'
@@ -57,7 +56,6 @@ export default function CompraSucessoPage({
 
   return (
     <main className="min-h-screen bg-mt-off-white font-sans text-[17px] leading-[1.75] text-mt-black">
-      <FontesMarca />
       <MetaPixel comPageView={false} />
       <PurchasePixel idCheckout={searchParams.checkout_ref ?? searchParams.session_id} />
 
@@ -127,7 +125,7 @@ export default function CompraSucessoPage({
                   {i + 1}
                 </span>
                 <div>
-                  <h3 className="font-satoshi text-[19px] font-bold leading-snug tracking-[-0.01em] text-mt-green-dark">
+                  <h3 className="font-heading text-titulo-card font-bold normal-case text-mt-green-dark">
                     {passo.titulo}
                   </h3>
                   <p className="mt-1 text-base leading-[1.65] text-mt-apoio">{passo.texto}</p>

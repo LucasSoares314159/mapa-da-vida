@@ -34,204 +34,165 @@ export function TrilhaConteudo({ nomeUsuario, aulasConcluidas }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-grade">
       {/* Boas-vindas */}
-      <div>
-        <h1 className="font-heading text-2xl font-bold" style={{ color: '#1a2e29' }}>
-          Boas-vindas, {primeiroNome}.
-        </h1>
-      </div>
+      <h1 className="font-heading text-titulo font-medium text-mt-green-dark">
+        Boas-vindas, {primeiroNome}.
+      </h1>
 
       {/* Card de progresso */}
-      <div className="flex flex-col gap-2">
-        <span className="text-sm font-semibold" style={{ color: '#1a2e29' }}>
-          Progresso do curso
-        </span>
-        <div
-          className="rounded-xl px-5 py-4"
-          style={{ border: '0.5px solid #c8d8d2', backgroundColor: '#ffffff' }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-sm" style={{ color: '#4a6b62' }}>
-              {qtdConcluidas} de {TOTAL_AULAS} aulas concluídas
-            </span>
-            <span className="text-sm font-semibold" style={{ color: '#1a2e29' }}>
-              {porcentagem}%
-            </span>
-          </div>
-          <div
-            className="mt-3 w-full overflow-hidden"
-            style={{ backgroundColor: '#f0f7f5', borderRadius: '100px', height: '6px' }}
-          >
-            <div
-              className="h-full transition-all duration-300"
-              style={{
-                width: `${porcentagem}%`,
-                backgroundColor: '#57AA8F',
-                borderRadius: '100px',
-              }}
-            />
-          </div>
+      <section className="card-mt p-card">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="font-heading text-titulo-card font-bold text-mt-green-dark">
+            Progresso da Trilha
+          </h2>
+          <span className="font-heading text-titulo-card font-bold text-mt-green-dark">
+            {porcentagem}%
+          </span>
         </div>
-      </div>
+        <p className="mt-1 text-sm text-mt-apoio">
+          {qtdConcluidas} de {TOTAL_AULAS} aulas concluídas
+        </p>
+        <div
+          className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-mt-green-sup"
+          role="progressbar"
+          aria-valuenow={porcentagem}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Progresso da Trilha"
+        >
+          <div
+            className="h-full rounded-full bg-mt-green transition-all duration-300"
+            style={{ width: `${porcentagem}%` }}
+          />
+        </div>
+      </section>
 
       {/* Lista de módulos */}
-      <div
-        className="w-full rounded-xl overflow-hidden"
-        style={{ border: '0.5px solid #c8d8d2', backgroundColor: '#ffffff' }}
-      >
-        {/* Header da seção */}
-        <div
-          className="flex items-center justify-between px-5 py-4"
-          style={{
-            backgroundColor: '#f0f7f5',
-            borderBottom: aberto ? '0.5px solid #c8d8d2' : 'none',
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setAberto((v) => !v)}
-              className="flex items-center gap-1.5"
-              aria-label={aberto ? 'Ocultar seção' : 'Mostrar seção'}
-            >
-              {aberto ? (
-                <ChevronUp className="size-4" style={{ color: '#4a6b62' }} />
-              ) : (
-                <ChevronDown className="size-4" style={{ color: '#4a6b62' }} />
-              )}
-            </button>
-            <span className="text-sm font-semibold" style={{ color: '#1a2e29' }}>
-              Aulas da TRILHA
-            </span>
-            <span className="text-xs" style={{ color: '#4a6b62' }}>
-              {TOTAL_AULAS} aulas • {DURACAO_TOTAL}
-            </span>
-          </div>
+      <section className="card-mt w-full overflow-hidden">
+        <CabecalhoSecao
+          aberto={aberto}
+          onAlternar={() => setAberto((v) => !v)}
+          rotuloAria={aberto ? 'Ocultar seção' : 'Mostrar seção'}
+          titulo={
+            <>
+              Aulas da <strong className="font-bold">Trilha</strong>
+            </>
+          }
+          detalhe={`${TOTAL_AULAS} aulas • ${DURACAO_TOTAL}`}
+        />
 
-          <button
-            onClick={() => setAberto((v) => !v)}
-            className="text-xs font-medium transition-opacity hover:opacity-70"
-            style={{ color: '#57AA8F' }}
-          >
-            {aberto ? 'Ocultar todas as seções' : 'Mostrar todas as seções'}
-          </button>
-        </div>
-
-        {/* Módulos */}
         {aberto && (
-          <div>
+          <ul className="divide-y-linha divide-mt-border">
             {MODULOS.map((modulo, index) => {
               const concluida = concluidas.includes(index)
 
               return (
-                <div
+                <li
                   key={index}
-                  className="flex items-center justify-between px-5 py-3.5"
-                  style={{
-                    borderBottom: index < MODULOS.length - 1 ? '0.5px solid #c8d8d2' : 'none',
-                    opacity: concluida ? 0.6 : 1,
-                  }}
+                  className={`flex items-center justify-between px-card py-3.5 ${concluida ? 'opacity-60' : ''}`}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex min-w-0 items-center gap-3">
                     {/* Checkbox / bolinha */}
                     <button
                       onClick={() => toggleAula(index)}
-                      className="shrink-0 size-4 rounded-full flex items-center justify-center transition-colors"
-                      style={
-                        concluida
-                          ? { backgroundColor: '#57AA8F', border: 'none', cursor: 'pointer' }
-                          : { backgroundColor: 'transparent', border: '1.5px solid #c8d8d2', cursor: 'pointer' }
-                      }
+                      className={`flex size-5 shrink-0 items-center justify-center rounded-full transition-colors ${
+                        concluida ? 'bg-mt-green' : 'border-[1.5px] border-mt-border hover:border-mt-green'
+                      }`}
                       aria-label={concluida ? 'Marcar como não concluída' : 'Marcar como concluída'}
                     >
-                      {concluida && <Check className="size-2.5 text-white" strokeWidth={3} />}
+                      {concluida && <Check className="size-3 text-white" strokeWidth={3} />}
                     </button>
 
                     {/* Título */}
                     <Link
                       href={`/content/modulo/${modulo.id}`}
-                      className="text-sm font-medium transition-opacity hover:opacity-70"
-                      style={{
-                        color: '#57AA8F',
-                        textDecoration: concluida ? 'line-through' : 'none',
-                      }}
+                      className={`text-[15px] font-medium text-mt-green-dark transition-colors hover:text-mt-green ${
+                        concluida ? 'line-through' : ''
+                      }`}
                     >
                       {modulo.titulo}
                     </Link>
                   </div>
 
                   {/* Duração */}
-                  <span className="text-xs shrink-0 ml-4" style={{ color: '#4a6b62' }}>
-                    {modulo.duracao}
-                  </span>
-                </div>
+                  <span className="ml-4 shrink-0 text-xs text-mt-apoio">{modulo.duracao}</span>
+                </li>
               )
             })}
-          </div>
+          </ul>
         )}
-      </div>
+      </section>
+
       {/* Seção Materiais & Frameworks */}
-      <div
-        className="w-full rounded-xl overflow-hidden"
-        style={{ border: '0.5px solid #c8d8d2', backgroundColor: '#ffffff' }}
-      >
-        {/* Header */}
-        <div
-          className="flex items-center justify-between px-5 py-4"
-          style={{
-            backgroundColor: '#f0f7f5',
-            borderBottom: abertoMateriais ? '0.5px solid #c8d8d2' : 'none',
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setAbertoMateriais((v) => !v)}
-              className="flex items-center gap-1.5"
-              aria-label={abertoMateriais ? 'Ocultar materiais' : 'Mostrar materiais'}
-            >
-              {abertoMateriais ? (
-                <ChevronUp className="size-4" style={{ color: '#4a6b62' }} />
-              ) : (
-                <ChevronDown className="size-4" style={{ color: '#4a6b62' }} />
-              )}
-            </button>
-            <span className="text-sm font-semibold" style={{ color: '#1a2e29' }}>
-              Materiais &amp; Frameworks
-            </span>
-          </div>
+      <section className="card-mt w-full overflow-hidden">
+        <CabecalhoSecao
+          aberto={abertoMateriais}
+          onAlternar={() => setAbertoMateriais((v) => !v)}
+          rotuloAria={abertoMateriais ? 'Ocultar materiais' : 'Mostrar materiais'}
+          titulo={<>Materiais &amp; Frameworks</>}
+        />
 
-          <button
-            onClick={() => setAbertoMateriais((v) => !v)}
-            className="text-xs font-medium transition-opacity hover:opacity-70"
-            style={{ color: '#57AA8F' }}
-          >
-            {abertoMateriais ? 'Ocultar todas as seções' : 'Mostrar todas as seções'}
-          </button>
-        </div>
-
-        {/* Lista de materiais */}
         {abertoMateriais && (
-          <div>
-            {MATERIAIS.map((material, index) => (
-              <div
-                key={material.id}
-                className="px-5 py-3.5"
-                style={{
-                  borderBottom: index < MATERIAIS.length - 1 ? '0.5px solid #c8d8d2' : 'none',
-                }}
-              >
+          <ul className="divide-y-linha divide-mt-border">
+            {MATERIAIS.map((material) => (
+              <li key={material.id} className="px-card py-3.5">
                 <Link
                   href={`/content/material/${material.id}`}
-                  className="block text-sm font-medium transition-opacity hover:opacity-70"
-                  style={{ color: '#57AA8F' }}
+                  className="block text-[15px] font-medium text-mt-green-dark transition-colors hover:text-mt-green"
                 >
                   {material.titulo}
                 </Link>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
+      </section>
+    </div>
+  )
+}
+
+// Faixa de título das duas seções da Trilha. Fundo mt-green-sup, que é a
+// variação de card do sistema; a hairline só aparece com a seção aberta.
+function CabecalhoSecao({
+  aberto,
+  onAlternar,
+  rotuloAria,
+  titulo,
+  detalhe,
+}: {
+  aberto: boolean
+  onAlternar: () => void
+  rotuloAria: string
+  titulo: React.ReactNode
+  detalhe?: string
+}) {
+  const Chevron = aberto ? ChevronUp : ChevronDown
+
+  return (
+    <div
+      className={`flex items-center justify-between gap-4 bg-mt-green-sup px-card py-4 ${
+        aberto ? 'border-b-linha border-mt-border' : ''
+      }`}
+    >
+      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+        <button
+          onClick={onAlternar}
+          className="-m-1 flex items-center rounded-full p-1 text-mt-apoio hover:text-mt-green-dark"
+          aria-label={rotuloAria}
+        >
+          <Chevron className="size-4" />
+        </button>
+        <h2 className="font-heading text-titulo-card font-medium text-mt-green-dark">{titulo}</h2>
+        {detalhe && <span className="text-xs text-mt-apoio">{detalhe}</span>}
       </div>
+
+      <button
+        onClick={onAlternar}
+        className="shrink-0 text-xs font-medium text-mt-green-dark underline decoration-mt-green underline-offset-4 hover:decoration-2"
+      >
+        {aberto ? 'Ocultar todas as seções' : 'Mostrar todas as seções'}
+      </button>
     </div>
   )
 }

@@ -79,9 +79,9 @@ export function EvolucaoMapas({ mapas }: Props) {
   const deltaVermelho = ultimo.vermelho - primeiro.vermelho
 
   return (
-    <div className="flex flex-col gap-5 rounded-card bg-white px-7 py-6" style={{ border: '0.5px solid #c8d8d2' }}>
+    <div className="card-mt flex flex-col gap-5 p-card-lg">
       <div className="flex flex-col gap-1">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <h2 className="font-sans text-rotulo font-medium uppercase text-mt-apoio">
           Sua evolução
         </h2>
         <p className="text-sm text-mt-green-dark">{montarResumo(deltaVerde, deltaVermelho)}</p>

@@ -22,20 +22,20 @@ export function MomentoDestaque({ momento }: { momento: MomentoVida | null }) {
     return (
       <Link
         href="/momento"
-        className="group flex items-center gap-3 rounded-[14px] border border-dashed border-mt-border bg-white px-4 py-3.5 no-underline transition-colors hover:border-mt-green hover:bg-mt-off-white/40"
+        className="group flex items-center gap-3 rounded-card border border-dashed border-mt-border bg-white px-4 py-3.5 no-underline transition-colors hover:border-mt-green hover:bg-mt-off-white/40"
       >
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-mt-off-white text-mt-green">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-elemento bg-mt-off-white text-mt-green">
           <Compass size={16} />
         </span>
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="text-[13px] font-semibold text-mt-black">
             Defina seu Momento de Vida
           </span>
-          <span className="truncate font-editorial text-xs italic text-mt-muted">
+          <span className="truncate font-editorial text-xs text-mt-apoio">
             Sem saber qual fase você está vivendo, os objetivos perdem o rumo.
           </span>
         </span>
-        <ArrowRight size={16} className="shrink-0 text-mt-muted transition-colors group-hover:text-mt-green" />
+        <ArrowRight size={16} className="shrink-0 text-mt-apoio transition-colors group-hover:text-mt-green" />
       </Link>
     )
   }
@@ -46,17 +46,16 @@ export function MomentoDestaque({ momento }: { momento: MomentoVida | null }) {
   return (
     <Link
       href="/momento"
-      className="group flex items-center gap-3 rounded-[14px] px-4 py-3 no-underline transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+      className="group flex items-center gap-3 rounded-card px-4 py-3 no-underline shadow-mt-1 transition-shadow hover:shadow-mt-2"
       style={{
         background: `linear-gradient(135deg, ${est.cor}14 0%, ${est.cor}08 100%)`,
         border: `1px solid ${est.cor}40`,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
       }}
     >
       {/* Ícone da estação */}
       <span
         aria-hidden
-        className="flex size-8 shrink-0 items-center justify-center rounded-[10px] text-base"
+        className="flex size-8 shrink-0 items-center justify-center rounded-elemento text-base"
         style={{ background: est.cor }}
       >
         {est.emoji}
@@ -68,7 +67,7 @@ export function MomentoDestaque({ momento }: { momento: MomentoVida | null }) {
           <span style={{ color: est.cor }}>Momento: {est.label}</span>
           {vencido && (
             <>
-              <span aria-hidden className="text-mt-muted opacity-50">·</span>
+              <span aria-hidden className="text-mt-apoio opacity-50">·</span>
               <span className="text-mt-red">passou da hora de revisar</span>
             </>
           )}

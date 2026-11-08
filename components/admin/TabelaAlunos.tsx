@@ -45,7 +45,7 @@ export function TabelaAlunos({ alunos }: { alunos: LinhaAluno[] }) {
           ))}
         </div>
 
-      <label className="flex cursor-pointer items-center gap-2 self-start text-sm text-mt-muted">
+      <label className="flex cursor-pointer items-center gap-2 self-start text-sm text-mt-apoio">
         <input
           type="checkbox"
           checked={soRisco}
@@ -60,21 +60,21 @@ export function TabelaAlunos({ alunos }: { alunos: LinhaAluno[] }) {
         <table className="w-full min-w-[900px] text-sm">
           <thead>
             <tr className="border-b border-mt-border bg-mt-off-white">
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-muted">Aluno</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-muted">Turma</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-muted">Onde parou</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-muted">Dias ativos</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-muted">Conteúdo</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-muted">Parado há</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-muted">Artefatos</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-apoio">Aluno</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-apoio">Turma</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-apoio">Onde parou</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-apoio">Dias ativos</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-apoio">Conteúdo</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-apoio">Parado há</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-apoio">Artefatos</th>
             </tr>
           </thead>
           <tbody>
             {ordenados.map((a) => (
               <tr key={a.id} className="border-b border-mt-border last:border-0">
                 <td className="px-4 py-3">
-                  <p className="font-medium" style={{ color: '#1a2e29' }}>{a.nome}</p>
-                  <p className="text-xs text-mt-muted">{a.email}</p>
+                  <p className="font-medium text-mt-green-dark">{a.nome}</p>
+                  <p className="text-xs text-mt-apoio">{a.email}</p>
                 </td>
                 <td className="px-4 py-3">
                   <span
@@ -88,16 +88,16 @@ export function TabelaAlunos({ alunos }: { alunos: LinhaAluno[] }) {
                     {a.turma === 'turma2' ? 'T2' : 'T1'}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-mt-muted">
+                <td className="px-4 py-3 text-mt-apoio">
                   {a.ultimoModulo === null
                     ? 'Não começou'
                     : MODULOS[a.ultimoModulo].titulo.replace(/ —.*/, '')}
                   <span className="ml-1 text-xs">({a.modulosConcluidos}/{MODULOS.length})</span>
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums text-mt-muted">
+                <td className="px-4 py-3 text-right tabular-nums text-mt-apoio">
                   {a.turma === 'turma1' ? '—' : a.diasAtivos || '—'}
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums text-mt-muted">
+                <td className="px-4 py-3 text-right tabular-nums text-mt-apoio">
                   {a.minutosConteudo
                     ? a.minutosConteudo >= 60
                       ? `${Math.floor(a.minutosConteudo / 60)}h${a.minutosConteudo % 60 ? ` ${a.minutosConteudo % 60}min` : ''}`
@@ -145,7 +145,7 @@ export function TabelaAlunos({ alunos }: { alunos: LinhaAluno[] }) {
             ))}
             {ordenados.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-sm text-mt-muted">
+                <td colSpan={7} className="px-4 py-8 text-center text-sm text-mt-apoio">
                   Ninguém em risco no momento.
                 </td>
               </tr>

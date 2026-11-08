@@ -142,7 +142,7 @@ export function TextareaComFormatacao({
       {selecao && (
         <div
           ref={barraRef}
-          className="fixed z-50 flex items-center gap-1 rounded-lg p-1 shadow-lg"
+          className="fixed z-50 flex items-center gap-1 rounded-lg p-1 shadow-mt-2"
           style={{ left: selecao.x, top: selecao.y, backgroundColor: '#1a2e29' }}
           onMouseDown={(e) => e.preventDefault()}
         >
