@@ -676,6 +676,17 @@ São **eventos customizados**, não padrão da Meta: mapeá-los a `Lead` ou `Vie
 misturaria o funil do quiz com o da lista de espera no mesmo relatório. Para virarem
 objetivo de campanha, precisam de **conversão personalizada** criada no Gerenciador.
 
+A exceção é o **`InitiateCheckout`**, padrão, disparado junto com o `cta_click`
+(`trackInicioCheckout()`). É o mesmo evento e o mesmo `content_name`/valor do submit da
+`/trilha`: os dois caminhos de venda levam ao mesmo checkout, e a otimização por
+InitiateCheckout precisa enxergar ambos. `quiz_slug` separa a origem no relatório.
+
+**Todos os eventos de etapa saem do navegador.** O servidor só envia o Purchase. Evento
+de etapa chegando como "API de Conversões" não veio deste código. Na aba *Testar
+eventos*, o navegador só aparece se o site foi aberto pelo link ou QR code da própria
+aba. Testar no celular por fora dela não mostra nada ali. A visão geral do Gerenciador
+também atrasa: confira `last_fired_time` do Pixel antes de concluir que um evento não chegou.
+
 **O Purchase não existia no projeto** — a compra era cega para a Meta. Agora dispara em
 par: Pixel em `/compra/sucesso` e CAPI no webhook, com `event_id` derivado da referência
 externa do checkout. Os dois lados chegam ao mesmo id sem trocar nada entre si, a Meta

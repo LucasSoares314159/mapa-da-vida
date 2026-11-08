@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react'
 import { Check } from 'lucide-react'
 import type { ConfigQuiz, Paragrafo, ResultadoQuiz } from '@/lib/quiz/tipos'
-import { track } from '@/lib/tracking/eventos'
+import { track, trackInicioCheckout } from '@/lib/tracking/eventos'
 import { iniciarCheckoutDoQuiz } from '@/lib/quiz/checkout-cliente'
 import { BlocoGarantia } from './BlocoGarantia'
 import { BlocoTexto } from './BlocoTexto'
@@ -101,6 +101,9 @@ function TelaVsl({ config, resultado }: Props) {
     setIndoParaCheckout(true)
     setErro(false)
     track('cta_click', { quiz_slug: config.slug, result_profile: resultado.perfil })
+    // Dispara antes do fetch do checkout: a criacao da cobranca leva tempo
+    // suficiente para o beacon sair antes do redirect.
+    trackInicioCheckout({ quiz_slug: config.slug, result_profile: resultado.perfil })
 
     try {
       window.location.href = await iniciarCheckoutDoQuiz({
