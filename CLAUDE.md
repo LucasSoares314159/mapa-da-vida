@@ -626,6 +626,23 @@ pessoa cumpre.
 num F5 é ruim, mas um rascunho antigo reaparecendo para quem volta pelo anúncio seria
 pior: a pessoa veria um resultado que não respondeu agora.
 
+### Visual do quiz = sistema da LP `/trilha` (novembro/2026)
+
+Quem chega do anúncio vê o quiz, a VSL e a LP como uma página só. As regras da LP
+(ver [Design da LP](#design-da-lp-trilha-novembro2026)) foram traduzidas para Tailwind:
+`font-satoshi`, `mt-apoio` (#5B6F73), `mt-green-sup`, `shadow-mt-1/2/3` e
+`rounded-painel` no `tailwind.config.ts`, com os mesmos valores do `:root` da LP.
+
+- **Abertura e ponte em verde escuro**, como o hero e a virada da LP; perguntas,
+  processando e resultado no off-white. `QuizConversa` troca o fundo por passo.
+- **`*trecho*` na config é o `<em>` da LP** (Satoshi 700, `--verde` no escuro). É só
+  marcação: a redação dos docs não muda, e `TextoQuiz` a remove.
+- **Satoshi e Lora 600 carregam só em `app/quiz/layout.tsx`**, não no `globals.css`: a
+  plataforma não usa nenhuma das duas.
+- **Botão é `BotaoQuiz`** (pílula `--verde`, texto branco). Branco sobre verde é
+  direcionamento de marca, o mesmo da LP: não troque por preto.
+- O `mt-muted` não é mais usado como cor de texto no quiz: dá ~3.4:1 e reprova no AA.
+
 ### Checkout agnóstico de provider
 
 `startCheckout()` em `lib/checkout/` resolve o provider por `CHECKOUT_PROVIDER` e

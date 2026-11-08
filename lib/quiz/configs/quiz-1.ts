@@ -26,7 +26,9 @@ export const quiz1: ConfigQuiz = {
   // TELA 01
   abertura: {
     id: 'abertura',
-    titulo: 'Descubra por que você continua adiando seus objetivos.',
+    // *…* marca o destaque do título (Satoshi 700 em --verde, como o <em> do
+    // H1 da LP /trilha). Só marcação: a redação é a do doc. TextoQuiz a remove.
+    titulo: 'Descubra por que você continua *adiando seus objetivos*.',
     paragrafos: [
       'Responda a 6 perguntas rápidas e descubra o que pode estar fazendo você deixar seus objetivos pessoais sempre para depois.',
       '**Tempo estimado:** 2 minutos.',
@@ -128,11 +130,15 @@ export const quiz1: ConfigQuiz = {
       depoisDaPergunta: 'q3',
       tela: {
         id: 'ponte',
-        titulo: 'Talvez exista uma diferença entre não ter tempo e não conseguir avançar.',
+        titulo: 'Talvez exista uma diferença entre não ter tempo e *não conseguir avançar*.',
+        // Os ** marcam enfase (negrito) nas tres expressoes-pivo que o texto
+        // contrapoe — escaneabilidade dentro do card. As palavras sao as mesmas
+        // do doc aprovado; so foi adicionada enfase, nenhuma alteracao de
+        // redacao. TextoQuiz converte ** em <strong>.
         paragrafos: [
-          'Porque uma coisa é ter uma rotina realmente sobrecarregada.',
-          'Outra é conseguir algum tempo livre, mas não saber como transformá-lo em progresso.',
-          'E existe uma terceira possibilidade: estar tentando realizar objetivos que simplesmente não cabem na vida que você tem hoje.',
+          'Porque uma coisa é ter uma **rotina realmente sobrecarregada**.',
+          'Outra é conseguir algum tempo livre, mas **não saber como transformá-lo em progresso**.',
+          'E existe uma terceira possibilidade: estar tentando realizar objetivos que **simplesmente não cabem na vida que você tem hoje**.',
           'Vamos descobrir qual dessas situações mais se aproxima da sua.',
         ],
         rotuloBotao: 'QUERO DESCOBRIR',
@@ -218,7 +224,7 @@ export const quiz1: ConfigQuiz = {
     // de imediato, sem player, em vez de um retângulo quebrado.
     videoId: '',
     contaId: '',
-    chamada: 'Seu diagnóstico está pronto.',
+    chamada: 'Seu diagnóstico está *pronto*.',
     ctaAtSeconds: 0,
     rotuloCta: 'ENTRAR AGORA PARA A TRILHA',
     // apoioCta foi absorvido pelo bloco de garantia abaixo — a mesma promessa

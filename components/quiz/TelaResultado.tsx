@@ -1,12 +1,25 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import type { ConfigQuiz, ResultadoQuiz } from '@/lib/quiz/tipos'
+import { Check } from 'lucide-react'
+import type { ConfigQuiz, Paragrafo, ResultadoQuiz } from '@/lib/quiz/tipos'
 import { track } from '@/lib/tracking/eventos'
 import { iniciarCheckoutDoQuiz } from '@/lib/quiz/checkout-cliente'
 import { BlocoGarantia } from './BlocoGarantia'
 import { BlocoTexto } from './BlocoTexto'
+import { BotaoQuiz } from './BotaoQuiz'
+import { TextoQuiz } from './TextoQuiz'
 import { VslPlayer } from './VslPlayer'
+
+// A "virada" do diagnostico e o paragrafo que os docs marcam inteiro em negrito
+// (ex. "Talvez voce nao precise de mais um planejamento..."). Separa-lo num
+// card de destaque da ao resultado a hierarquia que uma pilha de paragrafos
+// iguais nao tem — e o equivalente honesto ao card de numero dos quizzes de
+// funil, so que com a frase-pivo aprovada em vez de um valor inventado. O texto
+// nao muda: so e tirado da sequencia e exibido em destaque proprio.
+function ehDestaque(p: Paragrafo): p is string {
+  return typeof p === 'string' && p.startsWith('**') && p.endsWith('**')
+}
 
 // Telas 10 e da Mini-VSL.
 //
@@ -25,27 +38,47 @@ export function TelaResultado({ config, resultado }: Props) {
   const texto = config.resultados[resultado.perfil]
 
   if (!mostrandoVsl) {
-    return (
-      <div className="flex flex-1 flex-col justify-center">
-        <p className="mb-3 text-xs font-bold uppercase tracking-widest text-mt-green">
-          Seu diagnóstico
-        </p>
-        <h1 className="font-heading text-[26px] font-bold leading-tight text-mt-black sm:text-[32px]">
-          {texto.titulo}
-        </h1>
+    // A virada sai da sequencia para o card de destaque; os demais paragrafos
+    // seguem na ordem. Se o perfil nao tiver paragrafo em negrito, o card
+    // simplesmente nao aparece e tudo fica no corpo.
+    const destaque = texto.paragrafos.find(ehDestaque)
+    const corpo = texto.paragrafos.filter((p) => p !== destaque)
 
-        <div className="mt-5">
-          <BlocoTexto paragrafos={texto.paragrafos} />
+    return (
+      <div className="flex flex-1 flex-col justify-center py-2">
+        {/* Selo + eyebrow: marca que isto e a conclusao de uma analise, nao
+            mais uma tela de texto. Eyebrow em Lora minuscula de apoio, como o
+            da LP — a caixa alta espacada saiu do sistema. */}
+        <div className="flex flex-col items-center text-center">
+          <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-mt-green text-white">
+            <Check className="h-6 w-6" strokeWidth={3} aria-hidden="true" />
+          </span>
+          <p className="mb-2 font-editorial text-lg lowercase text-mt-apoio">seu diagnóstico</p>
+          <h1 className="font-satoshi text-[30px] font-medium lowercase leading-[1.1] tracking-[-0.02em] text-mt-green-dark [text-wrap:balance] sm:text-[40px]">
+            {texto.titulo}
+          </h1>
+        </div>
+
+        {destaque && (
+          // A frase-pivo e a virada do diagnostico, e ganha o tratamento da
+          // virada da LP: painel verde escuro (raio 24, sombra 3), Satoshi 500
+          // off-white. E o contraste de fundo — nao uma caixa a mais no claro —
+          // que faz o olho parar nela antes da leitura corrida.
+          <div className="mt-8 rounded-painel bg-mt-green-dark px-6 py-8 text-center shadow-mt-3 sm:px-10 sm:py-10">
+            <p className="mx-auto max-w-[20em] font-satoshi text-[22px] font-medium lowercase leading-[1.2] tracking-[-0.02em] text-mt-off-white [text-wrap:balance] sm:text-[26px]">
+              {/* Sem os ** — o painel ja e o destaque, e TextoQuiz os
+                  converteria num <strong> redundante. */}
+              {destaque.slice(2, -2)}
+            </p>
+          </div>
+        )}
+
+        <div className="mt-8">
+          <BlocoTexto paragrafos={corpo} />
         </div>
 
         <div className="mt-10">
-          <button
-            type="button"
-            onClick={() => setMostrandoVsl(true)}
-            className="w-full rounded-xl bg-mt-green-dark px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mt-green focus-visible:ring-offset-2"
-          >
-            {texto.rotuloBotao}
-          </button>
+          <BotaoQuiz onClick={() => setMostrandoVsl(true)}>{texto.rotuloBotao}</BotaoQuiz>
         </div>
       </div>
     )
@@ -94,8 +127,10 @@ function TelaVsl({ config, resultado }: Props) {
           garantia so aparece ao rolar — e a estrutura de VSL que converte:
           foco total no video e na oferta antes de qualquer outra coisa. */}
       <section className="flex min-h-dvh flex-col items-center justify-center px-5 py-8 text-center sm:px-8">
-        <p className="mb-5 font-heading text-xl font-bold leading-snug text-white sm:text-2xl">
-          {config.vsl.chamada}
+        {/* Chamada na voz do hero da LP: Satoshi 500 minúsculo off-white, o
+            trecho *marcado* na config em --verde 700. */}
+        <p className="mb-6 font-satoshi text-[28px] font-medium lowercase leading-[1.1] tracking-[-0.02em] text-mt-off-white [text-wrap:balance] sm:text-[34px]">
+          <TextoQuiz texto={config.vsl.chamada} tema="escuro" />
         </p>
 
         <VslPlayer
@@ -111,19 +146,17 @@ function TelaVsl({ config, resultado }: Props) {
 
         {ctaLiberado && (
           <div className="mt-6 w-full max-w-[400px] text-center">
-            <button
-              type="button"
-              onClick={comprar}
-              disabled={indoParaCheckout}
-              // Fundo claro, nao mt-green-dark: sobre a pagina ja escura, o
-              // mesmo tom do botao ficaria quase invisivel.
-              className="w-full rounded-xl bg-white px-6 py-4 text-sm font-bold uppercase tracking-wide text-mt-green-dark transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-mt-green-dark disabled:opacity-60"
-            >
+            {/* CTA do hero escuro da LP (.btn-cta-hero): pílula --verde com
+                texto branco, foco off-white. Contra o verde escuro da tela o
+                botão fica em ~4:1 — se destaca sem precisar do fundo branco. */}
+            <BotaoQuiz tema="escuro" onClick={comprar} disabled={indoParaCheckout} className="sm:w-full">
               {indoParaCheckout ? 'Abrindo o pagamento...' : config.vsl.rotuloCta}
-            </button>
+            </BotaoQuiz>
 
             {config.vsl.apoioCta && (
-              <p className="mt-3 text-sm leading-6 text-white/70">{config.vsl.apoioCta}</p>
+              <p className="mt-3 font-editorial text-[15px] lowercase leading-6 text-mt-off-white/70">
+                {config.vsl.apoioCta}
+              </p>
             )}
 
             {erro && (

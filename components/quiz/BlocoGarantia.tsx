@@ -1,46 +1,22 @@
-import { Fragment } from 'react'
 import type { GarantiaVsl } from '@/lib/quiz/tipos'
+import { TextoQuiz } from './TextoQuiz'
 
 // Bloco de garantia abaixo do CTA da VSL.
 //
 // A garantia e prova de remocao de risco — o empurrao final depois que a
 // pessoa ja viu a oferta —, entao fica DEPOIS do botao, nao antes, e tem peso
 // visual proprio (selo + headline + reforco) em vez de uma linha apagada no
-// rodape. Fundo escuro herdado da tela da VSL: o texto e branco e a enfase e
-// verde claro, nunca mt-black (que sumiria).
-
-// Enfase local, nao o TextoQuiz compartilhado: aquele e para telas claras
-// (negrito em mt-black) e nao faz italico. Aqui **negrito** fica branco forte
-// e *italico* vira a cor de destaque, como na headline da referencia.
-function TextoEnfase({ texto }: { texto: string }) {
-  const partes = texto.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
-
-  return (
-    <>
-      {partes.map((parte, i) => {
-        if (parte.startsWith('**') && parte.endsWith('**')) {
-          return (
-            <strong key={i} className="font-bold text-white">
-              {parte.slice(2, -2)}
-            </strong>
-          )
-        }
-        if (parte.startsWith('*') && parte.endsWith('*')) {
-          return (
-            <em key={i} className="font-semibold not-italic text-mt-green">
-              {parte.slice(1, -1)}
-            </em>
-          )
-        }
-        return <Fragment key={i}>{parte}</Fragment>
-      })}
-    </>
-  )
-}
+// rodape.
+//
+// Linguagem das secoes escuras da LP /trilha: superficie escura sobre fundo
+// escuro, sem borda; eyebrow em Lora minuscula (a caixa alta espacada saiu do
+// sistema); titulo em Satoshi 500 minusculo com o *destaque* em --verde 700;
+// o texto e prosa, entao Lora em caixa normal. A enfase vem de TextoQuiz no
+// tema escuro — **negrito** off-white, *destaque* verde.
 
 export function BlocoGarantia({ garantia }: { garantia: GarantiaVsl }) {
   return (
-    <div className="mt-10 w-full max-w-[440px] rounded-2xl border border-white/15 bg-white/[0.04] px-6 py-8 text-center">
+    <div className="mt-10 w-full max-w-[440px] rounded-painel bg-white/[0.06] px-6 py-8 text-center sm:px-8">
       {garantia.selo && (
         // Selo decorativo de tamanho fixo; next/image so adicionaria peso.
         // eslint-disable-next-line @next/next/no-img-element
@@ -53,18 +29,16 @@ export function BlocoGarantia({ garantia }: { garantia: GarantiaVsl }) {
         />
       )}
 
-      <p className="text-xs font-bold uppercase tracking-widest text-mt-green">
-        {garantia.eyebrow}
-      </p>
+      <p className="font-editorial text-base lowercase text-mt-off-white/70">{garantia.eyebrow}</p>
 
-      <h2 className="mt-2 font-heading text-2xl font-bold leading-tight text-white sm:text-[28px]">
-        <TextoEnfase texto={garantia.titulo} />
+      <h2 className="mt-2 font-satoshi text-[26px] font-medium lowercase leading-[1.12] tracking-[-0.02em] text-mt-off-white [text-wrap:balance] sm:text-[30px]">
+        <TextoQuiz texto={garantia.titulo} tema="escuro" />
       </h2>
 
       <div className="mt-4 space-y-3">
         {garantia.texto.map((paragrafo, i) => (
-          <p key={i} className="text-sm leading-6 text-white/75 sm:text-[15px]">
-            <TextoEnfase texto={paragrafo} />
+          <p key={i} className="font-editorial text-base leading-[1.7] text-mt-off-white/80">
+            <TextoQuiz texto={paragrafo} tema="escuro" />
           </p>
         ))}
       </div>
