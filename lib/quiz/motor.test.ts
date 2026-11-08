@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { avaliar, classificar, somarPontos } from './motor'
-import { quiz1 } from './configs/quiz-1'
+import { SEGUNDO_DA_OFERTA_NA_VSL, quiz1 } from './configs/quiz-1'
 import type { ConfigQuiz, Respostas } from './tipos'
 
 // Os cinco exemplos da seção 6 dos docs são o contrato do motor: se um deles
@@ -179,5 +179,19 @@ describe('integridade da config do quiz-1', () => {
       expect(quiz1.resultados[perfil].titulo.length).toBeGreaterThan(0)
       expect(quiz1.resultados[perfil].paragrafos.length).toBeGreaterThan(0)
     }
+  })
+
+  it('a VSL da VTurb tem conta e video juntos, ou nenhum dos dois', () => {
+    // So o videoId preenchido monta um player que nunca carrega (a URL do
+    // script exige a conta), com o botao de compra escondido atras dele.
+    const { provider, videoId, contaId } = quiz1.vsl
+    if (provider === 'vturb' && videoId && !contaId) {
+      throw new Error('quiz-1: preencha vsl.contaId (UUID da conta na URL do embed da VTurb)')
+    }
+  })
+
+  it('o botao de compra espera o segundo da oferta na VSL', () => {
+    expect(quiz1.vsl.ctaAtSeconds).toBe(SEGUNDO_DA_OFERTA_NA_VSL)
+    expect(SEGUNDO_DA_OFERTA_NA_VSL).toBe(354)
   })
 })

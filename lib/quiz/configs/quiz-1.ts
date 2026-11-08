@@ -16,6 +16,14 @@ import type { ConfigQuiz } from '../tipos'
  *   C+2. Parece dimensão C por falar de rotina e imprevisto, mas a matriz a
  *   classifica como falha de sustentação, e o Exemplo 3 dos docs só fecha assim.
  */
+/**
+ * Segundo da VSL em que a oferta e apresentada (5:54). O botao de compra so
+ * aparece quando a pessoa assiste ate aqui — em reproducao continua, sem contar
+ * avanco manual nem o autoplay mudo (ver lib/quiz/progresso-vsl.ts). Se o video
+ * for reeditado, medir de novo.
+ */
+export const SEGUNDO_DA_OFERTA_NA_VSL = 5 * 60 + 54
+
 export const quiz1: ConfigQuiz = {
   slug: 'quiz-1',
   versao: 1,
@@ -219,13 +227,14 @@ export const quiz1: ConfigQuiz = {
 
   vsl: {
     provider: 'vturb',
-    // PENDÊNCIA: a VTurb ainda não foi configurada. Cole aqui o id do vídeo
-    // (e contaId, se o embed exigir) — com videoId vazio a tela mostra o CTA
-    // de imediato, sem player, em vez de um retângulo quebrado.
-    videoId: '',
-    contaId: '',
+    // Da aba Embed da VTurb (JavaScript, "Otimizar Velocidade" ligada). O
+    // player e o arquivo de video tem ids diferentes: o segundo so aparece no
+    // preload do .m3u8.
+    videoId: '6af0be6770b42fd51594e194',
+    contaId: '9e6f61cc-e76a-4a7d-82d8-b1b1b195a704',
+    arquivoVideoId: '6af0be4e0b42ce3fc9fab152',
     chamada: 'Seu diagnóstico está *pronto*.',
-    ctaAtSeconds: 0,
+    ctaAtSeconds: SEGUNDO_DA_OFERTA_NA_VSL,
     rotuloCta: 'ENTRAR AGORA PARA A TRILHA',
     // apoioCta foi absorvido pelo bloco de garantia abaixo — a mesma promessa
     // de 7 dias não deve aparecer duas vezes na mesma tela.
