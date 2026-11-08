@@ -91,15 +91,27 @@ export type ConfigVsl = {
    * de imediato — é o estado em que um quiz nasce, antes de o vídeo existir.
    */
   videoId: string
-  /** Conta/player da VTurb, quando o provider exige (ver configs/quiz-1.ts). */
+  /**
+   * Conta da VTurb — o UUID na URL do script do embed. Obrigatória com o
+   * provider vturb: sem ela o player não monta e a tela cai no estado sem vídeo.
+   */
   contaId?: string
+  /**
+   * Arquivo de vídeo na VTurb (id do .m3u8 no preload do embed). Não é o id do
+   * player. Ausente, o vídeo só não é pré-carregado.
+   */
+  arquivoVideoId?: string
   /**
    * Frase curta acima do player, estilo direct-response — nunca um título com
    * subtítulo. A tela da VSL é para assistir, não para ler: qualquer bloco de
    * texto competindo com o vídeo é atenção tirada dele.
    */
   chamada: string
-  /** Segundos de reprodução até o botão de compra aparecer. */
+  /**
+   * Segundo do vídeo, alcançado por reprodução contínua, em que o botão de
+   * compra aparece. Avanço manual e autoplay mudo não contam. Zero libera de
+   * imediato.
+   */
   ctaAtSeconds: number
   rotuloCta: string
   /** Texto curto abaixo do botão (preço). A garantia tem bloco próprio. */

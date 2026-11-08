@@ -157,7 +157,7 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 | `cron-auth.ts` | Validação do `CRON_SECRET` |
 | `checkout/` | Abstração do provider de pagamento — ver [Funil de quiz](#funil-de-quiz) |
 | `quiz/` | Motor de pontuação, passos, sessão e configs dos quizzes |
-| `tracking/` | `track()` do funil, ponte React do Pixel (`meta.ts`), captura de atribuição e Conversions API |
+| `tracking/` | `track()` do funil, ponte React do Pixel (`meta.ts`), captura de atribuição, Conversions API (`capi.ts`) e contrato do Purchase compartilhado por browser e servidor (`purchase.ts`) |
 | `supabase.ts` / `-server.ts` / `-admin.ts` | Clientes browser / server / service-role |
 | `utils.ts` | `cn()` com os tokens do sistema visual registrados no `tailwind-merge` |
 | `validations.ts` | Schemas Zod |
@@ -180,7 +180,8 @@ as novas migrações versionadas em `supabase/migrations`.
 | `momentos_vida` | `estacao`, `frase`, `duracao`, `data_revisao`, `ativo` — 1 ativo por usuário |
 | `progresso_aulas` | `user_id`, `modulo_id`, `concluido_em`, `data_confiavel` |
 | `modulos_conteudo` | `modulo_id` (PK, texto), `blocos` (jsonb), `atualizado_em` |
-| `compras` | provedor/checkout, e-mail, status, `user_id`, método, parcelas e datas do funil |
+| `compras` | provedor/checkout, `external_id`, e-mail, status, `user_id`, método, parcelas, datas do funil e `meta_purchase_enviado_em` |
+| `checkout_atribuicao` | `external_id` (PK), `fbp`, `fbc`, `client_ip`, `client_user_agent`, `source_url`, `source` — gravada na criação da cobrança |
 | `tokens_acesso_compra` | hash do token, expiração, uso e invalidação |
 | `payment_webhook_events` | IDs de evento por provedor para idempotência |
 
@@ -197,6 +198,13 @@ validar o back office em produção.
 **Links de compra** — apenas o SHA-256 do token é persistido. Um novo envio invalida
 todos os links anteriores ainda ativos; `used_at` impede reutilização depois do cadastro.
 `payment_webhook_events (provider, event_id)` impede e-mail duplicado quando o provedor reenvia eventos.
+
+**`compras.meta_purchase_enviado_em IS NULL` significa "a Meta nunca recebeu o Purchase"**,
+e não "pendente de envio". O webhook só manda Purchase no processamento que **libera o
+acesso**; compra já liberada sai antes. É isso que mantém as duas vendas anteriores ao
+Pixel atual (31/10 e 04/11/2026) fora da Meta para sempre — não têm atribuição, e
+reenviá-las semanas depois contaria como venda de hoje. Não "complete" essas linhas nem
+crie rotina de reenvio para nulos.
 
 **`profiles.excluir_das_metricas`** — contas internas somem do back office e do
 contador de membros, mas a plataforma funciona normal para elas. Apagar dados de conta
@@ -688,14 +696,45 @@ eventos*, o navegador só aparece se o site foi aberto pelo link ou QR code da p
 aba. Testar no celular por fora dela não mostra nada ali. A visão geral do Gerenciador
 também atrasa: confira `last_fired_time` do Pixel antes de concluir que um evento não chegou.
 
-**O Purchase não existia no projeto** — a compra era cega para a Meta. Agora dispara em
-par: Pixel em `/compra/sucesso` e CAPI no webhook, com `event_id` derivado da referência
-externa do checkout. Os dois lados chegam ao mesmo id sem trocar nada entre si, a Meta
-deduplica e um retry do provedor não vira segunda venda.
+**O Purchase dispara em par:** Pixel em `/compra/sucesso` e CAPI no webhook, com
+`event_id` = `eventIdDaCompra(externalId)` (`lib/tracking/purchase.ts`). O `externalId` é
+gerado por nós e o único identificador que o browser também conhece (chega como
+`checkout_ref`); o id interno do provedor não chega à página. A Meta deduplica e um retry
+do provedor não vira segunda venda.
 
-**A CAPI nunca lança e roda depois do e-mail de acesso.** Falhar ali faria o provedor
-reenviar o evento e reprocessar a compra: perder um evento de tracking é muito mais
-barato que duplicar uma venda ou um e-mail.
+**Até 08/11/2026 nenhum Purchase chegou à Meta**, apesar de o código existir desde
+outubro: a CAPI estava sem token (e `capiConfigurada()` desistia sem log), e o
+`META_PIXEL_ID` apontava para o Pixel antigo. A série de Purchase no Gerenciador começa no
+deploy da branch `feat/meta-purchase` — ausência antes disso não é queda de conversão.
+
+**O valor vai dos dois lados, e é a receita do produto.** Dos dois eventos deduplicados a
+Meta fica com um, pela ordem de chegada; se o Pixel chegasse primeiro sem valor, a venda
+entrava sem receita. O servidor calcula `paidAmount − customerFee`: no cartão parcelado a
+taxa é repassada ao cliente, e juros dele não são receita nossa — contá-los inflaria o
+ROAS e faria a mesma venda valer mais no cartão que no PIX. O browser usa
+`VALOR_TRILHA_REAIS`, que precisa bater com o preço (mesma regra do `TRILHA_PRECO`).
+
+**A atribuição da cobrança fica em tabela nossa** (`checkout_atribuicao`), gravada em
+`startCheckout()` sob o `externalId`: `fbp`/`fbc` (do form/JSON, ou dos cookies da própria
+requisição), IP, user agent e página de origem (Referer). O webhook vem do servidor do
+provedor e não tem nada disso, e o payload documentado do `checkout.completed` não garante
+devolver o metadado. O metadado segue como reserva para cobranças anteriores à tabela.
+Telefone não vai: o payload v2 não traz (o webhook lê `cellphone`/`phone` se um dia vier).
+
+**O id do Pixel no servidor é constante** (`PIXEL_META_ID` em `lib/tracking/meta.ts`), não
+variável de ambiente: o Pixel foi trocado só no browser e a CAPI ficou apontando para o
+antigo. `lib/tracking/purchase.test.ts` falha se divergir de `public/js/rastreio-meta.js`.
+
+**Simular o webhook:** `node --env-file=.env.local scripts/simular-webhook-abacatepay.mjs
+--email <seu e-mail> [--repetir] [--cartao]`, com o `npm run dev` rodando. Assina como a
+AbacatePay, grava a compra com `dev_mode = true` no Supabase do `.env.local` e manda o
+e-mail de acesso. Recusa rodar com token da CAPI e sem `META_CAPI_TEST_CODE` — senão a
+compra simulada contaria como venda real.
+
+**A CAPI nunca lança, espera no máximo 4s e roda depois do e-mail de acesso.** Falhar ali
+faria o provedor reenviar o evento e reprocessar a compra: perder um evento de tracking é
+muito mais barato que duplicar uma venda ou um e-mail. Sem token, o webhook avisa no log
+(`META_CAPI_ACCESS_TOKEN ausente`) em vez de desistir calado.
 
 **A atribuição é capturada na entrada**, não no clique do CTA, que acontece várias telas
 depois e já perdeu a query string. A primeira captura com origem real ganha; os cookies
@@ -724,8 +763,13 @@ Desde **novembro/2026** existe **um único Pixel** (o mesmo do quiz) e **um úni
 servir a dois mundos sem bundle comum: a LP estática `/trilha` (`<script src>`) e as rotas
 Next do quiz e de `/compra/sucesso` (`components/MetaPixel.tsx`, via `next/script`). Antes
 cada rota Next montava o snippet com o id vindo de `NEXT_PUBLIC_META_PIXEL_QUIZ_ID`; a
-variável deixou de ser lida. Trocar de Pixel = editar o id nesse arquivo (e o
-`META_PIXEL_ID` da CAPI, que é server-side).
+variável deixou de ser lida. Trocar de Pixel = editar o id nesse arquivo **e**
+`PIXEL_META_ID` em `lib/tracking/meta.ts` (CAPI); o teste acusa se só um mudar.
+
+**O Gerenciador mostra todo evento como `https://www.mindtrail.com.br/`, mas o Pixel manda
+a URL inteira.** Verificado em 08/11/2026 com navegador headless: na `/trilha` o `dl` sai
+`/trilha?utm_…`, na página de sucesso sai `/compra/sucesso?checkout_ref=…`. O corte é do
+lado da Meta; não é a LP reescrevendo a URL (o `<base href>` só afeta links relativos).
 
 - O carregador expõe `trackMeta`, `trackMetaCustom`, `pageViewMeta` e
   `trackMetaAntesDeSair` em `window`, todos checando `fbq` — adblock não quebra a página.
@@ -766,16 +810,66 @@ não dá para inferir lendo um trecho só:
   `salvador-900`…). Os originais em alta ficam fora do repositório: a página nunca os usa,
   e versionados iriam para o deploy.
 
+### VSL da VTurb e o botão de compra
+
+O botão de compra da tela final só aparece quando a pessoa **assiste** até
+`SEGUNDO_DA_OFERTA_NA_VSL` (5:54, em `lib/quiz/configs/quiz-1.ts`). Os botões de ação da
+VTurb ficam desligados de propósito: o botão é nosso, para preservar `cta_click`,
+`InitiateCheckout` e a atribuição do checkout.
+
+**O tempo vem dos eventos do `<vturb-smartplayer>`, não de timer.** A biblioteca v4 emite
+`video:timeupdate` (`detail.time`, segundos inteiros) e `video:play` só em reprodução real;
+o autoplay mudo emite `smartautoplay:timeupdate`, que não é escutado. É o mesmo evento que
+o `onTime`/`displayHiddenElements` da própria VTurb usa — verificado lendo a biblioteca em
+`scripts.converteai.net/lib/js/smartplayer-wc/v4/smartplayer.js`, porque a central de ajuda
+deles só documenta o `displayHiddenElements`.
+
+**Mede-se a fronteira assistida, não a posição** (`lib/quiz/progresso-vsl.ts`). O player
+tem botões de avançar; comparar a posição (como faz o `displayHiddenElements`) liberaria o
+botão para quem pulasse até a oferta. A fronteira só anda com saltos de até 3s, fica no
+`localStorage` por vídeo e acompanha o "continuar assistindo" da VTurb, que grava a posição
+no mesmo ritmo. Quem já passou da oferta e volta vê o botão direto.
+
+**O autoplay mudo não conta.** O vídeo mudo atrás do "clique para ouvir" é chamariz, e ao
+clicar a VTurb recomeça do zero. É também o padrão da VTurb (`onTime` ignora o autoplay sem
+`inSmartAutoPlay`).
+
+**Sem player, sem espera.** `vslTemVideo()` exige `videoId` **e** `contaId`; faltando um, a
+tela cai no estado sem vídeo e mostra o botão de imediato. Um teste de integridade da
+config falha se só o `videoId` estiver preenchido. Se o script da VTurb der erro, o botão
+aparece na hora; se o player não der `player:ready` em `ESPERA_MAXIMA_PLAYER_MS` (15s), o
+botão aparece com o aviso "o vídeo não carregou". A trava da oferta é para quem está
+assistindo, não para quem ficou sem o vídeo. Se o player chegar depois, o aviso some e o
+botão fica.
+
+**A tag do embed é criada por código, uma vez — nunca por `dangerouslySetInnerHTML`.** O
+React reaplica o `innerHTML` a cada re-render, e a tela re-renderiza exatamente quando o
+botão é liberado: o `<vturb-smartplayer>` era trocado por outro, o vídeo voltava a 0:00
+pausado no segundo da oferta e os listeners ficavam no elemento antigo. Achado no teste com
+o player real; o player simulado não pegava. O script entra por `next/script` (uma vez por
+documento), então remontar a tela não registra o custom element de novo.
+
+**No celular o botão é uma barra fixa na base, por cima do vídeo.** Com o 9:16 em largura
+total, o botão no fluxo nascia abaixo da dobra e quem assistia não o via surgir. A barra
+respeita a safe area — o que exige `viewport-fit=cover`, declarado **só no layout do quiz**
+(por isso o wrapper dali tem padding lateral de safe area). Com o botão liberado, o
+container ganha `pb-40` para nada ficar preso atrás da barra. No desktop o botão volta ao
+fluxo, abaixo do player.
+
+**O embed é o da aba Embed, literal.** Bloco 1 (tag com placeholder 9:16) no player; bloco
+2 (`_plt`, preloads, dns-prefetch) em `PreloadVsl`, montado na tela do diagnóstico. O
+`.m3u8` do preload tem id próprio (`arquivoVideoId`), diferente do player. O `_plt` vai por
+`next/script` porque `<script>` inline renderizado pelo React no cliente não executa.
+
+**Teste com o player real sem deploy:** apontar `www.mindtrail.com.br` para o servidor local
+(`--host-resolver-rules` no Chrome) — a VTurb só toca em domínio autorizado — e usar o
+Google Chrome (o Chromium do Playwright não tem H.264). O Chrome headless libera autoplay
+com som em qualquer configuração, então o caminho do autoplay mudo só se valida num celular.
+
 ### Pendências
 
-- **`videoId` da VTurb** está vazio em `lib/quiz/configs/quiz-1.ts`. Sem ele o player não
-  é montado e o CTA aparece de imediato — a tela de compra nunca fica sem saída.
-- **`ctaAtSeconds` está em 0** enquanto não há vídeo. Com vídeo, ajustar ao ponto do
-  roteiro.
-- **Na VTurb o CTA é liberado por temporizador** desde a montagem, não pelo tempo real de
-  reprodução: o custom element não expõe progresso de forma estável. Quem pausa vê o botão
-  antes do ponto do roteiro — assumido para não prender o CTA atrás de um evento que pode
-  nunca chegar.
+- **Validar num celular real**: autoplay mudo + "clique para ouvir", barra do botão acima do
+  indicador de início do iPhone, navegador do Instagram. O headless não reproduz nenhum dos três.
 - **`META_CAPI_TEST_CODE` deve ser removido** depois de validar no Gerenciador, senão os
   eventos seguem chegando como teste e não contam para a campanha.
 
@@ -881,7 +975,8 @@ Os e-mails citam o Momento de Vida ativo como fio condutor. Buscas de usuário s
 | `NEXT_PUBLIC_QUIZ_ATIVO` | `false` desliga o funil de quiz (404 em todo slug) |
 | ~~`NEXT_PUBLIC_META_PIXEL_QUIZ_ID`~~ | não é mais lida — o id do Pixel vive em `public/js/rastreio-meta.js` |
 | `NEXT_PUBLIC_GA_ID` | GA4 nas rotas do quiz; o mesmo id da LP |
-| `META_PIXEL_ID` / `META_CAPI_ACCESS_TOKEN` | Purchase server-side pela Conversions API |
+| `META_CAPI_ACCESS_TOKEN` | Purchase server-side pela Conversions API; sem ele o webhook avisa no log e segue |
+| ~~`META_PIXEL_ID`~~ | não é mais lida — o id vive em `PIXEL_META_ID` (`lib/tracking/meta.ts`) |
 | `META_CAPI_TEST_CODE` | só durante a validação no Gerenciador — **remover depois** |
 
 Ao adicionar variável nova: **`.env.local` e Vercel**, e a Vercel precisa de redeploy —

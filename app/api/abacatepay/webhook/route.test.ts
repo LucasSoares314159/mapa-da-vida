@@ -1,220 +1,351 @@
-import { createHmac } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { assinarCorpoWebhook } from '@/lib/abacatepay'
 import { enviarLinkAcessoCompra } from '@/lib/acesso-compra'
-import { enviarEventoCapi } from '@/lib/tracking/capi'
+import { sha256 } from '@/lib/tracking/capi'
 import { POST } from './route'
 
-// Webhook da AbacatePay com banco, e-mail e CAPI simulados.
-//
-// Cobre o que custa caro errar em produção: aceitar evento forjado, mandar o
-// e-mail de acesso duas vezes, perder a compra quando o e-mail falha (o
-// provedor precisa conseguir reenviar) e descasar o event_id do Purchase entre
-// a CAPI e o Pixel da página de sucesso.
+// Integracao da rota com Supabase em memoria e fetch da Meta interceptado.
+// O que se protege aqui: um pagamento = um Purchase, nunca dois, e nunca
+// Purchase para venda ja liberada.
 
-// Chave pública de assinatura documentada pela AbacatePay (a mesma da rota).
-const CHAVE_PUBLICA =
-  't9dXRhHHo3yDEj5pVDYz0frf7q6bMKyMRmxxCPIPp3RCplBfXRxqlC6ZpiWmOqj4L63qEaeUOtrCI8P0VMUgo6iIga2ri9ogaHFs0WIIywSMg0q7RmBfybe1E5XJcfC4IW3alNqym0tXoAKkzvfEjZxV6bE0oG2zJrNNYmUCKZyV0KZ3JS8Votf9EAWWYdiDkMkpbMdPggfh1EqHlVkMiTady6jOR3hyzGEHrIz2Ret0xHKMbiqkr9HS1JhNHDX9'
+type Linha = Record<string, unknown>
 
-const SECRET = 'segredo-de-teste'
-const PRODUTO = 'prod_trilha'
-
-type Banco = {
-  eventos: Set<string>
-  processados: number
-  compraExistente: { id: string; access_email_sent_at: string | null } | null
-  upserts: Record<string, unknown>[]
-}
-
-const banco: Banco = { eventos: new Set(), processados: 0, compraExistente: null, upserts: [] }
-
-// Builder encadeável mínimo: .eq().eq() e depois await.
-function filtro(efeito: () => void) {
-  const f = {
-    eq: () => f,
-    then: (resolve: (v: { error: null }) => void) => {
-      efeito()
-      resolve({ error: null })
-    },
+/** Supabase falso: so as operacoes que o webhook e a atribuicao usam. */
+function criarSupabaseFalso() {
+  const tabelas: Record<string, Linha[]> = {}
+  const unicas: Record<string, string[]> = {
+    payment_webhook_events: ['provider', 'event_id'],
+    checkout_atribuicao: ['external_id'],
   }
-  return f
+
+  function from(nome: string) {
+    let operacao: 'select' | 'insert' | 'upsert' | 'update' | 'delete' = 'select'
+    let dados: Linha = {}
+    let conflito: string[] = []
+    const filtros: Array<[string, unknown]> = []
+    const linhas = () => (tabelas[nome] ??= [])
+    const mesmaChave = (a: Linha, b: Linha, chaves: string[]) => chaves.every((k) => a[k] === b[k])
+    const casa = (linha: Linha) => filtros.every(([k, v]) => linha[k] === v)
+
+    function executar(): { data: Linha[] | null; error: { code?: string; message: string } | null } {
+      if (operacao === 'insert') {
+        const chaves = unicas[nome]
+        if (chaves && linhas().some((l) => mesmaChave(l, dados, chaves))) {
+          return { data: null, error: { code: '23505', message: 'duplicate key' } }
+        }
+        const nova = { id: randomUUID(), ...dados }
+        linhas().push(nova)
+        return { data: [nova], error: null }
+      }
+      if (operacao === 'upsert') {
+        const existente = linhas().find((l) => mesmaChave(l, dados, conflito))
+        if (existente) {
+          Object.assign(existente, dados)
+          return { data: [existente], error: null }
+        }
+        const nova = { id: randomUUID(), ...dados }
+        linhas().push(nova)
+        return { data: [nova], error: null }
+      }
+      if (operacao === 'update') {
+        const alvo = linhas().filter(casa)
+        alvo.forEach((l) => Object.assign(l, dados))
+        return { data: alvo, error: null }
+      }
+      if (operacao === 'delete') {
+        tabelas[nome] = linhas().filter((l) => !casa(l))
+        return { data: null, error: null }
+      }
+      return { data: linhas().filter(casa), error: null }
+    }
+
+    const consulta = {
+      select: () => consulta,
+      insert: (d: Linha) => ((operacao = 'insert'), (dados = d), consulta),
+      upsert: (d: Linha, opcoes: { onConflict: string }) => (
+        (operacao = 'upsert'), (dados = d), (conflito = opcoes.onConflict.split(',')), consulta
+      ),
+      update: (d: Linha) => ((operacao = 'update'), (dados = d), consulta),
+      delete: () => ((operacao = 'delete'), consulta),
+      eq: (coluna: string, valor: unknown) => (filtros.push([coluna, valor]), consulta),
+      maybeSingle: async () => {
+        const { data, error } = executar()
+        return { data: data?.[0] ?? null, error }
+      },
+      single: async () => {
+        const { data, error } = executar()
+        return data?.[0]
+          ? { data: data[0], error }
+          : { data: null, error: error ?? { message: 'nenhuma linha' } }
+      },
+      then: (resolver: (r: unknown) => unknown, rejeitar?: (e: unknown) => unknown) =>
+        Promise.resolve(executar()).then(resolver, rejeitar),
+    }
+    return consulta
+  }
+
+  return { from, tabelas }
 }
+
+const estado = vi.hoisted(() => ({ supabase: null as unknown }))
 
 vi.mock('@/lib/supabase-admin', () => ({
-  createAdminSupabaseClient: () => ({
-    from(tabela: string) {
-      if (tabela === 'payment_webhook_events') {
-        return {
-          insert: async (linha: { event_id: string }) => {
-            if (banco.eventos.has(linha.event_id)) return { error: { code: '23505' } }
-            banco.eventos.add(linha.event_id)
-            return { error: null }
-          },
-          update: () => filtro(() => { banco.processados += 1 }),
-          delete: () => filtro(() => banco.eventos.clear()),
-        }
-      }
-      return {
-        select: () => ({
-          eq: () => ({
-            eq: () => ({
-              maybeSingle: async () => ({ data: banco.compraExistente, error: null }),
-            }),
-          }),
-        }),
-        upsert: (linha: Record<string, unknown>) => {
-          banco.upserts.push(linha)
-          return { select: () => ({ single: async () => ({ data: { id: 'compra_1' }, error: null }) }) }
-        },
-      }
-    },
+  createAdminSupabaseClient: () => estado.supabase,
+}))
+
+// vi.mock e elevado acima dos imports. O envio real do e-mail nao interessa
+// aqui; so o efeito no banco.
+vi.mock('@/lib/acesso-compra', () => ({
+  normalizarEmail: (email: string) => email.trim().toLowerCase(),
+  enviarLinkAcessoCompra: vi.fn(async (compraId: string) => {
+    const supabase = estado.supabase as ReturnType<typeof criarSupabaseFalso>
+    const compra = supabase.tabelas.compras.find((l) => l.id === compraId)
+    if (compra) compra.access_email_sent_at = new Date().toISOString()
   }),
 }))
 
-vi.mock('@/lib/acesso-compra', () => ({
-  enviarLinkAcessoCompra: vi.fn(),
-  normalizarEmail: (email: string) => email.trim().toLowerCase(),
-}))
+const EXTERNAL_ID = 'trilha-produtividade-1b2c3d'
 
-vi.mock('@/lib/tracking/capi', () => ({
-  capiConfigurada: () => true,
-  enviarEventoCapi: vi.fn(),
-  eventIdDaCompra: (id: string) => `purchase_${id}`,
-}))
-
-function evento(sobrescrever: Record<string, unknown> = {}, checkout: Record<string, unknown> = {}) {
+function payloadPago(eventId = 'log_1', checkout: Record<string, unknown> = {}) {
   return {
-    id: 'evt_1',
+    id: eventId,
     event: 'checkout.completed',
-    devMode: false,
+    apiVersion: 2,
+    devMode: true,
     data: {
       checkout: {
-        id: 'bill_1',
-        externalId: 'trilha-produtividade-abc',
+        id: 'bill_123',
+        externalId: EXTERNAL_ID,
         status: 'PAID',
         amount: 29700,
         paidAmount: 29700,
-        items: [{ id: PRODUTO, quantity: 1 }],
-        metadata: { source: 'quiz', quiz_slug: 'quiz-1', fbp: 'fb.1.1.1' },
+        customerFee: null,
+        customerId: 'cust_123',
+        installmentsCount: null,
+        updatedAt: new Date().toISOString(),
+        items: [{ id: 'prod_trilha', quantity: 1 }],
         ...checkout,
       },
-      customer: { name: 'Ana', email: '  Ana@Exemplo.com ' },
+      customer: {
+        id: 'cust_123',
+        name: 'Maria da Silva',
+        email: 'Maria@Exemplo.com',
+        taxId: '123.***.***-**',
+      },
       payerInformation: { method: 'PIX' },
     },
-    ...sobrescrever,
   }
 }
 
-function requisicao(
-  corpo: unknown,
-  { secret = SECRET, assinatura }: { secret?: string | null; assinatura?: string } = {}
-) {
-  const raw = JSON.stringify(corpo)
-  const sig = assinatura ?? createHmac('sha256', CHAVE_PUBLICA).update(raw).digest('base64')
-  const url = new URL('https://www.mindtrail.com.br/api/abacatepay/webhook')
-  if (secret) url.searchParams.set('webhookSecret', secret)
-  return new Request(url, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-webhook-signature': sig },
-    body: raw,
-  })
+function webhook(corpo: unknown, assinatura?: string) {
+  const bruto = JSON.stringify(corpo)
+  return POST(
+    new Request('https://www.mindtrail.com.br/api/abacatepay/webhook?webhookSecret=segredo', {
+      method: 'POST',
+      headers: { 'x-webhook-signature': assinatura ?? assinarCorpoWebhook(bruto) },
+      body: bruto,
+    })
+  )
 }
 
-describe('webhook AbacatePay', () => {
+const fetchMeta = vi.fn()
+const purchasesEnviados = () =>
+  fetchMeta.mock.calls.filter(([url]) => String(url).startsWith('https://graph.facebook.com/'))
+const corpoDoPurchase = (indice = 0) => JSON.parse(purchasesEnviados()[indice][1].body)
+
+describe('webhook AbacatePay → Purchase', () => {
+  let supabase: ReturnType<typeof criarSupabaseFalso>
+
   beforeEach(() => {
-    vi.stubEnv('ABACATEPAY_WEBHOOK_SECRET', SECRET)
-    vi.stubEnv('ABACATEPAY_PRODUCT_ID', PRODUTO)
-    vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://www.mindtrail.com.br/')
-    banco.eventos.clear()
-    banco.processados = 0
-    banco.compraExistente = null
-    banco.upserts = []
+    supabase = criarSupabaseFalso()
+    estado.supabase = supabase
+    vi.stubEnv('ABACATEPAY_WEBHOOK_SECRET', 'segredo')
+    vi.stubEnv('ABACATEPAY_PRODUCT_ID', 'prod_trilha')
+    vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://www.mindtrail.com.br')
+    vi.stubEnv('META_CAPI_ACCESS_TOKEN', 'token-secreto')
+    vi.stubEnv('META_CAPI_TEST_CODE', '')
+    fetchMeta.mockReset().mockResolvedValue(new Response('{"events_received":1}'))
+    vi.stubGlobal('fetch', fetchMeta)
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterEach(() => {
-    vi.clearAllMocks()
     vi.unstubAllEnvs()
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+    vi.mocked(enviarLinkAcessoCompra).mockClear()
   })
 
-  it('recusa sem secret, com secret errado e com assinatura inválida', async () => {
-    expect((await POST(requisicao(evento(), { secret: null }))).status).toBe(401)
-    expect((await POST(requisicao(evento(), { secret: 'outro' }))).status).toBe(401)
-    expect((await POST(requisicao(evento(), { assinatura: 'AAAA' }))).status).toBe(401)
-    expect(enviarLinkAcessoCompra).not.toHaveBeenCalled()
-  })
+  it('pagamento confirmado envia um Purchase com valor, event_id e atribuicao', async () => {
+    supabase.tabelas.checkout_atribuicao = [{
+      external_id: EXTERNAL_ID,
+      payment_provider: 'abacatepay',
+      source: 'quiz',
+      fbp: 'fb.1.1700000000000.123',
+      fbc: 'fb.1.1700000000000.AbC',
+      client_ip: '200.100.50.25',
+      client_user_agent: 'Mozilla/5.0 (iPhone)',
+      source_url: 'https://www.mindtrail.com.br/quiz/quiz-1',
+    }]
 
-  it('ignora eventos que não são checkout.completed sem tocar no banco', async () => {
-    const resposta = await POST(requisicao(evento({ event: 'checkout.refunded' })))
+    const resposta = await webhook(payloadPago())
+
     expect(resposta.status).toBe(200)
-    expect(banco.eventos.size).toBe(0)
-  })
+    expect(purchasesEnviados()).toHaveLength(1)
 
-  it('registra a compra, envia o acesso e manda o Purchase com o id da página de sucesso', async () => {
-    const resposta = await POST(requisicao(evento()))
-
-    expect(resposta.status).toBe(200)
-    expect(banco.upserts[0]).toMatchObject({
-      provider_checkout_id: 'bill_1',
-      email: 'ana@exemplo.com',
-      amount_total: 29700,
-      payment_method: 'PIX',
-      status: 'pago',
+    const evento = corpoDoPurchase().data[0]
+    expect(evento).toMatchObject({
+      event_name: 'Purchase',
+      event_id: `purchase_${EXTERNAL_ID}`,
+      action_source: 'website',
+      event_source_url: 'https://www.mindtrail.com.br/quiz/quiz-1',
+      custom_data: {
+        value: 297,
+        currency: 'BRL',
+        content_name: 'Trilha',
+        content_ids: ['trilha'],
+        content_type: 'product',
+        source: 'quiz',
+      },
     })
-    expect(enviarLinkAcessoCompra).toHaveBeenCalledWith('compra_1', 'ana@exemplo.com')
-    // A página de sucesso recebe ?checkout_ref=<externalId> e o Pixel usa
-    // purchase_<checkout_ref>: os dois lados precisam bater para a Meta deduplicar.
-    expect(enviarEventoCapi).toHaveBeenCalledWith(
-      expect.objectContaining({
-        nome: 'Purchase',
-        eventId: 'purchase_trilha-produtividade-abc',
-        valor: 297,
-        sourceUrl: 'https://www.mindtrail.com.br/compra/sucesso',
-      })
-    )
-    expect(banco.processados).toBe(1)
+    expect(evento.user_data).toMatchObject({
+      em: [sha256('maria@exemplo.com')],
+      fn: [sha256('maria')],
+      ln: [sha256('silva')],
+      fbp: 'fb.1.1700000000000.123',
+      fbc: 'fb.1.1700000000000.AbC',
+      client_ip_address: '200.100.50.25',
+      client_user_agent: 'Mozilla/5.0 (iPhone)',
+    })
+
+    const compra = supabase.tabelas.compras[0]
+    expect(compra.external_id).toBe(EXTERNAL_ID)
+    expect(compra.meta_purchase_enviado_em).toEqual(expect.any(String))
   })
 
-  it('não reenvia o e-mail quando o provedor repete o mesmo evento', async () => {
-    await POST(requisicao(evento()))
-    const repetido = await POST(requisicao(evento()))
+  it('o mesmo webhook duas vezes gera um Purchase', async () => {
+    await webhook(payloadPago('log_1'))
+    const repetido = await webhook(payloadPago('log_1'))
 
+    expect(repetido.status).toBe(200)
     expect(await repetido.json()).toMatchObject({ duplicate: true })
+    expect(purchasesEnviados()).toHaveLength(1)
+  })
+
+  it('outro evento da mesma cobranca tambem nao gera segundo Purchase', async () => {
+    await webhook(payloadPago('log_1'))
+    await webhook(payloadPago('log_2'))
+
+    expect(purchasesEnviados()).toHaveLength(1)
     expect(enviarLinkAcessoCompra).toHaveBeenCalledTimes(1)
   })
 
-  it('não reenvia o e-mail quando outro evento chega para compra já atendida', async () => {
-    banco.compraExistente = { id: 'compra_1', access_email_sent_at: '2026-11-08T10:00:00Z' }
-    const resposta = await POST(requisicao(evento({ id: 'evt_2' })))
+  it('venda ja liberada antes do Pixel atual nunca vai para a Meta', async () => {
+    supabase.tabelas.compras = [{
+      id: 'compra-antiga',
+      payment_provider: 'abacatepay',
+      provider_checkout_id: 'bill_123',
+      access_email_sent_at: '2026-11-04T12:22:04Z',
+      meta_purchase_enviado_em: null,
+    }]
+
+    const resposta = await webhook(payloadPago('log_reenviado'))
 
     expect(resposta.status).toBe(200)
+    expect(purchasesEnviados()).toHaveLength(0)
     expect(enviarLinkAcessoCompra).not.toHaveBeenCalled()
   })
 
-  it('libera o evento para nova tentativa quando o e-mail falha', async () => {
-    vi.mocked(enviarLinkAcessoCompra).mockRejectedValueOnce(new Error('SMTP fora'))
-    vi.spyOn(console, 'error').mockImplementation(() => {})
+  it('cartao parcelado: value e a receita do produto, sem os juros do cliente', async () => {
+    await webhook(payloadPago('log_1', { amount: 35208, paidAmount: 35208, customerFee: 5508 }))
 
-    const resposta = await POST(requisicao(evento()))
+    expect(corpoDoPurchase().data[0].custom_data.value).toBe(297)
+  })
+
+  it('sem a tabela de atribuicao, usa os cookies do metadado da cobranca', async () => {
+    await webhook(payloadPago('log_1', { metadata: { fbp: 'fb.1.9.meta', source: 'lp-trilha' } }))
+
+    const evento = corpoDoPurchase().data[0]
+    expect(evento.user_data.fbp).toBe('fb.1.9.meta')
+    expect(evento.event_source_url).toBe('https://www.mindtrail.com.br/compra/sucesso')
+  })
+
+  it('Meta fora do ar nao derruba a resposta nem o acesso, e nao marca envio', async () => {
+    fetchMeta.mockRejectedValue(new Error('ECONNRESET'))
+
+    const resposta = await webhook(payloadPago())
+
+    expect(resposta.status).toBe(200)
+    expect(enviarLinkAcessoCompra).toHaveBeenCalledTimes(1)
+    expect(supabase.tabelas.compras[0].meta_purchase_enviado_em).toBeUndefined()
+  })
+
+  it('sem token da CAPI, libera o acesso e avisa no log', async () => {
+    vi.stubEnv('META_CAPI_ACCESS_TOKEN', '')
+
+    const resposta = await webhook(payloadPago())
+
+    expect(resposta.status).toBe(200)
+    expect(purchasesEnviados()).toHaveLength(0)
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('META_CAPI_ACCESS_TOKEN ausente'))
+  })
+
+  it('assinatura invalida e rejeitada antes de qualquer efeito', async () => {
+    const resposta = await webhook(payloadPago(), 'assinatura-forjada')
+
+    expect(resposta.status).toBe(401)
+    expect(purchasesEnviados()).toHaveLength(0)
+    expect(supabase.tabelas.payment_webhook_events).toBeUndefined()
+  })
+
+  it('evento que nao e checkout.completed e ignorado', async () => {
+    const resposta = await webhook({ ...payloadPago(), event: 'checkout.refunded' })
+
+    expect(resposta.status).toBe(200)
+    expect(purchasesEnviados()).toHaveLength(0)
+  })
+
+  // Cenários que não envolvem a Meta, mas custam caro se quebrarem.
+
+  it('recusa sem secret na URL ou com secret errado, antes de ler o corpo', async () => {
+    const bruto = JSON.stringify(payloadPago())
+    const assinatura = assinarCorpoWebhook(bruto)
+    for (const url of [
+      'https://www.mindtrail.com.br/api/abacatepay/webhook',
+      'https://www.mindtrail.com.br/api/abacatepay/webhook?webhookSecret=outro',
+    ]) {
+      const resposta = await POST(
+        new Request(url, { method: 'POST', headers: { 'x-webhook-signature': assinatura }, body: bruto })
+      )
+      expect(resposta.status).toBe(401)
+    }
+    expect(enviarLinkAcessoCompra).not.toHaveBeenCalled()
+    expect(supabase.tabelas.payment_webhook_events ?? []).toHaveLength(0)
+  })
+
+  it('falha no e-mail devolve 500 e libera o evento para o provedor reenviar', async () => {
+    vi.mocked(enviarLinkAcessoCompra).mockRejectedValueOnce(new Error('SMTP fora'))
+
+    const resposta = await webhook(payloadPago('log_falha'))
 
     expect(resposta.status).toBe(500)
-    expect(banco.eventos.size).toBe(0)
-    expect(enviarEventoCapi).not.toHaveBeenCalled()
+    expect(supabase.tabelas.payment_webhook_events ?? []).toHaveLength(0)
+    expect(purchasesEnviados()).toHaveLength(0)
+
+    // O reenvio do provedor processa normalmente.
+    const reenvio = await webhook(payloadPago('log_falha'))
+    expect(reenvio.status).toBe(200)
+    expect(enviarLinkAcessoCompra).toHaveBeenCalledTimes(2)
   })
 
-  it('não libera acesso para outro produto nem para checkout não pago', async () => {
-    await POST(requisicao(evento({}, { items: [{ id: 'outro', quantity: 1 }] })))
-    await POST(requisicao(evento({ id: 'evt_3' }, { status: 'PENDING' })))
+  it('não libera acesso para outro produto nem para cobrança não paga', async () => {
+    await webhook(payloadPago('log_outro', { items: [{ id: 'outro_produto', quantity: 1 }] }))
+    await webhook(payloadPago('log_pendente', { status: 'PENDING' }))
 
-    expect(banco.upserts).toHaveLength(0)
+    expect(supabase.tabelas.compras ?? []).toHaveLength(0)
     expect(enviarLinkAcessoCompra).not.toHaveBeenCalled()
-  })
-
-  it('falha da CAPI não derruba o webhook', async () => {
-    vi.mocked(enviarEventoCapi).mockRejectedValueOnce(new Error('Meta fora'))
-    vi.spyOn(console, 'error').mockImplementation(() => {})
-
-    const resposta = await POST(requisicao(evento()))
-
-    expect(resposta.status).toBe(200)
-    expect(enviarLinkAcessoCompra).toHaveBeenCalledTimes(1)
+    expect(purchasesEnviados()).toHaveLength(0)
   })
 })

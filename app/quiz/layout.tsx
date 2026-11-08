@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
 import { MetaPixel } from '@/components/MetaPixel'
 
@@ -17,6 +17,16 @@ export const metadata: Metadata = {
   // organico: o trafego e pago e a pagina so faz sentido com a origem do
   // anuncio.
   robots: { index: false, follow: false },
+}
+
+// viewport-fit=cover so no funil: sem ele o iOS reporta safe area zero, e a
+// barra fixa do botao de compra (TelaResultado) ficaria atras do indicador de
+// inicio do iPhone. Com ele, o conteudo pode ir para baixo do notch com o
+// celular deitado — por isso o padding lateral de safe area no wrapper abaixo.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 }
 
 export default function QuizLayout({ children }: { children: React.ReactNode }) {
@@ -41,7 +51,7 @@ export default function QuizLayout({ children }: { children: React.ReactNode }) 
         </>
       )}
 
-      {children}
+      <div className="pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">{children}</div>
     </>
   )
 }

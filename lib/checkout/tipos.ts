@@ -25,11 +25,28 @@ export type ParamsCheckout = {
   fbc?: string
   /** URL para onde voltar se a pessoa desistir. */
   cancelPath?: string
+  /**
+   * Sinais do navegador para a CAPI casar a venda com o anuncio. Lidos da
+   * requisicao pelo servidor, nunca enviados ao provider como metadado.
+   */
+  cliente?: ContextoCliente
+}
+
+export type ContextoCliente = {
+  ip?: string
+  userAgent?: string
+  /** Pagina de onde o checkout foi iniciado (Referer). */
+  sourceUrl?: string
 }
 
 export type ResultadoCheckout = {
   /** Para onde redirecionar o navegador. */
   url: string
+  /**
+   * Referencia que nos geramos para a cobranca. Volta no webhook e na URL de
+   * sucesso, e e a chave da atribuicao e do event_id do Purchase.
+   */
+  externalId: string
 }
 
 export interface ProviderCheckout {
