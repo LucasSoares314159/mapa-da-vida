@@ -20,7 +20,7 @@ export default function TermosUsoPage() {
       </p>
       <p>
         Ao concluir a compra ou criar sua conta, você declara ter lido e aceitado estes Termos e a{' '}
-        <Link href="/cancelamento" className="text-mt-green underline">
+        <Link href="/cancelamento" className="text-mt-green-dark underline decoration-mt-green underline-offset-4 hover:decoration-2">
           Política de Cancelamento e Reembolso
         </Link>
         .
@@ -148,7 +148,7 @@ export default function TermosUsoPage() {
           Você tem <strong>7 dias</strong> para desistir da compra, com reembolso integral, nos termos do
           artigo 49 do Código de Defesa do Consumidor. Todas as regras, inclusive para compras
           parceladas, estão na{' '}
-          <Link href="/cancelamento" className="text-mt-green underline">
+          <Link href="/cancelamento" className="text-mt-green-dark underline decoration-mt-green underline-offset-4 hover:decoration-2">
             Política de Cancelamento e Reembolso
           </Link>
           .

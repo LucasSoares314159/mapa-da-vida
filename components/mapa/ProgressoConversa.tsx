@@ -22,12 +22,12 @@ export function ProgressoConversa({ perguntasConcluidas, perguntaAtual }: Props)
   return (
     <div className="w-full">
       <div className="mb-2 flex items-baseline justify-between">
-        <span className="text-xs" style={{ color: '#a8c4bc' }}>
+        <span className="text-xs text-mt-off-white/75">
           {perguntaAtual
             ? `Pergunta ${perguntaAtual} de ${TOTAL_PERGUNTAS}`
             : `${TOTAL_PERGUNTAS} perguntas`}
         </span>
-        <span className="text-xs" style={{ color: '#6f8f87' }}>
+        <span className="text-xs text-mt-off-white/60">
           {estimarTempoRestante(perguntasConcluidas)}
         </span>
       </div>
@@ -38,11 +38,11 @@ export function ProgressoConversa({ perguntasConcluidas, perguntaAtual }: Props)
         aria-valuemax={TOTAL_PERGUNTAS}
         aria-valuenow={perguntasConcluidas}
         aria-label="Progresso do Mapa da Vida"
-        style={{ height: 3, borderRadius: 2, backgroundColor: '#3d5a62', overflow: 'hidden' }}
+        className="h-[3px] overflow-hidden rounded-full bg-mt-linha-escura"
       >
         <div
-          className="transition-all duration-500 ease-out"
-          style={{ height: '100%', width: `${fracao * 100}%`, backgroundColor: '#57AA8F' }}
+          className="h-full rounded-full bg-mt-green transition-all duration-500 ease-out"
+          style={{ width: `${fracao * 100}%` }}
         />
       </div>
     </div>

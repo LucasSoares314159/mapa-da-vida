@@ -17,8 +17,8 @@ export function CadastroConviteForm({ token, email }: Props) {
   const [state, action] = useFormState(cadastroPorConvite, undefined)
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-10">
-      <Card className="w-full max-w-sm">
+    <main className="flex min-h-screen items-center justify-center bg-mt-off-white px-4 py-10">
+      <Card className="w-full max-w-[400px] rounded-painel shadow-mt-3">
         <CardHeader>
           <CardTitle>Criar conta</CardTitle>
           <CardDescription>Complete seu cadastro para acessar a Trilha</CardDescription>
@@ -36,7 +36,7 @@ export function CadastroConviteForm({ token, email }: Props) {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="nome">Nome</Label>
               <Input id="nome" name="nome" type="text" placeholder="Seu nome" autoComplete="name" required />
-              {state?.errors?.nome && <p className="text-xs text-destructive">{state.errors.nome[0]}</p>}
+              {state?.errors?.nome && <p className="text-[13px] text-mt-red">{state.errors.nome[0]}</p>}
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -47,19 +47,19 @@ export function CadastroConviteForm({ token, email }: Props) {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="telefone">Telefone</Label>
               <Input id="telefone" name="telefone" type="tel" placeholder="(00) 00000-0000" autoComplete="tel" required />
-              {state?.errors?.telefone && <p className="text-xs text-destructive">{state.errors.telefone[0]}</p>}
+              {state?.errors?.telefone && <p className="text-[13px] text-mt-red">{state.errors.telefone[0]}</p>}
             </div>
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="senha">Senha</Label>
               <Input id="senha" name="senha" type="password" placeholder="••••••••" autoComplete="new-password" required />
-              {state?.errors?.senha && <p className="text-xs text-destructive">{state.errors.senha[0]}</p>}
+              {state?.errors?.senha && <p className="text-[13px] text-mt-red">{state.errors.senha[0]}</p>}
             </div>
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="confirmarSenha">Confirmar senha</Label>
               <Input id="confirmarSenha" name="confirmarSenha" type="password" placeholder="••••••••" autoComplete="new-password" required />
-              {state?.errors?.confirmarSenha && <p className="text-xs text-destructive">{state.errors.confirmarSenha[0]}</p>}
+              {state?.errors?.confirmarSenha && <p className="text-[13px] text-mt-red">{state.errors.confirmarSenha[0]}</p>}
             </div>
           </CardContent>
 

@@ -362,7 +362,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
     <div className="min-h-screen py-8">
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 sm:px-6">
         {/* Meta — o título vem do AuthLayout */}
-        <p className="text-xs font-medium text-mt-muted">
+        <p className="text-xs font-medium text-mt-apoio">
           Mapa de {getMesAtual()} · {getZonaLabel(zona)} · {percentualLivre}% livre
         </p>
 
@@ -370,7 +370,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
         <MomentoDestaque momento={momento} />
 
         {/* Tabs por prazo */}
-        <div className="flex gap-1 rounded-[10px] border border-mt-border bg-white p-1">
+        <div className="flex gap-1 rounded-elemento border border-mt-border bg-white p-1">
           {PRAZOS.map((pz) => {
             const count = contarAtivos(pz)
             const ativa = tabAtiva === pz
@@ -392,7 +392,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
                   'flex flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                   ativa
                     ? 'bg-mt-green text-white'
-                    : 'bg-transparent text-mt-muted hover:bg-mt-green/10 hover:text-mt-green-dark'
+                    : 'bg-transparent text-mt-apoio hover:bg-mt-green/10 hover:text-mt-green-dark'
                 )}
               >
                 <span className="flex items-center gap-1 text-xs uppercase tracking-wide">
@@ -406,7 +406,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
                     {count}
                   </span>
                 </span>
-                <span className={cn('text-[10px] font-normal', ativa ? 'text-white/70' : 'text-mt-muted')}>
+                <span className={cn('text-[10px] font-normal', ativa ? 'text-white/70' : 'text-mt-apoio')}>
                   {PRAZO_SUBLABEL[pz]}
                 </span>
               </button>
@@ -449,7 +449,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
             <>
               <div className="flex items-center gap-3 pt-1">
                 <span className="h-px flex-1 bg-mt-border" />
-                <span className="text-[11px] font-medium uppercase tracking-wide text-mt-muted">
+                <span className="text-rotulo font-medium uppercase text-mt-apoio">
                   Concluídos ({concluidos.length})
                 </span>
                 <span className="h-px flex-1 bg-mt-border" />
@@ -473,7 +473,7 @@ export function ObjetivosLista({ objetivos: objs, percentualLivre, zona, momento
           {/* Botão adicionar — sempre visível */}
           <button
             onClick={() => handleAbrirModal(tabAtiva)}
-            className="flex w-full items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-mt-border bg-transparent px-6 py-3 text-sm font-medium text-mt-muted transition-colors hover:border-solid hover:border-mt-green hover:text-mt-green"
+            className="flex w-full items-center justify-center gap-1.5 rounded-elemento border border-dashed border-mt-border bg-transparent px-6 py-3 text-sm font-medium text-mt-apoio transition-colors hover:border-solid hover:border-mt-green hover:text-mt-green"
           >
             <Plus size={15} />
             Adicionar objetivo
@@ -513,12 +513,12 @@ function EmptyState({ prazo }: { prazo: PrazoObjetivo }) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-2.5 rounded-card border-[0.5px] border-mt-border bg-white px-6 py-10 text-center shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-      <div className="flex size-10 items-center justify-center rounded-xl bg-gray-200 text-mt-muted">
+    <div className="flex flex-col items-center gap-2.5 rounded-card border-linha border-mt-border bg-white px-6 py-10 text-center shadow-mt-1">
+      <div className="flex size-10 items-center justify-center rounded-xl bg-gray-200 text-mt-apoio">
         <Target size={18} />
       </div>
-      <p className="m-0 text-sm font-medium text-mt-muted">{titulos[prazo]}</p>
-      <p className="m-0 max-w-[280px] font-editorial text-sm italic leading-loose text-mt-muted">
+      <p className="m-0 text-sm font-medium text-mt-apoio">{titulos[prazo]}</p>
+      <p className="m-0 max-w-[280px] font-editorial text-sm leading-loose text-mt-apoio">
         {EMPTY_SUBTEXTO[prazo]}
       </p>
     </div>
@@ -534,7 +534,7 @@ function Toast({ mensagem, visivel }: { mensagem: string; visivel: boolean }) {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed bottom-7 left-1/2 z-[200] whitespace-nowrap rounded-badge bg-mt-green-dark px-5 py-2.5 text-[13px] font-medium text-white shadow-[0_4px_16px_rgba(0,0,0,0.15)] transition-[opacity,transform] duration-200"
+      className="pointer-events-none fixed bottom-7 left-1/2 z-[200] whitespace-nowrap rounded-badge bg-mt-green-dark px-5 py-2.5 text-[13px] font-medium text-white shadow-mt-2 transition-[opacity,transform] duration-200"
       style={{
         transform: visivel ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(16px)',
         opacity: visivel ? 1 : 0,

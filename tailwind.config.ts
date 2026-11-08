@@ -9,21 +9,51 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      // Sistema visual da LP /trilha, que é o padrão do front inteiro. Os
+      // valores moram no :root de app/globals.css (cópia do :root da LP);
+      // aqui só viram classes. Componente novo usa token, nunca número solto.
       fontFamily: {
         sans:      ['DM Sans', 'sans-serif'],
-        heading:   ['Space Grotesk', 'sans-serif'],
-        editorial: ['Lora', 'serif'],
-        // Títulos do funil (quiz → VSL), no padrão da LP /trilha. Carregada
-        // só em app/quiz/layout.tsx — a plataforma não usa.
+        // `heading` e `satoshi` são a mesma fonte: `heading` ficou como alias
+        // para os componentes que já o usavam (era Space Grotesk).
+        heading:   ['Satoshi', 'DM Sans', 'sans-serif'],
         satoshi:   ['Satoshi', 'DM Sans', 'sans-serif'],
+        editorial: ['Lora', 'Georgia', 'serif'],
       },
-      // Sistema de superfícies da LP /trilha (:root de public/trilha/index.html).
-      // Mesmos valores, para o quiz e a LP serem a mesma página aos olhos de
-      // quem chega do anúncio.
+      // Escala tipográfica da LP. Títulos em Satoshi 500 minúsculo; o peso 700
+      // é só para o destaque (<em>) e títulos de card.
+      fontSize: {
+        // H1 de hero (.hero-headline)
+        display:        ['clamp(34px, 5.4vw, 64px)', { lineHeight: '1.08', letterSpacing: '-0.02em' }],
+        // H1 de página e H2 de seção (h2 da LP: 36px, 28px no mobile)
+        titulo:         ['clamp(28px, 3.2vw, 36px)', { lineHeight: '1.15', letterSpacing: '-0.02em' }],
+        // Título de bloco dentro da página (h3 de painel)
+        subtitulo:      ['24px', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
+        // Título de card (h3 de card)
+        'titulo-card':  ['19px', { lineHeight: '1.3', letterSpacing: '-0.01em' }],
+        // Apoio em Lora (.hero-sub e afins)
+        apoio:          ['19px', { lineHeight: '1.6' }],
+        // Texto corrido (body da LP)
+        corpo:          ['17px', { lineHeight: '1.75' }],
+        // Rótulo de seção (.sec-label): caixa alta espaçada
+        rotulo:         ['11px', { lineHeight: '1.4', letterSpacing: '0.09em' }],
+      },
+      spacing: {
+        card:      'var(--pad-card)',
+        'card-lg': 'var(--pad-card-lg)',
+        painel:    'var(--pad-painel)',
+        titulo:    'var(--espaco-titulo)',
+        pilha:     'var(--gap-pilha)',
+        grade:     'var(--gap-grade)',
+      },
+      borderWidth: {
+        // A hairline da LP (--linha). Contorno e divisória são sempre ela.
+        linha: '0.5px',
+      },
       boxShadow: {
-        'mt-1': '0 14px 30px -20px rgba(42, 63, 69, .28)',
-        'mt-2': '0 18px 36px -20px rgba(42, 63, 69, .36)',
-        'mt-3': '0 30px 60px -30px rgba(42, 63, 69, .45), 0 8px 20px -12px rgba(42, 63, 69, .2)',
+        'mt-1': 'var(--sombra-1)',
+        'mt-2': 'var(--sombra-2)',
+        'mt-3': 'var(--sombra-3)',
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -72,14 +102,17 @@ const config: Config = {
         // AA como cor de texto; este dá 4.7:1 no off-white e 5.3:1 no branco.
         'mt-apoio':      '#5B6F73',
         'mt-green-sup':  '#E8F5F1',
+        // Linha e contorno sobre o verde escuro (a hairline do fundo claro some ali).
+        'mt-linha-escura': '#3d5a62',
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
-        card:  '16px',
-        badge: '20px',
-        painel: '24px',
+        elemento: 'var(--raio-sm)',
+        card:     'var(--raio-card)',
+        painel:   'var(--raio-painel)',
+        badge:    '20px',
       },
       animation: {
         'check-spring': 'check-spring 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',

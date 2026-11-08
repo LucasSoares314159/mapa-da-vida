@@ -20,25 +20,25 @@ export function PaginaLegal({
           Mind<span className="text-mt-green">Trail</span>
         </Link>
 
-        <h1 className="mt-8 font-heading text-3xl font-medium text-mt-green-dark">{titulo}</h1>
-        <p className="mt-2 text-sm text-mt-muted">Última atualização: {LEGAL_ATUALIZADO_EM}</p>
+        <h1 className="mt-8 font-heading text-titulo font-medium text-mt-green-dark">{titulo}</h1>
+        <p className="mt-2 text-sm text-mt-apoio">Última atualização: {LEGAL_ATUALIZADO_EM}</p>
 
         <div className="mt-8 space-y-8 text-[15px] leading-7 text-zinc-700">{children}</div>
 
-        <footer className="mt-12 border-t border-mt-border pt-6 text-sm leading-6 text-mt-muted">
+        <footer className="mt-12 border-t border-mt-border pt-6 text-sm leading-6 text-mt-apoio">
           <p>
             {EMPRESA.razaoSocial} · CNPJ {EMPRESA.cnpj}
             <br />
             {EMPRESA.endereco}
           </p>
           <nav className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
-            <Link href="/termos-uso" className="text-mt-green hover:underline">
+            <Link href="/termos-uso" className="text-mt-green-dark underline decoration-mt-green underline-offset-4 hover:decoration-2">
               Termos de Uso
             </Link>
-            <Link href="/cancelamento" className="text-mt-green hover:underline">
+            <Link href="/cancelamento" className="text-mt-green-dark underline decoration-mt-green underline-offset-4 hover:decoration-2">
               Cancelamento e Reembolso
             </Link>
-            <Link href="/trilha" className="text-mt-green hover:underline">
+            <Link href="/trilha" className="text-mt-green-dark underline decoration-mt-green underline-offset-4 hover:decoration-2">
               Voltar para a TRILHA
             </Link>
           </nav>
@@ -51,7 +51,7 @@ export function PaginaLegal({
 export function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <section className="space-y-3">
-      <h2 className="font-heading text-lg font-medium text-mt-green-dark">{titulo}</h2>
+      <h2 className="font-heading text-subtitulo font-medium text-mt-green-dark">{titulo}</h2>
       {children}
     </section>
   )
@@ -67,7 +67,7 @@ export function LinkWhatsApp() {
       href={EMPRESA.whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-mt-green underline"
+      className="text-mt-green-dark underline decoration-mt-green underline-offset-4 hover:decoration-2"
     >
       WhatsApp {EMPRESA.whatsapp}
     </a>

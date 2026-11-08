@@ -30,8 +30,7 @@ function LogoutButton() {
     <button
       type="submit"
       disabled={pending}
-      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-colors duration-200 hover:bg-mt-off-white disabled:opacity-60"
-      style={{ color: '#6f8f87' }}
+      className="flex w-full items-center gap-2.5 rounded-full px-3 py-2.5 text-sm text-mt-apoio transition-colors duration-200 hover:bg-mt-off-white hover:text-mt-green-dark disabled:opacity-60"
     >
       <LogOut className="size-4 shrink-0" />
       {pending ? 'Saindo…' : 'Sair'}
@@ -43,13 +42,13 @@ export function Sidebar({ onClose, totalMembros }: Props) {
   const pathname = usePathname()
 
   return (
-    <aside className="flex h-full w-[220px] shrink-0 flex-col bg-white" style={{ borderRight: '0.5px solid #c8d8d2' }}>
+    <aside className="flex h-full w-[220px] shrink-0 flex-col border-r-linha border-mt-border bg-white">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-5" style={{ borderBottom: '0.5px solid #c8d8d2' }}>
+      <div className="flex items-center gap-2.5 border-b-linha border-mt-border px-5 py-5">
         <div className="flex size-7 items-center justify-center rounded-lg bg-mt-green">
           <Map className="size-4 text-white" />
         </div>
-        <span className="font-heading text-[15px] font-medium text-mt-black">Trilha</span>
+        <span className="font-heading text-[17px] font-bold lowercase tracking-[-0.02em] text-mt-green-dark">Trilha</span>
       </div>
 
       {/* Nav */}
@@ -63,10 +62,10 @@ export function Sidebar({ onClose, totalMembros }: Props) {
               href={href}
               onClick={onClose}
               className={cn(
-                'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200',
+                'flex items-center gap-2.5 rounded-full px-3 py-2.5 text-sm font-medium transition-colors duration-200',
                 ativo
-                  ? 'bg-mt-off-white text-mt-green-dark'
-                  : 'text-mt-muted hover:bg-mt-off-white hover:text-mt-green-dark'
+                  ? 'bg-mt-green-sup text-mt-green-dark'
+                  : 'text-mt-apoio hover:bg-mt-off-white hover:text-mt-green-dark'
               )}
             >
               <Icone className="size-4 shrink-0" />
@@ -78,16 +77,16 @@ export function Sidebar({ onClose, totalMembros }: Props) {
         <Link
           href="/mapa/preparacao"
           onClick={onClose}
-          className="mt-2 flex items-center justify-center gap-2 rounded-lg bg-mt-green px-3 py-2.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-mt-green-dark"
+          className="mt-2 flex min-h-11 items-center justify-center gap-2 rounded-full bg-mt-green px-3 py-2.5 text-sm font-medium text-white transition-opacity duration-200 hover:opacity-90"
         >
           + Novo mapa
         </Link>
       </nav>
 
       {/* Footer */}
-      <div className="p-3" style={{ borderTop: '0.5px solid #c8d8d2' }}>
+      <div className="border-t-linha border-mt-border p-3">
         {typeof totalMembros === 'number' && (
-          <div className="flex items-center gap-2 px-3 py-2 text-xs" style={{ color: '#6f8f87' }}>
+          <div className="flex items-center gap-2 px-3 py-2 text-xs text-mt-apoio">
             <Users className="size-3.5 shrink-0" />
             {totalMembros.toLocaleString('pt-BR')} {totalMembros === 1 ? 'membro' : 'membros'}
           </div>

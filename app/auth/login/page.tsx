@@ -13,8 +13,8 @@ export default function LoginPage() {
   const [state, action] = useFormState(login, undefined)
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
-      <Card className="w-full max-w-sm">
+    <div className="flex min-h-screen items-center justify-center bg-mt-off-white px-4">
+      <Card className="w-full max-w-[400px] rounded-painel shadow-mt-3">
         <CardHeader>
           <CardTitle>Entrar</CardTitle>
           <CardDescription>Acesse seu Mapa da Vida</CardDescription>
@@ -39,7 +39,7 @@ export default function LoginPage() {
                 required
               />
               {state?.errors?.email && (
-                <p className="text-xs text-destructive">{state.errors.email[0]}</p>
+                <p className="text-[13px] text-mt-red">{state.errors.email[0]}</p>
               )}
             </div>
 
@@ -48,7 +48,7 @@ export default function LoginPage() {
                 <Label htmlFor="senha">Senha</Label>
                 <Link
                   href="/auth/esqueci-senha"
-                  className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                  className="text-[13px] text-mt-apoio underline decoration-mt-green underline-offset-4 hover:text-mt-green-dark"
                 >
                   Esqueci minha senha
                 </Link>
@@ -62,7 +62,7 @@ export default function LoginPage() {
                 required
               />
               {state?.errors?.senha && (
-                <p className="text-xs text-destructive">{state.errors.senha[0]}</p>
+                <p className="text-[13px] text-mt-red">{state.errors.senha[0]}</p>
               )}
             </div>
           </CardContent>

@@ -103,10 +103,10 @@ export function EditorConteudoModulo({ moduloId, moduloTitulo, blocosIniciais }:
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-8">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="font-heading text-xl font-bold" style={{ color: '#1a2e29' }}>
+          <h1 className="font-heading text-titulo font-medium text-mt-green-dark">
             {moduloTitulo}
           </h1>
-          <p className="text-sm" style={{ color: '#4a6b62' }}>
+          <p className="text-sm text-mt-apoio">
             Edite o conteúdo escrito que os alunos leem nesta aula.
           </p>
         </div>
@@ -114,16 +114,14 @@ export function EditorConteudoModulo({ moduloId, moduloTitulo, blocosIniciais }:
         <div className="flex shrink-0 items-center gap-2">
           <button
             onClick={() => setMostrarPreview((v) => !v)}
-            className="rounded-lg px-4 py-2 text-sm font-medium transition-opacity hover:opacity-80"
-            style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
+            className="rounded-lg px-4 py-2 text-sm font-medium transition-opacity hover:opacity-80 border border-mt-border text-mt-green-dark"
           >
             {mostrarPreview ? 'Editar' : 'Pré-visualizar'}
           </button>
           <button
             onClick={salvar}
             disabled={salvando}
-            className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
-            style={{ backgroundColor: '#57AA8F' }}
+            className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60 bg-mt-green"
           >
             {salvando ? (
               <Loader2 className="size-4 animate-spin" />
@@ -136,19 +134,18 @@ export function EditorConteudoModulo({ moduloId, moduloTitulo, blocosIniciais }:
       </div>
 
       {erro && (
-        <p className="text-sm" style={{ color: '#C05050' }}>
+        <p className="text-sm text-mt-red">
           {erro}
         </p>
       )}
 
       {mostrarPreview ? (
         <div
-          className="rounded-xl px-8 py-10"
-          style={{ border: '0.5px solid #c8d8d2', backgroundColor: '#ffffff' }}
+          className="card-mt px-8 py-10"
         >
           <ConteudoModulo blocos={blocos} />
           {blocos.length === 0 && (
-            <p className="text-sm" style={{ color: '#4a6b62' }}>
+            <p className="text-sm text-mt-apoio">
               Nenhum bloco ainda.
             </p>
           )}
@@ -156,8 +153,7 @@ export function EditorConteudoModulo({ moduloId, moduloTitulo, blocosIniciais }:
       ) : (
         <div className="flex flex-col gap-6">
           <div
-            className="rounded-xl p-4"
-            style={{ border: '0.5px solid #c8d8d2', backgroundColor: '#ffffff' }}
+            className="card-mt p-4"
           >
             <RascunhoComSelecao
               texto={rascunho}
@@ -168,7 +164,7 @@ export function EditorConteudoModulo({ moduloId, moduloTitulo, blocosIniciais }:
 
           {blocos.length > 0 && (
             <div className="flex flex-col gap-4">
-              <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#4a6b62' }}>
+              <span className="text-xs font-semibold uppercase tracking-wide text-mt-apoio">
                 Blocos já formatados
               </span>
               {blocos.map((bloco, index) => (
@@ -187,18 +183,16 @@ export function EditorConteudoModulo({ moduloId, moduloTitulo, blocosIniciais }:
           )}
 
           <div
-            className="flex flex-wrap gap-2 rounded-xl p-4"
-            style={{ border: '1px dashed #c8d8d2' }}
+            className="flex flex-wrap gap-2 rounded-card border border-dashed border-mt-border p-4"
           >
-            <span className="w-full text-xs" style={{ color: '#4a6b62' }}>
+            <span className="w-full text-xs text-mt-apoio">
               Blocos sem texto de origem (imagem, divisor) ou para adicionar do zero:
             </span>
             {TIPOS.map(({ tipo, label }) => (
               <button
                 key={tipo}
                 onClick={() => adicionar(tipo)}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-opacity hover:opacity-70"
-                style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-opacity hover:opacity-70 border border-mt-border text-mt-green-dark"
               >
                 <Plus className="size-3" />
                 {label}
@@ -232,13 +226,11 @@ function BlocoEditor({
 
   return (
     <div
-      className="flex flex-col gap-3 rounded-xl p-4"
-      style={{ border: '0.5px solid #c8d8d2', backgroundColor: '#ffffff' }}
+      className="card-mt flex flex-col gap-3 p-4"
     >
       <div className="flex items-center justify-between">
         <span
-          className="text-xs font-semibold uppercase tracking-wide"
-          style={{ color: '#4a6b62' }}
+          className="text-xs font-semibold uppercase tracking-wide text-mt-apoio"
         >
           {rotulo}
         </span>
@@ -246,8 +238,7 @@ function BlocoEditor({
           <button
             onClick={onMoverCima}
             disabled={!podeSubir}
-            className="flex size-7 items-center justify-center rounded-md transition-opacity disabled:opacity-30"
-            style={{ color: '#4a6b62' }}
+            className="flex size-7 items-center justify-center rounded-md transition-opacity disabled:opacity-30 text-mt-apoio"
             aria-label="Mover para cima"
           >
             <ChevronUp className="size-4" />
@@ -255,16 +246,14 @@ function BlocoEditor({
           <button
             onClick={onMoverBaixo}
             disabled={!podeDescer}
-            className="flex size-7 items-center justify-center rounded-md transition-opacity disabled:opacity-30"
-            style={{ color: '#4a6b62' }}
+            className="flex size-7 items-center justify-center rounded-md transition-opacity disabled:opacity-30 text-mt-apoio"
             aria-label="Mover para baixo"
           >
             <ChevronDown className="size-4" />
           </button>
           <button
             onClick={onRemover}
-            className="flex size-7 items-center justify-center rounded-md transition-opacity hover:opacity-70"
-            style={{ color: '#C05050' }}
+            className="flex size-7 items-center justify-center rounded-md transition-opacity hover:opacity-70 text-mt-red"
             aria-label="Remover bloco"
           >
             <Trash2 className="size-4" />
@@ -278,7 +267,7 @@ function BlocoEditor({
 }
 
 const campoTextoClasse =
-  'w-full rounded-lg px-3 py-2 text-sm outline-none focus:ring-1'
+  'w-full rounded-elemento border border-mt-border bg-white px-3 py-2 text-sm text-mt-black outline-none focus:border-mt-green focus:ring-[3px] focus:ring-mt-green/25'
 
 function CampoBloco({ bloco, onChange }: { bloco: Bloco; onChange: (b: Bloco) => void }) {
   switch (bloco.tipo) {
@@ -290,7 +279,6 @@ function CampoBloco({ bloco, onChange }: { bloco: Bloco; onChange: (b: Bloco) =>
           placeholder="Texto do bloco… (linha em branco separa parágrafos na leitura)"
           rows={10}
           className={campoTextoClasse}
-          style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
         />
       )
 
@@ -300,8 +288,7 @@ function CampoBloco({ bloco, onChange }: { bloco: Bloco; onChange: (b: Bloco) =>
           <select
             value={bloco.nivel}
             onChange={(e) => onChange({ ...bloco, nivel: Number(e.target.value) as 2 | 3 })}
-            className="rounded-lg px-2 py-2 text-sm"
-            style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
+            className="rounded-lg px-2 py-2 text-sm border border-mt-border text-mt-green-dark"
           >
             <option value={2}>H2</option>
             <option value={3}>H3</option>
@@ -311,7 +298,6 @@ function CampoBloco({ bloco, onChange }: { bloco: Bloco; onChange: (b: Bloco) =>
             onChange={(e) => onChange({ ...bloco, texto: e.target.value })}
             placeholder="Texto do título…"
             className={campoTextoClasse}
-            style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
           />
         </div>
       )
@@ -332,8 +318,7 @@ function CampoBloco({ bloco, onChange }: { bloco: Bloco; onChange: (b: Bloco) =>
             value={bloco.icone}
             onChange={(e) => onChange({ ...bloco, icone: e.target.value })}
             placeholder="💡"
-            className="w-14 rounded-lg px-2 py-2 text-center text-sm"
-            style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
+            className="w-14 rounded-lg px-2 py-2 text-center text-sm border border-mt-border text-mt-green-dark"
           />
           <TextareaComFormatacao
             value={bloco.texto}
@@ -341,7 +326,6 @@ function CampoBloco({ bloco, onChange }: { bloco: Bloco; onChange: (b: Bloco) =>
             placeholder="Texto do callout…"
             rows={2}
             className={campoTextoClasse}
-            style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
           />
         </div>
       )
@@ -354,11 +338,11 @@ function CampoBloco({ bloco, onChange }: { bloco: Bloco; onChange: (b: Bloco) =>
               <button
                 key={cor}
                 onClick={() => onChange({ ...bloco, cor })}
-                className="rounded-full px-3 py-1 text-xs font-medium capitalize"
-                style={{
-                  border: bloco.cor === cor ? '1.5px solid #57AA8F' : '1px solid #c8d8d2',
-                  color: bloco.cor === cor ? '#57AA8F' : '#4a6b62',
-                }}
+                className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                  bloco.cor === cor
+                    ? 'border-[1.5px] border-mt-green text-mt-green-dark'
+                    : 'border border-mt-border text-mt-apoio'
+                }`}
               >
                 {cor}
               </button>
@@ -370,7 +354,6 @@ function CampoBloco({ bloco, onChange }: { bloco: Bloco; onChange: (b: Bloco) =>
             placeholder="Texto em destaque…"
             rows={2}
             className={campoTextoClasse}
-            style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
           />
         </div>
       )
@@ -383,7 +366,7 @@ function CampoBloco({ bloco, onChange }: { bloco: Bloco; onChange: (b: Bloco) =>
 
     case 'divisor':
       return (
-        <p className="text-sm" style={{ color: '#4a6b62' }}>
+        <p className="text-sm text-mt-apoio">
           Uma linha divisória entre seções. Nada para preencher.
         </p>
       )
@@ -397,14 +380,12 @@ function CampoBloco({ bloco, onChange }: { bloco: Bloco; onChange: (b: Bloco) =>
             placeholder="Texto da citação…"
             rows={2}
             className={campoTextoClasse}
-            style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
           />
           <input
             value={bloco.fonte ?? ''}
             onChange={(e) => onChange({ ...bloco, fonte: e.target.value })}
             placeholder="Fonte (opcional)"
             className={campoTextoClasse}
-            style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
           />
         </div>
       )
@@ -427,12 +408,10 @@ function ListaDeItens({
             onChange={(e) => onChange(itens.map((it, j) => (j === i ? e.target.value : it)))}
             placeholder="Item…"
             className={campoTextoClasse}
-            style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
           />
           <button
             onClick={() => onChange(itens.filter((_, j) => j !== i))}
-            className="flex size-8 shrink-0 items-center justify-center rounded-md transition-opacity hover:opacity-70"
-            style={{ color: '#C05050' }}
+            className="flex size-8 shrink-0 items-center justify-center rounded-md transition-opacity hover:opacity-70 text-mt-red"
             aria-label="Remover item"
           >
             <Trash2 className="size-3.5" />
@@ -441,8 +420,7 @@ function ListaDeItens({
       ))}
       <button
         onClick={() => onChange([...itens, ''])}
-        className="flex w-fit items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-70"
-        style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
+        className="flex w-fit items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-70 border border-mt-border text-mt-green-dark"
       >
         <Plus className="size-3" />
         Item
@@ -489,8 +467,7 @@ function CampoImagem({
           <img src={bloco.url} alt="" className="max-h-48 w-full rounded-lg object-cover" />
           <button
             onClick={() => onChange({ ...bloco, url: '' })}
-            className="flex w-fit items-center gap-1.5 text-xs font-medium transition-opacity hover:opacity-70"
-            style={{ color: '#C05050' }}
+            className="flex w-fit items-center gap-1.5 text-xs font-medium transition-opacity hover:opacity-70 text-mt-red"
           >
             <Trash2 className="size-3.5" />
             Remover imagem
@@ -500,8 +477,7 @@ function CampoImagem({
         <button
           onClick={() => inputRef.current?.click()}
           disabled={enviando}
-          className="flex items-center justify-center gap-2 rounded-lg py-6 text-sm font-medium transition-opacity hover:opacity-70 disabled:opacity-60"
-          style={{ border: '1px dashed #c8d8d2', color: '#4a6b62' }}
+          className="flex items-center justify-center gap-2 rounded-card border border-dashed border-mt-border py-6 text-sm font-medium text-mt-apoio transition-colors hover:border-mt-green hover:text-mt-green-dark disabled:opacity-60"
         >
           {enviando ? (
             <Loader2 className="size-4 animate-spin" />
@@ -521,7 +497,7 @@ function CampoImagem({
       />
 
       {erro && (
-        <p className="text-xs" style={{ color: '#C05050' }}>
+        <p className="text-xs text-mt-red">
           {erro}
         </p>
       )}
@@ -531,7 +507,6 @@ function CampoImagem({
         onChange={(e) => onChange({ ...bloco, legenda: e.target.value })}
         placeholder="Legenda (opcional)"
         className={campoTextoClasse}
-        style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
       />
     </div>
   )
@@ -561,17 +536,16 @@ function CampoEmbed({
         placeholder='Cole a URL ou o <iframe src="https://link.excalidraw.com/readonly/…">'
         rows={2}
         className={campoTextoClasse}
-        style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
       />
 
       {bloco.url && !urlValida && (
-        <p className="text-xs" style={{ color: '#C05050' }}>
+        <p className="text-xs text-mt-red">
           URL não aceita. Só https de: {HOSTS_EMBED.join(', ')}.
         </p>
       )}
 
       <div className="flex items-center gap-2">
-        <label className="text-xs" style={{ color: '#4a6b62' }}>
+        <label className="text-xs text-mt-apoio">
           Altura (px)
         </label>
         <input
@@ -580,8 +554,7 @@ function CampoEmbed({
           max={1200}
           value={bloco.altura ?? ALTURA_EMBED_PADRAO}
           onChange={(e) => onChange({ ...bloco, altura: Number(e.target.value) })}
-          className="w-24 rounded-lg px-2 py-1.5 text-sm"
-          style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
+          className="w-24 rounded-lg px-2 py-1.5 text-sm border border-mt-border text-mt-green-dark"
         />
       </div>
 
@@ -590,7 +563,6 @@ function CampoEmbed({
         onChange={(e) => onChange({ ...bloco, legenda: e.target.value })}
         placeholder="Legenda (opcional)"
         className={campoTextoClasse}
-        style={{ border: '1px solid #c8d8d2', color: '#1a2e29' }}
       />
 
       {urlValida && (
@@ -600,8 +572,7 @@ function CampoEmbed({
           loading="lazy"
           sandbox="allow-scripts allow-same-origin allow-popups"
           referrerPolicy="no-referrer"
-          className="w-full rounded-lg"
-          style={{ height: 240, border: '1px solid #c8d8d2' }}
+          className="h-60 w-full rounded-elemento border border-mt-border"
         />
       )}
     </div>

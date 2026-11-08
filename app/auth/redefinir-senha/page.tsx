@@ -12,8 +12,8 @@ export default function RedefinirSenhaPage() {
   const [state, action] = useFormState(redefinirSenha, undefined)
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
-      <Card className="w-full max-w-sm">
+    <div className="flex min-h-screen items-center justify-center bg-mt-off-white px-4">
+      <Card className="w-full max-w-[400px] rounded-painel shadow-mt-3">
         <CardHeader>
           <CardTitle>Redefinir senha</CardTitle>
           <CardDescription>Escolha uma nova senha para sua conta.</CardDescription>
@@ -29,12 +29,12 @@ export default function RedefinirSenhaPage() {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="senha">Nova senha</Label>
               <Input id="senha" name="senha" type="password" placeholder="••••••••" autoComplete="new-password" required />
-              {state?.errors?.senha && <p className="text-xs text-destructive">{state.errors.senha[0]}</p>}
+              {state?.errors?.senha && <p className="text-[13px] text-mt-red">{state.errors.senha[0]}</p>}
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="confirmarSenha">Confirmar nova senha</Label>
               <Input id="confirmarSenha" name="confirmarSenha" type="password" placeholder="••••••••" autoComplete="new-password" required />
-              {state?.errors?.confirmarSenha && <p className="text-xs text-destructive">{state.errors.confirmarSenha[0]}</p>}
+              {state?.errors?.confirmarSenha && <p className="text-[13px] text-mt-red">{state.errors.confirmarSenha[0]}</p>}
             </div>
           </CardContent>
 

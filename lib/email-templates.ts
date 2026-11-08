@@ -6,11 +6,15 @@ import ObjetivoConcluido from '@/emails/objetivo-concluido'
 import MomentoRevisao from '@/emails/momento-revisao'
 import AcessoPlataforma from '@/emails/acesso-plataforma'
 
+// Exportado porque a página /compra/sucesso mostra o assunto para a pessoa
+// procurar na caixa de entrada: mudou aqui, muda lá.
+export const ASSUNTO_ACESSO_PLATAFORMA = 'Pagamento confirmado: crie sua conta na MindTrail'
+
 export async function templateAcessoPlataforma(opts: {
   urlCadastro: string
   validadeHoras: number
 }): Promise<{ subject: string; html: string }> {
-  const subject = 'Pagamento confirmado: crie sua conta na MindTrail'
+  const subject = ASSUNTO_ACESSO_PLATAFORMA
   const html = await render(
     AcessoPlataforma({
       urlCadastro: opts.urlCadastro,

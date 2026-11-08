@@ -4,6 +4,7 @@ import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { ArrowLeft, BookOpen, FileText, Sparkles } from 'lucide-react'
+import { buttonVariants } from '@/components/ui/button'
 import { RevelacaoDiagnostico } from './RevelacaoDiagnostico'
 import type { Diagnostico } from '@/lib/analise'
 import type { Mapa } from '@/types'
@@ -21,7 +22,7 @@ const MapaFlow = dynamic(() => import('./MapaFlow').then((m) => m.MapaFlow), {
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <div className="size-6 animate-spin rounded-full border-2 border-mt-green border-t-transparent" />
-        <p className="text-sm text-mt-muted">Desenhando seu mapa…</p>
+        <p className="text-sm text-mt-apoio">Desenhando seu mapa…</p>
       </div>
     </div>
   ),
@@ -41,31 +42,22 @@ export function RevelacaoMapa({ mapa, diagnostico }: Props) {
     <div>
       {/* Header sticky — permanece visível durante o scroll */}
       <header
-        className="sticky top-0 z-50 bg-white"
-        style={{ borderBottom: '0.5px solid #c8d8d2' }}
+        className="sticky top-0 z-50 bg-white border-b-linha border-mt-border"
       >
         <div
-          className="mx-auto grid max-w-5xl items-center px-5"
-          style={{ gridTemplateColumns: '1fr auto 1fr', height: 52 }}
+          className="mx-auto grid h-[52px] max-w-5xl grid-cols-[1fr_auto_1fr] items-center px-5"
         >
           {/* Botão Dashboard */}
           <Link
             href="/dashboard"
-            className="flex items-center gap-1.5 text-sm font-medium transition-colors"
-            style={{ color: '#57AA8F' }}
+            className="flex items-center gap-1.5 text-sm font-medium text-mt-green-dark transition-colors hover:text-mt-green"
           >
             <ArrowLeft className="size-4" />
             Dashboard
           </Link>
 
           {/* Título central */}
-          <h1
-            className="text-center text-sm font-semibold whitespace-nowrap"
-            style={{
-              fontFamily: 'var(--font-space-grotesk), Space Grotesk, sans-serif',
-              color: '#2A3F45',
-            }}
-          >
+          <h1 className="whitespace-nowrap text-center font-heading text-[17px] font-bold text-mt-green-dark">
             Mapa da Vida
           </h1>
 
@@ -74,13 +66,7 @@ export function RevelacaoMapa({ mapa, diagnostico }: Props) {
             {visualizacao === 'diagnostico' ? (
               <button
                 onClick={() => setVisualizacao('mapa')}
-                className="flex items-center gap-1.5 text-xs font-medium transition-opacity hover:opacity-80"
-                style={{
-                  backgroundColor: '#2A3F45',
-                  color: '#EDF2EF',
-                  borderRadius: 8,
-                  padding: '6px 12px',
-                }}
+                className="flex items-center gap-1.5 rounded-full bg-mt-green-dark px-3 py-1.5 text-xs font-medium text-mt-off-white transition-opacity hover:opacity-90"
               >
                 <Sparkles className="size-3.5" />
                 Ver mapa completo
@@ -88,13 +74,7 @@ export function RevelacaoMapa({ mapa, diagnostico }: Props) {
             ) : (
               <Link
                 href={`/diagnostico/${mapa.id}`}
-                className="flex items-center gap-1.5 text-xs font-medium transition-opacity hover:opacity-80"
-                style={{
-                  backgroundColor: '#2A3F45',
-                  color: '#EDF2EF',
-                  borderRadius: 8,
-                  padding: '6px 12px',
-                }}
+                className="flex items-center gap-1.5 rounded-full bg-mt-green-dark px-3 py-1.5 text-xs font-medium text-mt-off-white transition-opacity hover:opacity-90"
               >
                 <FileText className="size-3.5" />
                 Ver diagnóstico
@@ -116,7 +96,7 @@ export function RevelacaoMapa({ mapa, diagnostico }: Props) {
           {/* Altura explícita: MapaFlow se dimensiona com height:100%, que
               resolve para zero dentro de um pai sem altura definida — era o que
               deixava o fluxograma invisível. */}
-          <div style={{ height: 'calc(100vh - 52px - 164px)', minHeight: 320 }}>
+          <div className="h-[calc(100vh-52px-164px)] min-h-[320px]">
             <MapaFlow mapa={mapa} minimal />
           </div>
 
@@ -124,20 +104,12 @@ export function RevelacaoMapa({ mapa, diagnostico }: Props) {
               o diagnóstico completo ficava num link de 12px no header, e não
               havia nenhuma rota de volta para o conteúdo da Trilha. */}
           <div
-            className="flex flex-col gap-3 px-6 py-6"
-            style={{ borderTop: '0.5px solid #c8d8d2', backgroundColor: '#fff' }}
+            className="flex flex-col gap-3 px-6 py-6 border-t-linha border-mt-border bg-white"
           >
             <div className="mx-auto flex w-full max-w-md flex-col gap-3">
               <Link
                 href={`/diagnostico/${mapa.id}`}
-                className="flex items-center justify-center gap-2 text-white transition-opacity hover:opacity-90"
-                style={{
-                  backgroundColor: '#57AA8F',
-                  borderRadius: 10,
-                  padding: '16px 24px',
-                  fontSize: 16,
-                  fontWeight: 500,
-                }}
+                className={buttonVariants({ size: 'lg' })}
               >
                 <FileText className="size-4" />
                 Ver diagnóstico completo
@@ -145,15 +117,7 @@ export function RevelacaoMapa({ mapa, diagnostico }: Props) {
 
               <Link
                 href="/content"
-                className="flex items-center justify-center gap-2 transition-opacity hover:opacity-80"
-                style={{
-                  border: '1.5px solid #57AA8F',
-                  color: '#2A3F45',
-                  borderRadius: 10,
-                  padding: '14px 24px',
-                  fontSize: 15,
-                  fontWeight: 500,
-                }}
+                className={buttonVariants({ variant: 'outline', size: 'lg' })}
               >
                 <BookOpen className="size-4" />
                 Ir para o conteúdo da Trilha

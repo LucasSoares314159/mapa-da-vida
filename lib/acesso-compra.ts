@@ -6,7 +6,7 @@ import { templateAcessoPlataforma } from '@/lib/email-templates'
 const TOKEN_BYTES = 32
 const DEFAULT_TTL_HOURS = 7 * 24
 
-function getTokenTtlHours(): number {
+export function getTokenTtlHours(): number {
   const configured = Number(process.env.ACCESS_LINK_TTL_HOURS ?? DEFAULT_TTL_HOURS)
   return Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_TTL_HOURS
 }

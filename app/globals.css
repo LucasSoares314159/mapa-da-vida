@@ -1,4 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Space+Grotesk:wght@300;400;500&family=Lora:ital,wght@0,400;1,400&display=swap');
+/* Sistema visual da plataforma = sistema da LP /trilha (public/trilha/index.html).
+   Satoshi nos títulos (Fontshare: não está no Google Fonts), DM Sans no texto,
+   Lora no apoio. Lora em itálico fica só para depoimento — voz do aluno. */
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,8 +11,36 @@
 @layer base {
   :root {
     --font-body:      'DM Sans', sans-serif;
-    --font-heading:   'Space Grotesk', sans-serif;
-    --font-editorial: 'Lora', serif;
+    --font-heading:   'Satoshi', 'DM Sans', sans-serif;
+    --font-editorial: 'Lora', Georgia, serif;
+
+    /* ===== SISTEMA DE SUPERFÍCIES — cópia do :root da LP =====
+       Os componentes referenciam pelos tokens do Tailwind (rounded-card,
+       p-card, gap-pilha, shadow-mt-1…), que apontam para estas variáveis.
+       Regras (as mesmas da LP):
+       · card = superfície branca (ou mt-green-sup) sobre fundo de seção:
+         rounded-card, border-linha, shadow-mt-1, p-card / p-card-lg
+       · painel = superfície que contém outros cards ou é o destaque da tela:
+         rounded-painel, shadow-mt-3 (ou mt-1 se contém cards), p-painel
+       · elemento dentro de card/painel (card aninhado, ícone, campo):
+         rounded-elemento, sem sombra — sombra dentro de sombra vira ruído
+       · superfície escura sobre fundo escuro: sem borda
+       · divisórias e contornos: sempre border-linha (hairline). Traço de 2px só
+         em ilustração e indicador de estado (aba ativa, foco)
+       · título de seção → primeiro conteúdo: mb-titulo
+       · cards empilhados: gap-pilha · cards lado a lado: gap-grade */
+    --raio-sm: 12px;
+    --raio-card: 16px;
+    --raio-painel: 24px;
+    --sombra-1: 0 14px 30px -20px rgba(42, 63, 69, .28);
+    --sombra-2: 0 18px 36px -20px rgba(42, 63, 69, .36);
+    --sombra-3: 0 30px 60px -30px rgba(42, 63, 69, .45), 0 8px 20px -12px rgba(42, 63, 69, .2);
+    --pad-card: 24px;
+    --pad-card-lg: 32px;
+    --pad-painel: 48px;
+    --espaco-titulo: 40px;
+    --gap-pilha: 12px;
+    --gap-grade: 24px;
 
     --background:           145 19% 94%;
     --foreground:           180 11% 5%;
@@ -16,20 +48,33 @@
     --card-foreground:      180 11% 5%;
     --popover:              0 0% 100%;
     --popover-foreground:   180 11% 5%;
-    --primary:              163 50% 45%;
+    --primary:              160 33% 50%;
     --primary-foreground:   0 0% 100%;
-    --secondary:            145 19% 94%;
-    --secondary-foreground: 191 24% 22%;
+    --secondary:            161 41% 94%;
+    --secondary-foreground: 193 24% 22%;
     --muted:                152 20% 86%;
-    --muted-foreground:     168 13% 50%;
-    --accent:               152 20% 86%;
-    --accent-foreground:    191 24% 22%;
-    --destructive:          0 41% 53%;
+    --muted-foreground:     190 12% 40%;
+    --accent:               145 19% 94%;
+    --accent-foreground:    193 24% 22%;
+    --destructive:          0 47% 53%;
     --destructive-foreground: 0 0% 100%;
-    --border:               160 16% 82%;
-    --input:                160 16% 82%;
-    --ring:                 163 50% 45%;
-    --radius:               0.625rem;
+    /* = #c8d8d2, a --borda da LP */
+    --border:               158 18% 81%;
+    --input:                158 18% 81%;
+    --ring:                 160 33% 50%;
+    --radius:               12px;
+  }
+
+  /* Mobile: os mesmos recuos da LP abaixo de 640px. */
+  @media (max-width: 640px) {
+    :root {
+      --raio-painel: 20px;
+      --pad-card: 20px;
+      --pad-card-lg: 24px;
+      --pad-painel: 32px 20px;
+      --espaco-titulo: 32px;
+      --gap-grade: 16px;
+    }
   }
 
   * {
@@ -42,17 +87,41 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2, h3 {
+  /* Títulos: Satoshi minúsculo, como na LP. O minúsculo vem do CSS — o texto-
+     fonte, o <title> e o leitor de tela seguem com a grafia normal. Nome
+     próprio ou sigla que não pode virar minúsculo: `normal-case` no elemento.
+     A cor não entra na base: título sobre fundo escuro herda o claro do pai, e
+     uma cor padrão aqui o apagaria sem aviso. */
+  h1, h2, h3, h4 {
     font-family: var(--font-heading);
+    font-weight: 500;
+    text-transform: lowercase;
+    letter-spacing: -0.02em;
   }
 }
 
-@layer utilities {
-  .editorial {
-    font-family: var(--font-editorial);
-    font-style: italic;
-    font-size: 15px;
-    line-height: 1.8;
-    color: hsl(191 24% 22%);
+@layer components {
+  /* Rótulo de seção (.sec-label da LP): o único texto em caixa alta do sistema. */
+  .rotulo {
+    @apply font-sans text-rotulo font-medium uppercase text-mt-green;
+  }
+
+  /* Apoio curto (.hero-sub da LP): Lora reta e minúscula, subordinada pelo tom. */
+  .apoio {
+    @apply font-editorial text-apoio lowercase text-mt-apoio;
+  }
+
+  /* Campo de formulário sobre o verde escuro (Mapa conversacional). O foco
+     troca a linha pelo verde; o anel de foco do teclado vem do outline. */
+  .campo-escuro {
+    @apply w-full rounded-elemento border-[1.5px] border-mt-linha-escura bg-white/[0.03] px-3.5 py-[13px] text-sm leading-relaxed text-mt-off-white outline-none transition-colors placeholder:text-mt-off-white/45 focus:border-mt-green;
+  }
+
+  /* Superfícies. Ver as regras no :root. */
+  .card-mt {
+    @apply rounded-card border-linha border-mt-border bg-white shadow-mt-1;
+  }
+  .painel-mt {
+    @apply rounded-painel border-linha border-mt-border bg-white shadow-mt-3;
   }
 }

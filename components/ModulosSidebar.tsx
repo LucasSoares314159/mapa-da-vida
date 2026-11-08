@@ -13,13 +13,10 @@ type Props = {
 export function ModulosSidebar({ modulos, moduloAtualId, concluidas }: Props) {
   return (
     <aside
-      className="hidden lg:flex h-fit w-[260px] shrink-0 flex-col rounded-xl overflow-hidden"
-      style={{ border: '0.5px solid #c8d8d2', backgroundColor: '#ffffff' }}
+      className="card-mt hidden lg:flex h-fit w-[260px] shrink-0 flex-col overflow-hidden"
     >
-      <div className="px-5 py-4" style={{ backgroundColor: '#f0f7f5', borderBottom: '0.5px solid #c8d8d2' }}>
-        <span className="text-sm font-semibold" style={{ color: '#1a2e29' }}>
-          Módulos
-        </span>
+      <div className="px-5 py-4 bg-mt-green-sup border-b-linha border-mt-border">
+        <h2 className="font-heading text-titulo-card font-medium text-mt-green-dark">Módulos</h2>
       </div>
 
       <div>
@@ -34,28 +31,19 @@ export function ModulosSidebar({ modulos, moduloAtualId, concluidas }: Props) {
               className="block transition-opacity hover:opacity-80"
             >
               <div
-                className="flex items-center gap-2.5 px-5 py-3"
-                style={{
-                  backgroundColor: atual ? '#f0f7f5' : 'transparent',
-                  borderBottom: index < modulos.length - 1 ? '0.5px solid #c8d8d2' : 'none',
-                }}
+                className={`flex items-center gap-2.5 px-5 py-3 ${atual ? 'bg-mt-green-sup' : ''} ${
+                  index < modulos.length - 1 ? 'border-b-linha border-mt-border' : ''
+                }`}
               >
                 <span
-                  className="shrink-0 flex size-4 items-center justify-center rounded-full"
-                  style={
-                    concluida
-                      ? { backgroundColor: '#57AA8F' }
-                      : { border: '1.5px solid #c8d8d2' }
-                  }
+                  className={`flex size-4 shrink-0 items-center justify-center rounded-full ${
+                    concluida ? 'bg-mt-green' : 'border-[1.5px] border-mt-border'
+                  }`}
                 >
                   {concluida && <Check className="size-2.5 text-white" strokeWidth={3} />}
                 </span>
                 <span
-                  className="text-sm"
-                  style={{
-                    color: atual ? '#1a2e29' : '#4a6b62',
-                    fontWeight: atual ? 600 : 400,
-                  }}
+                  className={`text-sm ${atual ? 'font-semibold text-mt-green-dark' : 'font-normal text-mt-apoio'}`}
                 >
                   {modulo.titulo}
                 </span>

@@ -64,7 +64,7 @@ export function PainelMetricas({
         </div>
 
         <div className="flex items-center gap-2">
-          {carregando && <span className="text-xs text-mt-muted">atualizando…</span>}
+          {carregando && <span className="text-xs text-mt-apoio">atualizando…</span>}
           <div className="flex gap-1 rounded-lg border border-mt-border bg-mt-surface p-1">
             {PERIODOS.map((p) => (
               <button
@@ -85,10 +85,10 @@ export function PainelMetricas({
         </div>
       </div>
 
-      <p className="text-xs text-mt-muted">{turma.descricao}</p>
+      <p className="text-xs text-mt-apoio">{turma.descricao}</p>
 
       {turma.total === 0 ? (
-        <p className="rounded-lg border border-mt-border bg-mt-surface px-4 py-3 text-sm text-mt-muted">
+        <p className="rounded-lg border border-mt-border bg-mt-surface px-4 py-3 text-sm text-mt-apoio">
           Nenhum aluno nesta turma.
         </p>
       ) : (
@@ -114,7 +114,7 @@ export function PainelMetricas({
 
           {/* Dedicação */}
           <div className="flex flex-col gap-2">
-            <h3 className="text-[11px] font-medium uppercase tracking-wider text-mt-muted">
+            <h3 className="font-sans text-rotulo font-medium uppercase text-mt-apoio">
               Dedicação · retorno e consistência
             </h3>
             <Dedicacao turma={turma} />
@@ -122,7 +122,7 @@ export function PainelMetricas({
 
           {/* Funil */}
           <div className="flex flex-col gap-2">
-            <h3 className="text-[11px] font-medium uppercase tracking-wider text-mt-muted">
+            <h3 className="font-sans text-rotulo font-medium uppercase text-mt-apoio">
               Funil de ativação · cumulativo
             </h3>
             <Funil etapas={turma.funil} />
@@ -131,16 +131,15 @@ export function PainelMetricas({
           {/* Alcance + distribuição, lado a lado */}
           <div className="grid gap-3 lg:grid-cols-2">
             <div className="flex flex-col gap-2">
-              <h3 className="text-[11px] font-medium uppercase tracking-wider text-mt-muted">
+              <h3 className="font-sans text-rotulo font-medium uppercase text-mt-apoio">
                 Alcance · em qualquer ordem
               </h3>
               <div className="flex flex-col gap-1.5 rounded-lg border border-mt-border bg-mt-surface p-4">
                 {turma.alcance.map((a) => (
                   <div key={a.rotulo} className="flex items-baseline justify-between gap-3">
-                    <span className="truncate text-xs text-mt-muted">{a.rotulo}</span>
+                    <span className="truncate text-xs text-mt-apoio">{a.rotulo}</span>
                     <span
-                      className="text-xs font-semibold tabular-nums"
-                      style={{ color: '#1a2e29' }}
+                      className="text-xs font-semibold tabular-nums text-mt-green-dark"
                     >
                       {a.valor}
                     </span>
@@ -150,7 +149,7 @@ export function PainelMetricas({
             </div>
 
             <div className="flex flex-col gap-2">
-              <h3 className="text-[11px] font-medium uppercase tracking-wider text-mt-muted">
+              <h3 className="font-sans text-rotulo font-medium uppercase text-mt-apoio">
                 Onde pararam
               </h3>
               <DistribuicaoModulos itens={turma.distribuicao} />
@@ -176,13 +175,13 @@ function Mini({
   const cor = tom === 'critico' ? '#C05050' : tom === 'alerta' ? '#D4A843' : '#1a2e29'
   return (
     <div className="flex flex-col gap-0.5 rounded-lg border border-mt-border bg-mt-surface px-3 py-2.5">
-      <span className="text-[10px] font-medium uppercase tracking-wider text-mt-muted">
+      <span className="text-[10px] font-medium uppercase tracking-wider text-mt-apoio">
         {rotulo}
       </span>
       <span className="font-heading text-lg font-bold tabular-nums" style={{ color: cor }}>
         {valor}
       </span>
-      {sublabel && <span className="text-[10px] text-mt-muted">{sublabel}</span>}
+      {sublabel && <span className="text-[10px] text-mt-apoio">{sublabel}</span>}
     </div>
   )
 }

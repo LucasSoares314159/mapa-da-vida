@@ -66,7 +66,7 @@ export function SeletorRitmo({
       {aberto && (
         <div
           role="menu"
-          className="absolute left-0 top-full z-20 mt-1.5 flex w-52 flex-col gap-0.5 rounded-xl border border-mt-border bg-white p-1.5 shadow-lg"
+          className="absolute left-0 top-full z-20 mt-1.5 flex w-52 flex-col gap-0.5 rounded-xl border border-mt-border bg-white p-1.5 shadow-mt-2"
         >
           {(Object.keys(RITMOS) as RitmoObjetivo[]).map((chave) => {
             const r = RITMOS[chave]
@@ -89,7 +89,7 @@ export function SeletorRitmo({
                   <PontoStatus tom={r.tom} />
                   {r.label}
                 </span>
-                <span className="pl-[15px] text-[11px] leading-snug text-mt-muted">
+                <span className="pl-[15px] text-[11px] leading-snug text-mt-apoio">
                   {r.descricao}
                 </span>
               </button>

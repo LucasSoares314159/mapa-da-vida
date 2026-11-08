@@ -240,8 +240,7 @@ export function MapaConversa({ userId, ehPrimeiroMapa, pedirPerfil }: Props) {
 
   return (
     <main
-      className="flex min-h-screen flex-col px-6 py-8"
-      style={{ backgroundColor: '#2A3F45' }}
+      className="flex min-h-screen flex-col px-6 py-8 bg-mt-green-dark"
       onKeyDown={(e) => {
         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && podeAvancar) avancar()
       }}
@@ -259,8 +258,7 @@ export function MapaConversa({ userId, ehPrimeiroMapa, pedirPerfil }: Props) {
         {!ehPrimeiroMapa && (
           <Link
             href="/content"
-            className="mb-6 inline-flex items-center gap-1.5 self-start text-sm font-medium transition-opacity hover:opacity-80"
-            style={{ color: '#a8c4bc' }}
+            className="mb-6 inline-flex items-center gap-1.5 self-start text-sm font-medium text-mt-off-white/75 transition-colors hover:text-mt-off-white"
           >
             <ArrowLeft className="size-4" />
             Voltar para a Trilha
@@ -278,10 +276,9 @@ export function MapaConversa({ userId, ehPrimeiroMapa, pedirPerfil }: Props) {
         {/* Retomar rascunho */}
         {rascunhoOferecido && (
           <div
-            className="mb-8 rounded-xl p-5"
-            style={{ border: '0.5px solid #3d5a62', backgroundColor: 'rgba(255,255,255,0.03)' }}
+            className="mb-8 rounded-card bg-white/[0.06] p-card"
           >
-            <p className="mb-4 text-sm" style={{ color: '#EDF2EF' }}>
+            <p className="mb-4 text-sm text-mt-off-white">
               Você já tinha começado este mapa. Quer continuar de onde parou?
             </p>
             <div className="flex gap-3">
@@ -292,13 +289,7 @@ export function MapaConversa({ userId, ehPrimeiroMapa, pedirPerfil }: Props) {
                   setIndice(rascunhoOferecido.indice)
                   setRascunhoOferecido(null)
                 }}
-                className="text-sm font-medium"
-                style={{
-                  backgroundColor: '#57AA8F',
-                  color: '#fff',
-                  borderRadius: 8,
-                  padding: '8px 14px',
-                }}
+                className="min-h-9 rounded-full bg-mt-green px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
               >
                 Continuar
               </button>
@@ -308,8 +299,7 @@ export function MapaConversa({ userId, ehPrimeiroMapa, pedirPerfil }: Props) {
                   limparRascunho()
                   setRascunhoOferecido(null)
                 }}
-                className="text-sm"
-                style={{ color: '#a8c4bc' }}
+                className="text-sm text-mt-off-white/75 underline decoration-mt-green underline-offset-4 hover:text-mt-off-white"
               >
                 Começar de novo
               </button>
@@ -325,19 +315,11 @@ export function MapaConversa({ userId, ehPrimeiroMapa, pedirPerfil }: Props) {
           {passo.tipo === 'pergunta' && (
             <div className="mb-6 flex flex-col gap-1.5">
               <span
-                className="uppercase"
-                style={{ color: '#6f8f87', fontSize: 11, fontWeight: 600, letterSpacing: '1px' }}
+                className="text-rotulo font-medium uppercase text-mt-off-white/70"
               >
                 Pilar {PILARES[passo.pilar].label}
               </span>
-              <span
-                style={{
-                  color: '#57AA8F',
-                  fontSize: 20,
-                  fontWeight: 600,
-                  lineHeight: 1.2,
-                }}
-              >
+              <span className="font-heading text-[20px] font-bold lowercase leading-[1.2] tracking-[-0.02em] text-mt-green">
                 {passo.area}
               </span>
             </div>
@@ -400,15 +382,15 @@ export function MapaConversa({ userId, ehPrimeiroMapa, pedirPerfil }: Props) {
 
           {passo.tipo === 'enviando' && (
             <div className="mt-10 flex flex-col items-center gap-3">
-              <Loader2 className="size-6 animate-spin" style={{ color: '#57AA8F' }} />
-              <p className="text-sm" style={{ color: '#a8c4bc' }}>
+              <Loader2 className="size-6 animate-spin text-mt-green" />
+              <p className="text-sm text-mt-off-white/75">
                 Analisando suas 9 áreas…
               </p>
             </div>
           )}
 
           {erro && passo.tipo !== 'perfil' && (
-            <p role="alert" className="mt-6 text-sm" style={{ color: '#E68A8A' }}>
+            <p role="alert" className="mt-6 text-sm text-[#E68A8A]">
               {erro}
             </p>
           )}
@@ -422,8 +404,7 @@ export function MapaConversa({ userId, ehPrimeiroMapa, pedirPerfil }: Props) {
                 type="button"
                 onClick={() => setIndice((i) => i - 1)}
                 disabled={isPending}
-                className="flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-80"
-                style={{ color: '#a8c4bc' }}
+                className="flex items-center gap-1.5 text-sm font-medium text-mt-off-white/75 transition-colors hover:text-mt-off-white"
               >
                 <ArrowLeft className="size-4" />
                 Voltar
@@ -439,14 +420,7 @@ export function MapaConversa({ userId, ehPrimeiroMapa, pedirPerfil }: Props) {
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="ml-auto flex items-center justify-center gap-2 text-white transition-opacity hover:opacity-90 disabled:opacity-40"
-                  style={{
-                    backgroundColor: '#57AA8F',
-                    borderRadius: 10,
-                    padding: '14px 24px',
-                    fontSize: 15,
-                    fontWeight: 500,
-                  }}
+                  className="ml-auto flex items-center justify-center gap-2 min-h-11 rounded-full bg-mt-green px-6 py-3 text-base font-medium leading-tight text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-mt-off-white disabled:opacity-40"
                 >
                   {passo.tipo === 'contexto'
                     ? 'Começar'

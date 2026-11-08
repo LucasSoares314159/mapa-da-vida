@@ -77,7 +77,7 @@ export function ObjetivoCard({
 
   return (
     <div
-      className={`flex flex-col gap-3 rounded-card border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-[opacity,border-color,background] duration-300 ${
+      className={`flex flex-col gap-3 rounded-card border p-card shadow-mt-1 transition-[opacity,border-color,background] duration-300 ${
         concluido ? 'border-[#d4e8df] bg-[#f9fdfb] opacity-[0.58]' : 'border-[#e2ece8] bg-white'
       }`}
     >
@@ -100,7 +100,7 @@ export function ObjetivoCard({
               if (e.key === 'ArrowDown') { e.preventDefault(); onMoverTeclado(1) }
             }}
             disabled={isProcessing}
-            className="mt-0.5 flex size-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-mt-border transition-colors hover:bg-mt-off-white hover:text-mt-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mt-green active:cursor-grabbing disabled:cursor-not-allowed"
+            className="mt-0.5 flex size-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-mt-border transition-colors hover:bg-mt-off-white hover:text-mt-apoio focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mt-green active:cursor-grabbing disabled:cursor-not-allowed"
           >
             <GripVertical size={14} />
           </button>
@@ -145,7 +145,7 @@ export function ObjetivoCard({
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <span
             className={`text-[15px] leading-snug transition-colors duration-300 ${
-              concluido ? 'text-mt-muted line-through' : 'text-mt-black'
+              concluido ? 'text-mt-apoio line-through' : 'text-mt-black'
             }`}
           >
             {objetivo.texto}
@@ -157,7 +157,7 @@ export function ObjetivoCard({
           {(objetivo.data_alvo || concluido) && (
             <div
               className={`flex items-center gap-1 text-[11px] ${
-                atrasado ? 'font-medium text-mt-red' : 'text-mt-muted'
+                atrasado ? 'font-medium text-mt-red' : 'text-mt-apoio'
               }`}
             >
               <CalendarDays size={11} />
@@ -196,8 +196,7 @@ export function ObjetivoCard({
             {!concluido && possivelComparacao && (
               <span
                 title="O radar de coerência indicou que esse objetivo pode ser fruto de comparação."
-                className="rounded-badge border border-mt-red px-2.5 py-[3px] text-[11px] text-mt-red"
-                style={{ background: 'rgba(192,80,80,0.1)' }}
+                className="rounded-badge border border-mt-red bg-mt-red/10 px-2.5 py-[3px] text-[11px] text-mt-red"
               >
                 Fruto de comparação?
               </span>
@@ -205,8 +204,7 @@ export function ObjetivoCard({
 
             {concluido && (
               <span
-                className="rounded-badge border px-2.5 py-[3px] text-[11px]"
-                style={{ border: '1px solid #a8d5c2', color: '#3d8f72', background: '#f0faf5' }}
+                className="rounded-badge border border-mt-green/40 bg-mt-green-sup px-2.5 py-[3px] text-[11px] text-[#2f7a60]"
               >
                 Concluído
               </span>
@@ -214,8 +212,7 @@ export function ObjetivoCard({
 
             {objetivo.status === 'pausado' && (
               <span
-                className="rounded-badge border px-2.5 py-[3px] text-[11px]"
-                style={{ border: '1px solid #b88a30', color: '#b88a30', background: 'rgba(212,168,67,0.15)' }}
+                className="rounded-badge border border-[#b88a30] bg-mt-yellow/15 px-2.5 py-[3px] text-[11px] text-[#8a6620]"
               >
                 Pausado
               </span>
@@ -232,7 +229,7 @@ export function ObjetivoCard({
               disabled={isProcessing}
               aria-label={`Pausar: ${objetivo.texto}`}
               title="Pausar"
-              className="flex size-7 items-center justify-center rounded-md text-mt-muted transition-colors hover:bg-mt-off-white hover:text-mt-black disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              className="flex size-7 items-center justify-center rounded-md text-mt-apoio transition-colors hover:bg-mt-off-white hover:text-mt-black disabled:cursor-not-allowed disabled:hover:bg-transparent"
             >
               <Pause size={13} />
             </button>
@@ -253,7 +250,7 @@ export function ObjetivoCard({
             disabled={isProcessing}
             aria-label={`Editar: ${objetivo.texto}`}
             title="Editar"
-            className="flex size-7 items-center justify-center rounded-md text-mt-muted transition-colors hover:bg-mt-off-white hover:text-mt-black disabled:cursor-not-allowed disabled:hover:bg-transparent"
+            className="flex size-7 items-center justify-center rounded-md text-mt-apoio transition-colors hover:bg-mt-off-white hover:text-mt-black disabled:cursor-not-allowed disabled:hover:bg-transparent"
           >
             <Pencil size={13} />
           </button>
@@ -263,13 +260,13 @@ export function ObjetivoCard({
               disabled={isProcessing}
               aria-label={`Arquivar: ${objetivo.texto}`}
               title="Arquivar"
-              className="flex size-7 items-center justify-center rounded-md text-mt-muted transition-colors hover:bg-red-50 hover:text-mt-red disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              className="flex size-7 items-center justify-center rounded-md text-mt-apoio transition-colors hover:bg-red-50 hover:text-mt-red disabled:cursor-not-allowed disabled:hover:bg-transparent"
             >
               <Trash2 size={13} />
             </button>
             {confirmandoArquivar && (
-              <div className="absolute right-0 top-full z-10 mt-1 flex w-40 flex-col gap-2 rounded-lg border border-mt-border bg-white px-3 py-2 shadow-lg">
-                <p className="text-[11px] leading-snug text-mt-muted">Arquivar este objetivo?</p>
+              <div className="absolute right-0 top-full z-10 mt-1 flex w-40 flex-col gap-2 rounded-lg border border-mt-border bg-white px-3 py-2 shadow-mt-2">
+                <p className="text-[11px] leading-snug text-mt-apoio">Arquivar este objetivo?</p>
                 <div className="flex gap-1.5">
                   <button
                     onClick={() => { onArquivar(objetivo.id); setConfirmandoArquivar(false) }}
@@ -279,7 +276,7 @@ export function ObjetivoCard({
                   </button>
                   <button
                     onClick={() => setConfirmandoArquivar(false)}
-                    className="flex-1 rounded-md border border-mt-border py-1 text-[11px] font-medium text-mt-muted transition-colors hover:bg-mt-off-white"
+                    className="flex-1 rounded-md border border-mt-border py-1 text-[11px] font-medium text-mt-apoio transition-colors hover:bg-mt-off-white"
                   >
                     Cancelar
                   </button>

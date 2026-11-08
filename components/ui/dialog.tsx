@@ -24,7 +24,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+      'fixed inset-0 z-50 bg-mt-green-dark/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
       className
     )}
     {...props}
@@ -44,7 +44,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed left-1/2 top-1/2 z-50 flex max-h-[85vh] w-[calc(100%-2.5rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-card bg-white shadow-[0_8px_32px_rgba(0,0,0,0.12)] sm:max-w-[560px]',
+        'fixed left-1/2 top-1/2 z-50 flex max-h-[85vh] w-[calc(100%-2.5rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-painel bg-white shadow-mt-3 sm:max-w-[560px]',
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
         className
       )}
@@ -53,7 +53,7 @@ const DialogContent = React.forwardRef<
       {children}
       {!semBotaoFechar && (
         <DialogPrimitive.Close
-          className="absolute right-4 top-4 flex size-8 items-center justify-center rounded-md text-mt-muted transition-colors hover:bg-mt-off-white hover:text-mt-black focus:outline-none focus-visible:ring-2 focus-visible:ring-mt-green"
+          className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-full text-mt-apoio transition-colors hover:bg-mt-off-white hover:text-mt-green-dark focus:outline-none focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-mt-green-dark"
           aria-label="Fechar"
         >
           <X size={16} />
@@ -78,7 +78,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-lg font-medium text-mt-black', className)}
+    className={cn('font-heading text-subtitulo font-medium lowercase text-mt-green-dark', className)}
     {...props}
   />
 ))
@@ -90,7 +90,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-sm text-mt-muted', className)}
+    className={cn('text-[15px] text-mt-apoio', className)}
     {...props}
   />
 ))

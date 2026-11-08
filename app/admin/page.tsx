@@ -46,8 +46,7 @@ export default async function AdminPage({
 
         <Link
           href="/admin/modulos"
-          className="flex w-fit items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-70"
-          style={{ color: '#57AA8F' }}
+          className="flex w-fit items-center gap-1.5 text-sm font-medium text-mt-green-dark transition-colors hover:text-mt-green"
         >
           Editar conteúdo dos módulos →
         </Link>
@@ -72,10 +71,10 @@ export default async function AdminPage({
         {/* Conteúdo, base inteira */}
         <section className="flex flex-col gap-3">
           <div>
-            <h2 className="font-heading text-lg font-bold" style={{ color: '#1a2e29' }}>
+            <h2 className="font-heading text-subtitulo font-medium text-mt-green-dark">
               Drop-off por módulo
             </h2>
-            <p className="text-sm text-mt-muted">
+            <p className="text-sm text-mt-apoio">
               Base inteira. De quem chegou ao módulo, quantos não o concluíram.
               {piorModulo && piorModulo.dropoff > 0 ? (
                 <> Maior queda: <strong>{piorModulo.titulo.replace(/ —.*/, '')}</strong>.</>
@@ -88,23 +87,23 @@ export default async function AdminPage({
             <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="border-b border-mt-border bg-mt-off-white">
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-muted">Módulo</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-muted">Chegaram</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-muted">Concluíram</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-muted">Drop-off</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-mt-apoio">Módulo</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-apoio">Chegaram</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-apoio">Concluíram</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-mt-apoio">Drop-off</th>
                 </tr>
               </thead>
               <tbody>
                 {m.porModulo.map((mod) => (
                   <tr key={mod.id} className="border-b border-mt-border last:border-0">
-                    <td className="px-4 py-3" style={{ color: '#1a2e29' }}>
+                    <td className="px-4 py-3 text-mt-green-dark">
                       {mod.titulo.replace(/ —/, ' ·')}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums text-mt-muted">{mod.chegaram}</td>
-                    <td className="px-4 py-3 text-right tabular-nums text-mt-muted">{mod.concluiram}</td>
+                    <td className="px-4 py-3 text-right tabular-nums text-mt-apoio">{mod.chegaram}</td>
+                    <td className="px-4 py-3 text-right tabular-nums text-mt-apoio">{mod.concluiram}</td>
                     <td className="px-4 py-3 text-right tabular-nums">
                       {mod.chegaram === 0 ? (
-                        <span className="text-xs text-mt-muted">—</span>
+                        <span className="text-xs text-mt-apoio">—</span>
                       ) : (
                         <span
                           className="rounded-full px-2 py-1 text-xs font-medium"
@@ -130,10 +129,10 @@ export default async function AdminPage({
         {/* Alunos */}
         <section className="flex flex-col gap-3">
           <div>
-            <h2 className="font-heading text-lg font-bold" style={{ color: '#1a2e29' }}>
+            <h2 className="font-heading text-subtitulo font-medium text-mt-green-dark">
               Alunos
             </h2>
-            <p className="text-sm text-mt-muted">
+            <p className="text-sm text-mt-apoio">
               Quem puxar hoje. Sem observações do Mapa nem texto de objetivos.
             </p>
           </div>

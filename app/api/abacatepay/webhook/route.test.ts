@@ -306,4 +306,46 @@ describe('webhook AbacatePay → Purchase', () => {
     expect(resposta.status).toBe(200)
     expect(purchasesEnviados()).toHaveLength(0)
   })
+
+  // Cenários que não envolvem a Meta, mas custam caro se quebrarem.
+
+  it('recusa sem secret na URL ou com secret errado, antes de ler o corpo', async () => {
+    const bruto = JSON.stringify(payloadPago())
+    const assinatura = assinarCorpoWebhook(bruto)
+    for (const url of [
+      'https://www.mindtrail.com.br/api/abacatepay/webhook',
+      'https://www.mindtrail.com.br/api/abacatepay/webhook?webhookSecret=outro',
+    ]) {
+      const resposta = await POST(
+        new Request(url, { method: 'POST', headers: { 'x-webhook-signature': assinatura }, body: bruto })
+      )
+      expect(resposta.status).toBe(401)
+    }
+    expect(enviarLinkAcessoCompra).not.toHaveBeenCalled()
+    expect(supabase.tabelas.payment_webhook_events ?? []).toHaveLength(0)
+  })
+
+  it('falha no e-mail devolve 500 e libera o evento para o provedor reenviar', async () => {
+    vi.mocked(enviarLinkAcessoCompra).mockRejectedValueOnce(new Error('SMTP fora'))
+
+    const resposta = await webhook(payloadPago('log_falha'))
+
+    expect(resposta.status).toBe(500)
+    expect(supabase.tabelas.payment_webhook_events ?? []).toHaveLength(0)
+    expect(purchasesEnviados()).toHaveLength(0)
+
+    // O reenvio do provedor processa normalmente.
+    const reenvio = await webhook(payloadPago('log_falha'))
+    expect(reenvio.status).toBe(200)
+    expect(enviarLinkAcessoCompra).toHaveBeenCalledTimes(2)
+  })
+
+  it('não libera acesso para outro produto nem para cobrança não paga', async () => {
+    await webhook(payloadPago('log_outro', { items: [{ id: 'outro_produto', quantity: 1 }] }))
+    await webhook(payloadPago('log_pendente', { status: 'PENDING' }))
+
+    expect(supabase.tabelas.compras ?? []).toHaveLength(0)
+    expect(enviarLinkAcessoCompra).not.toHaveBeenCalled()
+    expect(purchasesEnviados()).toHaveLength(0)
+  })
 })

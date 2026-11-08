@@ -31,8 +31,7 @@ export function PassoPerfil({ perfil, revelado, erro, onChange }: Props) {
           <div>
             <label
               htmlFor="data_nascimento"
-              className="mb-2 block text-sm"
-              style={{ color: '#EDF2EF' }}
+              className="mb-2 block text-sm text-mt-off-white"
             >
               Sua data de nascimento
             </label>
@@ -43,24 +42,13 @@ export function PassoPerfil({ perfil, revelado, erro, onChange }: Props) {
               value={perfil.data_nascimento}
               max={new Date().toISOString().slice(0, 10)}
               onChange={(e) => onChange({ ...perfil, data_nascimento: e.target.value })}
-              className="w-full text-sm outline-none transition-colors"
-              style={{
-                border: '1.5px solid #3d5a62',
-                backgroundColor: 'rgba(255,255,255,0.03)',
-                borderRadius: 10,
-                padding: '13px 14px',
-                color: '#EDF2EF',
-                fontFamily: 'inherit',
-                colorScheme: 'dark',
-              }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = '#57AA8F')}
-              onBlur={(e) => (e.currentTarget.style.borderColor = '#3d5a62')}
+              className="campo-escuro [color-scheme:dark]"
             />
           </div>
 
           {/* Profissão */}
           <div>
-            <label htmlFor="profissao" className="mb-2 block text-sm" style={{ color: '#EDF2EF' }}>
+            <label htmlFor="profissao" className="mb-2 block text-sm text-mt-off-white">
               O que você faz hoje
             </label>
             <select
@@ -70,23 +58,13 @@ export function PassoPerfil({ perfil, revelado, erro, onChange }: Props) {
               onChange={(e) =>
                 onChange({ ...perfil, profissao: e.target.value as GrupoProfissao })
               }
-              className="w-full text-sm outline-none transition-colors"
-              style={{
-                border: '1.5px solid #3d5a62',
-                backgroundColor: 'rgba(255,255,255,0.03)',
-                borderRadius: 10,
-                padding: '13px 14px',
-                color: perfil.profissao ? '#EDF2EF' : '#6f8f87',
-                fontFamily: 'inherit',
-              }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = '#57AA8F')}
-              onBlur={(e) => (e.currentTarget.style.borderColor = '#3d5a62')}
+              className={`campo-escuro ${perfil.profissao ? '' : 'text-mt-off-white/60'}`}
             >
-              <option value="" disabled style={{ color: '#2A3F45' }}>
+              <option value="" disabled className="text-mt-green-dark">
                 Selecione uma opção
               </option>
               {PROFISSOES_ONBOARDING.map((p) => (
-                <option key={p} value={p} style={{ color: '#2A3F45' }}>
+                <option key={p} value={p} className="text-mt-green-dark">
                   {p}
                 </option>
               ))}
@@ -104,8 +82,7 @@ export function PassoPerfil({ perfil, revelado, erro, onChange }: Props) {
               >
                 <label
                   htmlFor="profissao_outro"
-                  className="mb-2 block text-sm"
-                  style={{ color: '#EDF2EF' }}
+                  className="mb-2 block text-sm text-mt-off-white"
                 >
                   Conte qual é a sua profissão
                 </label>
@@ -116,24 +93,14 @@ export function PassoPerfil({ perfil, revelado, erro, onChange }: Props) {
                   value={perfil.profissao_outro}
                   onChange={(e) => onChange({ ...perfil, profissao_outro: e.target.value })}
                   placeholder="Ex: professora de yoga"
-                  className="w-full text-sm outline-none transition-colors placeholder:text-[#6f8f87]"
-                  style={{
-                    border: '1.5px solid #3d5a62',
-                    backgroundColor: 'rgba(255,255,255,0.03)',
-                    borderRadius: 10,
-                    padding: '13px 14px',
-                    color: '#EDF2EF',
-                    fontFamily: 'inherit',
-                  }}
-                  onFocus={(e) => (e.currentTarget.style.borderColor = '#57AA8F')}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = '#3d5a62')}
+                  className="campo-escuro"
                 />
               </motion.div>
             )}
           </AnimatePresence>
 
           {erro && (
-            <p role="alert" className="text-sm" style={{ color: '#E68A8A' }}>
+            <p role="alert" className="text-sm text-[#E68A8A]">
               {erro}
             </p>
           )}

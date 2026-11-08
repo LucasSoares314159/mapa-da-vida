@@ -38,8 +38,7 @@ export function LeituraModuloOverlay({ titulo, blocos, aberto, onFechar }: Props
     <AnimatePresence>
       {aberto && (
         <motion.div
-          className="fixed inset-0 z-50 overflow-y-auto"
-          style={{ backgroundColor: '#EDF2EF' }}
+          className="fixed inset-0 z-50 overflow-y-auto bg-mt-off-white"
           role="dialog"
           aria-modal="true"
           aria-label={titulo}
@@ -49,13 +48,11 @@ export function LeituraModuloOverlay({ titulo, blocos, aberto, onFechar }: Props
           transition={TRANSICAO}
         >
           <div
-            className="sticky top-0 z-10 px-6 py-4"
-            style={{ backgroundColor: '#EDF2EF', borderBottom: '0.5px solid #c8d8d2' }}
+            className="sticky top-0 z-10 px-6 py-4 bg-mt-off-white border-b-linha border-mt-border"
           >
             <button
               onClick={onFechar}
-              className="flex size-9 items-center justify-center rounded-full transition-opacity hover:opacity-70"
-              style={{ border: '1px solid #c8d8d2', color: '#1a2e29', backgroundColor: '#ffffff' }}
+              className="flex size-9 items-center justify-center rounded-full transition-opacity hover:opacity-70 border border-mt-border text-mt-green-dark bg-white"
               aria-label="Fechar leitura"
             >
               <X className="size-4" />
@@ -64,7 +61,7 @@ export function LeituraModuloOverlay({ titulo, blocos, aberto, onFechar }: Props
 
           <div className="px-6 py-12">
             <div className="mx-auto flex w-full max-w-[640px] flex-col gap-6">
-              <h1 className="font-heading text-3xl font-bold leading-tight" style={{ color: '#1a2e29' }}>
+              <h1 className="font-heading text-titulo font-medium text-mt-green-dark">
                 {titulo}
               </h1>
               <ConteudoModulo blocos={blocos} />
