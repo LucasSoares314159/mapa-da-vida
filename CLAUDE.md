@@ -705,6 +705,22 @@ barato que duplicar uma venda ou um e-mail.
 depois e já perdeu a query string. A primeira captura com origem real ganha; os cookies
 do Pixel são reatualizados, porque podem ter sido gravados depois da primeira tela.
 
+### Página de sucesso (`/compra/sucesso`)
+
+Redesenhada em **novembro/2026** no sistema da LP. O que ela promete precisa bater
+com o que o webhook faz:
+
+- **O assunto do e-mail vem de `ASSUNTO_ACESSO_PLATAFORMA`** (`lib/email-templates.ts`)
+  e a validade do link de `getTokenTtlHours()`. A página manda a pessoa procurar esse
+  assunto na caixa de entrada: texto à mão divergiria na primeira edição do e-mail.
+- **O título não espera a animação.** É texto do servidor com entrada em CSS; a cena
+  (`components/compra/CelebracaoCompra.tsx`) é decorativa e `aria-hidden`. Check
+  primeiro, mascote depois: a confirmação é o que a pessoa precisa ler.
+- **`noindex`** — só faz sentido para quem acabou de pagar.
+- O webhook tem teste de rota (`app/api/abacatepay/webhook/route.test.ts`) cobrindo
+  autenticação, deduplicação, rollback quando o e-mail falha e o `event_id` do Purchase
+  casando com o `checkout_ref` da página.
+
 ### Pixel da Meta — um só, para o site inteiro
 
 Desde **novembro/2026** existe **um único Pixel** (o mesmo do quiz) e **um único

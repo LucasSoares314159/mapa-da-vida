@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
+import { FontesMarca } from '@/components/FontesMarca'
 import { MetaPixel } from '@/components/MetaPixel'
 
 // Layout proprio do funil de quiz: sem Header, sem Sidebar, sem rodape.
@@ -22,22 +23,8 @@ export const metadata: Metadata = {
 export default function QuizLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      {/* Fontes da LP /trilha, só no funil. Satoshi (títulos) não está no
-          Google Fonts — vem da Fontshare, como na LP. Lora 600 é o negrito da
-          prosa; o globals.css só carrega o 400. A plataforma não usa nenhuma
-          das duas, então não vão para o globals. */}
-      <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="" />
-      <link
-        rel="stylesheet"
-        href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap"
-      />
-      {/* A regra pressupõe o pages/_document; aqui a fonte é do funil de
-          propósito, não do site. */}
-      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap"
-      />
+      {/* Fontes da LP /trilha, só no funil — a plataforma não usa. */}
+      <FontesMarca />
 
       <MetaPixel />
 
