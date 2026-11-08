@@ -1,4 +1,36 @@
+import { createHmac, timingSafeEqual } from 'node:crypto'
+
 const ABACATEPAY_API_URL = 'https://api.abacatepay.com/v2'
+
+/**
+ * Chave publica com que a AbacatePay assina os webhooks (HMAC-SHA256, base64,
+ * header X-Webhook-Signature). E a mesma para todas as contas e esta na
+ * documentacao deles — nao e segredo. O segredo e o `webhookSecret` da URL.
+ */
+export const ABACATEPAY_PUBLIC_KEY =
+  't9dXRhHHo3yDEj5pVDYz0frf7q6bMKyMRmxxCPIPp3RCplBfXRxqlC6ZpiWmOqj4L63qEaeUOtrCI8P0VMUgo6iIga2ri9ogaHFs0WIIywSMg0q7RmBfybe1E5XJcfC4IW3alNqym0tXoAKkzvfEjZxV6bE0oG2zJrNNYmUCKZyV0KZ3JS8Votf9EAWWYdiDkMkpbMdPggfh1EqHlVkMiTady6jOR3hyzGEHrIz2Ret0xHKMbiqkr9HS1JhNHDX9'
+
+/** Comparacao em tempo constante, para segredo e assinatura. */
+export function compararSegredo(recebido: string, esperado: string): boolean {
+  const recebidoBuffer = Buffer.from(recebido)
+  const esperadoBuffer = Buffer.from(esperado)
+
+  return (
+    recebidoBuffer.length === esperadoBuffer.length &&
+    timingSafeEqual(recebidoBuffer, esperadoBuffer)
+  )
+}
+
+/** Assinatura que a AbacatePay mandaria para este corpo bruto. */
+export function assinarCorpoWebhook(rawBody: string): string {
+  return createHmac('sha256', ABACATEPAY_PUBLIC_KEY)
+    .update(Buffer.from(rawBody, 'utf8'))
+    .digest('base64')
+}
+
+export function assinaturaWebhookValida(rawBody: string, assinatura: string): boolean {
+  return compararSegredo(assinatura, assinarCorpoWebhook(rawBody))
+}
 
 export type AbacatePayPaymentMethod = 'PIX' | 'CARD'
 

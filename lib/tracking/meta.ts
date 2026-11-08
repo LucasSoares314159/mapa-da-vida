@@ -8,6 +8,16 @@
 /** Caminho publico do carregador unico do Pixel. */
 export const SCRIPT_PIXEL_META = '/js/rastreio-meta.js'
 
+/**
+ * Id do Pixel para o lado servidor (Conversions API).
+ *
+ * Constante, e nao variavel de ambiente, de proposito: o browser le o id de
+ * public/js/rastreio-meta.js e a CAPI lia de META_PIXEL_ID. Quando o Pixel foi
+ * trocado, so o arquivo mudou — o servidor ficou apontando para o Pixel antigo.
+ * Um teste (lib/tracking/purchase.test.ts) confere que os dois ids sao iguais.
+ */
+export const PIXEL_META_ID = '2130218701193734'
+
 type ParamsMeta = Record<string, unknown>
 type OpcoesMeta = { eventID?: string }
 

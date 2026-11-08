@@ -157,7 +157,7 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 | `cron-auth.ts` | Validação do `CRON_SECRET` |
 | `checkout/` | Abstração do provider de pagamento — ver [Funil de quiz](#funil-de-quiz) |
 | `quiz/` | Motor de pontuação, passos, sessão e configs dos quizzes |
-| `tracking/` | `track()` do funil, ponte React do Pixel (`meta.ts`), captura de atribuição e Conversions API |
+| `tracking/` | `track()` do funil, ponte React do Pixel (`meta.ts`), captura de atribuição, Conversions API (`capi.ts`) e contrato do Purchase compartilhado por browser e servidor (`purchase.ts`) |
 | `supabase.ts` / `-server.ts` / `-admin.ts` | Clientes browser / server / service-role |
 | `validations.ts` | Schemas Zod |
 | `empresa.ts` | Razão social, CNPJ, endereço e contato das páginas legais |
@@ -179,7 +179,8 @@ as novas migrações versionadas em `supabase/migrations`.
 | `momentos_vida` | `estacao`, `frase`, `duracao`, `data_revisao`, `ativo` — 1 ativo por usuário |
 | `progresso_aulas` | `user_id`, `modulo_id`, `concluido_em`, `data_confiavel` |
 | `modulos_conteudo` | `modulo_id` (PK, texto), `blocos` (jsonb), `atualizado_em` |
-| `compras` | provedor/checkout, e-mail, status, `user_id`, método, parcelas e datas do funil |
+| `compras` | provedor/checkout, `external_id`, e-mail, status, `user_id`, método, parcelas, datas do funil e `meta_purchase_enviado_em` |
+| `checkout_atribuicao` | `external_id` (PK), `fbp`, `fbc`, `client_ip`, `client_user_agent`, `source_url`, `source` — gravada na criação da cobrança |
 | `tokens_acesso_compra` | hash do token, expiração, uso e invalidação |
 | `payment_webhook_events` | IDs de evento por provedor para idempotência |
 
@@ -196,6 +197,13 @@ validar o back office em produção.
 **Links de compra** — apenas o SHA-256 do token é persistido. Um novo envio invalida
 todos os links anteriores ainda ativos; `used_at` impede reutilização depois do cadastro.
 `payment_webhook_events (provider, event_id)` impede e-mail duplicado quando o provedor reenvia eventos.
+
+**`compras.meta_purchase_enviado_em IS NULL` significa "a Meta nunca recebeu o Purchase"**,
+e não "pendente de envio". O webhook só manda Purchase no processamento que **libera o
+acesso**; compra já liberada sai antes. É isso que mantém as duas vendas anteriores ao
+Pixel atual (31/10 e 04/11/2026) fora da Meta para sempre — não têm atribuição, e
+reenviá-las semanas depois contaria como venda de hoje. Não "complete" essas linhas nem
+crie rotina de reenvio para nulos.
 
 **`profiles.excluir_das_metricas`** — contas internas somem do back office e do
 contador de membros, mas a plataforma funciona normal para elas. Apagar dados de conta
@@ -676,14 +684,45 @@ São **eventos customizados**, não padrão da Meta: mapeá-los a `Lead` ou `Vie
 misturaria o funil do quiz com o da lista de espera no mesmo relatório. Para virarem
 objetivo de campanha, precisam de **conversão personalizada** criada no Gerenciador.
 
-**O Purchase não existia no projeto** — a compra era cega para a Meta. Agora dispara em
-par: Pixel em `/compra/sucesso` e CAPI no webhook, com `event_id` derivado da referência
-externa do checkout. Os dois lados chegam ao mesmo id sem trocar nada entre si, a Meta
-deduplica e um retry do provedor não vira segunda venda.
+**O Purchase dispara em par:** Pixel em `/compra/sucesso` e CAPI no webhook, com
+`event_id` = `eventIdDaCompra(externalId)` (`lib/tracking/purchase.ts`). O `externalId` é
+gerado por nós e o único identificador que o browser também conhece (chega como
+`checkout_ref`); o id interno do provedor não chega à página. A Meta deduplica e um retry
+do provedor não vira segunda venda.
 
-**A CAPI nunca lança e roda depois do e-mail de acesso.** Falhar ali faria o provedor
-reenviar o evento e reprocessar a compra: perder um evento de tracking é muito mais
-barato que duplicar uma venda ou um e-mail.
+**Até 08/11/2026 nenhum Purchase chegou à Meta**, apesar de o código existir desde
+outubro: a CAPI estava sem token (e `capiConfigurada()` desistia sem log), e o
+`META_PIXEL_ID` apontava para o Pixel antigo. A série de Purchase no Gerenciador começa no
+deploy da branch `feat/meta-purchase` — ausência antes disso não é queda de conversão.
+
+**O valor vai dos dois lados, e é a receita do produto.** Dos dois eventos deduplicados a
+Meta fica com um, pela ordem de chegada; se o Pixel chegasse primeiro sem valor, a venda
+entrava sem receita. O servidor calcula `paidAmount − customerFee`: no cartão parcelado a
+taxa é repassada ao cliente, e juros dele não são receita nossa — contá-los inflaria o
+ROAS e faria a mesma venda valer mais no cartão que no PIX. O browser usa
+`VALOR_TRILHA_REAIS`, que precisa bater com o preço (mesma regra do `TRILHA_PRECO`).
+
+**A atribuição da cobrança fica em tabela nossa** (`checkout_atribuicao`), gravada em
+`startCheckout()` sob o `externalId`: `fbp`/`fbc` (do form/JSON, ou dos cookies da própria
+requisição), IP, user agent e página de origem (Referer). O webhook vem do servidor do
+provedor e não tem nada disso, e o payload documentado do `checkout.completed` não garante
+devolver o metadado. O metadado segue como reserva para cobranças anteriores à tabela.
+Telefone não vai: o payload v2 não traz (o webhook lê `cellphone`/`phone` se um dia vier).
+
+**O id do Pixel no servidor é constante** (`PIXEL_META_ID` em `lib/tracking/meta.ts`), não
+variável de ambiente: o Pixel foi trocado só no browser e a CAPI ficou apontando para o
+antigo. `lib/tracking/purchase.test.ts` falha se divergir de `public/js/rastreio-meta.js`.
+
+**Simular o webhook:** `node --env-file=.env.local scripts/simular-webhook-abacatepay.mjs
+--email <seu e-mail> [--repetir] [--cartao]`, com o `npm run dev` rodando. Assina como a
+AbacatePay, grava a compra com `dev_mode = true` no Supabase do `.env.local` e manda o
+e-mail de acesso. Recusa rodar com token da CAPI e sem `META_CAPI_TEST_CODE` — senão a
+compra simulada contaria como venda real.
+
+**A CAPI nunca lança, espera no máximo 4s e roda depois do e-mail de acesso.** Falhar ali
+faria o provedor reenviar o evento e reprocessar a compra: perder um evento de tracking é
+muito mais barato que duplicar uma venda ou um e-mail. Sem token, o webhook avisa no log
+(`META_CAPI_ACCESS_TOKEN ausente`) em vez de desistir calado.
 
 **A atribuição é capturada na entrada**, não no clique do CTA, que acontece várias telas
 depois e já perdeu a query string. A primeira captura com origem real ganha; os cookies
@@ -696,8 +735,13 @@ Desde **novembro/2026** existe **um único Pixel** (o mesmo do quiz) e **um úni
 servir a dois mundos sem bundle comum: a LP estática `/trilha` (`<script src>`) e as rotas
 Next do quiz e de `/compra/sucesso` (`components/MetaPixel.tsx`, via `next/script`). Antes
 cada rota Next montava o snippet com o id vindo de `NEXT_PUBLIC_META_PIXEL_QUIZ_ID`; a
-variável deixou de ser lida. Trocar de Pixel = editar o id nesse arquivo (e o
-`META_PIXEL_ID` da CAPI, que é server-side).
+variável deixou de ser lida. Trocar de Pixel = editar o id nesse arquivo **e**
+`PIXEL_META_ID` em `lib/tracking/meta.ts` (CAPI); o teste acusa se só um mudar.
+
+**O Gerenciador mostra todo evento como `https://www.mindtrail.com.br/`, mas o Pixel manda
+a URL inteira.** Verificado em 08/11/2026 com navegador headless: na `/trilha` o `dl` sai
+`/trilha?utm_…`, na página de sucesso sai `/compra/sucesso?checkout_ref=…`. O corte é do
+lado da Meta; não é a LP reescrevendo a URL (o `<base href>` só afeta links relativos).
 
 - O carregador expõe `trackMeta`, `trackMetaCustom`, `pageViewMeta` e
   `trackMetaAntesDeSair` em `window`, todos checando `fbq` — adblock não quebra a página.
@@ -853,7 +897,8 @@ Os e-mails citam o Momento de Vida ativo como fio condutor. Buscas de usuário s
 | `NEXT_PUBLIC_QUIZ_ATIVO` | `false` desliga o funil de quiz (404 em todo slug) |
 | ~~`NEXT_PUBLIC_META_PIXEL_QUIZ_ID`~~ | não é mais lida — o id do Pixel vive em `public/js/rastreio-meta.js` |
 | `NEXT_PUBLIC_GA_ID` | GA4 nas rotas do quiz; o mesmo id da LP |
-| `META_PIXEL_ID` / `META_CAPI_ACCESS_TOKEN` | Purchase server-side pela Conversions API |
+| `META_CAPI_ACCESS_TOKEN` | Purchase server-side pela Conversions API; sem ele o webhook avisa no log e segue |
+| ~~`META_PIXEL_ID`~~ | não é mais lida — o id vive em `PIXEL_META_ID` (`lib/tracking/meta.ts`) |
 | `META_CAPI_TEST_CODE` | só durante a validação no Gerenciador — **remover depois** |
 
 Ao adicionar variável nova: **`.env.local` e Vercel**, e a Vercel precisa de redeploy —

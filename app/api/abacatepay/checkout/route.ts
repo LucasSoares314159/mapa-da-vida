@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { NextResponse } from 'next/server'
-import { startCheckout, type ParamsCheckout } from '@/lib/checkout'
+import { contextoDaRequisicao, startCheckout, type ParamsCheckout } from '@/lib/checkout'
 import { PARAMS_UTM } from '@/lib/tracking/atribuicao'
 
 export const runtime = 'nodejs'
@@ -107,7 +107,18 @@ async function iniciarCheckout(request: Request) {
     const requestOrigin = new URL(request.url).origin
     const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || requestOrigin).replace(/\/$/, '')
     const params = await lerParams(request)
-    const { url } = await startCheckout(params, siteUrl)
+    const { cliente, cookies } = contextoDaRequisicao(request)
+    const { url } = await startCheckout(
+      {
+        ...params,
+        // O form/JSON ganha: le o cookie no browser, inclusive o _fbc derivado
+        // do fbclid. O cookie da requisicao cobre quem chegou sem os campos.
+        fbp: params.fbp ?? cookies.fbp,
+        fbc: params.fbc ?? cookies.fbc,
+        cliente,
+      },
+      siteUrl
+    )
 
     if ((request.headers.get('content-type') ?? '').includes('application/json')) {
       return NextResponse.json({ url })

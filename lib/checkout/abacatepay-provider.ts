@@ -38,7 +38,7 @@ export const abacatePayProvider: ProviderCheckout = {
       throw new Error('AbacatePay nao retornou a URL do Checkout')
     }
 
-    return { url: checkout.url }
+    return { url: checkout.url, externalId }
   },
 }
 
