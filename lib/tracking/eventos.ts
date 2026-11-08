@@ -9,8 +9,9 @@
 // (browser + CAPI), mas gerar o id em todos deixa qualquer evento pronto para
 // ganhar par server-side sem mudar quem o dispara.
 
+import { TRILHA_PRECO_VALOR } from '@/lib/empresa'
 import { lerAtribuicao } from './atribuicao'
-import { trackMetaCustom } from './meta'
+import { trackMeta, trackMetaCustom } from './meta'
 
 declare global {
   interface Window {
@@ -75,6 +76,25 @@ export function track(evento: EventoQuiz, params: ParamsEvento = {}): string {
   }
 
   return eventId
+}
+
+/**
+ * InitiateCheckout do quiz — evento PADRAO da Meta, ao contrario dos demais.
+ *
+ * E o mesmo evento que a LP /trilha dispara no submit, com o mesmo
+ * content_name e valor: os dois caminhos de venda levam ao mesmo checkout, e a
+ * otimizacao de campanha por InitiateCheckout precisa enxergar os dois.
+ * quiz_slug e result_profile separam a origem no relatorio. Segue em paralelo
+ * ao cta_click, que continua alimentando o funil customizado e o GA4.
+ */
+export function trackInicioCheckout(params: ParamsEvento = {}): void {
+  if (typeof window === 'undefined') return
+
+  trackMeta(
+    'InitiateCheckout',
+    limpar({ content_name: 'Trilha', value: TRILHA_PRECO_VALOR, currency: 'BRL', ...params }),
+    { eventID: gerarEventId() }
+  )
 }
 
 /**
