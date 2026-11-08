@@ -93,7 +93,10 @@ export function TelaPergunta({
   }
 
   return (
-    <div className="flex flex-1 flex-col justify-center">
+    // No mobile a pergunta começa no topo, não centralizada: centralizar
+    // empurrava o enunciado para baixo nas perguntas curtas e, nas longas, não
+    // sobrava espaço para centralizar de qualquer jeito.
+    <div className="flex flex-1 flex-col justify-start sm:justify-center">
       {pergunta.contexto && pergunta.contexto.length > 0 && (
         // O contexto e uma observacao/insight antes da pergunta ("E curioso
         // como sempre encontramos tempo para as obrigacoes...") — tem funcao
@@ -106,7 +109,7 @@ export function TelaPergunta({
         // conversacional" da LP (a opcao e Satoshi). O icone de mensagem no
         // circulo verde e o mesmo marcador do FAQ da LP. O rotulo em caixa alta
         // espacada saiu: a LP aboliu caixa alta espacada.
-        <div className="mb-7 flex items-start gap-3 rounded-card bg-mt-green-sup p-4 sm:p-5">
+        <div className="mb-5 flex items-start gap-3 rounded-card bg-mt-green-sup p-3.5 sm:mb-7 sm:p-5">
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-mt-green text-white">
             <MessageCircle className="h-4 w-4" aria-hidden="true" />
           </span>
@@ -114,7 +117,7 @@ export function TelaPergunta({
             {pergunta.contexto.map((linha, i) => (
               <p
                 key={i}
-                className="font-editorial text-[17px] lowercase leading-[1.6] text-mt-green-dark"
+                className="font-editorial text-base lowercase leading-[1.6] text-mt-green-dark sm:text-[17px]"
               >
                 {linha}
               </p>
@@ -126,7 +129,7 @@ export function TelaPergunta({
       {/* Pergunta = titulo da tela: Satoshi 500 minusculo, como os h2 da LP. */}
       <h1
         id={`pergunta-${pergunta.id}`}
-        className="font-satoshi text-[28px] font-medium lowercase leading-[1.12] tracking-[-0.02em] text-mt-green-dark [text-wrap:balance] sm:text-[34px]"
+        className="font-satoshi text-[25px] font-medium lowercase leading-[1.12] tracking-[-0.02em] text-mt-green-dark [text-wrap:balance] sm:text-[34px]"
       >
         {pergunta.enunciado}
       </h1>
@@ -140,7 +143,7 @@ export function TelaPergunta({
       <div
         role="radiogroup"
         aria-labelledby={`pergunta-${pergunta.id}`}
-        className="mt-7 space-y-3"
+        className="mt-5 space-y-2.5 sm:mt-7 sm:space-y-3"
       >
         {pergunta.opcoes.map((opcao, indice) => {
           const ativa = selecionada === opcao.id
@@ -163,7 +166,7 @@ export function TelaPergunta({
               // sombra 1 (2 no hover). Selecionada, o contorno vira indicador de
               // estado — o único caso em que a LP aceita traço de 2px —, feito
               // com ring para não deslocar o layout.
-              className={`flex w-full items-center gap-4 rounded-card border-[0.5px] p-4 text-left shadow-mt-1 transition-[box-shadow,background-color] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mt-green sm:px-5 ${
+              className={`flex w-full items-center gap-4 rounded-card border-[0.5px] px-4 py-3 text-left shadow-mt-1 transition-[box-shadow,background-color] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mt-green sm:p-4 sm:px-5 ${
                 ativa
                   ? 'border-mt-green bg-mt-green-sup ring-2 ring-mt-green'
                   : 'border-mt-border bg-white hover:shadow-mt-2'
@@ -188,9 +191,17 @@ export function TelaPergunta({
         })}
       </div>
 
-      {/* Botão só na última pergunta (auto-advance cobre as demais). */}
+      {/* Botão só na última pergunta (auto-advance cobre as demais).
+
+          No mobile ele gruda no rodapé (sticky): só o espaçamento não garante
+          que caiba — a pergunta 6 tem contexto, enunciado de 4 linhas e opções
+          de 2 linhas, e o navegador do WhatsApp mostra ainda menos tela. Rolar
+          para achar o botão depois de escolher era exatamente o atrito que o
+          auto-advance eliminou nas outras perguntas. O degradê no topo deixa as
+          opções sumirem por baixo sem corte seco. No desktop cabe: volta ao
+          fluxo. */}
       {confirmaComBotao && (
-        <div className="mt-8 pb-2">
+        <div className="sticky bottom-0 z-10 -mx-5 mt-5 bg-mt-off-white px-5 pb-4 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-mt-off-white before:to-mt-off-white/0 sm:static sm:mx-0 sm:mt-8 sm:bg-transparent sm:px-0 sm:pb-2 sm:pt-0 sm:before:hidden">
           <BotaoQuiz
             onClick={() => selecionada && onAvancar(selecionada)}
             disabled={!selecionada}
