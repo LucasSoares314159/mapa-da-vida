@@ -13,6 +13,17 @@ const config: Config = {
         sans:      ['DM Sans', 'sans-serif'],
         heading:   ['Space Grotesk', 'sans-serif'],
         editorial: ['Lora', 'serif'],
+        // Títulos do funil (quiz → VSL), no padrão da LP /trilha. Carregada
+        // só em app/quiz/layout.tsx — a plataforma não usa.
+        satoshi:   ['Satoshi', 'DM Sans', 'sans-serif'],
+      },
+      // Sistema de superfícies da LP /trilha (:root de public/trilha/index.html).
+      // Mesmos valores, para o quiz e a LP serem a mesma página aos olhos de
+      // quem chega do anúncio.
+      boxShadow: {
+        'mt-1': '0 14px 30px -20px rgba(42, 63, 69, .28)',
+        'mt-2': '0 18px 36px -20px rgba(42, 63, 69, .36)',
+        'mt-3': '0 30px 60px -30px rgba(42, 63, 69, .45), 0 8px 20px -12px rgba(42, 63, 69, .2)',
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -57,6 +68,10 @@ const config: Config = {
         'mt-yellow':     '#D4A843',
         'mt-red':        '#C05050',
         'mt-muted':      '#6f8f87',
+        // Texto de apoio sobre fundo claro. O mt-muted dá ~3.4:1 e reprova no
+        // AA como cor de texto; este dá 4.7:1 no off-white e 5.3:1 no branco.
+        'mt-apoio':      '#5B6F73',
+        'mt-green-sup':  '#E8F5F1',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -64,6 +79,7 @@ const config: Config = {
         sm: 'calc(var(--radius) - 4px)',
         card:  '16px',
         badge: '20px',
+        painel: '24px',
       },
       animation: {
         'check-spring': 'check-spring 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',

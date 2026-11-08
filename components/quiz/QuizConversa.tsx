@@ -13,6 +13,7 @@ import { TelaPergunta } from './TelaPergunta'
 import { TelaProcessando } from './TelaProcessando'
 import { TelaResultado } from './TelaResultado'
 import { TelaTexto } from './TelaTexto'
+import type { TemaQuiz } from './TextoQuiz'
 
 // Orquestrador do quiz: um unico componente renderiza qualquer config.
 //
@@ -124,23 +125,37 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
     limparRascunho(config)
   }, [passo?.tipo, config, resultado])
 
-  const avancar = useCallback(() => {
-    if (!estado.comecou) {
-      dispatch({ tipo: 'comecou' })
-      track('quiz_start', { quiz_slug: config.slug })
-    }
+  // Perguntas cujo quiz_answer ja foi disparado. Sem isso, voltar e re-responder
+  // (trivial agora com auto-advance) emitia um quiz_answer repetido para a mesma
+  // etapa, inflando a contagem de respostas por etapa no GA4 e no Pixel. Cada
+  // etapa conta uma vez — a primeira resposta dada a ela.
+  const perguntasRegistradas = useRef<Set<string>>(new Set())
 
-    if (passo?.tipo === 'pergunta') {
-      track('quiz_answer', {
-        quiz_slug: config.slug,
-        etapa: passo.indice + 1,
-        pergunta: passo.pergunta.id,
-        opcao: estado.respostas[passo.pergunta.id],
-      })
-    }
+  // `opcaoEscolhida` chega das telas de pergunta (auto-advance): o id escolhido
+  // vem explicito porque o estado do React ainda nao refletiu a escolha no mesmo
+  // gesto — sem ele o quiz_answer sairia com a opcao anterior. As telas de copy
+  // chamam sem argumento.
+  const avancar = useCallback(
+    (opcaoEscolhida?: string) => {
+      if (!estado.comecou) {
+        dispatch({ tipo: 'comecou' })
+        track('quiz_start', { quiz_slug: config.slug })
+      }
 
-    dispatch({ tipo: 'avancar' })
-  }, [estado.comecou, estado.respostas, passo, config.slug])
+      if (passo?.tipo === 'pergunta' && !perguntasRegistradas.current.has(passo.pergunta.id)) {
+        perguntasRegistradas.current.add(passo.pergunta.id)
+        track('quiz_answer', {
+          quiz_slug: config.slug,
+          etapa: passo.indice + 1,
+          pergunta: passo.pergunta.id,
+          opcao: opcaoEscolhida ?? estado.respostas[passo.pergunta.id],
+        })
+      }
+
+      dispatch({ tipo: 'avancar' })
+    },
+    [estado.comecou, estado.respostas, passo, config.slug]
+  )
 
   if (!passo) return null
 
@@ -148,19 +163,42 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
   const mostrarProgresso = passo.tipo !== 'abertura' && passo.tipo !== 'resultado'
   const podeVoltar = estado.indice > 0 && passo.tipo !== 'processando' && passo.tipo !== 'resultado'
 
+  // Abertura e ponte vivem no verde escuro, como o hero e a virada da LP
+  // /trilha; perguntas, processando e resultado no off-white, onde as opcoes
+  // sao cards brancos. A troca de fundo marca a troca de "voz" — a mesma
+  // alternancia de secoes escuras e claras da LP. A VSL tem o proprio fundo
+  // (fixed) em TelaResultado.
+  const tema: TemaQuiz =
+    passo.tipo === 'abertura' || passo.tipo === 'interstituicao' ? 'escuro' : 'claro'
+  const escuro = tema === 'escuro'
+
   return (
-    <div className="flex min-h-screen flex-col bg-mt-off-white">
+    <div
+      className={`flex min-h-screen flex-col transition-colors duration-300 motion-reduce:transition-none ${
+        escuro ? 'bg-mt-green-dark' : 'bg-mt-off-white'
+      }`}
+    >
       <div ref={topo} />
 
       {mostrarProgresso && (
-        <header className="sticky top-0 z-10 border-b border-mt-border/50 bg-mt-off-white/95 px-5 py-4 backdrop-blur sm:px-8">
+        <header
+          className={`sticky top-0 z-10 border-b-[0.5px] px-5 py-4 backdrop-blur sm:px-8 ${
+            escuro
+              ? 'border-white/10 bg-mt-green-dark/95'
+              : 'border-mt-border bg-mt-off-white/95'
+          }`}
+        >
           <div className="mx-auto flex max-w-2xl items-center gap-4">
             {podeVoltar ? (
               <button
                 type="button"
                 onClick={() => dispatch({ tipo: 'voltar' })}
                 aria-label="Voltar para a pergunta anterior"
-                className="-ml-1 shrink-0 rounded-lg p-2 text-mt-muted transition-colors hover:bg-mt-border/40 hover:text-mt-green-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mt-green"
+                className={`-ml-1 shrink-0 rounded-full p-2 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-mt-green ${
+                  escuro
+                    ? 'text-mt-off-white/70 hover:bg-white/10 hover:text-mt-off-white'
+                    : 'text-mt-apoio hover:bg-mt-green-sup hover:text-mt-green-dark'
+                }`}
               >
                 <ArrowLeft className="h-5 w-5" aria-hidden="true" />
               </button>
@@ -171,6 +209,7 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
             <ProgressoQuiz
               fracao={progressoDoPasso(passos, estado.indice, totalPerguntas)}
               rotulo={rotuloEtapa(passo, totalPerguntas)}
+              tema={tema}
             />
           </div>
         </header>
@@ -195,6 +234,9 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
                 dispatch({ tipo: 'responder', idPergunta: passo.pergunta.id, idOpcao })
               }
               onAvancar={avancar}
+              // A última pergunta avança para o processando: transição de peso,
+              // por botão, não por toque na opção.
+              confirmaComBotao={passo.indice === totalPerguntas - 1}
             />
           )}
 

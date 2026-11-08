@@ -59,7 +59,7 @@ export function VslPlayer({ vsl, onPlay, onLiberarCta, maxAlturaClasse = '' }: P
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
           <Play className="ml-1 h-7 w-7 fill-white/90 text-white/90" aria-hidden="true" />
         </span>
-        <p className="max-w-[220px] text-sm leading-6 text-white/60">
+        <p className="max-w-[220px] font-editorial text-[15px] lowercase leading-6 text-mt-off-white/70">
           Seu vídeo com a análise completa aparece aqui em instantes.
         </p>
       </div>
