@@ -630,6 +630,11 @@ Mapa conversacional: restaurar rascunho faria a barra nascer cheia, e voltar nã
 recuar. O denominador conta só as perguntas; as telas de copy não são etapas que a
 pessoa cumpre.
 
+**O botão da última pergunta gruda no rodapé no mobile.** É a única pergunta sem
+auto-advance, e a mais longa (contexto + 4 linhas de enunciado + opções de 2 linhas):
+só apertar espaçamento não a fazia caber em ~630px, menos ainda no navegador do
+WhatsApp. Encurtar a copy das opções não era opção — a redação é dos docs.
+
 **Rascunho em `sessionStorage`, limpo ao chegar no resultado.** Perder seis respostas
 num F5 é ruim, mas um rascunho antigo reaparecendo para quem volta pelo anúncio seria
 pior: a pessoa veria um resultado que não respondeu agora.

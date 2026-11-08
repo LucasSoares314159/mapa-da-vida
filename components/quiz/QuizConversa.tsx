@@ -182,7 +182,7 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
 
       {mostrarProgresso && (
         <header
-          className={`sticky top-0 z-10 border-b-[0.5px] px-5 py-4 backdrop-blur sm:px-8 ${
+          className={`sticky top-0 z-10 border-b-[0.5px] px-5 py-3 backdrop-blur sm:px-8 sm:py-4 ${
             escuro
               ? 'border-white/10 bg-mt-green-dark/95'
               : 'border-mt-border bg-mt-off-white/95'
@@ -215,7 +215,10 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
         </header>
       )}
 
-      <main className="flex flex-1 flex-col px-5 py-8 sm:px-8 sm:py-12">
+      {/* Topo curto no mobile: a pergunta mais longa (6, com contexto e botão)
+          não cabia em ~630px visíveis, e cada pixel acima do enunciado empurra
+          as opções para fora da tela. */}
+      <main className="flex flex-1 flex-col px-5 pb-8 pt-5 sm:px-8 sm:py-12">
         <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col">
           {passo.tipo === 'abertura' && (
             <TelaTexto tela={passo.tela} onAvancar={avancar} variante="abertura" />
