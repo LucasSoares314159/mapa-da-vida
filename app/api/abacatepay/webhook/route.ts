@@ -1,13 +1,18 @@
-import { createHmac, timingSafeEqual } from 'crypto'
 import { NextResponse } from 'next/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { assinaturaWebhookValida, compararSegredo } from '@/lib/abacatepay'
 import { enviarLinkAcessoCompra, normalizarEmail } from '@/lib/acesso-compra'
+import { buscarAtribuicaoCheckout } from '@/lib/checkout/atribuicao-checkout'
 import { createAdminSupabaseClient } from '@/lib/supabase-admin'
-import { capiConfigurada, enviarEventoCapi, eventIdDaCompra } from '@/lib/tracking/capi'
+import { capiConfigurada, enviarEventoCapi } from '@/lib/tracking/capi'
+import {
+  CONTEUDO_TRILHA,
+  MOEDA_TRILHA,
+  eventIdDaCompra,
+  receitaDoProdutoEmReais,
+} from '@/lib/tracking/purchase'
 
 export const runtime = 'nodejs'
-
-const ABACATEPAY_PUBLIC_KEY =
-  't9dXRhHHo3yDEj5pVDYz0frf7q6bMKyMRmxxCPIPp3RCplBfXRxqlC6ZpiWmOqj4L63qEaeUOtrCI8P0VMUgo6iIga2ri9ogaHFs0WIIywSMg0q7RmBfybe1E5XJcfC4IW3alNqym0tXoAKkzvfEjZxV6bE0oG2zJrNNYmUCKZyV0KZ3JS8Votf9EAWWYdiDkMkpbMdPggfh1EqHlVkMiTady6jOR3hyzGEHrIz2Ret0xHKMbiqkr9HS1JhNHDX9'
 
 type CheckoutItem = {
   id?: unknown
@@ -25,6 +30,8 @@ type AbacatePayEvent = {
       status?: unknown
       amount?: unknown
       paidAmount?: unknown
+      /** Taxa do cartao repassada ao cliente; null no PIX. */
+      customerFee?: unknown
       customerId?: unknown
       receiptUrl?: unknown
       installmentsCount?: unknown
@@ -35,6 +42,9 @@ type AbacatePayEvent = {
     customer?: {
       name?: unknown
       email?: unknown
+      // Fora do payload documentado da v2. Lido se um dia vier, para o `ph`.
+      cellphone?: unknown
+      phone?: unknown
     } | null
     payerInformation?: {
       method?: unknown
@@ -42,22 +52,14 @@ type AbacatePayEvent = {
   }
 }
 
-function compararSegredo(recebido: string, esperado: string): boolean {
-  const recebidoBuffer = Buffer.from(recebido)
-  const esperadoBuffer = Buffer.from(esperado)
+type Checkout = NonNullable<NonNullable<AbacatePayEvent['data']>['checkout']>
 
-  return (
-    recebidoBuffer.length === esperadoBuffer.length &&
-    timingSafeEqual(recebidoBuffer, esperadoBuffer)
-  )
+function texto(valor: unknown): string | undefined {
+  return typeof valor === 'string' && valor.trim() ? valor.trim() : undefined
 }
 
-function assinaturaValida(rawBody: string, assinatura: string): boolean {
-  const esperada = createHmac('sha256', ABACATEPAY_PUBLIC_KEY)
-    .update(Buffer.from(rawBody, 'utf8'))
-    .digest('base64')
-
-  return compararSegredo(assinatura, esperada)
+function metadataString(metadata: Record<string, unknown> | undefined, chave: string) {
+  return texto(metadata?.[chave])
 }
 
 async function processarCheckoutPago(payload: AbacatePayEvent): Promise<void> {
@@ -88,6 +90,10 @@ async function processarCheckoutPago(payload: AbacatePayEvent): Promise<void> {
   if (existingError) {
     throw new Error(`Falha ao consultar compra: ${existingError.message}`)
   }
+  // Compra ja liberada: e um reenvio. Sai antes do Purchase de proposito — o
+  // Purchase so e enviado no processamento que libera o acesso. E o que mantem
+  // as vendas anteriores ao Pixel atual (31/10 e 04/11/2026, sem atribuicao)
+  // fora da Meta, mesmo que o provedor volte a mandar o evento delas.
   if (compraExistente?.access_email_sent_at) return
 
   const nomeCliente = typeof customer.name === 'string' ? customer.name : null
@@ -115,6 +121,7 @@ async function processarCheckoutPago(payload: AbacatePayEvent): Promise<void> {
         payment_provider: 'abacatepay',
         provider_checkout_id: checkout.id,
         provider_customer_id: customerId,
+        external_id: texto(checkout.externalId) ?? null,
         produto: 'trilha-produtividade',
         email,
         nome_cliente: nomeCliente,
@@ -130,7 +137,7 @@ async function processarCheckoutPago(payload: AbacatePayEvent): Promise<void> {
       },
       { onConflict: 'payment_provider,provider_checkout_id' }
     )
-    .select('id')
+    .select('id, meta_purchase_enviado_em')
     .single()
 
   if (compraError || !compra) {
@@ -138,51 +145,103 @@ async function processarCheckoutPago(payload: AbacatePayEvent): Promise<void> {
   }
 
   await enviarLinkAcessoCompra(compra.id, email)
-  await registrarPurchase(payload, email)
+
+  // Depois do e-mail: o acesso e o que a pessoa pagou para ter. O Purchase e
+  // efeito colateral — nunca lanca, e espera a Meta por no maximo ~4s.
+  await registrarPurchase(supabase, {
+    compraId: compra.id,
+    jaEnviado: Boolean(compra.meta_purchase_enviado_em),
+    checkout,
+    customer,
+    email,
+    paidAt,
+  })
 }
 
-function metadataString(metadata: Record<string, unknown> | undefined, chave: string) {
-  const valor = metadata?.[chave]
-  return typeof valor === 'string' ? valor : undefined
+/** Momento do pagamento, nunca no futuro (relogio do provedor adiantado). */
+function momentoDoPagamento(paidAt: string): Date {
+  const data = new Date(paidAt)
+  const agora = new Date()
+  return Number.isNaN(data.getTime()) || data > agora ? agora : data
 }
 
-async function registrarPurchase(payload: AbacatePayEvent, email: string): Promise<void> {
-  if (!capiConfigurada()) return
-
-  const checkout = payload.data?.checkout
-  if (!checkout || typeof checkout.id !== 'string') return
-
-  const metadata = checkout.metadata
-  const referencia = typeof checkout.externalId === 'string'
-    ? checkout.externalId
-    : checkout.id
-  const amount = typeof checkout.paidAmount === 'number'
-    ? checkout.paidAmount
-    : typeof checkout.amount === 'number'
-      ? checkout.amount
-      : undefined
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? '').replace(/\/$/, '')
+async function registrarPurchase(
+  supabase: SupabaseClient,
+  contexto: {
+    compraId: string
+    jaEnviado: boolean
+    checkout: Checkout
+    customer: NonNullable<NonNullable<AbacatePayEvent['data']>['customer']>
+    email: string
+    paidAt: string
+  }
+): Promise<void> {
+  const { compraId, jaEnviado, checkout, customer, email, paidAt } = contexto
 
   try {
-    await enviarEventoCapi({
+    // Reprocessamento depois de um envio bem-sucedido (ex.: o e-mail saiu, mas
+    // gravar o status falhou e o provedor reenviou). Um Purchase por compra.
+    if (jaEnviado) return
+
+    if (!capiConfigurada()) {
+      // Sem este aviso a CAPI ficou desligada por semanas sem ninguem notar.
+      console.warn('[abacatepay-webhook] META_CAPI_ACCESS_TOKEN ausente; Purchase nao enviado a Meta')
+      return
+    }
+
+    const externalId = texto(checkout.externalId)
+    const referencia = externalId ?? (checkout.id as string)
+    const atribuicao = externalId ? await buscarAtribuicaoCheckout(externalId) : null
+    const metadata = checkout.metadata
+    const valor = receitaDoProdutoEmReais(checkout)
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? '').replace(/\/$/, '')
+
+    if (valor === undefined) {
+      console.warn(`[abacatepay-webhook] Checkout ${referencia} sem valor legivel; Purchase vai sem value`)
+    }
+
+    const source = atribuicao?.source ?? metadataString(metadata, 'source') ?? 'lp-trilha'
+    const quizSlug = metadataString(metadata, 'quiz_slug')
+    const resultProfile = metadataString(metadata, 'result_profile')
+
+    const enviado = await enviarEventoCapi({
       nome: 'Purchase',
       eventId: eventIdDaCompra(referencia),
-      email,
-      fbp: metadataString(metadata, 'fbp'),
-      fbc: metadataString(metadata, 'fbc'),
-      valor: amount !== undefined ? amount / 100 : undefined,
-      moeda: 'BRL',
-      sourceUrl: siteUrl ? `${siteUrl}/compra/sucesso` : undefined,
+      ocorridoEm: momentoDoPagamento(paidAt),
+      usuario: {
+        email,
+        nome: texto(customer.name),
+        telefone: texto(customer.cellphone) ?? texto(customer.phone),
+        externalId: texto(checkout.customerId),
+        pais: 'br',
+        ip: atribuicao?.ip,
+        userAgent: atribuicao?.userAgent,
+        // Tabela nossa primeiro; metadado da cobranca cobre checkouts criados
+        // antes dela existir.
+        fbp: atribuicao?.fbp ?? metadataString(metadata, 'fbp'),
+        fbc: atribuicao?.fbc ?? metadataString(metadata, 'fbc'),
+      },
+      valor,
+      moeda: MOEDA_TRILHA,
+      sourceUrl: atribuicao?.sourceUrl ?? (siteUrl ? `${siteUrl}/compra/sucesso` : undefined),
       customData: {
-        source: metadataString(metadata, 'source') ?? 'lp-trilha',
-        ...(metadataString(metadata, 'quiz_slug')
-          ? { quiz_slug: metadataString(metadata, 'quiz_slug') as string }
-          : {}),
-        ...(metadataString(metadata, 'result_profile')
-          ? { result_profile: metadataString(metadata, 'result_profile') as string }
-          : {}),
+        ...CONTEUDO_TRILHA,
+        source,
+        ...(quizSlug ? { quiz_slug: quizSlug } : {}),
+        ...(resultProfile ? { result_profile: resultProfile } : {}),
       },
     })
+
+    if (!enviado) return
+
+    const { error } = await supabase
+      .from('compras')
+      .update({ meta_purchase_enviado_em: new Date().toISOString() })
+      .eq('id', compraId)
+
+    if (error) {
+      console.error('[abacatepay-webhook] Purchase enviado, mas falhou ao marcar a compra:', error.message)
+    }
   } catch (error) {
     console.error('[abacatepay-webhook] Purchase da CAPI falhou:', error)
   }
@@ -201,7 +260,7 @@ export async function POST(request: Request) {
   }
 
   const rawBody = await request.text()
-  if (!assinaturaValida(rawBody, signature)) {
+  if (!assinaturaWebhookValida(rawBody, signature)) {
     return NextResponse.json({ error: 'Assinatura invalida' }, { status: 401 })
   }
 
@@ -254,4 +313,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Falha ao processar evento' }, { status: 500 })
   }
 }
-
