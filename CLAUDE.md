@@ -147,6 +147,7 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 | `materiais.ts` | Catálogo dos materiais de apoio — título e URL do quadro |
 | `conteudo-modulos.ts` | Leitura/escrita dos blocos de texto de cada módulo (tabela `modulos_conteudo`) |
 | `rotina.ts` | Cálculo de horas livres e Zona |
+| `habitos.ts` | Dia em Brasília, semana, constância, calendário e teto do Monitor de Hábitos |
 | `onboarding.ts` | Passos, progresso e falas do Mapa conversacional |
 | `gate-mapa.ts` | Cookie e isenções do gate do primeiro mapa |
 | `prazo.ts` | Labels de prazo de objetivo |
@@ -180,6 +181,8 @@ as novas migrações versionadas em `supabase/migrations`.
 | `momentos_vida` | `estacao`, `frase`, `duracao`, `data_revisao`, `ativo` — 1 ativo por usuário |
 | `progresso_aulas` | `user_id`, `modulo_id`, `concluido_em`, `data_confiavel` |
 | `modulos_conteudo` | `modulo_id` (PK, texto), `blocos` (jsonb), `atualizado_em` |
+| `habitos` | `nome` (3–24), `icone`, `area`, `meta_semanal` (1–7), `ancora`, `ordem`, `criado_em`, `arquivado_em` |
+| `habito_registros` | PK `(habito_id, dia)`, `user_id`, `dia` (date, Brasília), `status` (`feito`/`pulado`) |
 | `compras` | provedor/checkout, `external_id`, e-mail, status, `user_id`, método, parcelas, datas do funil e `meta_purchase_enviado_em` |
 | `checkout_atribuicao` | `external_id` (PK), `fbp`, `fbc`, `client_ip`, `client_user_agent`, `source_url`, `source` — gravada na criação da cobrança |
 | `tokens_acesso_compra` | hash do token, expiração, uso e invalidação |
@@ -214,6 +217,12 @@ interna seria o oposto do pretendido.
 o card mostrar "Definir ritmo" em tom neutro em vez de vermelho. Os objetivos anteriores à
 feature ficam nulos de propósito — derivar o ritmo do prazo inventaria uma declaração que a
 pessoa nunca fez. Mesmo padrão do Radar de Coerência e de `profiles.data_nascimento`.
+
+**`habito_registros.dia` é o dia de Brasília, calculado no servidor** (`diaDeHoje()` em
+`lib/habitos.ts`). Nunca grave a data do cliente nem `now()::date` do banco (UTC): marcar
+às 22h cairia no dia seguinte. Desmarcar **apaga a linha**; não existe estado "desfeito".
+Hábito nunca é apagado pelo usuário, só arquivado (`arquivado_em`), para o histórico seguir
+contando.
 
 **`objetivos.ordem` é por `(user_id, prazo)`**, não global. Reordenar numa aba não mexe nas
 outras. `NULL` cai no fim da lista (`nullsFirst: false` na query), nunca no topo.
@@ -396,6 +405,37 @@ frase uma vez em vez de letra por letra. As 3 opções são um `radiogroup` nave
 setas, e o status nunca é comunicado só por cor.
 
 ---
+
+## Monitor de Hábitos
+
+Feature de **novembro/2026**, em construção por etapas (plano: dados → tela Hoje →
+criação → progresso → menu inferior → PWA → faixa na Trilha e métricas). Protótipo
+aprovado: grade de círculos, segurar para marcar, celebração forte.
+
+**Recompensa sem punição.** A celebração ao marcar é deliberadamente forte; falhar não
+tem consequência visual nenhuma. Nada zera: não há streak. O número de destaque do
+progresso é o de **repetições totais**, que só cresce. Streak que zera é o motivo mais
+citado de abandono de apps de hábito.
+
+**Meta semanal, não dias fixos.** "3x por semana, em qualquer dia": dia livre não é falha.
+
+**Constância = Σ min(feitos, meta) / Σ meta** nas 4 semanas completas antes da atual
+(`constancia()` em `lib/habitos.ts`). Três decisões dentro dessa fórmula:
+- a semana corrente fica de fora, senão a constância cairia toda segunda-feira;
+- passar da meta numa semana não compensa a semana fraca seguinte (o `min`);
+- só entram semanas que começam depois da criação do hábito, então criar um hábito
+  novo não derruba a média de quem já tinha outros. Sem semana completa, a constância
+  é `null` ("começou agora"), nunca 0%.
+
+**O calendário conta, em cada dia, só os hábitos que existiam nele.** Criar um hábito
+hoje não pode apagar os "dias completos" do passado.
+
+**Teto de 5 hábitos ativos** (`LIMITE_HABITOS_ATIVOS`), checado na action. Diferente dos
+Objetivos, que perderam o teto: hábito tem custo diário, objetivo não.
+
+**A action recebe o estado desejado** (`definirHabitoHoje(id, feito)`), não um "alternar":
+a tela marca de forma otimista, e dois toques rápidos com "alternar" podem chegar fora
+de ordem e inverter o resultado.
 
 ## Momento de Vida
 
