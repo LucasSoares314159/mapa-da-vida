@@ -1,6 +1,8 @@
 import { createAdminSupabaseClient } from './supabase-admin'
 import { MODULOS } from './modulos'
 import { moduloIdParaIndice } from './progresso'
+import { constancia, diaDeHoje, inicioDaSemana, somarDias, SEMANAS_CONSTANCIA } from './habitos'
+import type { Habito, RegistroHabito } from '@/types'
 
 /**
  * Agregações do back office.
@@ -52,6 +54,7 @@ export type LinhaAluno = {
   temMomento: boolean
   temObjetivo: boolean
   temRotina: boolean
+  temHabito: boolean
 }
 
 export type Etapa = { rotulo: string; detalhe: string; valor: number; pct: number }
@@ -100,6 +103,67 @@ export type Metricas = {
   ativos7d: number
   concluiramTrilha: number
   dadosDeTempoConfiaveis: boolean
+  habitos: ResumoHabitos
+}
+
+/**
+ * Monitor de Hábitos no back office. Nunca leva o nome dos hábitos: dá para
+ * acompanhar adesão e constância sem ler o que a pessoa decidiu mudar — mesma
+ * regra das observações do Mapa e do texto dos objetivos.
+ */
+export type ResumoHabitos = {
+  /** Dia do primeiro hábito criado por um aluno — o lançamento, na prática. */
+  lancamento: string | null
+  /** Alunos que já criaram ao menos um hábito (arquivados contam). */
+  adotaram: number
+  /** Alunos que marcaram algum hábito nos últimos 7 dias. */
+  ativos7d: number
+  /** Média de hábitos ativos entre quem adotou. */
+  mediaAtivos: number
+  /** Média da constância das 4 semanas fechadas, entre quem já tem semana fechada. */
+  constanciaMedia: number | null
+  /** Quantos alunos entram nessa média. */
+  comConstancia: number
+}
+
+type HabitoMetrica = Pick<Habito, 'id' | 'user_id' | 'meta_semanal' | 'criado_em' | 'arquivado_em'>
+type RegistroMetrica = Pick<RegistroHabito, 'habito_id' | 'user_id' | 'dia' | 'status'>
+
+/** Função pura, separada para teste: o resumo de hábitos de um grupo de alunos. */
+export function resumoHabitos(
+  alunoIds: Set<string>,
+  habitos: HabitoMetrica[],
+  registros: RegistroMetrica[],
+  hoje: string
+): ResumoHabitos {
+  const doGrupo = habitos.filter((h) => alunoIds.has(h.user_id))
+  const regs = registros.filter((r) => alunoIds.has(r.user_id))
+
+  const porAluno = new Map<string, HabitoMetrica[]>()
+  for (const h of doGrupo) porAluno.set(h.user_id, [...(porAluno.get(h.user_id) ?? []), h])
+
+  const desde7d = somarDias(hoje, -6)
+  const ativos7d = new Set(regs.filter((r) => r.status === 'feito' && r.dia >= desde7d).map((r) => r.user_id))
+
+  const constancias: number[] = []
+  let somaAtivos = 0
+  porAluno.forEach((lista, userId) => {
+    somaAtivos += lista.filter((h) => !h.arquivado_em).length
+    // constancia() só usa id, meta, criação e arquivamento; o resto do tipo não entra no cálculo.
+    const c = constancia(lista as Habito[], regs.filter((r) => r.user_id === userId) as RegistroHabito[], hoje).atual
+    if (c !== null) constancias.push(c)
+  })
+
+  const lancamento = doGrupo.reduce<string | null>((min, h) => (min === null || h.criado_em < min ? h.criado_em : min), null)
+
+  return {
+    lancamento: lancamento ? lancamento.slice(0, 10) : null,
+    adotaram: porAluno.size,
+    ativos7d: ativos7d.size,
+    mediaAtivos: porAluno.size ? Math.round((somaAtivos / porAluno.size) * 10) / 10 : 0,
+    constanciaMedia: constancias.length ? Math.round(constancias.reduce((a, b) => a + b, 0) / constancias.length) : null,
+    comConstancia: constancias.length,
+  }
 }
 
 /** Duração de um módulo em minutos, a partir de "MM:SS" ou "H:MM:SS". */
@@ -188,6 +252,8 @@ export async function carregarMetricas(periodo: Periodo = {}): Promise<Metricas>
     { data: momentos },
     { data: objetivos },
     { data: rotinas },
+    { data: habitos },
+    { data: registrosHabito },
   ] = await Promise.all([
     sb
       .from('profiles')
@@ -198,6 +264,12 @@ export async function carregarMetricas(periodo: Periodo = {}): Promise<Metricas>
     sb.from('momentos_vida').select('user_id, criado_em'),
     sb.from('objetivos').select('user_id, criado_em'),
     sb.from('rotinas').select('user_id, atualizado_em'),
+    sb.from('habitos').select('id, user_id, meta_semanal, criado_em, arquivado_em'),
+    // Constância compara 4 semanas fechadas: basta o recorte de 8 semanas + a atual.
+    sb
+      .from('habito_registros')
+      .select('habito_id, user_id, dia, status')
+      .gte('dia', somarDias(inicioDaSemana(diaDeHoje()), -7 * SEMANAS_CONSTANCIA * 2)),
   ])
 
   // Contas internas (testes, equipe) ficam fora de todas as métricas — a
@@ -237,6 +309,7 @@ export async function carregarMetricas(periodo: Periodo = {}): Promise<Metricas>
   const comMomento = setDe(momentos, (l) => l.criado_em)
   const comObjetivo = setDe(objetivos, (l) => l.criado_em)
   const comRotina = setDe(rotinas, (l) => l.atualizado_em)
+  const comHabito = setDe(habitos, (l) => l.criado_em)
 
   // Eventos de progresso agrupados por aluno.
   type Progresso = { indices: number[]; ultima: string | null; datas: string[] }
@@ -296,6 +369,7 @@ export async function carregarMetricas(periodo: Periodo = {}): Promise<Metricas>
       temMomento: comMomento.has(p.id),
       temObjetivo: comObjetivo.has(p.id),
       temRotina: comRotina.has(p.id),
+      temHabito: comHabito.has(p.id),
     }
   })
 
@@ -340,6 +414,7 @@ export async function carregarMetricas(periodo: Periodo = {}): Promise<Metricas>
       { rotulo: 'Criou um Objetivo', valor: grupo.filter((a) => a.temObjetivo).length },
       { rotulo: 'Montou a Rotina', valor: grupo.filter((a) => a.temRotina).length },
       { rotulo: 'Definiu o Momento', valor: grupo.filter((a) => a.temMomento).length },
+      { rotulo: 'Criou um hábito', valor: grupo.filter((a) => a.temHabito).length },
     ]
   }
 
@@ -454,5 +529,13 @@ export async function carregarMetricas(periodo: Periodo = {}): Promise<Metricas>
     ).length,
     concluiramTrilha: alunos.filter((a) => a.modulosConcluidos === MODULOS.length).length,
     dadosDeTempoConfiaveis: eventos.some((e) => e.data_confiavel),
+    // Hábitos é feature de novembro/2026: fica fora do funil (mediria a data de
+    // lançamento, não comportamento) e entra só no alcance e neste resumo.
+    habitos: resumoHabitos(
+      new Set(alunos.map((a) => a.id)),
+      (habitos ?? []) as HabitoMetrica[],
+      (registrosHabito ?? []) as RegistroMetrica[],
+      diaDeHoje()
+    ),
   }
 }

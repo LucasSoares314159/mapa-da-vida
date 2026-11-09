@@ -6,6 +6,7 @@ import {
   diaDeHoje,
   diasCompletos,
   existiaNoDia,
+  habitosDoDia,
   inicioDaSemana,
   placarDoHabito,
   podeCriarHabito,
@@ -187,5 +188,16 @@ describe('regras simples', () => {
   it('o teto é de 5 hábitos ativos', () => {
     expect(podeCriarHabito(4)).toBe(true)
     expect(podeCriarHabito(5)).toBe(false)
+  })
+})
+
+describe('habitosDoDia', () => {
+  it('separa o feito hoje do resto da semana e ignora arquivados', () => {
+    const ativo = habito({ id: 'h1', meta_semanal: 4 })
+    const arquivado = habito({ id: 'h2', arquivado_em: '2026-11-10T12:00:00Z' })
+    const regs = [...feitos('h1', '2026-11-09', '2026-11-10', HOJE), ...feitos('h2', '2026-11-09')]
+    expect(habitosDoDia([ativo, arquivado], regs, HOJE)).toEqual([
+      { id: 'h1', nome: 'Caminhar', icone: 'caminhar', meta: 4, feitosAntesDeHoje: 2, feitoHoje: true },
+    ])
   })
 })

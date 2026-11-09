@@ -64,6 +64,32 @@ export default async function AdminPage({
           />
         </div>
 
+        {/* Monitor de Hábitos: só agregados, nunca o nome dos hábitos. */}
+        <section className="flex flex-col gap-3">
+          <div>
+            <h2 className="font-heading text-subtitulo font-medium text-mt-green-dark">Monitor de Hábitos</h2>
+            <p className="text-sm text-mt-apoio">
+              {m.habitos.lancamento
+                ? <>Primeiro hábito criado em {m.habitos.lancamento.split('-').reverse().join('/')}. Adesão baixa logo após o lançamento é esperada, não é gargalo.</>
+                : <>Nenhum aluno criou hábito ainda.</>}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <Kpi
+              rotulo="Criaram hábito"
+              valor={m.habitos.adotaram}
+              sublabel={m.totalAlunos ? `${Math.round((m.habitos.adotaram / m.totalAlunos) * 100)}% da base` : undefined}
+            />
+            <Kpi rotulo="Marcaram em 7 dias" valor={m.habitos.ativos7d} sublabel="marcou ao menos um hábito" />
+            <Kpi rotulo="Hábitos por pessoa" valor={m.habitos.mediaAtivos.toLocaleString('pt-BR')} sublabel="ativos, entre quem criou" />
+            <Kpi
+              rotulo="Constância média"
+              valor={m.habitos.constanciaMedia === null ? '—' : `${m.habitos.constanciaMedia}%`}
+              sublabel={m.habitos.comConstancia ? `${m.habitos.comConstancia} com semana fechada` : 'ainda sem semana fechada'}
+            />
+          </div>
+        </section>
+
         <Suspense fallback={<div className="h-64 rounded-lg border border-mt-border bg-mt-surface" />}>
           <PainelMetricas metricas={m} periodo={periodoId} />
         </Suspense>

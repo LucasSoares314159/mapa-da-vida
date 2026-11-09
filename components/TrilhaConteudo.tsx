@@ -13,9 +13,11 @@ const DURACAO_TOTAL = duracaoTotalTrilha()
 type Props = {
   nomeUsuario: string
   aulasConcluidas: number[]
+  /** Logo abaixo das boas-vindas: a faixa de hábitos de hoje. */
+  destaque?: React.ReactNode
 }
 
-export function TrilhaConteudo({ nomeUsuario, aulasConcluidas }: Props) {
+export function TrilhaConteudo({ nomeUsuario, aulasConcluidas, destaque }: Props) {
   const [aberto, setAberto] = useState(true)
   const [abertoMateriais, setAbertoMateriais] = useState(true)
   const [concluidas, setConcluidas] = useState<number[]>(aulasConcluidas)
@@ -39,6 +41,8 @@ export function TrilhaConteudo({ nomeUsuario, aulasConcluidas }: Props) {
       <h1 className="font-heading text-titulo font-medium text-mt-green-dark">
         Boas-vindas, {primeiroNome}.
       </h1>
+
+      {destaque}
 
       {/* Card de progresso */}
       <section className="card-mt p-card">

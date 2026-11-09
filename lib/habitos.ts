@@ -239,3 +239,33 @@ export function calendario(
 export function diasCompletos(cal: DiaCalendario[][]): number {
   return cal.reduce((total, semana) => total + semana.filter((d) => d.completo).length, 0)
 }
+
+export type HabitoDoDiaCalculado = {
+  id: string
+  nome: string
+  icone: Habito['icone']
+  meta: number
+  /** Feitos na semana corrente sem contar hoje. */
+  feitosAntesDeHoje: number
+  feitoHoje: boolean
+}
+
+/**
+ * O que a tela Hoje e a faixa da Trilha precisam de cada hábito ativo. Basta
+ * passar os registros da semana corrente; arquivados ficam de fora.
+ */
+export function habitosDoDia(habitos: Habito[], registros: RegistroHabito[], hoje: string): HabitoDoDiaCalculado[] {
+  return habitos
+    .filter((h) => !h.arquivado_em)
+    .map((h) => {
+      const p = progressoSemanal(h, registros, hoje)
+      return {
+        id: h.id,
+        nome: h.nome,
+        icone: h.icone,
+        meta: h.meta_semanal,
+        feitosAntesDeHoje: p.feitos - (p.feitoHoje ? 1 : 0),
+        feitoHoje: p.feitoHoje,
+      }
+    })
+}

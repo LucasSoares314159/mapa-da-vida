@@ -4,14 +4,14 @@ import { contarMembros } from '@/lib/membros'
 import {
   constancia,
   diaDeHoje,
+  habitosDoDia,
   inicioDaSemana,
   podeCriarHabito,
-  progressoSemanal,
   somarDias,
   SEMANAS_CONSTANCIA,
 } from '@/lib/habitos'
 import { AuthLayout } from '@/components/AuthLayout'
-import { HabitosHoje, type HabitoDoDia } from '@/components/habitos/HabitosHoje'
+import { HabitosHoje } from '@/components/habitos/HabitosHoje'
 import type { Habito, RegistroHabito } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -50,17 +50,7 @@ export default async function HabitosPage() {
   const registros = (registrosRaw ?? []) as RegistroHabito[]
   const ativos = todos.filter((h) => !h.arquivado_em)
 
-  const habitos: HabitoDoDia[] = ativos.map((h) => {
-    const p = progressoSemanal(h, registros, hoje)
-    return {
-      id: h.id,
-      nome: h.nome,
-      icone: h.icone,
-      meta: h.meta_semanal,
-      feitosAntesDeHoje: p.feitos - (p.feitoHoje ? 1 : 0),
-      feitoHoje: p.feitoHoje,
-    }
-  })
+  const habitos = habitosDoDia(todos, registros, hoje)
 
   return (
     <AuthLayout titulo="Meus Hábitos" nomeUsuario={profile?.nome ?? user.email ?? ''} totalMembros={totalMembros}>

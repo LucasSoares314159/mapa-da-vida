@@ -90,7 +90,7 @@ npm run build             # só com o dev parado
 |---|---|---|
 | `/` | Landing page | pública |
 | `/auth/*` | login, cadastro, esqueci/redefinir senha, verificar e-mail, callback | pública |
-| `/content` | Trilha: módulos e lives | ✅ |
+| `/content` | Trilha: faixa de hábitos de hoje, módulos e materiais | ✅ |
 | `/content/modulo/[id]` | Aula individual | ✅ |
 | `/content/material/[id]` | Material de apoio — quadro do Excalidraw | ✅ |
 | `/mapa/novo` → `/mapa/[id]` | Fluxo conversacional do AHA moment | ✅ |
@@ -133,11 +133,11 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
   /admin          Kpi · Funil · PainelMetricas · TabelaAlunos · Dedicacao · DistribuicaoModulos
   /mapa           MapaFlow · RevelacaoMapa · RevelacaoDiagnostico · AreaDestaqueOverlay
   /               AuthLayout · Header · Sidebar · NavInferior · MenuConta · RegistroServiceWorker (e o resto)
-  /habitos        HabitosHoje · CirculoHabito · FormularioHabito · ProgressoHabitos · ConviteInstalar · iconesHabito
+  /habitos        HabitosHoje · FaixaHabitos · CirculoHabito · FormularioHabito · ProgressoHabitos · ConviteInstalar · iconesHabito
   /lp
 /lib              ver tabela abaixo
 /emails           6 templates react-email
-/hooks            useMetaPixel · useUTMForward · useCelebracao
+/hooks            useMetaPixel · useUTMForward · useCelebracao · useMarcarHabitos
 /types/index.ts   tipos + PILARES + ESTACOES + COR_STATUS
 ```
 
@@ -414,9 +414,16 @@ setas, e o status nunca é comunicado só por cor.
 
 ## Monitor de Hábitos
 
-Feature de **novembro/2026**, em construção por etapas (plano: dados → tela Hoje →
-criação → progresso → menu inferior → PWA → faixa na Trilha e métricas). Protótipo
-aprovado: grade de círculos, segurar para marcar, celebração forte.
+Feature de **novembro/2026**: tela Hoje (`/habitos`), criação e edição, progresso,
+faixa no topo da Trilha, menu inferior no celular e app instalável. Protótipo aprovado:
+grade de círculos, segurar para marcar, celebração forte. **Adesão baixa nas primeiras
+semanas é esperada**, não gargalo; o `/admin` mostra a data do primeiro hábito criado.
+
+**A faixa "Hábitos de hoje" fica no topo de `/content`**, logo abaixo das boas-vindas:
+é onde a pessoa já passa todo dia, e marcar dali dispensa lembrete. Usa o mesmo
+`CirculoHabito` (tamanho compacto) e a mesma lógica da tela Hoje (`useMarcarHabitos`).
+A tela cheia de "dia completo" fica só em `/habitos`; na faixa, o fechamento do dia é
+um aviso.
 
 **Recompensa sem punição.** A celebração ao marcar é deliberadamente forte; falhar não
 tem consequência visual nenhuma. Nada zera: não há streak. O número de destaque do
@@ -1055,8 +1062,13 @@ nada sobre dedicação.
 
 **Risco:** 7+ dias sem concluir aula (`DIAS_RISCO`), só Turma 2.
 
+**Hábitos fora do funil, dentro do alcance.** "Criou um hábito" entra no bloco de
+alcance e num bloco próprio (`resumoHabitos()`): adotaram, marcaram em 7 dias, hábitos
+ativos por pessoa e constância média. No funil mediria a data de lançamento, não o
+comportamento. A constância média só conta quem já tem semana fechada.
+
 **Privacidade:** a tela mostra nome, e-mail e progresso, mas **nunca** as observações
-do Mapa nem o texto dos objetivos. Dá para agir sem ler o que a pessoa escreveu no
+do Mapa nem o texto dos objetivos, nem o nome dos hábitos. Dá para agir sem ler o que a pessoa escreveu no
 momento mais vulnerável. Agregados de status seguem visíveis, sem nome atrelado.
 
 ---
