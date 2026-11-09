@@ -17,12 +17,12 @@ import type { ConfigQuiz } from '../tipos'
  *   classifica como falha de sustentação, e o Exemplo 3 dos docs só fecha assim.
  */
 /**
- * Segundo da VSL em que a oferta e apresentada (5:54). O botao de compra so
+ * Segundo da VSL em que a oferta e apresentada (4:42). O botao de compra so
  * aparece quando a pessoa assiste ate aqui — em reproducao continua, sem contar
  * avanco manual nem o autoplay mudo (ver lib/quiz/progresso-vsl.ts). Se o video
  * for reeditado, medir de novo.
  */
-export const SEGUNDO_DA_OFERTA_NA_VSL = 5 * 60 + 54
+export const SEGUNDO_DA_OFERTA_NA_VSL = 4 * 60 + 42
 
 export const quiz1: ConfigQuiz = {
   slug: 'quiz-1',
@@ -230,9 +230,9 @@ export const quiz1: ConfigQuiz = {
     // Da aba Embed da VTurb (JavaScript, "Otimizar Velocidade" ligada). O
     // player e o arquivo de video tem ids diferentes: o segundo so aparece no
     // preload do .m3u8.
-    videoId: '6af0be6770b42fd51594e194',
+    videoId: '6af1c3e60b42ce3fc9fb7aa1',
     contaId: '9e6f61cc-e76a-4a7d-82d8-b1b1b195a704',
-    arquivoVideoId: '6af0be4e0b42ce3fc9fab152',
+    arquivoVideoId: '6af1c3d2ffc8452284b83e02',
     chamada: 'Seu diagnóstico está *pronto*.',
     ctaAtSeconds: SEGUNDO_DA_OFERTA_NA_VSL,
     rotuloCta: 'ENTRAR AGORA PARA A TRILHA',

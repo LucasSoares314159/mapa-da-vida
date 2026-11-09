@@ -813,7 +813,7 @@ não dá para inferir lendo um trecho só:
 ### VSL da VTurb e o botão de compra
 
 O botão de compra da tela final só aparece quando a pessoa **assiste** até
-`SEGUNDO_DA_OFERTA_NA_VSL` (5:54, em `lib/quiz/configs/quiz-1.ts`). Os botões de ação da
+`SEGUNDO_DA_OFERTA_NA_VSL` (4:42 na VSL acelerada, em `lib/quiz/configs/quiz-1.ts`). Os botões de ação da
 VTurb ficam desligados de propósito: o botão é nosso, para preservar `cta_click`,
 `InitiateCheckout` e a atribuição do checkout.
 
