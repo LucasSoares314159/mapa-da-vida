@@ -192,6 +192,6 @@ describe('integridade da config do quiz-1', () => {
 
   it('o botao de compra espera o segundo da oferta na VSL', () => {
     expect(quiz1.vsl.ctaAtSeconds).toBe(SEGUNDO_DA_OFERTA_NA_VSL)
-    expect(SEGUNDO_DA_OFERTA_NA_VSL).toBe(354)
+    expect(SEGUNDO_DA_OFERTA_NA_VSL).toBe(282)
   })
 })
