@@ -101,6 +101,7 @@ npm run build             # só com o dev parado
 | `/rotina` | Calculadora de Rotina | ✅ |
 | `/habitos` | Monitor de Hábitos: tela Hoje (grade de círculos) | ✅ |
 | `/habitos/novo`, `/habitos/[id]` | Criar · editar e arquivar hábito | ✅ |
+| `/habitos/progresso` | Repetições, constância, calendário de 5 semanas e placar por hábito | ✅ |
 | `/dashboard` | Mapas salvos e evolução | ✅ |
 | `/admin` | Back office de métricas | ✅ + `ADMIN_EMAILS` |
 | `/admin/modulos`, `/admin/modulos/[id]` | Editor do conteúdo escrito das aulas | ✅ + `ADMIN_EMAILS` |
@@ -130,7 +131,7 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
   /ui             shadcn/ui
   /admin          Kpi · Funil · PainelMetricas · TabelaAlunos · Dedicacao · DistribuicaoModulos
   /mapa           MapaFlow · RevelacaoMapa · RevelacaoDiagnostico · AreaDestaqueOverlay
-  /habitos        HabitosHoje · CirculoHabito · FormularioHabito · iconesHabito
+  /habitos        HabitosHoje · CirculoHabito · FormularioHabito · ProgressoHabitos · iconesHabito
   /lp
 /lib              ver tabela abaixo
 /emails           6 templates react-email
@@ -460,6 +461,13 @@ no formulário. O toque curto no círculo ensina o gesto.
 **A bolinha da área no formulário é a cor do último Mapa** (`app/habitos/ultimo-mapa.ts`),
 sem o nome do status escrito: só a cor, com o status no `aria-label`. Conta isenta do gate
 pode não ter Mapa; aí os chips aparecem sem bolinha.
+
+**As repetições do progresso são contadas desde sempre**, numa consulta de contagem à
+parte; o resto da tela lê só as últimas 8 semanas. É o número que "só cresce": recortá-lo
+faria ele cair com o tempo.
+
+**Queda na constância aparece em tom neutro, nunca vermelho** ("−5 pontos sobre as 4
+anteriores"). Vermelho ali seria a punição que a feature evita; a informação continua lá.
 
 **A constância da tela Hoje não muda ao marcar.** É de propósito: ela olha só semanas
 fechadas. O que reage na hora é o anel da semana e o "X de Y hoje".
