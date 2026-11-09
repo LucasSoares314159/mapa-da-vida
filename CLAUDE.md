@@ -99,6 +99,7 @@ npm run build             # só com o dev parado
 | `/momento` | Momento de Vida | ✅ |
 | `/objetivos` | Objetivos + Radar de Coerência | ✅ |
 | `/rotina` | Calculadora de Rotina | ✅ |
+| `/habitos` | Monitor de Hábitos: tela Hoje (grade de círculos) | ✅ |
 | `/dashboard` | Mapas salvos e evolução | ✅ |
 | `/admin` | Back office de métricas | ✅ + `ADMIN_EMAILS` |
 | `/admin/modulos`, `/admin/modulos/[id]` | Editor do conteúdo escrito das aulas | ✅ + `ADMIN_EMAILS` |
@@ -128,10 +129,11 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
   /ui             shadcn/ui
   /admin          Kpi · Funil · PainelMetricas · TabelaAlunos · Dedicacao · DistribuicaoModulos
   /mapa           MapaFlow · RevelacaoMapa · RevelacaoDiagnostico · AreaDestaqueOverlay
+  /habitos        HabitosHoje · CirculoHabito · iconesHabito
   /lp
 /lib              ver tabela abaixo
 /emails           6 templates react-email
-/hooks            useMetaPixel · useUTMForward
+/hooks            useMetaPixel · useUTMForward · useCelebracao
 /types/index.ts   tipos + PILARES + ESTACOES + COR_STATUS
 ```
 
@@ -436,6 +438,22 @@ Objetivos, que perderam o teto: hábito tem custo diário, objetivo não.
 **A action recebe o estado desejado** (`definirHabitoHoje(id, feito)`), não um "alternar":
 a tela marca de forma otimista, e dois toques rápidos com "alternar" podem chegar fora
 de ordem e inverter o resultado.
+Além disso, `HabitosHoje` enfileira as gravações **por hábito**: cada chamada espera a
+anterior do mesmo hábito. Se a gravação falhar, a tela desfaz a marcação só se ainda
+mostrar o estado que falhou.
+
+**Segurar ~0,5s para marcar** (`TEMPO_SEGURAR_MS` em `CirculoHabito`), não tocar. O
+círculo é grande e fica onde o polegar rola a tela: toque simples marcaria sem querer.
+E a espera, com o círculo enchendo de verde, faz parte da recompensa. Toque curto mostra
+"segure o círculo para marcar"; teclado (Enter/Espaço) marca direto, porque teclado não
+tem "segurar". A duração também está na classe `duration-[550ms]` do preenchimento.
+
+**Som ligado por padrão**, preferência no `localStorage` (`habitos-som`), não no banco: é
+conforto do aparelho. Vibração só existe no Android (o iPhone não implementa
+`navigator.vibrate`). Animações têm `motion-reduce:animate-none`.
+
+**A constância da tela Hoje não muda ao marcar.** É de propósito: ela olha só semanas
+fechadas. O que reage na hora é o anel da semana e o "X de Y hoje".
 
 ## Momento de Vida
 

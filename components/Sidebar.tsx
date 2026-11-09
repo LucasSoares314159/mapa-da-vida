@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useFormStatus } from 'react-dom'
-import { LogOut, Map, Clock, Target, BookOpen, Compass, Users } from 'lucide-react'
+import { LogOut, Map, Clock, Target, BookOpen, Compass, Users, CircleCheck } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
 import { cn } from '@/lib/utils'
 
@@ -18,6 +18,7 @@ type Props = {
 // objetivos saem dos dois), e os mapas por último, como histórico.
 const ITENS_NAV = [
   { href: '/content',   label: 'Conteúdo',        icone: BookOpen },
+  { href: '/habitos',   label: 'Meus Hábitos',    icone: CircleCheck },
   { href: '/momento',   label: 'Momento de Vida', icone: Compass },
   { href: '/rotina',    label: 'Minha Rotina',    icone: Clock },
   { href: '/objetivos', label: 'Meus Objetivos',  icone: Target },
