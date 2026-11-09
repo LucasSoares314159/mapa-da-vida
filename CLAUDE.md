@@ -484,9 +484,11 @@ fechadas. O que reage na hora é o anel da semana e o "X de Y hoje".
 ### Navegação no celular (novembro/2026)
 
 No celular, a plataforma tem **menu inferior** (`NavInferior`: Hábitos · Progresso ·
-Trilha · Objetivos · Mapa) e o **avatar do Header abre o menu "Mais"** (`MenuConta`:
-Momento de Vida, Rotina, novo mapa, som dos hábitos, sair). O hambúrguer e o drawer da
-Sidebar saíram do celular; no computador a Sidebar segue igual. É o primeiro passo do
+Trilha · Objetivos · Mapa), e o **≡ e o avatar do Header abrem o menu "Mais"**
+(`MenuConta`: Momento de Vida, Rotina, novo mapa, som dos hábitos, sair). O drawer da
+Sidebar saiu do celular; no computador a Sidebar segue igual. O ≡ voltou porque só o
+avatar como gatilho escondia Momento de Vida e Rotina de quem conhecia a gaveta antiga.
+O menu "Mais" não repete as abas: dois menus completos disputariam o mesmo papel. É o primeiro passo do
 app instalável: a mesma navegação serve ao PWA da plataforma inteira.
 
 - **O menu inferior está no fluxo do layout, não em `fixed`** — é o último filho do

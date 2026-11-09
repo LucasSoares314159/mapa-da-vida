@@ -9,7 +9,7 @@ import { logout } from '@/app/actions/auth'
 import { gravarSomLigado, lerSomLigado } from '@/hooks/useCelebracao'
 import { cn } from '@/lib/utils'
 
-// Menu "Mais" do celular, aberto pelo avatar do Header. Guarda o que não coube
+// Menu "Mais" do celular, aberto pelo ≡ e pelo avatar do Header. Guarda o que não coube
 // nas 5 abas do menu inferior: Momento de Vida, Rotina, novo mapa, som e sair.
 // No computador tudo isso já está na Sidebar, e o avatar não abre nada.
 

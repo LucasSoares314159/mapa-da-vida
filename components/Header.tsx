@@ -1,23 +1,35 @@
 'use client'
 
 import Link from 'next/link'
-import { Mail, MessageCircle, Youtube } from 'lucide-react'
+import { Mail, Menu, MessageCircle, Youtube } from 'lucide-react'
 
 type Props = {
   titulo: string
   nomeUsuario: string
-  /** Celular: o avatar abre o menu "Mais". No computador o avatar é só visual. */
-  onAvatarClick?: () => void
+  /** Celular: o ≡ e o avatar abrem o menu "Mais". No computador nenhum dos dois aparece como botão. */
+  onMenuClick?: () => void
 }
 
-export function Header({ titulo, nomeUsuario, onAvatarClick }: Props) {
+export function Header({ titulo, nomeUsuario, onMenuClick }: Props) {
   const inicial = nomeUsuario.trim().charAt(0).toUpperCase()
 
   return (
     <header
       className="flex min-h-14 shrink-0 items-center justify-between border-b-linha border-mt-border bg-white px-5 pt-[env(safe-area-inset-top)]"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1">
+        {/* O ≡ é o gesto que todo mundo reconhece; só o avatar como gatilho deixava
+            Momento de Vida e Rotina escondidos para quem vinha da gaveta antiga. */}
+        {onMenuClick && (
+          <button
+            type="button"
+            onClick={onMenuClick}
+            aria-label="Abrir menu"
+            className="-ml-2.5 flex size-11 items-center justify-center rounded-full text-mt-green-dark transition-colors hover:bg-mt-off-white focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-mt-green-dark lg:hidden"
+          >
+            <Menu className="size-5" aria-hidden />
+          </button>
+        )}
         <h1 className="font-heading text-[17px] font-medium text-mt-green-dark">{titulo}</h1>
       </div>
 
@@ -63,7 +75,7 @@ export function Header({ titulo, nomeUsuario, onAvatarClick }: Props) {
         {/* No celular o avatar abre o menu "Mais"; no computador é só visual. */}
         <button
           type="button"
-          onClick={onAvatarClick}
+          onClick={onMenuClick}
           aria-label="Abrir menu da conta"
           className="flex size-11 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-mt-green-dark lg:hidden"
         >
