@@ -187,7 +187,7 @@ export function HabitosHoje({ dataLabel, habitos, constancia, podeCriar }: Props
         </>
       )}
 
-      <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-4 bottom-6 z-40 flex justify-center">
+      <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-4 bottom-24 z-40 lg:bottom-6 flex justify-center">
         {aviso && (
           <span className="animate-habito-entrar rounded-elemento bg-mt-green-dark px-4 py-3 text-sm text-mt-off-white shadow-mt-2 motion-reduce:animate-none">
             {aviso}

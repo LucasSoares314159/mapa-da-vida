@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
+import { NavInferior } from './NavInferior'
+import { MenuConta } from './MenuConta'
 
 type Props = {
   titulo: string
@@ -12,44 +14,36 @@ type Props = {
   children: React.ReactNode
 }
 
+// Computador: Sidebar fixa à esquerda. Celular: menu inferior (NavInferior) e o
+// avatar do Header abre o menu "Mais" (MenuConta) com o que não coube nas abas.
+//
+// h-dvh, não h-screen: no iPhone, 100vh inclui a barra do Safari e o menu
+// inferior nasceria escondido atrás dela.
 export function AuthLayout({ titulo, nomeUsuario, totalMembros, children }: Props) {
-  const [sidebarAberta, setSidebarAberta] = useState(false)
+  const [menuAberto, setMenuAberto] = useState(false)
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-dvh overflow-hidden">
       {/* Sidebar — visível apenas em lg+ */}
-      <div className="hidden lg:flex h-screen">
+      <div className="hidden h-dvh lg:flex">
         <Sidebar totalMembros={totalMembros} />
-      </div>
-
-      {/* Drawer overlay — visível apenas em mobile quando aberto */}
-      {sidebarAberta && (
-        <div
-          className="fixed inset-0 z-40 bg-mt-green-dark/50 lg:hidden"
-          onClick={() => setSidebarAberta(false)}
-        />
-      )}
-
-      {/* Drawer sidebar — mobile */}
-      <div
-        className={`fixed inset-y-0 left-0 z-50 lg:hidden transition-transform duration-300 ${
-          sidebarAberta ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <Sidebar onClose={() => setSidebarAberta(false)} totalMembros={totalMembros} />
       </div>
 
       {/* Conteúdo principal */}
       <div className="flex flex-1 flex-col overflow-hidden bg-mt-off-white">
-        <Header
-          titulo={titulo}
-          nomeUsuario={nomeUsuario}
-          onMenuClick={() => setSidebarAberta(true)}
-        />
+        <Header titulo={titulo} nomeUsuario={nomeUsuario} onAvatarClick={() => setMenuAberto(true)} />
         <main className="flex-1 overflow-y-auto">
           {children}
         </main>
+        <NavInferior />
       </div>
+
+      <MenuConta
+        aberto={menuAberto}
+        onFechar={() => setMenuAberto(false)}
+        nomeUsuario={nomeUsuario}
+        totalMembros={totalMembros}
+      />
     </div>
   )
 }

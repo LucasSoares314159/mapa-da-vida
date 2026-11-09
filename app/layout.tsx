@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -33,6 +33,16 @@ export const metadata: Metadata = {
   other: {
     'facebook-domain-verification': '2ias9w5cfah8le8udpfzrplmpzuxxj',
   },
+}
+
+// viewport-fit=cover em todo o site: sem ele o iOS reporta safe area zero, e o
+// menu inferior do celular (NavInferior) e o app instalado ficariam atrás da
+// barra de início. Cada barra fixa compensa com env(safe-area-inset-*).
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#ffffff',
 }
 
 export default function RootLayout({

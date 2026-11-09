@@ -131,6 +131,7 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
   /ui             shadcn/ui
   /admin          Kpi · Funil · PainelMetricas · TabelaAlunos · Dedicacao · DistribuicaoModulos
   /mapa           MapaFlow · RevelacaoMapa · RevelacaoDiagnostico · AreaDestaqueOverlay
+  /               AuthLayout · Header · Sidebar · NavInferior · MenuConta (e o resto)
   /habitos        HabitosHoje · CirculoHabito · FormularioHabito · ProgressoHabitos · iconesHabito
   /lp
 /lib              ver tabela abaixo
@@ -471,6 +472,24 @@ anteriores"). Vermelho ali seria a punição que a feature evita; a informação
 
 **A constância da tela Hoje não muda ao marcar.** É de propósito: ela olha só semanas
 fechadas. O que reage na hora é o anel da semana e o "X de Y hoje".
+
+### Navegação no celular (novembro/2026)
+
+No celular, a plataforma tem **menu inferior** (`NavInferior`: Hábitos · Progresso ·
+Trilha · Objetivos · Mapa) e o **avatar do Header abre o menu "Mais"** (`MenuConta`:
+Momento de Vida, Rotina, novo mapa, som dos hábitos, sair). O hambúrguer e o drawer da
+Sidebar saíram do celular; no computador a Sidebar segue igual. É o primeiro passo do
+app instalável: a mesma navegação serve ao PWA da plataforma inteira.
+
+- **O menu inferior está no fluxo do layout, não em `fixed`** — é o último filho do
+  flex-col de `AuthLayout`. Fixo, ele cobriria o fim de toda página e cada tela teria de
+  reservar padding. Avisos (`fixed`) sobem para `bottom-24` no celular para não cair nele.
+- **`h-dvh`, não `h-screen`**, no `AuthLayout`: no iPhone `100vh` inclui a barra do
+  Safari e o menu nasceria escondido atrás dela.
+- **`viewport-fit=cover` é global** (`app/layout.tsx`): sem ele o iOS reporta safe area
+  zero. Header e menu inferior compensam com `env(safe-area-inset-*)`.
+- **`/rotina` e `/mapa/*` não usam `AuthLayout` e ficam sem menu**: o Mapa é um fluxo
+  focado, e a Calculadora tem fundo e volta próprios.
 
 ## Momento de Vida
 
@@ -926,8 +945,8 @@ documento), então remontar a tela não registra o custom element de novo.
 
 **No celular o botão é uma barra fixa na base, por cima do vídeo.** Com o 9:16 em largura
 total, o botão no fluxo nascia abaixo da dobra e quem assistia não o via surgir. A barra
-respeita a safe area — o que exige `viewport-fit=cover`, declarado **só no layout do quiz**
-(por isso o wrapper dali tem padding lateral de safe area). Com o botão liberado, o
+respeita a safe area — o que exige `viewport-fit=cover` (hoje global, em `app/layout.tsx`;
+o layout do quiz também o declara, e por isso o wrapper dali tem padding lateral de safe area). Com o botão liberado, o
 container ganha `pb-40` para nada ficar preso atrás da barra. No desktop o botão volta ao
 fluxo, abaixo do player.
 
