@@ -100,6 +100,7 @@ npm run build             # só com o dev parado
 | `/objetivos` | Objetivos + Radar de Coerência | ✅ |
 | `/rotina` | Calculadora de Rotina | ✅ |
 | `/habitos` | Monitor de Hábitos: tela Hoje (grade de círculos) | ✅ |
+| `/habitos/novo`, `/habitos/[id]` | Criar · editar e arquivar hábito | ✅ |
 | `/dashboard` | Mapas salvos e evolução | ✅ |
 | `/admin` | Back office de métricas | ✅ + `ADMIN_EMAILS` |
 | `/admin/modulos`, `/admin/modulos/[id]` | Editor do conteúdo escrito das aulas | ✅ + `ADMIN_EMAILS` |
@@ -129,7 +130,7 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
   /ui             shadcn/ui
   /admin          Kpi · Funil · PainelMetricas · TabelaAlunos · Dedicacao · DistribuicaoModulos
   /mapa           MapaFlow · RevelacaoMapa · RevelacaoDiagnostico · AreaDestaqueOverlay
-  /habitos        HabitosHoje · CirculoHabito · iconesHabito
+  /habitos        HabitosHoje · CirculoHabito · FormularioHabito · iconesHabito
   /lp
 /lib              ver tabela abaixo
 /emails           6 templates react-email
@@ -451,6 +452,14 @@ tem "segurar". A duração também está na classe `duration-[550ms]` do preench
 **Som ligado por padrão**, preferência no `localStorage` (`habitos-som`), não no banco: é
 conforto do aparelho. Vibração só existe no Android (o iPhone não implementa
 `navigator.vibrate`). Animações têm `motion-reduce:animate-none`.
+
+**O nome abaixo do círculo é o link de edição; o círculo só marca.** Dar dois papéis ao
+mesmo alvo (toque curto edita, segurar marca) faria quem tenta marcar com um toque cair
+no formulário. O toque curto no círculo ensina o gesto.
+
+**A bolinha da área no formulário é a cor do último Mapa** (`app/habitos/ultimo-mapa.ts`),
+sem o nome do status escrito: só a cor, com o status no `aria-label`. Conta isenta do gate
+pode não ter Mapa; aí os chips aparecem sem bolinha.
 
 **A constância da tela Hoje não muda ao marcar.** É de propósito: ela olha só semanas
 fechadas. O que reage na hora é o anel da semana e o "X de Y hoje".

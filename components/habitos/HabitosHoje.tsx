@@ -161,6 +161,7 @@ export function HabitosHoje({ dataLabel, habitos, constancia, podeCriar }: Props
                   celebrando={celebrando?.id === h.id ? celebrando.tipo : null}
                   onAlternar={() => alternar(h)}
                   onToqueCurto={() => avisar('Segure o círculo para marcar.')}
+                  hrefEditar={`/habitos/${h.id}`}
                 />
               </li>
             ))}

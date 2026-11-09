@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { ICONE_HABITO } from './iconesHabito'
 import type { IconeHabito } from '@/types'
@@ -59,6 +60,10 @@ type Props = {
   onToqueCurto?: () => void
   /** compacto: a faixa de hábitos no topo da Trilha. */
   tamanho?: 'normal' | 'compacto'
+  /** Só desenha (prévia do formulário): sem segurar, sem foco, sem leitor de tela. */
+  estatico?: boolean
+  /** O nome abaixo do círculo vira link para editar. O círculo continua só marcando. */
+  hrefEditar?: string
 }
 
 export function CirculoHabito({
@@ -71,6 +76,8 @@ export function CirculoHabito({
   onAlternar,
   onToqueCurto,
   tamanho = 'normal',
+  estatico = false,
+  hrefEditar,
 }: Props) {
   const [segurando, setSegurando] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -150,6 +157,14 @@ export function CirculoHabito({
           />
         </svg>
 
+        {estatico ? (
+          <div
+            aria-hidden
+            className="absolute inset-[10%] flex items-center justify-center overflow-hidden rounded-full border-linha border-mt-border bg-white"
+          >
+            <Icone className={cn('text-mt-green-dark', compacto ? 'size-6' : 'size-11')} strokeWidth={1.8} />
+          </div>
+        ) : (
         <button
           type="button"
           aria-pressed={feito}
@@ -181,6 +196,7 @@ export function CirculoHabito({
             <Icone className={cn('text-mt-green-dark', compacto ? 'size-6' : 'size-11')} strokeWidth={1.8} />
           </span>
         </button>
+        )}
 
         {celebrando && (
           <div aria-hidden className="pointer-events-none absolute inset-0 motion-reduce:hidden">
@@ -198,7 +214,20 @@ export function CirculoHabito({
       </div>
 
       <div className="flex max-w-[150px] flex-col items-center gap-0.5 text-center">
-        <span className={cn('font-semibold leading-snug text-mt-black', compacto ? 'text-xs' : 'text-sm')}>{nome}</span>
+        {hrefEditar ? (
+          <Link
+            href={hrefEditar}
+            aria-label={`Editar ${nome}`}
+            className={cn(
+              'rounded-sm font-semibold leading-snug text-mt-black underline-offset-4 hover:underline hover:decoration-mt-green focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-mt-green-dark',
+              compacto ? 'text-xs' : 'text-sm'
+            )}
+          >
+            {nome}
+          </Link>
+        ) : (
+          <span className={cn('font-semibold leading-snug text-mt-black', compacto ? 'text-xs' : 'text-sm')}>{nome}</span>
+        )}
         {!compacto && (
           <span className={cn('text-sm', cumpriu ? 'font-semibold text-mt-green-dark' : 'text-mt-apoio')}>
             {rotuloSemana}
