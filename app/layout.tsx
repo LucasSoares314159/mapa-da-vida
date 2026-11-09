@@ -9,6 +9,12 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.png',
   },
+  // App instalável no iPhone: abre sem a barra do Safari, com o nome curto.
+  appleWebApp: {
+    capable: true,
+    title: 'Trilha',
+    statusBarStyle: 'default',
+  },
   description: "Responda 9 perguntas honestas e descubra o que está sustentando — e o que está consumindo — a sua energia. Diagnóstico gratuito, resultado imediato.",
   metadataBase: new URL("https://mindtrail.com.br"),
   openGraph: {

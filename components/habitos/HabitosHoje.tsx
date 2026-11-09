@@ -9,6 +9,7 @@ import { definirHabitoHoje } from '@/app/actions/habitos'
 import { useCelebracao } from '@/hooks/useCelebracao'
 import { cn } from '@/lib/utils'
 import { CirculoHabito } from './CirculoHabito'
+import { ConviteInstalar } from './ConviteInstalar'
 import type { IconeHabito } from '@/types'
 
 export type HabitoDoDia = {
@@ -109,6 +110,7 @@ export function HabitosHoje({ dataLabel, habitos, constancia, podeCriar }: Props
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col px-5 pb-16 pt-8 sm:px-8">
+      <ConviteInstalar />
       <div className="mb-6 flex flex-col gap-1">
         <span className="text-sm text-mt-apoio first-letter:uppercase">{dataLabel}</span>
         <div className="flex items-baseline justify-between gap-3">

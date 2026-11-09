@@ -103,6 +103,7 @@ npm run build             # só com o dev parado
 | `/habitos/novo`, `/habitos/[id]` | Criar · editar e arquivar hábito | ✅ |
 | `/habitos/progresso` | Repetições, constância, calendário de 5 semanas e placar por hábito | ✅ |
 | `/dashboard` | Mapas salvos e evolução | ✅ |
+| `/manifest.webmanifest`, `/sw.js`, `/offline.html` | App instalável (PWA) — ver [App instalável](#app-instalável-pwa) | pública |
 | `/admin` | Back office de métricas | ✅ + `ADMIN_EMAILS` |
 | `/admin/modulos`, `/admin/modulos/[id]` | Editor do conteúdo escrito das aulas | ✅ + `ADMIN_EMAILS` |
 | `/api/cron/emails` | Disparo diário (21h UTC) | `CRON_SECRET` |
@@ -131,8 +132,8 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
   /ui             shadcn/ui
   /admin          Kpi · Funil · PainelMetricas · TabelaAlunos · Dedicacao · DistribuicaoModulos
   /mapa           MapaFlow · RevelacaoMapa · RevelacaoDiagnostico · AreaDestaqueOverlay
-  /               AuthLayout · Header · Sidebar · NavInferior · MenuConta (e o resto)
-  /habitos        HabitosHoje · CirculoHabito · FormularioHabito · ProgressoHabitos · iconesHabito
+  /               AuthLayout · Header · Sidebar · NavInferior · MenuConta · RegistroServiceWorker (e o resto)
+  /habitos        HabitosHoje · CirculoHabito · FormularioHabito · ProgressoHabitos · ConviteInstalar · iconesHabito
   /lp
 /lib              ver tabela abaixo
 /emails           6 templates react-email
@@ -490,6 +491,35 @@ app instalável: a mesma navegação serve ao PWA da plataforma inteira.
   zero. Header e menu inferior compensam com `env(safe-area-inset-*)`.
 - **`/rotina` e `/mapa/*` não usam `AuthLayout` e ficam sem menu**: o Mapa é um fluxo
   focado, e a Calculadora tem fundo e volta próprios.
+
+### App instalável (PWA)
+
+Desde **novembro/2026** a plataforma é instalável no celular como **"Trilha"**
+(`app/manifest.ts`). Decisões:
+
+- **O app é a plataforma inteira, não só os hábitos.** O menu inferior leva à Trilha, aos
+  Objetivos e ao Mapa; num app com escopo só de `/habitos`, esses toques sairiam do app e
+  abririam o navegador. `scope: '/'`.
+- **Instalado, abre em `/habitos`** (`start_url`): o gesto diário a um toque. Pelo
+  navegador, o login continua levando a `/content`. Quem abre o app deslogado passa pelo
+  login e cai em `/content` — aceito, acontece uma vez.
+- **O service worker (`public/sw.js`) não guarda nada em cache além de `offline.html`.**
+  As telas são autenticadas e por pessoa; servir versão guardada mostraria os hábitos de
+  ontem como se fossem de hoje. Ele só intercepta navegações, e só para cair na página
+  offline quando a rede falha. Trocar `offline.html` exige subir a versão do `CACHE`.
+- **`offline.html` é HTML puro com o símbolo embutido em SVG**: sem rede, nem a imagem do
+  ícone carregaria.
+- **Registro só em produção e só nas telas autenticadas** (`RegistroServiceWorker` dentro
+  do `AuthLayout`): no `next dev` atrapalharia o recarregamento, e a LP e o quiz não
+  precisam dele para nada.
+- **Convite de instalação só na tela de hábitos e só no celular** (`ConviteInstalar`).
+  Android usa o diálogo nativo (`beforeinstallprompt`); o Safari do iPhone não tem diálogo,
+  então o convite mostra o passo a passo pelo botão Compartilhar. "Agora não" esconde por
+  14 dias (`localStorage`). Quem já abriu pelo app instalado nunca vê o convite.
+- **Ícones gerados do símbolo da marca** (verde sobre off-white): `public/icons/` (192, 512
+  e o *maskable*, com o símbolo menor para caber na zona segura) e `app/apple-icon.png`.
+- Sem notificações nesta leva. Lembrete por push fica para depois; no iPhone ele só
+  funciona com o app instalado.
 
 ## Momento de Vida
 

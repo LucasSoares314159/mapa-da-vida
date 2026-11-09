@@ -5,6 +5,7 @@ import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { NavInferior } from './NavInferior'
 import { MenuConta } from './MenuConta'
+import { RegistroServiceWorker } from './RegistroServiceWorker'
 
 type Props = {
   titulo: string
@@ -38,6 +39,7 @@ export function AuthLayout({ titulo, nomeUsuario, totalMembros, children }: Prop
         <NavInferior />
       </div>
 
+      <RegistroServiceWorker />
       <MenuConta
         aberto={menuAberto}
         onFechar={() => setMenuAberto(false)}
