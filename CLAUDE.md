@@ -911,6 +911,14 @@ valida secret e HMAC, deduplica por `(provider, event_id)`, registra a compra e 
 convite. O `externalId` aparece também em `checkout_ref` na URL de sucesso para o Pixel e
 a CAPI derivarem o mesmo `event_id` sem depender de identificadores internos do provedor.
 
+**O tempo do checkout é medido no servidor** (novembro/2026). Cada chamada a
+`/api/abacatepay/checkout` loga uma linha `[abacatepay-checkout-tempo]` (JSON) nos logs da
+Vercel e devolve o header `Server-Timing`, com `leitura`, `provedor` (a criação na
+AbacatePay), `atribuicao` (o insert no Supabase) e `total`, em ms, mais `fria` (primeira
+invocação da instância = cold start). Se `provedor` domina, o gargalo é a AbacatePay; se
+`total` é muito maior que a soma e `fria` é `true`, é cold start. No navegador o mesmo número
+aparece na aba Rede (Timing). Não há dado pessoal nem segredo nessa linha.
+
 ### Tracking
 
 `track()` em `lib/tracking/eventos.ts` manda cada evento para o **Pixel e o GA4** na

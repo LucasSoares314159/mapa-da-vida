@@ -5,6 +5,13 @@ import { PARAMS_UTM } from '@/lib/tracking/atribuicao'
 
 export const runtime = 'nodejs'
 
+// Medicao do tempo do checkout (clique -> URL de pagamento), visivel no log da
+// Vercel e no header Server-Timing. `fria` marca a primeira invocacao do modulo
+// naquela instancia: e o cold start, que separa "a funcao demorou para subir"
+// de "a AbacatePay demorou para responder".
+const modulosCarregadoEm = Date.now()
+let invocacoes = 0
+
 type ErroComDetalhes = Error & {
   status?: unknown
   code?: unknown
@@ -103,10 +110,37 @@ async function lerParams(request: Request): Promise<ParamsCheckout> {
 }
 
 async function iniciarCheckout(request: Request) {
+  const inicio = performance.now()
+  const fria = invocacoes++ === 0
+  const tempos: Record<string, number> = {}
+  const ms = (n: number) => Math.round(n)
+
+  function medicao(): Record<string, number | boolean> {
+    const total = performance.now() - inicio
+    return {
+      fria,
+      instanciaAtivaHaMs: fria ? 0 : Date.now() - modulosCarregadoEm,
+      total: ms(total),
+      ...Object.fromEntries(Object.entries(tempos).map(([k, v]) => [k, ms(v)])),
+    }
+  }
+
+  function serverTiming() {
+    const m = medicao()
+    return [
+      `total;dur=${m.total}`,
+      `provedor;dur=${m.provedor ?? 0}`,
+      `atribuicao;dur=${m.atribuicao ?? 0}`,
+      `leitura;dur=${m.leitura ?? 0}`,
+      `fria;desc="${fria}"`,
+    ].join(', ')
+  }
+
   try {
     const requestOrigin = new URL(request.url).origin
     const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || requestOrigin).replace(/\/$/, '')
     const params = await lerParams(request)
+    tempos.leitura = performance.now() - inicio
     const { cliente, cookies } = contextoDaRequisicao(request)
     const { url } = await startCheckout(
       {
@@ -117,14 +151,21 @@ async function iniciarCheckout(request: Request) {
         fbc: params.fbc ?? cookies.fbc,
         cliente,
       },
-      siteUrl
+      siteUrl,
+      tempos
     )
 
+    // Uma linha so, para a Vercel preservar os campos no mesmo registro.
+    console.info('[abacatepay-checkout-tempo]', JSON.stringify({ origem: params.source, ...medicao() }))
+    const cabecalhos = { 'Server-Timing': serverTiming() }
+
     if ((request.headers.get('content-type') ?? '').includes('application/json')) {
-      return NextResponse.json({ url })
+      return NextResponse.json({ url }, { headers: cabecalhos })
     }
 
-    return NextResponse.redirect(url, 303)
+    const redirecionamento = NextResponse.redirect(url, 303)
+    redirecionamento.headers.set('Server-Timing', cabecalhos['Server-Timing'])
+    return redirecionamento
   } catch (error) {
     const errorId = randomUUID()
     const requestUrl = new URL(request.url)
@@ -145,6 +186,7 @@ async function iniciarCheckout(request: Request) {
         cardEnabled: process.env.ABACATEPAY_CARD_ENABLED?.trim().toLowerCase() === 'true',
         provider: process.env.CHECKOUT_PROVIDER ?? 'abacatepay',
       },
+      tempos: medicao(),
       error: detalhesDoErro(error),
     }))
 
