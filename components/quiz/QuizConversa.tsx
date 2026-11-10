@@ -198,7 +198,10 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
 
   return (
     <div
-      className={`flex min-h-screen flex-col transition-colors duration-300 motion-reduce:transition-none ${
+      // min-h-dvh, nao min-h-screen: o 100vh do navegador do Instagram e do
+      // Facebook conta a tela inteira e ignora as barras do app, e o layout
+      // acharia que tem mais altura do que tem.
+      className={`flex min-h-dvh flex-col transition-colors duration-300 motion-reduce:transition-none ${
         escuro ? 'bg-mt-green-dark' : 'bg-mt-off-white'
       }`}
     >
@@ -243,7 +246,7 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
           não cabia em ~630px visíveis, e cada pixel acima do enunciado empurra
           as opções para fora da tela. Em tela baixa (celular-baixo), mais
           curto ainda. */}
-      <main className="flex flex-1 flex-col px-5 pb-8 pt-5 celular-baixo:pt-3 sm:px-8 sm:py-12">
+      <main className="flex flex-1 flex-col px-5 pb-8 pt-5 celular-baixo:pt-3 celular-minimo:pt-2 sm:px-8 sm:py-12">
         <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col">
           {passo.tipo === 'interstituicao' && (
             <TelaTexto tela={passo.tela} onAvancar={avancar} />

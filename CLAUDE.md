@@ -683,27 +683,40 @@ Resultado no build local, 4G lento (1,6 Mbps, 150ms) e CPU 4x: entrada de **749 
 ### Tela baixa (`celular-baixo`)
 
 Os navegadores do Instagram e do Facebook comem altura com as barras deles: um Android
-de 360×640 chega a ~600px visíveis. A varredura do fluxo em 360×600 e 360×640 com user
-agent do Instagram Android achou três telas que dependiam de tela alta:
+de 360×640 chega a ~600px visíveis. Sem Android real para testar, o fluxo é coberto
+**pelo extremo**: a varredura roda em 360×480, 560, 600 e 640 com user agent do
+Instagram Android, e em cada tela o essencial precisa estar visível sem rolar e sem
+nada por cima — a pergunta e as 4 opções, o botão da ponte, o botão do diagnóstico, o
+vídeo com os controles e a barra de compra. 480px é mais baixo que qualquer navegador de
+app real. A primeira varredura achou quatro telas que dependiam de tela alta:
 
 - **Perguntas 2 a 5:** a última opção ficava até ~80px abaixo da dobra. Com
   auto-advance, opção fora da tela é opção que a pessoa nem considera.
 - **Ponte:** o botão ficava em ~830px — fora da dobra até em celular de 800px.
+- **Diagnóstico:** o botão "Assistir à minha análise" ficava em ~1200px, em qualquer
+  celular — e era o trecho que mais perdia gente (6 terminaram o quiz, 2 deram play).
 - **VSL:** o 9:16 em largura total tem 640px de altura em 360px de largura; a legenda e
   os controles da VTurb ficavam fora da tela.
 
 Consertos: o breakpoint **`celular-baixo`** (`tailwind.config.ts`, largura < 640px **e**
 altura ≤ 700px — notebook baixo tem largura de sobra e fica de fora) encolhe espaçamento
-e tipografia das perguntas, da ponte e da chamada da VSL. O botão da ponte **gruda no
-rodapé**, como o da pergunta 6. O player tem a **largura limitada pela altura visível**
-(`LARGURA_VSL` em `VslPlayer.tsx`, em `dvh`), descontando a chamada acima dele — mexeu
-na chamada, confira o desconto. A barra do botão de compra continua por cima da faixa de
-baixo do vídeo depois da oferta, como antes: reservar o espaço desde o início encolheria
-o vídeo pelos 4:42 inteiros.
+e tipografia das perguntas, da ponte e da chamada da VSL; **`celular-minimo`** (altura ≤
+540px) encolhe mais um degrau, para as perguntas com caixa de contexto caberem em 480px.
+Os botões da ponte e do diagnóstico **grudam no rodapé** no celular, como o da pergunta
+6 — a pessoa continua rolando e lendo tudo, o botão só fica sempre alcançável. O degradê
+acima da barra da pergunta 6 tem a mesma altura da margem entre a opção d e o botão:
+maior que ela, cobria a base da opção (a checagem de oclusão precisa contar o degradê,
+que é `pointer-events-none` e passa despercebido pelo `elementFromPoint`).
 
-O **diagnóstico** (tela de resultado) continua exigindo rolagem para chegar ao botão
-"Assistir à minha análise": o texto é longo em qualquer altura de tela, e a leitura antes
-do vídeo é o ponto da tela. Não é dependência de tela alta.
+**Altura em `dvh`, nunca `vh`/`min-h-screen`.** O `vh` do navegador de app conta a tela
+inteira e ignora as barras do app: o layout acha que tem mais altura do que tem. O player tem a **largura limitada pela altura visível**
+(`LARGURA_VSL` em `VslPlayer.tsx`, em `dvh`), descontando a chamada acima dele — mexeu
+na chamada, confira o desconto. **Limite conhecido:** depois dos 282s, a barra do botão de compra cobre os ~48px de baixo
+do vídeo — onde ficam o progresso e o pause da VTurb — em qualquer altura. É o
+comportamento anterior, mantido de propósito: reservar o espaço desde o início encolheria
+o vídeo pelos 4:42 inteiros, e encolhê-lo só na oferta faz o vídeo pular de tamanho no
+momento da venda (em 480px ele cairia para ~164px de largura). Quem precisar pausar rola
+um pouco: o container ganha `pb-40` com a barra.
 
 ### Visual do quiz = sistema da LP `/trilha` (novembro/2026)
 

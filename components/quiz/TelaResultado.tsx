@@ -77,7 +77,13 @@ export function TelaResultado({ config, resultado }: Props) {
           <BlocoTexto paragrafos={corpo} />
         </div>
 
-        <div className="mt-10">
+        {/* Botao grudado no rodape no celular, como o da ponte e o da pergunta
+            6. O diagnostico passa de ~1200px em qualquer celular, e era
+            justamente aqui que o funil perdia gente: 6 terminaram o quiz e 2
+            deram play na VSL. A pessoa continua rolando e lendo tudo; o botao
+            so deixa de exigir que ela chegue ao fim para achar a saida. No
+            desktop volta ao fluxo, abaixo do texto. */}
+        <div className="sticky bottom-0 z-10 -mx-5 mt-8 bg-mt-off-white px-5 pb-4 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-6 before:h-6 celular-minimo:pb-2 celular-minimo:pt-2 celular-minimo:before:-top-3 celular-minimo:before:h-3 before:bg-gradient-to-t before:from-mt-off-white before:to-mt-off-white/0 sm:static sm:mx-0 sm:mt-10 sm:bg-transparent sm:px-0 sm:pb-0 sm:pt-0 sm:before:hidden">
           <BotaoQuiz onClick={() => setMostrandoVsl(true)}>{texto.rotuloBotao}</BotaoQuiz>
         </div>
 

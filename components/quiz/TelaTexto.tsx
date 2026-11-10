@@ -48,7 +48,7 @@ export function TelaTexto({ tela, onAvancar }: Props) {
           num Android de 360x600), e quem estava no ritmo do auto-advance nao
           tinha sinal de que precisava rolar para continuar. No desktop cabe:
           volta ao fluxo. */}
-      <div className="sticky bottom-0 z-10 -mx-5 mt-6 bg-mt-green-dark px-5 pb-4 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-mt-green-dark before:to-mt-green-dark/0 sm:static sm:mx-0 sm:mt-8 sm:bg-transparent sm:px-0 sm:pb-0 sm:pt-0 sm:before:hidden">
+      <div className="sticky bottom-0 z-10 -mx-5 mt-6 bg-mt-green-dark px-5 pb-4 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-6 before:h-6 celular-minimo:pb-2 celular-minimo:pt-2 celular-minimo:before:-top-3 celular-minimo:before:h-3 before:bg-gradient-to-t before:from-mt-green-dark before:to-mt-green-dark/0 sm:static sm:mx-0 sm:mt-8 sm:bg-transparent sm:px-0 sm:pb-0 sm:pt-0 sm:before:hidden">
         <BotaoQuiz tema="escuro" onClick={() => onAvancar()}>
           {tela.rotuloBotao}
         </BotaoQuiz>

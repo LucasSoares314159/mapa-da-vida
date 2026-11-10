@@ -114,7 +114,7 @@ export function TelaPergunta({
         // 360x600 dentro do Instagram, a ultima opcao das perguntas 2 a 5
         // ficava ate ~80px abaixo da dobra. Com auto-advance, opcao fora da
         // tela e opcao que a pessoa nem considera.
-        <div className="mb-5 flex items-start gap-3 rounded-card bg-mt-green-sup p-3.5 celular-baixo:mb-3 celular-baixo:p-3 sm:mb-7 sm:p-5">
+        <div className="mb-5 flex items-start gap-3 rounded-card bg-mt-green-sup p-3.5 celular-baixo:mb-3 celular-baixo:p-3 celular-minimo:mb-2 celular-minimo:p-2.5 sm:mb-7 sm:p-5">
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-mt-green text-white celular-baixo:h-6 celular-baixo:w-6">
             <MessageCircle className="h-4 w-4" aria-hidden="true" />
           </span>
@@ -122,7 +122,7 @@ export function TelaPergunta({
             {pergunta.contexto.map((linha, i) => (
               <p
                 key={i}
-                className="font-editorial text-base lowercase leading-[1.6] text-mt-green-dark celular-baixo:text-[15px] celular-baixo:leading-[1.45] sm:text-[17px]"
+                className="font-editorial text-base lowercase leading-[1.6] text-mt-green-dark celular-baixo:text-[15px] celular-baixo:leading-[1.45] celular-minimo:text-[14px] celular-minimo:leading-[1.4] sm:text-[17px]"
               >
                 {linha}
               </p>
@@ -134,7 +134,7 @@ export function TelaPergunta({
       {/* Pergunta = titulo da tela: Satoshi 500 minusculo, como os h2 da LP. */}
       <h1
         id={`pergunta-${pergunta.id}`}
-        className="font-satoshi text-[25px] font-medium lowercase leading-[1.12] tracking-[-0.02em] text-mt-green-dark [text-wrap:balance] celular-baixo:text-[22px] sm:text-[34px]"
+        className="font-satoshi text-[25px] font-medium lowercase leading-[1.12] tracking-[-0.02em] text-mt-green-dark [text-wrap:balance] celular-baixo:text-[22px] celular-minimo:text-[20px] sm:text-[34px]"
       >
         {pergunta.enunciado}
       </h1>
@@ -148,7 +148,7 @@ export function TelaPergunta({
       <div
         role="radiogroup"
         aria-labelledby={`pergunta-${pergunta.id}`}
-        className="mt-5 space-y-2.5 celular-baixo:mt-3 celular-baixo:space-y-2 sm:mt-7 sm:space-y-3"
+        className="mt-5 space-y-2.5 celular-baixo:mt-3 celular-baixo:space-y-2 celular-minimo:mt-2 celular-minimo:space-y-1 sm:mt-7 sm:space-y-3"
       >
         {pergunta.opcoes.map((opcao, indice) => {
           const ativa = selecionada === opcao.id
@@ -171,7 +171,7 @@ export function TelaPergunta({
               // sombra 1 (2 no hover). Selecionada, o contorno vira indicador de
               // estado — o único caso em que a LP aceita traço de 2px —, feito
               // com ring para não deslocar o layout.
-              className={`flex w-full items-center gap-4 rounded-card border-[0.5px] px-4 py-3 text-left celular-baixo:gap-3 celular-baixo:py-2 shadow-mt-1 transition-[box-shadow,background-color] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mt-green sm:p-4 sm:px-5 ${
+              className={`flex w-full items-center gap-4 rounded-card border-[0.5px] px-4 py-3 text-left celular-baixo:gap-3 celular-baixo:py-2 celular-minimo:py-1.5 shadow-mt-1 transition-[box-shadow,background-color] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mt-green sm:p-4 sm:px-5 ${
                 ativa
                   ? 'border-mt-green bg-mt-green-sup ring-2 ring-mt-green'
                   : 'border-mt-border bg-white hover:shadow-mt-2'
@@ -188,7 +188,7 @@ export function TelaPergunta({
               </span>
               {/* Opção é controle: Satoshi 500 minúsculo, como chips e
                   perguntas do FAQ da LP. */}
-              <span className="font-satoshi text-base font-medium lowercase leading-[1.4] text-mt-green-dark celular-baixo:text-[15px] celular-baixo:leading-[1.35] sm:text-[17px]">
+              <span className="font-satoshi text-base font-medium lowercase leading-[1.4] text-mt-green-dark celular-baixo:text-[15px] celular-baixo:leading-[1.35] celular-minimo:text-[14px] sm:text-[17px]">
                 {opcao.texto}
               </span>
             </button>
@@ -203,13 +203,17 @@ export function TelaPergunta({
           de 2 linhas, e o navegador do WhatsApp mostra ainda menos tela. Rolar
           para achar o botão depois de escolher era exatamente o atrito que o
           auto-advance eliminou nas outras perguntas. O degradê no topo deixa as
-          opções sumirem por baixo sem corte seco. No desktop cabe: volta ao
-          fluxo. */}
+          opções sumirem por baixo sem corte seco — e tem 20px, a mesma margem
+          acima da barra: maior que ela, cobria a base da opção d mesmo com a
+          barra parada no fluxo. No desktop cabe: volta ao fluxo. */}
       {confirmaComBotao && (
-        <div className="sticky bottom-0 z-10 -mx-5 mt-5 bg-mt-off-white px-5 pb-4 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-mt-off-white before:to-mt-off-white/0 sm:static sm:mx-0 sm:mt-8 sm:bg-transparent sm:px-0 sm:pb-2 sm:pt-0 sm:before:hidden">
+        <div className="sticky bottom-0 z-10 -mx-5 mt-5 celular-minimo:mt-3 bg-mt-off-white px-5 pb-4 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-5 before:h-5 celular-baixo:pt-2 celular-minimo:pb-2 celular-minimo:before:-top-3 celular-minimo:before:h-3 before:bg-gradient-to-t before:from-mt-off-white before:to-mt-off-white/0 sm:static sm:mx-0 sm:mt-8 sm:bg-transparent sm:px-0 sm:pb-2 sm:pt-0 sm:before:hidden">
           <BotaoQuiz
             onClick={() => selecionada && onAvancar(selecionada)}
             disabled={!selecionada}
+            // Em tela baixa o degrade do rodape cobria a base da opcao d (ate
+            // 17px em 360x560): botao e barra mais baixos devolvem esse espaco.
+            className="celular-baixo:py-3"
           >
             {pergunta.rotuloBotao}
           </BotaoQuiz>
