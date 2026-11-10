@@ -1,6 +1,7 @@
+import { CascaCarregando } from '@/components/CascaCarregando'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function MaterialLoading() {
+function Esqueleto() {
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-8">
       <div className="flex flex-col gap-6">
@@ -21,5 +22,13 @@ export default function MaterialLoading() {
         <Skeleton className="h-4 w-48" />
       </div>
     </div>
+  )
+}
+
+export default function MaterialLoading() {
+  return (
+    <CascaCarregando>
+      <Esqueleto />
+    </CascaCarregando>
   )
 }

@@ -1,8 +1,9 @@
+import { CascaCarregando } from '@/components/CascaCarregando'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function ObjetivosLoading() {
+function Esqueleto() {
   return (
-    <div className="min-h-screen py-8">
+    <div className="py-8">
       <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 flex flex-col gap-4">
         <Skeleton className="h-7 w-44" />
         <Skeleton className="h-3 w-56 -mt-2" />
@@ -35,5 +36,13 @@ export default function ObjetivosLoading() {
         <Skeleton className="h-11 w-full rounded-elemento" />
       </div>
     </div>
+  )
+}
+
+export default function ObjetivosLoading() {
+  return (
+    <CascaCarregando titulo="Meus Objetivos">
+      <Esqueleto />
+    </CascaCarregando>
   )
 }

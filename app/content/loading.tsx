@@ -1,6 +1,7 @@
+import { CascaCarregando } from '@/components/CascaCarregando'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function ContentLoading() {
+function Esqueleto() {
   return (
     <div className="mx-auto w-full max-w-2xl px-6 py-8 flex flex-col gap-4">
       {/* Cabeçalho da trilha */}
@@ -42,5 +43,13 @@ export default function ContentLoading() {
         </div>
       ))}
     </div>
+  )
+}
+
+export default function ContentLoading() {
+  return (
+    <CascaCarregando titulo="Conteúdo">
+      <Esqueleto />
+    </CascaCarregando>
   )
 }

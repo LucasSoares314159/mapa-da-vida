@@ -1,6 +1,7 @@
+import { CascaCarregando } from '@/components/CascaCarregando'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function DashboardLoading() {
+function Esqueleto() {
   return (
     <div className="mx-auto w-full max-w-2xl px-6 py-8 flex flex-col gap-6">
       <Skeleton className="h-[88px] w-full rounded-xl" />
@@ -27,5 +28,13 @@ export default function DashboardLoading() {
         </div>
       ))}
     </div>
+  )
+}
+
+export default function DashboardLoading() {
+  return (
+    <CascaCarregando titulo="Seus mapas">
+      <Esqueleto />
+    </CascaCarregando>
   )
 }
