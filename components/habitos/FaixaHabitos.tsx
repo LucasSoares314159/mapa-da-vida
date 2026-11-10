@@ -17,7 +17,7 @@ export function FaixaHabitos({ habitos }: { habitos: HabitoDoDia[] }) {
     return (
       <Link
         href="/habitos/novo"
-        className="card-mt flex items-center gap-4 p-card transition-shadow hover:shadow-mt-2 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-mt-green-dark"
+        className="card-mt flex items-center gap-4 p-card transition-[box-shadow,transform] duration-150 hover:shadow-mt-2 active:scale-[0.99] motion-reduce:transition-none focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-mt-green-dark"
       >
         <span className="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-mt-apoio text-mt-green-dark">
           <Plus className="size-5" aria-hidden />
@@ -64,7 +64,7 @@ export function FaixaHabitos({ habitos }: { habitos: HabitoDoDia[] }) {
 
       <Link
         href="/habitos"
-        className="inline-flex min-h-11 items-center gap-1 self-start rounded-sm text-sm font-semibold text-mt-green-dark underline decoration-mt-green underline-offset-4 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-mt-green-dark"
+        className="inline-flex min-h-11 items-center gap-1 self-start rounded-sm text-sm font-semibold text-mt-green-dark underline decoration-mt-green underline-offset-4 active:opacity-60 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-mt-green-dark"
       >
         Ver hábitos e progresso
         <ChevronRight className="size-4" aria-hidden />

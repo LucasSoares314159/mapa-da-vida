@@ -101,8 +101,8 @@ export function FormularioHabito({ habito, statusPorArea }: Props) {
       const resultado = editando ? await editarHabito(habito.id, dados) : await criarHabito(dados)
       if ('redirectTo' in resultado) return router.push(resultado.redirectTo)
       if ('error' in resultado) return setErroServidor(resultado.error)
+      // Sem router.refresh(): a action já chamou revalidatePath, e o refresh baixava a tela de novo.
       router.push('/habitos')
-      router.refresh()
     })
   }
 
@@ -116,7 +116,6 @@ export function FormularioHabito({ habito, statusPorArea }: Props) {
         return setErroServidor(resultado.error)
       }
       router.push('/habitos')
-      router.refresh()
     })
   }
 

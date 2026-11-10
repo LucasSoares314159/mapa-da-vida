@@ -37,7 +37,7 @@ function BotaoSair() {
 }
 
 const ITEM =
-  'flex min-h-12 w-full items-center gap-3 rounded-elemento px-3 text-base font-medium text-mt-green-dark transition-colors hover:bg-mt-green-sup focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-mt-green-dark'
+  'flex min-h-12 w-full items-center gap-3 rounded-elemento px-3 text-base font-medium text-mt-green-dark transition-colors hover:bg-mt-green-sup active:bg-mt-green-sup focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-mt-green-dark'
 
 export function MenuConta({ aberto, onFechar, nomeUsuario, totalMembros }: Props) {
   const [som, setSom] = useState(true)

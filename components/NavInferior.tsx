@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { BarChart3, BookOpen, CircleCheck, Map, Target, type LucideIcon } from 'lucide-react'
@@ -36,6 +37,13 @@ const ABAS: Aba[] = [
 
 export function NavInferior() {
   const pathname = usePathname()
+  // Aba tocada cuja tela ainda não chegou. Acende no toque, antes da resposta do
+  // servidor: sem isso, com a rede lenta, o toque parecia não ter funcionado.
+  const [pendente, setPendente] = useState<string | null>(null)
+
+  useEffect(() => {
+    setPendente(null)
+  }, [pathname])
 
   return (
     <nav
@@ -44,18 +52,23 @@ export function NavInferior() {
     >
       <ul className="grid grid-cols-5">
         {ABAS.map(({ href, label, icone: Icone, ativa }) => {
-          const atual = ativa(pathname)
+          const atual = pendente ? pendente === href : ativa(pathname)
+          const carregando = pendente === href
           return (
             <li key={href}>
               <Link
                 href={href}
-                aria-current={atual ? 'page' : undefined}
-                className="flex min-h-14 flex-col items-center justify-center gap-1 pb-1.5 pt-2 focus-visible:outline focus-visible:outline-[3px] focus-visible:-outline-offset-[3px] focus-visible:outline-mt-green-dark"
+                aria-current={ativa(pathname) ? 'page' : undefined}
+                onClick={() => {
+                  if (!ativa(pathname)) setPendente(href)
+                }}
+                className="group flex min-h-14 flex-col items-center justify-center gap-1 pb-1.5 pt-2 focus-visible:outline focus-visible:outline-[3px] focus-visible:-outline-offset-[3px] focus-visible:outline-mt-green-dark"
               >
                 <span
                   className={cn(
-                    'flex h-7 w-14 items-center justify-center rounded-full transition-colors',
-                    atual && 'bg-mt-green-sup'
+                    'flex h-7 w-14 items-center justify-center rounded-full transition-[background-color,transform] duration-150 group-active:scale-90 group-active:bg-mt-green-sup motion-reduce:transition-none',
+                    atual && 'bg-mt-green-sup',
+                    carregando && 'animate-pulse motion-reduce:animate-none'
                   )}
                 >
                   <Icone className={cn('size-5', atual ? 'text-mt-green-dark' : 'text-mt-apoio')} strokeWidth={1.9} aria-hidden />

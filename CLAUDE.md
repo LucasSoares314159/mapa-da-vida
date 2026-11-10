@@ -46,6 +46,9 @@ perfis foram deletados de propósito. **Nunca reconciliar `auth.users` com
 - **Processos travados:** `pkill -9 -f "next dev"`
 - **macOS bloqueando o servidor:** `xattr -cr .` (já roda no `postinstall`)
 - O aviso `Found lockfile missing swc dependencies` no boot é cosmético; ignore.
+- **Funções da Vercel em São Paulo** (`regions: ["gru1"]` no `vercel.json`), ao lado do
+  Supabase (`sa-east-1`). No padrão (`iad1`, Washington), cada tela fazia pelo menos duas
+  idas e voltas em sequência entre os EUA e São Paulo.
 
 ### Antes de qualquer push
 
@@ -507,6 +510,15 @@ app instalável: a mesma navegação serve ao PWA da plataforma inteira.
   zero. Header e menu inferior compensam com `env(safe-area-inset-*)`.
 - **`/rotina` e `/mapa/*` não usam `AuthLayout` e ficam sem menu**: o Mapa é um fluxo
   focado, e a Calculadora tem fundo e volta próprios.
+- **Toda rota com `AuthLayout` precisa de `loading.tsx` dentro de `CascaCarregando`.** O
+  `AuthLayout` é montado por cada página, não por um layout de rota, então um `loading.tsx`
+  solto mostra o esqueleto sem Header nem menu, e a moldura pisca a cada troca de tela. Sem
+  `loading.tsx` é pior: o toque deixa a tela antiga parada até o servidor responder, e o
+  Next não tem o que pré-carregar de uma rota dinâmica. Foi o caso de `/habitos/*` até
+  novembro/2026: tocar em Hábitos ou Progresso parecia não funcionar.
+- **A aba acende no toque** (`pendente` em `NavInferior`), antes da tela chegar, e pulsa
+  até o `pathname` mudar. As abas, os itens do menu "Mais" e os cards-link têm estado
+  `active:`: no iPhone não existe hover, e sem ele o toque não dava retorno nenhum.
 
 ### App instalável (PWA)
 

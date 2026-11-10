@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Mail, Menu, MessageCircle, Youtube } from 'lucide-react'
 
 type Props = {
-  titulo: string
+  titulo: React.ReactNode
   nomeUsuario: string
   /** Celular: o ≡ e o avatar abrem o menu "Mais". No computador nenhum dos dois aparece como botão. */
   onMenuClick?: () => void

@@ -66,7 +66,7 @@ export function HabitosHoje({ dataLabel, habitos, constancia, podeCriar }: Props
         <>
           <Link
             href="/habitos/progresso"
-            className="card-mt flex items-center gap-4 p-card transition-shadow hover:shadow-mt-2 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-mt-green-dark"
+            className="card-mt flex items-center gap-4 p-card transition-[box-shadow,transform] duration-150 hover:shadow-mt-2 active:scale-[0.99] motion-reduce:transition-none focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-mt-green-dark"
           >
             <span className="flex flex-1 flex-col gap-0.5">
               <span className="text-sm text-mt-apoio">
@@ -104,7 +104,7 @@ export function HabitosHoje({ dataLabel, habitos, constancia, podeCriar }: Props
                   <Link
                     href="/habitos/novo"
                     aria-label="Novo hábito"
-                    className="flex size-28 items-center justify-center rounded-full border-2 border-dashed border-mt-apoio text-mt-green-dark transition-colors hover:bg-mt-green-sup focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-mt-green-dark"
+                    className="flex size-28 items-center justify-center rounded-full border-2 border-dashed border-mt-apoio text-mt-green-dark transition-[background-color,transform] duration-150 hover:bg-mt-green-sup active:scale-95 active:bg-mt-green-sup motion-reduce:transition-none focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-mt-green-dark"
                   >
                     <Plus className="size-8" aria-hidden />
                   </Link>

@@ -1,8 +1,9 @@
+import { CascaCarregando } from '@/components/CascaCarregando'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function MomentoLoading() {
+function Esqueleto() {
   return (
-    <div className="min-h-screen py-8">
+    <div className="py-8">
       <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <Skeleton className="h-7 w-56" />
@@ -19,5 +20,13 @@ export default function MomentoLoading() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function MomentoLoading() {
+  return (
+    <CascaCarregando titulo="Meu Momento de Vida">
+      <Esqueleto />
+    </CascaCarregando>
   )
 }

@@ -1,6 +1,7 @@
+import { CascaCarregando } from '@/components/CascaCarregando'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function DiagnosticoLoading() {
+function Esqueleto() {
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-4 px-6 py-8">
       <Skeleton className="h-4 w-20" />
@@ -28,5 +29,13 @@ export default function DiagnosticoLoading() {
       </div>
       <Skeleton className="h-48 w-full rounded-card" />
     </div>
+  )
+}
+
+export default function DiagnosticoLoading() {
+  return (
+    <CascaCarregando titulo="Diagnóstico Completo">
+      <Esqueleto />
+    </CascaCarregando>
   )
 }
