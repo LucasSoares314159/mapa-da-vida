@@ -75,7 +75,8 @@
    * Enquanto o fbevents.js nao terminou de carregar, o evento fica so na fila
    * do stub — por isso espera a biblioteca (callMethod existe so depois dela)
    * por ate 1,5s e da mais 300ms para a requisicao sair. Se o Pixel estiver
-   * bloqueado, continua na hora: rastreio nunca segura uma compra.
+   * bloqueado, espera o teto inteiro (o stub do fbq existe mesmo assim, entao
+   * callMethod nunca aparece). Sem uso na /trilha desde nov/2026.
    */
   function trackMetaAntesDeSair(evento, params, continuar) {
     var seguiu = false

@@ -38,10 +38,21 @@ export function providerAtivo(): ProviderCheckout {
  */
 export async function startCheckout(
   params: ParamsCheckout,
-  siteUrl: string
+  siteUrl: string,
+  /** Recebe a duracao (ms) de cada etapa; so para medir, nao muda o fluxo. */
+  tempos?: Record<string, number>
 ): Promise<ResultadoCheckout> {
   const provider = providerAtivo()
+
+  const t0 = performance.now()
   const resultado = await provider.criarCobranca(params, siteUrl)
+  const t1 = performance.now()
   await gravarAtribuicaoCheckout(resultado.externalId, provider.nome, params)
+  const t2 = performance.now()
+
+  if (tempos) {
+    tempos.provedor = t1 - t0
+    tempos.atribuicao = t2 - t1
+  }
   return resultado
 }
