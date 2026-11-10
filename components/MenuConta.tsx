@@ -3,14 +3,16 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useFormStatus } from 'react-dom'
-import { Clock, Compass, LogOut, Plus, Users, Volume2, VolumeX } from 'lucide-react'
+import { Clock, Compass, LogOut, Plus, Smartphone, Users, Volume2, VolumeX } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { logout } from '@/app/actions/auth'
 import { gravarSomLigado, lerSomLigado } from '@/hooks/useCelebracao'
+import { useInstalacaoApp } from '@/hooks/useInstalacaoApp'
+import { PassosInstalacao } from '@/components/PassosInstalacao'
 import { cn } from '@/lib/utils'
 
 // Menu "Mais" do celular, aberto pelo ≡ e pelo avatar do Header. Guarda o que não coube
-// nas 5 abas do menu inferior: Momento de Vida, Rotina, novo mapa, som e sair.
+// nas 5 abas do menu inferior: Momento de Vida, Rotina, novo mapa, instalar o app, som e sair.
 // No computador tudo isso já está na Sidebar, e o avatar não abre nada.
 
 type Props = {
@@ -39,6 +41,14 @@ const ITEM =
 
 export function MenuConta({ aberto, onFechar, nomeUsuario, totalMembros }: Props) {
   const [som, setSom] = useState(true)
+  const [passosAbertos, setPassosAbertos] = useState(false)
+  const { plataforma, podeInstalar, abrirDialogoNativo } = useInstalacaoApp()
+
+  // Caminho fixo para instalar, para quem dispensou o convite da tela de hábitos.
+  async function instalar() {
+    onFechar()
+    if (!(await abrirDialogoNativo())) setPassosAbertos(true)
+  }
 
   useEffect(() => {
     if (aberto) setSom(lerSomLigado())
@@ -51,6 +61,7 @@ export function MenuConta({ aberto, onFechar, nomeUsuario, totalMembros }: Props
   }
 
   return (
+    <>
     <Dialog open={aberto} onOpenChange={(v) => !v && onFechar()}>
       {/* No celular vira folha presa ao rodapé; o Dialog padrão é centralizado. */}
       <DialogContent className="bottom-0 top-auto w-full max-w-none translate-y-0 rounded-b-none pb-[env(safe-area-inset-bottom)] data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:bottom-auto sm:top-1/2 sm:w-[calc(100%-2.5rem)] sm:max-w-[420px] sm:-translate-y-1/2 sm:rounded-painel">
@@ -72,6 +83,13 @@ export function MenuConta({ aberto, onFechar, nomeUsuario, totalMembros }: Props
             <Plus className="size-5 shrink-0" aria-hidden />
             Novo mapa
           </Link>
+
+          {podeInstalar && (
+            <button type="button" onClick={instalar} className={ITEM}>
+              <Smartphone className="size-5 shrink-0" aria-hidden />
+              Instalar o app
+            </button>
+          )}
 
           <button
             type="button"
@@ -114,5 +132,10 @@ export function MenuConta({ aberto, onFechar, nomeUsuario, totalMembros }: Props
         </div>
       </DialogContent>
     </Dialog>
+
+      {(plataforma === 'ios' || plataforma === 'android') && (
+        <PassosInstalacao aberto={passosAbertos} onFechar={() => setPassosAbertos(false)} plataforma={plataforma} />
+      )}
+    </>
   )
 }

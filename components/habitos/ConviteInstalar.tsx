@@ -2,27 +2,19 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { Share, SquarePlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
+import { PassosInstalacao } from '@/components/PassosInstalacao'
+import { useInstalacaoApp } from '@/hooks/useInstalacaoApp'
 
 // Convite para instalar a plataforma como app, no topo da tela de hábitos (só no
-// celular). Android: o Chrome oferece o próprio diálogo de instalação. iPhone: o
-// Safari não tem esse diálogo, então explicamos o caminho pelo botão Compartilhar.
-// Quem já abriu pelo app instalado não vê nada.
+// celular). Com o diálogo nativo do Chrome disponível, "Instalar" o abre; sem ele
+// (Safari do iPhone, sempre; Chrome do Android, quando ainda não ofereceu), o botão
+// mostra o passo a passo. Quem já abriu pelo app instalado não vê nada. O caminho
+// fixo, para quem dispensou, é o item "Instalar o app" do menu "Mais".
 
 const CHAVE_DISPENSA = 'pwa-convite-dispensado-em'
 // Quem disse "agora não" volta a ver o convite depois de duas semanas.
 const DIAS_ATE_REPETIR = 14
-
-type EventoInstalacao = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }
-
-function jaInstalado(): boolean {
-  return (
-    window.matchMedia('(display-mode: standalone)').matches ||
-    (navigator as Navigator & { standalone?: boolean }).standalone === true
-  )
-}
 
 function dispensadoRecentemente(): boolean {
   try {
@@ -34,23 +26,12 @@ function dispensadoRecentemente(): boolean {
 }
 
 export function ConviteInstalar() {
-  const [modo, setModo] = useState<'android' | 'ios' | null>(null)
-  const [evento, setEvento] = useState<EventoInstalacao | null>(null)
+  const { plataforma, podeInstalar, temDialogoNativo, abrirDialogoNativo } = useInstalacaoApp()
+  const [dispensado, setDispensado] = useState(true)
   const [passosAbertos, setPassosAbertos] = useState(false)
 
   useEffect(() => {
-    if (jaInstalado() || dispensadoRecentemente()) return
-    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      setModo('ios')
-      return
-    }
-    function aoOferecer(e: Event) {
-      e.preventDefault()
-      setEvento(e as EventoInstalacao)
-      setModo('android')
-    }
-    window.addEventListener('beforeinstallprompt', aoOferecer)
-    return () => window.removeEventListener('beforeinstallprompt', aoOferecer)
+    setDispensado(dispensadoRecentemente())
   }, [])
 
   function dispensar() {
@@ -59,18 +40,15 @@ export function ConviteInstalar() {
     } catch {
       // Sem storage o convite só volta na próxima visita.
     }
-    setModo(null)
+    setDispensado(true)
   }
 
   async function instalar() {
-    if (modo === 'ios') return setPassosAbertos(true)
-    if (!evento) return
-    await evento.prompt()
-    const { outcome } = await evento.userChoice
-    if (outcome === 'accepted') setModo(null)
+    if (!(await abrirDialogoNativo())) setPassosAbertos(true)
   }
 
-  if (!modo) return null
+  // Só celular: no computador o convite nem aparece (lg:hidden abaixo).
+  if (dispensado || !podeInstalar || (plataforma !== 'ios' && plataforma !== 'android')) return null
 
   return (
     <>
@@ -81,7 +59,7 @@ export function ConviteInstalar() {
           <p className="text-sm leading-snug text-mt-apoio">Abre direto nos seus hábitos, como um app.</p>
           <div className="mt-1 flex flex-wrap gap-2">
             <Button size="sm" onClick={instalar}>
-              {modo === 'ios' ? 'Como instalar' : 'Instalar'}
+              {temDialogoNativo ? 'Instalar' : 'Como instalar'}
             </Button>
             <Button size="sm" variant="ghost" onClick={dispensar}>
               Agora não
@@ -90,37 +68,7 @@ export function ConviteInstalar() {
         </div>
       </div>
 
-      <Dialog open={passosAbertos} onOpenChange={setPassosAbertos}>
-        <DialogContent>
-          <div className="flex flex-col gap-5 p-card-lg">
-            <DialogTitle className="pr-8 text-subtitulo text-mt-green-dark">
-              Instalar no <span className="normal-case">iPhone</span>
-            </DialogTitle>
-            <DialogDescription className="sr-only">Passo a passo para adicionar a Trilha à tela de início</DialogDescription>
-            <ol className="flex flex-col gap-4 text-base text-mt-black">
-              <li className="flex items-start gap-3">
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-mt-green-sup text-sm font-bold text-mt-green-dark">1</span>
-                <span>
-                  No Safari, toque em <strong>Compartilhar</strong>{' '}
-                  <Share className="inline size-4 align-text-bottom text-mt-green-dark" aria-hidden /> na barra de baixo.
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-mt-green-sup text-sm font-bold text-mt-green-dark">2</span>
-                <span>
-                  Role e toque em <strong>Adicionar à Tela de Início</strong>{' '}
-                  <SquarePlus className="inline size-4 align-text-bottom text-mt-green-dark" aria-hidden />.
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-mt-green-sup text-sm font-bold text-mt-green-dark">3</span>
-                <span>Toque em <strong>Adicionar</strong>. A Trilha aparece com os seus apps e abre direto nos hábitos.</span>
-              </li>
-            </ol>
-            <Button onClick={() => setPassosAbertos(false)}>Entendi</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <PassosInstalacao aberto={passosAbertos} onFechar={() => setPassosAbertos(false)} plataforma={plataforma} />
     </>
   )
 }
