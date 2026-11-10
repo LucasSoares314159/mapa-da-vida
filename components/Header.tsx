@@ -6,6 +6,7 @@ import { Mail, Menu, MessageCircle, Youtube } from 'lucide-react'
 type Props = {
   titulo: string
   nomeUsuario: string
+  /** Celular: o ≡ e o avatar abrem o menu "Mais". No computador nenhum dos dois aparece como botão. */
   onMenuClick?: () => void
 }
 
@@ -14,17 +15,19 @@ export function Header({ titulo, nomeUsuario, onMenuClick }: Props) {
 
   return (
     <header
-      className="flex h-14 shrink-0 items-center justify-between border-b-linha border-mt-border bg-white px-5"
+      className="flex min-h-14 shrink-0 items-center justify-between border-b-linha border-mt-border bg-white px-5 pt-[env(safe-area-inset-top)]"
     >
-      <div className="flex items-center gap-3">
-        {/* Botão hamburguer — visível apenas em mobile */}
+      <div className="flex items-center gap-1">
+        {/* O ≡ é o gesto que todo mundo reconhece; só o avatar como gatilho deixava
+            Momento de Vida e Rotina escondidos para quem vinha da gaveta antiga. */}
         {onMenuClick && (
           <button
+            type="button"
             onClick={onMenuClick}
-            className="flex size-11 items-center justify-center rounded-full text-mt-green-dark transition-colors hover:bg-mt-off-white lg:hidden"
             aria-label="Abrir menu"
+            className="-ml-2.5 flex size-11 items-center justify-center rounded-full text-mt-green-dark transition-colors hover:bg-mt-off-white focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-mt-green-dark lg:hidden"
           >
-            <Menu className="size-5" />
+            <Menu className="size-5" aria-hidden />
           </button>
         )}
         <h1 className="font-heading text-[17px] font-medium text-mt-green-dark">{titulo}</h1>
@@ -69,8 +72,20 @@ export function Header({ titulo, nomeUsuario, onMenuClick }: Props) {
           <span className="hidden sm:inline">Grupo do WhatsApp</span>
         </Link>
 
+        {/* No celular o avatar abre o menu "Mais"; no computador é só visual. */}
+        <button
+          type="button"
+          onClick={onMenuClick}
+          aria-label="Abrir menu da conta"
+          className="flex size-11 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-mt-green-dark lg:hidden"
+        >
+          <span className="flex size-8 items-center justify-center rounded-full bg-mt-green-sup font-heading text-sm font-bold text-mt-green-dark">
+            {inicial}
+          </span>
+        </button>
         <div
-          className="flex size-8 items-center justify-center rounded-full bg-mt-green-sup font-heading text-sm font-bold text-mt-green-dark"
+          aria-hidden
+          className="hidden size-8 items-center justify-center rounded-full bg-mt-green-sup font-heading text-sm font-bold text-mt-green-dark lg:flex"
         >
           {inicial}
         </div>

@@ -114,6 +114,52 @@ export const RITMOS: Record<RitmoObjetivo, {
   parado:    { label: 'Parado',    tom: 'vermelho', descricao: 'Não saiu do lugar' },
 }
 
+// ---- Monitor de Hábitos ----
+
+export type IconeHabito =
+  | 'caminhar' | 'agua' | 'alimentacao' | 'sono' | 'leitura'
+  | 'financas' | 'trabalho' | 'conversa' | 'escrita' | 'cuidado'
+
+// Catálogo fechado de ícones. O desenho (Lucide) é escolhido no componente; aqui
+// fica só o id gravado no banco e o nome lido pelo leitor de tela.
+export const ICONES_HABITO: Record<IconeHabito, { label: string }> = {
+  caminhar:    { label: 'Caminhar' },
+  agua:        { label: 'Água' },
+  alimentacao: { label: 'Alimentação' },
+  sono:        { label: 'Sono' },
+  leitura:     { label: 'Leitura' },
+  financas:    { label: 'Finanças' },
+  trabalho:    { label: 'Trabalho' },
+  conversa:    { label: 'Conversa' },
+  escrita:     { label: 'Escrita' },
+  cuidado:     { label: 'Cuidado' },
+}
+
+export interface Habito {
+  id: string
+  user_id: string
+  nome: string
+  icone: IconeHabito
+  area: NomeArea
+  // Vezes por semana, de 1 a 7. Em qualquer dia: dia livre não é falha.
+  meta_semanal: number
+  ancora?: string | null
+  ordem?: number | null
+  criado_em: string
+  arquivado_em?: string | null
+}
+
+export type StatusRegistroHabito = 'feito' | 'pulado'
+
+export interface RegistroHabito {
+  habito_id: string
+  user_id: string
+  // 'YYYY-MM-DD' no fuso de Brasília.
+  dia: string
+  status: StatusRegistroHabito
+  criado_em: string
+}
+
 export type NomeArea =
   | 'Exercícios Físicos'
   | 'Alimentação'

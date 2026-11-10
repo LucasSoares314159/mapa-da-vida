@@ -129,6 +129,15 @@ const config: Config = {
       animation: {
         'check-spring': 'check-spring 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
         'entrada-cta': 'entrada-cta 0.45s cubic-bezier(0.22, 1, 0.36, 1) both',
+        // Monitor de Hábitos: a celebração ao marcar é forte de propósito
+        // (recompensa sem punição — ver CLAUDE.md). Todas saem com
+        // motion-reduce:animate-none nos componentes.
+        'habito-pop':       'habito-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'habito-onda':      'habito-onda 0.7s ease-out forwards',
+        'habito-particula': 'habito-particula 0.75s ease-out forwards',
+        'habito-subir':     'habito-subir 1s ease-out forwards',
+        'habito-entrar':    'habito-entrar 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+        'habito-festa':     'habito-festa 1.1s cubic-bezier(0.2, 0.7, 0.3, 1) forwards',
       },
       keyframes: {
         'check-spring': {
@@ -141,6 +150,34 @@ const config: Config = {
         'entrada-cta': {
           '0%': { opacity: '0', transform: 'translateY(24px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'habito-pop': {
+          '0%': { transform: 'scale(1)' },
+          '35%': { transform: 'scale(1.35)' },
+          '65%': { transform: 'scale(0.92)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        'habito-onda': {
+          '0%': { transform: 'scale(0.85)', opacity: '0.55' },
+          '100%': { transform: 'scale(1.45)', opacity: '0' },
+        },
+        // A partícula sai do centro para fora; a direção vem da rotação do pai.
+        'habito-particula': {
+          '0%': { transform: 'translateY(-46px) scale(1)', opacity: '1' },
+          '100%': { transform: 'translateY(-96px) scale(0.3)', opacity: '0' },
+        },
+        'habito-subir': {
+          '0%': { transform: 'translateY(6px)', opacity: '0' },
+          '20%': { transform: 'translateY(0)', opacity: '1' },
+          '100%': { transform: 'translateY(-34px)', opacity: '0' },
+        },
+        'habito-entrar': {
+          '0%': { transform: 'scale(0.85)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'habito-festa': {
+          '0%': { transform: 'translateY(-40px) scale(1.2)', opacity: '1' },
+          '100%': { transform: 'translateY(-210px) scale(0.3)', opacity: '0' },
         },
       },
     },

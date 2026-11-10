@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { ICONES_HABITO, PILARES } from '@/types'
+import type { IconeHabito, NomeArea } from '@/types'
 
 export const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -105,3 +107,29 @@ export const perfilOnboardingSchema = z
 
 export type AreaConversaData = z.infer<typeof areaConversaSchema>
 export type PerfilOnboardingData = z.infer<typeof perfilOnboardingSchema>
+
+// ---- Monitor de Hábitos ----
+// Mesma regra no formulário e em app/actions/habitos.ts: a action é um endpoint
+// público e não pode confiar no que o cliente já validou.
+const AREAS_HABITO = Object.values(PILARES).flatMap((p) => p.areas) as [NomeArea, ...NomeArea[]]
+const ICONES_VALIDOS = Object.keys(ICONES_HABITO) as [IconeHabito, ...IconeHabito[]]
+
+export const habitoSchema = z.object({
+  nome: z
+    .string()
+    .trim()
+    .min(3, 'Escreva o que você vai fazer')
+    .max(24, 'Use até 24 caracteres: o nome aparece dentro do círculo'),
+  icone: z.enum(ICONES_VALIDOS, { message: 'Escolha um ícone' }),
+  area: z.enum(AREAS_HABITO, { message: 'Escolha a área do Mapa que esse hábito cuida' }),
+  meta_semanal: z.number().int().min(1, 'Escolha de 1 a 7 vezes').max(7, 'Escolha de 1 a 7 vezes'),
+  ancora: z
+    .string()
+    .trim()
+    .max(60, 'Use até 60 caracteres')
+    .optional()
+    .transform((v) => (v ? v : null)),
+})
+
+export type HabitoInput = z.input<typeof habitoSchema>
+export type HabitoData = z.output<typeof habitoSchema>

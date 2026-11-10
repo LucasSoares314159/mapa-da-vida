@@ -534,7 +534,7 @@ function Toast({ mensagem, visivel }: { mensagem: string; visivel: boolean }) {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed bottom-7 left-1/2 z-[200] whitespace-nowrap rounded-badge bg-mt-green-dark px-5 py-2.5 text-[13px] font-medium text-white shadow-mt-2 transition-[opacity,transform] duration-200"
+      className="pointer-events-none fixed bottom-24 left-1/2 lg:bottom-7 z-[200] whitespace-nowrap rounded-badge bg-mt-green-dark px-5 py-2.5 text-[13px] font-medium text-white shadow-mt-2 transition-[opacity,transform] duration-200"
       style={{
         transform: visivel ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(16px)',
         opacity: visivel ? 1 : 0,

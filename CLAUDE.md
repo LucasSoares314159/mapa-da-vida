@@ -90,7 +90,7 @@ npm run build             # só com o dev parado
 |---|---|---|
 | `/` | Landing page | pública |
 | `/auth/*` | login, cadastro, esqueci/redefinir senha, verificar e-mail, callback | pública |
-| `/content` | Trilha: módulos e lives | ✅ |
+| `/content` | Trilha: faixa de hábitos de hoje, módulos e materiais | ✅ |
 | `/content/modulo/[id]` | Aula individual | ✅ |
 | `/content/material/[id]` | Material de apoio — quadro do Excalidraw | ✅ |
 | `/mapa/novo` → `/mapa/[id]` | Fluxo conversacional do AHA moment | ✅ |
@@ -99,7 +99,11 @@ npm run build             # só com o dev parado
 | `/momento` | Momento de Vida | ✅ |
 | `/objetivos` | Objetivos + Radar de Coerência | ✅ |
 | `/rotina` | Calculadora de Rotina | ✅ |
+| `/habitos` | Monitor de Hábitos: tela Hoje (grade de círculos) | ✅ |
+| `/habitos/novo`, `/habitos/[id]` | Criar · editar e arquivar hábito | ✅ |
+| `/habitos/progresso` | Repetições, constância, calendário de 5 semanas e placar por hábito | ✅ |
 | `/dashboard` | Mapas salvos e evolução | ✅ |
+| `/manifest.webmanifest`, `/sw.js`, `/offline.html` | App instalável (PWA) — ver [App instalável](#app-instalável-pwa) | pública |
 | `/admin` | Back office de métricas | ✅ + `ADMIN_EMAILS` |
 | `/admin/modulos`, `/admin/modulos/[id]` | Editor do conteúdo escrito das aulas | ✅ + `ADMIN_EMAILS` |
 | `/api/cron/emails` | Disparo diário (21h UTC) | `CRON_SECRET` |
@@ -128,10 +132,12 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
   /ui             shadcn/ui
   /admin          Kpi · Funil · PainelMetricas · TabelaAlunos · Dedicacao · DistribuicaoModulos
   /mapa           MapaFlow · RevelacaoMapa · RevelacaoDiagnostico · AreaDestaqueOverlay
+  /               AuthLayout · Header · Sidebar · NavInferior · MenuConta · RegistroServiceWorker (e o resto)
+  /habitos        HabitosHoje · FaixaHabitos · CirculoHabito · FormularioHabito · ProgressoHabitos · ConviteInstalar · iconesHabito
   /lp
 /lib              ver tabela abaixo
 /emails           6 templates react-email
-/hooks            useMetaPixel · useUTMForward
+/hooks            useMetaPixel · useUTMForward · useCelebracao · useMarcarHabitos
 /types/index.ts   tipos + PILARES + ESTACOES + COR_STATUS
 ```
 
@@ -147,6 +153,7 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 | `materiais.ts` | Catálogo dos materiais de apoio — título e URL do quadro |
 | `conteudo-modulos.ts` | Leitura/escrita dos blocos de texto de cada módulo (tabela `modulos_conteudo`) |
 | `rotina.ts` | Cálculo de horas livres e Zona |
+| `habitos.ts` | Dia em Brasília, semana, constância, calendário e teto do Monitor de Hábitos |
 | `onboarding.ts` | Passos, progresso e falas do Mapa conversacional |
 | `gate-mapa.ts` | Cookie e isenções do gate do primeiro mapa |
 | `prazo.ts` | Labels de prazo de objetivo |
@@ -180,6 +187,8 @@ as novas migrações versionadas em `supabase/migrations`.
 | `momentos_vida` | `estacao`, `frase`, `duracao`, `data_revisao`, `ativo` — 1 ativo por usuário |
 | `progresso_aulas` | `user_id`, `modulo_id`, `concluido_em`, `data_confiavel` |
 | `modulos_conteudo` | `modulo_id` (PK, texto), `blocos` (jsonb), `atualizado_em` |
+| `habitos` | `nome` (3–24), `icone`, `area`, `meta_semanal` (1–7), `ancora`, `ordem`, `criado_em`, `arquivado_em` |
+| `habito_registros` | PK `(habito_id, dia)`, `user_id`, `dia` (date, Brasília), `status` (`feito`/`pulado`) |
 | `compras` | provedor/checkout, `external_id`, e-mail, status, `user_id`, método, parcelas, datas do funil e `meta_purchase_enviado_em` |
 | `checkout_atribuicao` | `external_id` (PK), `fbp`, `fbc`, `client_ip`, `client_user_agent`, `source_url`, `source` — gravada na criação da cobrança |
 | `tokens_acesso_compra` | hash do token, expiração, uso e invalidação |
@@ -214,6 +223,12 @@ interna seria o oposto do pretendido.
 o card mostrar "Definir ritmo" em tom neutro em vez de vermelho. Os objetivos anteriores à
 feature ficam nulos de propósito — derivar o ritmo do prazo inventaria uma declaração que a
 pessoa nunca fez. Mesmo padrão do Radar de Coerência e de `profiles.data_nascimento`.
+
+**`habito_registros.dia` é o dia de Brasília, calculado no servidor** (`diaDeHoje()` em
+`lib/habitos.ts`). Nunca grave a data do cliente nem `now()::date` do banco (UTC): marcar
+às 22h cairia no dia seguinte. Desmarcar **apaga a linha**; não existe estado "desfeito".
+Hábito nunca é apagado pelo usuário, só arquivado (`arquivado_em`), para o histórico seguir
+contando.
 
 **`objetivos.ordem` é por `(user_id, prazo)`**, não global. Reordenar numa aba não mexe nas
 outras. `NULL` cai no fim da lista (`nullsFirst: false` na query), nunca no topo.
@@ -396,6 +411,124 @@ frase uma vez em vez de letra por letra. As 3 opções são um `radiogroup` nave
 setas, e o status nunca é comunicado só por cor.
 
 ---
+
+## Monitor de Hábitos
+
+Feature de **novembro/2026**: tela Hoje (`/habitos`), criação e edição, progresso,
+faixa no topo da Trilha, menu inferior no celular e app instalável. Protótipo aprovado:
+grade de círculos, segurar para marcar, celebração forte. **Adesão baixa nas primeiras
+semanas é esperada**, não gargalo; o `/admin` mostra a data do primeiro hábito criado.
+
+**A faixa "Hábitos de hoje" fica no topo de `/content`**, logo abaixo das boas-vindas:
+é onde a pessoa já passa todo dia, e marcar dali dispensa lembrete. Usa o mesmo
+`CirculoHabito` (tamanho compacto) e a mesma lógica da tela Hoje (`useMarcarHabitos`).
+A tela cheia de "dia completo" fica só em `/habitos`; na faixa, o fechamento do dia é
+um aviso.
+
+**Recompensa sem punição.** A celebração ao marcar é deliberadamente forte; falhar não
+tem consequência visual nenhuma. Nada zera: não há streak. O número de destaque do
+progresso é o de **repetições totais**, que só cresce. Streak que zera é o motivo mais
+citado de abandono de apps de hábito.
+
+**Meta semanal, não dias fixos.** "3x por semana, em qualquer dia": dia livre não é falha.
+
+**Constância = Σ min(feitos, meta) / Σ meta** nas 4 semanas completas antes da atual
+(`constancia()` em `lib/habitos.ts`). Três decisões dentro dessa fórmula:
+- a semana corrente fica de fora, senão a constância cairia toda segunda-feira;
+- passar da meta numa semana não compensa a semana fraca seguinte (o `min`);
+- só entram semanas que começam depois da criação do hábito, então criar um hábito
+  novo não derruba a média de quem já tinha outros. Sem semana completa, a constância
+  é `null` ("começou agora"), nunca 0%.
+
+**O calendário conta, em cada dia, só os hábitos que existiam nele.** Criar um hábito
+hoje não pode apagar os "dias completos" do passado.
+
+**Teto de 5 hábitos ativos** (`LIMITE_HABITOS_ATIVOS`), checado na action. Diferente dos
+Objetivos, que perderam o teto: hábito tem custo diário, objetivo não.
+
+**A action recebe o estado desejado** (`definirHabitoHoje(id, feito)`), não um "alternar":
+a tela marca de forma otimista, e dois toques rápidos com "alternar" podem chegar fora
+de ordem e inverter o resultado.
+Além disso, `HabitosHoje` enfileira as gravações **por hábito**: cada chamada espera a
+anterior do mesmo hábito. Se a gravação falhar, a tela desfaz a marcação só se ainda
+mostrar o estado que falhou.
+
+**Segurar ~0,5s para marcar** (`TEMPO_SEGURAR_MS` em `CirculoHabito`), não tocar. O
+círculo é grande e fica onde o polegar rola a tela: toque simples marcaria sem querer.
+E a espera, com o círculo enchendo de verde, faz parte da recompensa. Toque curto mostra
+"segure o círculo para marcar"; teclado (Enter/Espaço) marca direto, porque teclado não
+tem "segurar". A duração também está na classe `duration-[550ms]` do preenchimento.
+
+**Som ligado por padrão**, preferência no `localStorage` (`habitos-som`), não no banco: é
+conforto do aparelho. Vibração só existe no Android (o iPhone não implementa
+`navigator.vibrate`). Animações têm `motion-reduce:animate-none`.
+
+**O nome abaixo do círculo é o link de edição; o círculo só marca.** Dar dois papéis ao
+mesmo alvo (toque curto edita, segurar marca) faria quem tenta marcar com um toque cair
+no formulário. O toque curto no círculo ensina o gesto.
+
+**A bolinha da área no formulário é a cor do último Mapa** (`app/habitos/ultimo-mapa.ts`),
+sem o nome do status escrito: só a cor, com o status no `aria-label`. Conta isenta do gate
+pode não ter Mapa; aí os chips aparecem sem bolinha.
+
+**As repetições do progresso são contadas desde sempre**, numa consulta de contagem à
+parte; o resto da tela lê só as últimas 8 semanas. É o número que "só cresce": recortá-lo
+faria ele cair com o tempo.
+
+**Queda na constância aparece em tom neutro, nunca vermelho** ("−5 pontos sobre as 4
+anteriores"). Vermelho ali seria a punição que a feature evita; a informação continua lá.
+
+**A constância da tela Hoje não muda ao marcar.** É de propósito: ela olha só semanas
+fechadas. O que reage na hora é o anel da semana e o "X de Y hoje".
+
+### Navegação no celular (novembro/2026)
+
+No celular, a plataforma tem **menu inferior** (`NavInferior`: Hábitos · Progresso ·
+Trilha · Objetivos · Mapa), e o **≡ e o avatar do Header abrem o menu "Mais"**
+(`MenuConta`: Momento de Vida, Rotina, novo mapa, som dos hábitos, sair). O drawer da
+Sidebar saiu do celular; no computador a Sidebar segue igual. O ≡ voltou porque só o
+avatar como gatilho escondia Momento de Vida e Rotina de quem conhecia a gaveta antiga.
+O menu "Mais" não repete as abas: dois menus completos disputariam o mesmo papel. É o primeiro passo do
+app instalável: a mesma navegação serve ao PWA da plataforma inteira.
+
+- **O menu inferior está no fluxo do layout, não em `fixed`** — é o último filho do
+  flex-col de `AuthLayout`. Fixo, ele cobriria o fim de toda página e cada tela teria de
+  reservar padding. Avisos (`fixed`) sobem para `bottom-24` no celular para não cair nele.
+- **`h-dvh`, não `h-screen`**, no `AuthLayout`: no iPhone `100vh` inclui a barra do
+  Safari e o menu nasceria escondido atrás dela.
+- **`viewport-fit=cover` é global** (`app/layout.tsx`): sem ele o iOS reporta safe area
+  zero. Header e menu inferior compensam com `env(safe-area-inset-*)`.
+- **`/rotina` e `/mapa/*` não usam `AuthLayout` e ficam sem menu**: o Mapa é um fluxo
+  focado, e a Calculadora tem fundo e volta próprios.
+
+### App instalável (PWA)
+
+Desde **novembro/2026** a plataforma é instalável no celular como **"Trilha"**
+(`app/manifest.ts`). Decisões:
+
+- **O app é a plataforma inteira, não só os hábitos.** O menu inferior leva à Trilha, aos
+  Objetivos e ao Mapa; num app com escopo só de `/habitos`, esses toques sairiam do app e
+  abririam o navegador. `scope: '/'`.
+- **Instalado, abre em `/habitos`** (`start_url`): o gesto diário a um toque. Pelo
+  navegador, o login continua levando a `/content`. Quem abre o app deslogado passa pelo
+  login e cai em `/content` — aceito, acontece uma vez.
+- **O service worker (`public/sw.js`) não guarda nada em cache além de `offline.html`.**
+  As telas são autenticadas e por pessoa; servir versão guardada mostraria os hábitos de
+  ontem como se fossem de hoje. Ele só intercepta navegações, e só para cair na página
+  offline quando a rede falha. Trocar `offline.html` exige subir a versão do `CACHE`.
+- **`offline.html` é HTML puro com o símbolo embutido em SVG**: sem rede, nem a imagem do
+  ícone carregaria.
+- **Registro só em produção e só nas telas autenticadas** (`RegistroServiceWorker` dentro
+  do `AuthLayout`): no `next dev` atrapalharia o recarregamento, e a LP e o quiz não
+  precisam dele para nada.
+- **Convite de instalação só na tela de hábitos e só no celular** (`ConviteInstalar`).
+  Android usa o diálogo nativo (`beforeinstallprompt`); o Safari do iPhone não tem diálogo,
+  então o convite mostra o passo a passo pelo botão Compartilhar. "Agora não" esconde por
+  14 dias (`localStorage`). Quem já abriu pelo app instalado nunca vê o convite.
+- **Ícones gerados do símbolo da marca** (verde sobre off-white): `public/icons/` (192, 512
+  e o *maskable*, com o símbolo menor para caber na zona segura) e `app/apple-icon.png`.
+- Sem notificações nesta leva. Lembrete por push fica para depois; no iPhone ele só
+  funciona com o app instalado.
 
 ## Momento de Vida
 
@@ -931,8 +1064,8 @@ documento), então remontar a tela não registra o custom element de novo.
 
 **No celular o botão é uma barra fixa na base, por cima do vídeo.** Com o 9:16 em largura
 total, o botão no fluxo nascia abaixo da dobra e quem assistia não o via surgir. A barra
-respeita a safe area — o que exige `viewport-fit=cover`, declarado **só no layout do quiz**
-(por isso o wrapper dali tem padding lateral de safe area). Com o botão liberado, o
+respeita a safe area — o que exige `viewport-fit=cover` (hoje global, em `app/layout.tsx`;
+o layout do quiz também o declara, e por isso o wrapper dali tem padding lateral de safe area). Com o botão liberado, o
 container ganha `pb-40` para nada ficar preso atrás da barra. No desktop o botão volta ao
 fluxo, abaixo do player.
 
@@ -1014,8 +1147,13 @@ nada sobre dedicação.
 
 **Risco:** 7+ dias sem concluir aula (`DIAS_RISCO`), só Turma 2.
 
+**Hábitos fora do funil, dentro do alcance.** "Criou um hábito" entra no bloco de
+alcance e num bloco próprio (`resumoHabitos()`): adotaram, marcaram em 7 dias, hábitos
+ativos por pessoa e constância média. No funil mediria a data de lançamento, não o
+comportamento. A constância média só conta quem já tem semana fechada.
+
 **Privacidade:** a tela mostra nome, e-mail e progresso, mas **nunca** as observações
-do Mapa nem o texto dos objetivos. Dá para agir sem ler o que a pessoa escreveu no
+do Mapa nem o texto dos objetivos, nem o nome dos hábitos. Dá para agir sem ler o que a pessoa escreveu no
 momento mais vulnerável. Agregados de status seguem visíveis, sem nome atrelado.
 
 ---
