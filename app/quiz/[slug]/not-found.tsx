@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export default function QuizNaoEncontrado() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-mt-off-white px-6">
+    <main className="flex min-h-dvh items-center justify-center bg-mt-off-white px-6">
       <div className="w-full max-w-md text-center">
         <h1 className="font-heading text-2xl font-bold text-mt-black">
           Este diagnóstico não está disponível.

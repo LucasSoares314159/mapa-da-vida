@@ -157,7 +157,7 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
 | `cron-auth.ts` | Validação do `CRON_SECRET` |
 | `checkout/` | Abstração do provider de pagamento — ver [Funil de quiz](#funil-de-quiz) |
 | `quiz/` | Motor de pontuação, passos, sessão e configs dos quizzes |
-| `tracking/` | `track()` do funil, ponte React do Pixel (`meta.ts`), captura de atribuição, Conversions API (`capi.ts`) e contrato do Purchase compartilhado por browser e servidor (`purchase.ts`) |
+| `tracking/` | `track()` do funil, ponte React do Pixel (`meta.ts`), GA4 com carregamento adiado (`ga.ts`), "a página está visível?" (`visibilidade.ts`), captura de atribuição, Conversions API (`capi.ts`) e contrato do Purchase compartilhado por browser e servidor (`purchase.ts`) |
 | `supabase.ts` / `-server.ts` / `-admin.ts` | Clientes browser / server / service-role |
 | `utils.ts` | `cn()` com os tokens do sistema visual registrados no `tailwind-merge` |
 | `validations.ts` | Schemas Zod |
@@ -591,9 +591,10 @@ Pronto: `/quiz/quiz-2` existe. **Nenhuma tela nova, nenhuma rota nova.** Um
 componente renderiza qualquer `ConfigQuiz`; se criar um quiz exigir escrever
 componente, a config é que está com campo faltando.
 
-Ao mudar perguntas ou pesos de um quiz **já no ar**, incremente `versao`: ela
-invalida os rascunhos em `sessionStorage`, que de outro modo pontuariam respostas
-antigas com a matriz nova.
+Ao mudar perguntas, pesos ou a **sequência de telas** de um quiz **já no ar**,
+incremente `versao`: ela invalida os rascunhos em `sessionStorage`, que de outro modo
+pontuariam respostas antigas com a matriz nova — ou, com uma tela a mais ou a menos,
+reabririam na tela errada, porque o índice salvo é posicional.
 
 ### Decisões que o código não explica
 
@@ -638,15 +639,93 @@ WhatsApp. Encurtar a copy das opções não era opção — a redação é dos d
 
 **Rascunho em `sessionStorage`, limpo ao chegar no resultado.** Perder seis respostas
 num F5 é ruim, mas um rascunho antigo reaparecendo para quem volta pelo anúncio seria
-pior: a pessoa veria um resultado que não respondeu agora.
+pior: a pessoa veria um resultado que não respondeu agora. Restaurar um rascunho conta
+como já ter começado: o `quiz_start` daquela pessoa já saiu, e não sai de novo.
+
+### Entrada sem abertura (novembro/2026, branch `feat/quiz-sem-intro`)
+
+A primeira campanha rodou 21h: 83 `quiz_view`, 8 `quiz_start`, 6 `quiz_complete`. Quem
+começava terminava; a perda estava na entrada, e era pior no Android (3% de início,
+contra 24% no iPhone). Daí três mudanças, e uma hipótese descartada.
+
+**Não há tela de abertura: quem chega cai na pergunta 1.** O anúncio já promete as 6
+perguntas; a abertura repetia a promessa e pedia um toque sem entregar nada — e num
+Android de 360×600 o botão dela ficava a 23px da borda de baixo. A copy da TELA 01 dos
+docs saiu da config. Por isso `quiz-1` está na `versao` 2.
+
+**O `quiz_start` sai na primeira resposta**, imediatamente antes do `quiz_answer` da
+etapa 1 — antes saía no toque de "Começar meu diagnóstico". **A taxa de início antes e
+depois desta mudança não é comparável** (o denominador também mudou, abaixo): compare
+começos por real gasto.
+
+**`quiz_view` só com a página visível** (`lib/tracking/visibilidade.ts`). Carga em
+segundo plano — aba de trás, pré-renderização, pré-carregamento do navegador de um app —
+executa o JavaScript sem ninguém ver a tela. No diagnóstico o Pixel contou 58
+`quiz_view` no Android contra 23 visualizações da página de destino no Gerenciador; não
+foi possível confirmar que a Meta pré-carrega a página, mas esse filtro tira a dúvida
+do denominador. O `PageView` do Pixel continua na carga: o Pixel não foi tocado.
+
+**O GA4 só é baixado na primeira resposta** (`lib/tracking/ga.ts`). Eram 177 kB de
+`gtag.js` numa tela cujo único trabalho é um toque. Os eventos anteriores não se perdem:
+ficam na fila do `dataLayer` e saem quando a biblioteca chega. O custo aceito: **quem sai
+sem responder nunca baixa o `gtag.js`, e o `quiz_view` dela não chega ao GA4.** A taxa de
+entrada se lê no Pixel; no GA4, o funil começa de fato no `quiz_start`. O Pixel ficou na
+entrada de propósito — adiá-lo mudaria o denominador da campanha de novo.
+
+**O preload da VTurb não estava na entrada** e ficou onde estava, na tela do
+diagnóstico. A hipótese de que ele pesava na primeira tela era falsa: a entrada baixava 0
+byte da VTurb. Movê-lo para "depois da primeira resposta" o faria carregar *mais cedo*.
+
+Resultado no build local, 4G lento (1,6 Mbps, 150ms) e CPU 4x: entrada de **749 kB para
+508 kB**, primeiro botão respondendo em **1,19s em vez de 1,64s** — e esse botão agora já
+é a resposta da pergunta 1, não um "Começar".
+
+### Tela baixa (`celular-baixo`)
+
+Os navegadores do Instagram e do Facebook comem altura com as barras deles: um Android
+de 360×640 chega a ~600px visíveis. Sem Android real para testar, o fluxo é coberto
+**pelo extremo**: a varredura roda em 360×480, 560, 600 e 640 com user agent do
+Instagram Android, e em cada tela o essencial precisa estar visível sem rolar e sem
+nada por cima — a pergunta e as 4 opções, o botão da ponte, o botão do diagnóstico, o
+vídeo com os controles e a barra de compra. 480px é mais baixo que qualquer navegador de
+app real. A primeira varredura achou quatro telas que dependiam de tela alta:
+
+- **Perguntas 2 a 5:** a última opção ficava até ~80px abaixo da dobra. Com
+  auto-advance, opção fora da tela é opção que a pessoa nem considera.
+- **Ponte:** o botão ficava em ~830px — fora da dobra até em celular de 800px.
+- **Diagnóstico:** o botão "Assistir à minha análise" ficava em ~1200px, em qualquer
+  celular — e era o trecho que mais perdia gente (6 terminaram o quiz, 2 deram play).
+- **VSL:** o 9:16 em largura total tem 640px de altura em 360px de largura; a legenda e
+  os controles da VTurb ficavam fora da tela.
+
+Consertos: o breakpoint **`celular-baixo`** (`tailwind.config.ts`, largura < 640px **e**
+altura ≤ 700px — notebook baixo tem largura de sobra e fica de fora) encolhe espaçamento
+e tipografia das perguntas, da ponte e da chamada da VSL; **`celular-minimo`** (altura ≤
+540px) encolhe mais um degrau, para as perguntas com caixa de contexto caberem em 480px.
+Os botões da ponte e do diagnóstico **grudam no rodapé** no celular, como o da pergunta
+6 — a pessoa continua rolando e lendo tudo, o botão só fica sempre alcançável. O degradê
+acima da barra da pergunta 6 tem a mesma altura da margem entre a opção d e o botão:
+maior que ela, cobria a base da opção (a checagem de oclusão precisa contar o degradê,
+que é `pointer-events-none` e passa despercebido pelo `elementFromPoint`).
+
+**Altura em `dvh`, nunca `vh`/`min-h-screen`.** O `vh` do navegador de app conta a tela
+inteira e ignora as barras do app: o layout acha que tem mais altura do que tem. O player tem a **largura limitada pela altura visível**
+(`LARGURA_VSL` em `VslPlayer.tsx`, em `dvh`), descontando a chamada acima dele — mexeu
+na chamada, confira o desconto. **Limite conhecido:** depois dos 282s, a barra do botão de compra cobre os ~48px de baixo
+do vídeo — onde ficam o progresso e o pause da VTurb — em qualquer altura. É o
+comportamento anterior, mantido de propósito: reservar o espaço desde o início encolheria
+o vídeo pelos 4:42 inteiros, e encolhê-lo só na oferta faz o vídeo pular de tamanho no
+momento da venda (em 480px ele cairia para ~164px de largura). Quem precisar pausar rola
+um pouco: o container ganha `pb-40` com a barra.
 
 ### Visual do quiz = sistema da LP `/trilha` (novembro/2026)
 
 Quem chega do anúncio vê o quiz, a VSL e a LP como uma página só. Desde novembro/2026
 o sistema da LP é o da plataforma inteira — ver [Sistema visual](#sistema-visual--o-da-lp-trilha).
 
-- **Abertura e ponte em verde escuro**, como o hero e a virada da LP; perguntas,
-  processando e resultado no off-white. `QuizConversa` troca o fundo por passo.
+- **Ponte em verde escuro**, como a virada da LP; perguntas, processando e resultado
+  no off-white. `QuizConversa` troca o fundo por passo. (A abertura, que era o hero
+  escuro com o mascote, saiu do fluxo — ver [Entrada sem abertura](#entrada-sem-abertura-novembro2026-branch-featquiz-sem-intro).)
 - **`*trecho*` na config é o `<em>` da LP** (Satoshi 700, `--verde` no escuro). É só
   marcação: a redação dos docs não muda, e `TextoQuiz` a remove.
 - **Botão é `BotaoQuiz`** (pílula `--verde`, texto branco). Branco sobre verde é
@@ -676,7 +755,8 @@ a CAPI derivarem o mesmo `event_id` sem depender de identificadores internos do 
 `track()` em `lib/tracking/eventos.ts` manda cada evento para o **Pixel e o GA4** na
 mesma chamada: o Pixel alimenta a otimização da campanha, o GA4 dá o relatório de funil
 com abandono por etapa — que no Gerenciador da Meta exigiria uma conversão personalizada
-por passo.
+por passo. No GA4 o evento entra numa fila e só sai depois da primeira resposta, quando o
+`gtag.js` é baixado — ver [Entrada sem abertura](#entrada-sem-abertura-novembro2026-branch-featquiz-sem-intro).
 
 Eventos: `quiz_view` · `quiz_start` · `quiz_answer` (com etapa) · `quiz_complete` (com
 perfil, regra e pontuações) · `vsl_play` · `cta_click`.
@@ -870,6 +950,9 @@ com som em qualquer configuração, então o caminho do autoplay mudo só se val
 
 - **Validar num celular real**: autoplay mudo + "clique para ouvir", barra do botão acima do
   indicador de início do iPhone, navegador do Instagram. O headless não reproduz nenhum dos três.
+- **Validar a entrada sem abertura num Android real, dentro do Instagram**: a varredura
+  de `celular-baixo` foi feita com viewport e user agent emulados, sem as barras reais
+  do app nem o teclado do sistema.
 - **`META_CAPI_TEST_CODE` deve ser removido** depois de validar no Gerenciador, senão os
   eventos seguem chegando como teste e não contam para a campanha.
 

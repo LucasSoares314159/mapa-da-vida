@@ -9,6 +9,18 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        // Celular com pouca altura util: os navegadores do Instagram e do
+        // Facebook comem altura com as barras deles, e um Android de 360x640
+        // chega a ~600px visiveis. Escopado a largura de celular para nao
+        // pegar notebook baixo, que tem largura de sobra. Usado no quiz, onde
+        // as opcoes e os botoes precisam caber sem rolar.
+        'celular-baixo': { raw: '(max-width: 639px) and (max-height: 700px)' },
+        // Abaixo do que qualquer navegador de app real deixa visivel: o pior
+        // caso coberto de proposito (360x480). Mais um degrau de compactacao,
+        // para as perguntas com caixa de contexto caberem inteiras.
+        'celular-minimo': { raw: '(max-width: 639px) and (max-height: 540px)' },
+      },
       // Sistema visual da LP /trilha, que é o padrão do front inteiro. Os
       // valores moram no :root de app/globals.css (cópia do :root da LP);
       // aqui só viram classes. Componente novo usa token, nunca número solto.

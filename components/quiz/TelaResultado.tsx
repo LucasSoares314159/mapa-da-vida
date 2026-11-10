@@ -77,7 +77,13 @@ export function TelaResultado({ config, resultado }: Props) {
           <BlocoTexto paragrafos={corpo} />
         </div>
 
-        <div className="mt-10">
+        {/* Botao grudado no rodape no celular, como o da ponte e o da pergunta
+            6. O diagnostico passa de ~1200px em qualquer celular, e era
+            justamente aqui que o funil perdia gente: 6 terminaram o quiz e 2
+            deram play na VSL. A pessoa continua rolando e lendo tudo; o botao
+            so deixa de exigir que ela chegue ao fim para achar a saida. No
+            desktop volta ao fluxo, abaixo do texto. */}
+        <div className="sticky bottom-0 z-10 -mx-5 mt-8 bg-mt-off-white px-5 pb-4 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-6 before:h-6 celular-minimo:pb-2 celular-minimo:pt-2 celular-minimo:before:-top-3 celular-minimo:before:h-3 before:bg-gradient-to-t before:from-mt-off-white before:to-mt-off-white/0 sm:static sm:mx-0 sm:mt-10 sm:bg-transparent sm:px-0 sm:pb-0 sm:pt-0 sm:before:hidden">
           <BotaoQuiz onClick={() => setMostrandoVsl(true)}>{texto.rotuloBotao}</BotaoQuiz>
         </div>
 
@@ -146,10 +152,12 @@ function TelaVsl({ config, resultado }: Props) {
       {/* Primeira dobra: chamada + VSL + CTA cabem juntos numa tela. A
           garantia so aparece ao rolar — e a estrutura de VSL que converte:
           foco total no video e na oferta antes de qualquer outra coisa. */}
-      <section className="flex min-h-dvh flex-col items-center justify-center px-5 py-8 text-center sm:px-8">
+      <section className="flex min-h-dvh flex-col items-center justify-center px-5 py-8 text-center celular-baixo:py-4 sm:px-8">
         {/* Chamada na voz do hero da LP: Satoshi 500 minúsculo off-white, o
             trecho *marcado* na config em --verde 700. */}
-        <p className="mb-6 font-satoshi text-[28px] font-medium lowercase leading-[1.1] tracking-[-0.02em] text-mt-off-white [text-wrap:balance] sm:text-[34px]">
+        {/* Altura desta chamada + padding da secao = o desconto de altura em
+            LARGURA_VSL (VslPlayer): mexeu aqui, confira la. */}
+        <p className="mb-6 font-satoshi text-[28px] font-medium lowercase leading-[1.1] tracking-[-0.02em] text-mt-off-white [text-wrap:balance] celular-baixo:mb-3 celular-baixo:text-[24px] sm:text-[34px]">
           <TextoQuiz texto={config.vsl.chamada} tema="escuro" />
         </p>
 

@@ -44,7 +44,26 @@ type Props = {
  */
 export const ESPERA_MAXIMA_PLAYER_MS = 15_000
 
-const CAIXA_9_16 = 'relative mx-auto aspect-[9/16] w-full max-w-[400px] overflow-hidden rounded-2xl'
+/**
+ * Largura do player: a tela inteira no celular, ate 400px no desktop — e nunca
+ * mais largo do que a altura da tela comporta.
+ *
+ * O 9:16 em largura total tem 640px de altura num celular de 360px, mais que os
+ * ~600px que sobram dentro do navegador do Instagram ou do Facebook: a base do
+ * video (legenda e controles da VTurb) ficava fora da tela. A largura passa a
+ * ser limitada pela altura visivel (dvh) menos o que fica acima do player na
+ * TelaVsl — a chamada e o respiro, ~10,5rem; ~6,5rem em tela baixa, onde eles
+ * encolhem. Se mudar a chamada, conferir esses valores. Em navegador sem dvh o
+ * limite e descartado e vale a largura total, o comportamento anterior.
+ *
+ * Quando o botao de compra aparece, a barra fixa dele cobre a faixa de baixo
+ * do video, como antes: reservar esse espaco desde o inicio encolheria o video
+ * para todo mundo pelos 4:42 inteiros.
+ */
+export const LARGURA_VSL =
+  'w-full max-w-[min(400px,calc((100dvh-10.5rem)*9/16))] celular-baixo:max-w-[calc((100dvh-6.5rem)*9/16)]'
+
+const CAIXA_9_16 = `relative mx-auto aspect-[9/16] ${LARGURA_VSL} overflow-hidden rounded-2xl`
 
 /** Script do player na VTurb (embed "JavaScript" da aba Embed). */
 export function urlScriptVturb(vsl: ConfigVsl): string {
@@ -268,7 +287,7 @@ function VturbPlayer({ vsl, onPlay, onLiberarCta, onFalharCarga, onRecuperarCarg
 
   return (
     // Sem aspect-ratio proprio: o placeholder do embed ja reserva o 9:16.
-    <div className="relative mx-auto w-full max-w-[400px] overflow-hidden rounded-2xl bg-black">
+    <div className={`relative mx-auto ${LARGURA_VSL} overflow-hidden rounded-2xl bg-black`}>
       {/* Bloco 1 do embed, criado no layout effect acima. Vazio no JSX de
           proposito: o React nao reconcilia o que nao renderizou. */}
       <div ref={caixa} />

@@ -137,13 +137,14 @@ export type RegrasClassificacao = {
 export type ConfigQuiz = {
   slug: string
   /**
-   * Muda quando perguntas ou pesos mudam. Invalida rascunho em sessionStorage:
-   * respostas gravadas sob outra versão não descrevem mais este quiz.
+   * Muda quando perguntas, pesos ou a sequência de telas mudam. Invalida
+   * rascunho em sessionStorage: respostas gravadas sob outra versão não
+   * descrevem mais este quiz, e o índice salvo é posicional — com uma tela a
+   * mais ou a menos no fluxo, ele reabriria na tela errada.
    */
   versao: number
   tituloPagina: string
   descricaoPagina: string
-  abertura: Interstituicao
   perguntas: Pergunta[]
   /** Telas de copy no meio do fluxo, indexadas pela pergunta que as precede. */
   interstituicoes: { depoisDaPergunta: string; tela: Interstituicao }[]
