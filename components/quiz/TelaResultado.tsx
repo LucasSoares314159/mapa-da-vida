@@ -146,10 +146,12 @@ function TelaVsl({ config, resultado }: Props) {
       {/* Primeira dobra: chamada + VSL + CTA cabem juntos numa tela. A
           garantia so aparece ao rolar — e a estrutura de VSL que converte:
           foco total no video e na oferta antes de qualquer outra coisa. */}
-      <section className="flex min-h-dvh flex-col items-center justify-center px-5 py-8 text-center sm:px-8">
+      <section className="flex min-h-dvh flex-col items-center justify-center px-5 py-8 text-center celular-baixo:py-4 sm:px-8">
         {/* Chamada na voz do hero da LP: Satoshi 500 minúsculo off-white, o
             trecho *marcado* na config em --verde 700. */}
-        <p className="mb-6 font-satoshi text-[28px] font-medium lowercase leading-[1.1] tracking-[-0.02em] text-mt-off-white [text-wrap:balance] sm:text-[34px]">
+        {/* Altura desta chamada + padding da secao = o desconto de altura em
+            LARGURA_VSL (VslPlayer): mexeu aqui, confira la. */}
+        <p className="mb-6 font-satoshi text-[28px] font-medium lowercase leading-[1.1] tracking-[-0.02em] text-mt-off-white [text-wrap:balance] celular-baixo:mb-3 celular-baixo:text-[24px] sm:text-[34px]">
           <TextoQuiz texto={config.vsl.chamada} tema="escuro" />
         </p>
 

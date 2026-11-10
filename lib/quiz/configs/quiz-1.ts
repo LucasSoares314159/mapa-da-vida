@@ -26,23 +26,15 @@ export const SEGUNDO_DA_OFERTA_NA_VSL = 4 * 60 + 42
 
 export const quiz1: ConfigQuiz = {
   slug: 'quiz-1',
-  versao: 1,
+  // 2: a abertura saiu e o índice do rascunho deslocou uma tela.
+  versao: 2,
   tituloPagina: 'Descubra por que você continua adiando seus objetivos',
   descricaoPagina:
     'Responda a 6 perguntas rápidas e descubra o que pode estar fazendo você deixar seus objetivos pessoais sempre para depois.',
 
-  // TELA 01
-  abertura: {
-    id: 'abertura',
-    // *…* marca o destaque do título (Satoshi 700 em --verde, como o <em> do
-    // H1 da LP /trilha). Só marcação: a redação é a do doc. TextoQuiz a remove.
-    titulo: 'Descubra por que você continua *adiando seus objetivos*.',
-    paragrafos: [
-      'Responda a 6 perguntas rápidas e descubra o que pode estar fazendo você deixar seus objetivos pessoais sempre para depois.',
-      '**Tempo estimado:** 2 minutos.',
-    ],
-    rotuloBotao: 'COMEÇAR MEU DIAGNÓSTICO',
-  },
+  // TELA 01 (abertura) saiu do fluxo em novembro/2026: quem chega do anúncio
+  // cai direto na pergunta 1. O anúncio já promete as 6 perguntas; a abertura
+  // repetia a promessa e pedia um toque sem entregar nada. Ver CLAUDE.md.
 
   perguntas: [
     // TELA 02

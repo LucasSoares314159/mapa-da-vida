@@ -109,15 +109,20 @@ export function TelaPergunta({
         // conversacional" da LP (a opcao e Satoshi). O icone de mensagem no
         // circulo verde e o mesmo marcador do FAQ da LP. O rotulo em caixa alta
         // espacada saiu: a LP aboliu caixa alta espacada.
-        <div className="mb-5 flex items-start gap-3 rounded-card bg-mt-green-sup p-3.5 sm:mb-7 sm:p-5">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-mt-green text-white">
+        //
+        // Em tela baixa (celular-baixo) tudo encolhe um degrau: num Android de
+        // 360x600 dentro do Instagram, a ultima opcao das perguntas 2 a 5
+        // ficava ate ~80px abaixo da dobra. Com auto-advance, opcao fora da
+        // tela e opcao que a pessoa nem considera.
+        <div className="mb-5 flex items-start gap-3 rounded-card bg-mt-green-sup p-3.5 celular-baixo:mb-3 celular-baixo:p-3 sm:mb-7 sm:p-5">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-mt-green text-white celular-baixo:h-6 celular-baixo:w-6">
             <MessageCircle className="h-4 w-4" aria-hidden="true" />
           </span>
           <div className="space-y-1 pt-px">
             {pergunta.contexto.map((linha, i) => (
               <p
                 key={i}
-                className="font-editorial text-base lowercase leading-[1.6] text-mt-green-dark sm:text-[17px]"
+                className="font-editorial text-base lowercase leading-[1.6] text-mt-green-dark celular-baixo:text-[15px] celular-baixo:leading-[1.45] sm:text-[17px]"
               >
                 {linha}
               </p>
@@ -129,13 +134,13 @@ export function TelaPergunta({
       {/* Pergunta = titulo da tela: Satoshi 500 minusculo, como os h2 da LP. */}
       <h1
         id={`pergunta-${pergunta.id}`}
-        className="font-satoshi text-[25px] font-medium lowercase leading-[1.12] tracking-[-0.02em] text-mt-green-dark [text-wrap:balance] sm:text-[34px]"
+        className="font-satoshi text-[25px] font-medium lowercase leading-[1.12] tracking-[-0.02em] text-mt-green-dark [text-wrap:balance] celular-baixo:text-[22px] sm:text-[34px]"
       >
         {pergunta.enunciado}
       </h1>
 
       {pergunta.apoio && (
-        <p className="mt-3 font-editorial text-[17px] lowercase leading-[1.6] text-mt-apoio">
+        <p className="mt-3 font-editorial text-[17px] lowercase leading-[1.6] text-mt-apoio celular-baixo:mt-1.5 celular-baixo:text-[15px] celular-baixo:leading-[1.45]">
           {pergunta.apoio}
         </p>
       )}
@@ -143,7 +148,7 @@ export function TelaPergunta({
       <div
         role="radiogroup"
         aria-labelledby={`pergunta-${pergunta.id}`}
-        className="mt-5 space-y-2.5 sm:mt-7 sm:space-y-3"
+        className="mt-5 space-y-2.5 celular-baixo:mt-3 celular-baixo:space-y-2 sm:mt-7 sm:space-y-3"
       >
         {pergunta.opcoes.map((opcao, indice) => {
           const ativa = selecionada === opcao.id
@@ -166,7 +171,7 @@ export function TelaPergunta({
               // sombra 1 (2 no hover). Selecionada, o contorno vira indicador de
               // estado — o único caso em que a LP aceita traço de 2px —, feito
               // com ring para não deslocar o layout.
-              className={`flex w-full items-center gap-4 rounded-card border-[0.5px] px-4 py-3 text-left shadow-mt-1 transition-[box-shadow,background-color] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mt-green sm:p-4 sm:px-5 ${
+              className={`flex w-full items-center gap-4 rounded-card border-[0.5px] px-4 py-3 text-left celular-baixo:gap-3 celular-baixo:py-2 shadow-mt-1 transition-[box-shadow,background-color] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mt-green sm:p-4 sm:px-5 ${
                 ativa
                   ? 'border-mt-green bg-mt-green-sup ring-2 ring-mt-green'
                   : 'border-mt-border bg-white hover:shadow-mt-2'
@@ -175,7 +180,7 @@ export function TelaPergunta({
               {/* O estado não é comunicado só por cor: há o check e o aria-checked. */}
               <span
                 aria-hidden="true"
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-satoshi text-sm font-bold lowercase transition-colors ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-satoshi celular-baixo:h-7 celular-baixo:w-7 text-sm font-bold lowercase transition-colors ${
                   ativa ? 'bg-mt-green text-white' : 'bg-mt-green-sup text-mt-green-dark'
                 }`}
               >
@@ -183,7 +188,7 @@ export function TelaPergunta({
               </span>
               {/* Opção é controle: Satoshi 500 minúsculo, como chips e
                   perguntas do FAQ da LP. */}
-              <span className="font-satoshi text-base font-medium lowercase leading-[1.4] text-mt-green-dark sm:text-[17px]">
+              <span className="font-satoshi text-base font-medium lowercase leading-[1.4] text-mt-green-dark celular-baixo:text-[15px] celular-baixo:leading-[1.35] sm:text-[17px]">
                 {opcao.texto}
               </span>
             </button>

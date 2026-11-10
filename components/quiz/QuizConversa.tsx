@@ -7,6 +7,8 @@ import { avaliar } from '@/lib/quiz/motor'
 import { gravarRascunho, lerRascunho, limparRascunho } from '@/lib/quiz/sessao'
 import { capturarAtribuicao } from '@/lib/tracking/atribuicao'
 import { track } from '@/lib/tracking/eventos'
+import { carregarGa } from '@/lib/tracking/ga'
+import { aoFicarVisivel } from '@/lib/tracking/visibilidade'
 import type { ConfigQuiz, Respostas } from '@/lib/quiz/tipos'
 import { ProgressoQuiz } from './ProgressoQuiz'
 import { TelaPergunta } from './TelaPergunta'
@@ -37,8 +39,11 @@ type Acao =
 
 function reducer(estado: Estado, acao: Acao): Estado {
   switch (acao.tipo) {
+    // Rascunho com indice > 0 so existe se a pessoa ja respondeu algo nesta
+    // aba — e o quiz_start dela ja saiu. Sem marcar `comecou`, um F5 no meio
+    // do quiz disparava um segundo quiz_start na resposta seguinte.
     case 'restaurar':
-      return { ...estado, indice: acao.indice, respostas: acao.respostas }
+      return { ...estado, indice: acao.indice, respostas: acao.respostas, comecou: true }
 
     case 'responder':
       return {
@@ -69,25 +74,40 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
   const topo = useRef<HTMLDivElement>(null)
 
   // Entrada: captura a origem do trafego antes de qualquer evento, para que o
-  // quiz_view ja saia com UTM.
+  // quiz_view ja saia com UTM — por isso este efeito vem antes do do quiz_view.
   //
   // A trava de execucao unica nao e so pelo StrictMode do dev: o efeito
-  // re-rodaria tambem se config trocasse de referencia, e um quiz_view a mais
-  // por pessoa inflaria o topo do funil, fazendo toda a conversao parecer
-  // metade do que e.
+  // re-rodaria tambem se config trocasse de referencia.
   const jaEntrou = useRef(false)
   useEffect(() => {
     if (jaEntrou.current) return
     jaEntrou.current = true
 
     capturarAtribuicao()
-    track('quiz_view', { quiz_slug: config.slug })
 
     const rascunho = lerRascunho(config)
     if (rascunho && rascunho.indice > 0) {
       dispatch({ tipo: 'restaurar', indice: rascunho.indice, respostas: rascunho.respostas })
+      // Ja tinha comecado: o GA4 e liberado na primeira resposta, e ela ja houve.
+      carregarGa()
     }
   }, [config])
+
+  // quiz_view so com a pagina visivel (ver lib/tracking/visibilidade.ts): uma
+  // carga em segundo plano nao e uma pessoa olhando para a pergunta.
+  //
+  // Uma vez por carga: um quiz_view a mais por pessoa inflaria o topo do funil,
+  // fazendo toda a conversao parecer metade do que e.
+  const viewRegistrada = useRef(false)
+  useEffect(
+    () =>
+      aoFicarVisivel(() => {
+        if (viewRegistrada.current) return
+        viewRegistrada.current = true
+        track('quiz_view', { quiz_slug: config.slug })
+      }),
+    [config.slug]
+  )
 
   // Persiste a cada mudanca. Nada disso sai do navegador.
   useEffect(() => {
@@ -135,11 +155,17 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
   // vem explicito porque o estado do React ainda nao refletiu a escolha no mesmo
   // gesto — sem ele o quiz_answer sairia com a opcao anterior. As telas de copy
   // chamam sem argumento.
+  //
+  // Sem tela de abertura, a primeira chamada e a primeira resposta: o
+  // quiz_start sai nela, imediatamente antes do quiz_answer da etapa 1.
   const avancar = useCallback(
     (opcaoEscolhida?: string) => {
       if (!estado.comecou) {
         dispatch({ tipo: 'comecou' })
         track('quiz_start', { quiz_slug: config.slug })
+        // A entrada ja cumpriu seu papel: agora o gtag.js pode baixar, e
+        // esvazia a fila com quiz_view e quiz_start (ver lib/tracking/ga.ts).
+        carregarGa()
       }
 
       if (passo?.tipo === 'pergunta' && !perguntasRegistradas.current.has(passo.pergunta.id)) {
@@ -160,16 +186,14 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
   if (!passo) return null
 
   const totalPerguntas = config.perguntas.length
-  const mostrarProgresso = passo.tipo !== 'abertura' && passo.tipo !== 'resultado'
+  const mostrarProgresso = passo.tipo !== 'resultado'
   const podeVoltar = estado.indice > 0 && passo.tipo !== 'processando' && passo.tipo !== 'resultado'
 
-  // Abertura e ponte vivem no verde escuro, como o hero e a virada da LP
-  // /trilha; perguntas, processando e resultado no off-white, onde as opcoes
-  // sao cards brancos. A troca de fundo marca a troca de "voz" — a mesma
-  // alternancia de secoes escuras e claras da LP. A VSL tem o proprio fundo
-  // (fixed) em TelaResultado.
-  const tema: TemaQuiz =
-    passo.tipo === 'abertura' || passo.tipo === 'interstituicao' ? 'escuro' : 'claro'
+  // A ponte vive no verde escuro, como a virada da LP /trilha; perguntas,
+  // processando e resultado no off-white, onde as opcoes sao cards brancos. A
+  // troca de fundo marca a troca de "voz" — a mesma alternancia de secoes
+  // escuras e claras da LP. A VSL tem o proprio fundo (fixed) em TelaResultado.
+  const tema: TemaQuiz = passo.tipo === 'interstituicao' ? 'escuro' : 'claro'
   const escuro = tema === 'escuro'
 
   return (
@@ -182,7 +206,7 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
 
       {mostrarProgresso && (
         <header
-          className={`sticky top-0 z-10 border-b-[0.5px] px-5 py-3 backdrop-blur sm:px-8 sm:py-4 ${
+          className={`sticky top-0 z-10 border-b-[0.5px] px-5 py-3 backdrop-blur celular-baixo:py-2 sm:px-8 sm:py-4 ${
             escuro
               ? 'border-white/10 bg-mt-green-dark/95'
               : 'border-mt-border bg-mt-off-white/95'
@@ -217,15 +241,12 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
 
       {/* Topo curto no mobile: a pergunta mais longa (6, com contexto e botão)
           não cabia em ~630px visíveis, e cada pixel acima do enunciado empurra
-          as opções para fora da tela. */}
-      <main className="flex flex-1 flex-col px-5 pb-8 pt-5 sm:px-8 sm:py-12">
+          as opções para fora da tela. Em tela baixa (celular-baixo), mais
+          curto ainda. */}
+      <main className="flex flex-1 flex-col px-5 pb-8 pt-5 celular-baixo:pt-3 sm:px-8 sm:py-12">
         <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col">
-          {passo.tipo === 'abertura' && (
-            <TelaTexto tela={passo.tela} onAvancar={avancar} variante="abertura" />
-          )}
-
           {passo.tipo === 'interstituicao' && (
-            <TelaTexto tela={passo.tela} onAvancar={avancar} variante="ponte" />
+            <TelaTexto tela={passo.tela} onAvancar={avancar} />
           )}
 
           {passo.tipo === 'pergunta' && (

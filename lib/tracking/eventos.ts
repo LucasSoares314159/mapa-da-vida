@@ -11,14 +11,8 @@
 
 import { TRILHA_PRECO_VALOR } from '@/lib/empresa'
 import { lerAtribuicao } from './atribuicao'
+import { eventoGa } from './ga'
 import { trackMeta, trackMetaCustom } from './meta'
-
-declare global {
-  interface Window {
-    gtag?: (...args: unknown[]) => void
-    dataLayer?: unknown[]
-  }
-}
 
 export type EventoQuiz =
   | 'quiz_view'
@@ -69,11 +63,8 @@ export function track(evento: EventoQuiz, params: ParamsEvento = {}): string {
 
   dispararPixel(evento, payload, eventId)
 
-  try {
-    window.gtag?.('event', evento, { ...payload, event_id: eventId })
-  } catch {
-    // Idem.
-  }
+  // Enfileira: o gtag.js so e baixado na primeira resposta (ver ./ga.ts).
+  eventoGa(evento, { ...payload, event_id: eventId })
 
   return eventId
 }
