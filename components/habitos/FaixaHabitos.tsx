@@ -34,7 +34,7 @@ export function FaixaHabitos({ habitos }: { habitos: HabitoDoDia[] }) {
   const feitosHoje = habitos.filter((h) => feitos[h.id]).length
 
   return (
-    <section className="card-mt flex flex-col gap-4 p-card" aria-labelledby="faixa-habitos-titulo">
+    <section className="card-mt flex select-none flex-col gap-4 p-card [-webkit-touch-callout:none]" aria-labelledby="faixa-habitos-titulo">
       <div className="flex items-baseline justify-between gap-3">
         <h2 id="faixa-habitos-titulo" className="font-heading text-titulo-card font-bold text-mt-green-dark">
           Hábitos de hoje

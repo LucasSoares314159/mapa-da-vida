@@ -1,3 +1,5 @@
+'use client'
+
 import { Header } from './Header'
 import { NavInferior } from './NavInferior'
 import { Sidebar } from './Sidebar'
@@ -24,6 +26,8 @@ export function CascaCarregando({ titulo, children }: Props) {
         <Header
           titulo={titulo ?? <span className="block h-5 w-40 animate-pulse rounded-elemento bg-mt-border/50" />}
           nomeUsuario=""
+          // O ≡ aparece também aqui, para o título não pular de lugar quando a tela chega.
+          onMenuClick={() => {}}
         />
         <main className="flex-1 overflow-y-auto" aria-busy="true">
           {children}
