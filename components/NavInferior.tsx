@@ -38,7 +38,8 @@ const ABAS: Aba[] = [
 export function NavInferior() {
   const pathname = usePathname()
   // Aba tocada cuja tela ainda não chegou. Acende no toque, antes da resposta do
-  // servidor: sem isso, com a rede lenta, o toque parecia não ter funcionado.
+  // servidor: sem isso, com a rede lenta, o toque parecia não ter funcionado. Não
+  // pulsa: com a tela de carregamento logo atrás, o pulso ficava agitado demais.
   const [pendente, setPendente] = useState<string | null>(null)
 
   useEffect(() => {
@@ -53,7 +54,6 @@ export function NavInferior() {
       <ul className="grid grid-cols-5">
         {ABAS.map(({ href, label, icone: Icone, ativa }) => {
           const atual = pendente ? pendente === href : ativa(pathname)
-          const carregando = pendente === href
           return (
             <li key={href}>
               <Link
@@ -67,8 +67,7 @@ export function NavInferior() {
                 <span
                   className={cn(
                     'flex h-7 w-14 items-center justify-center rounded-full transition-[background-color,transform] duration-150 group-active:scale-90 group-active:bg-mt-green-sup motion-reduce:transition-none',
-                    atual && 'bg-mt-green-sup',
-                    carregando && 'animate-pulse motion-reduce:animate-none'
+                    atual && 'bg-mt-green-sup'
                   )}
                 >
                   <Icone className={cn('size-5', atual ? 'text-mt-green-dark' : 'text-mt-apoio')} strokeWidth={1.9} aria-hidden />

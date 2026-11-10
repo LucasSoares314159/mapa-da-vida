@@ -40,7 +40,10 @@ export function HabitosHoje({ dataLabel, habitos, constancia, podeCriar }: Props
   const feitosHoje = habitos.filter((h) => feitos[h.id]).length
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col px-5 pb-16 pt-8 sm:px-8">
+    // select-none na tela toda, não só no círculo: segurar o círculo no iPhone
+    // selecionava o texto vizinho (o nome, o card de constância) e abria o balão
+    // "Copiar / Pesquisar". Aqui não há texto que alguém queira copiar.
+    <div className="mx-auto flex w-full max-w-4xl select-none flex-col px-5 pb-16 pt-8 [-webkit-touch-callout:none] sm:px-8">
       <ConviteInstalar />
       <div className="mb-6 flex flex-col gap-1">
         <span className="text-sm text-mt-apoio first-letter:uppercase">{dataLabel}</span>
