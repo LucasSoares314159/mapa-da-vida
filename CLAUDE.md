@@ -453,6 +453,13 @@ Além disso, `HabitosHoje` enfileira as gravações **por hábito**: cada chamad
 anterior do mesmo hábito. Se a gravação falhar, a tela desfaz a marcação só se ainda
 mostrar o estado que falhou.
 
+**Toda action de hábito chama `revalidatePath`** depois de gravar (`/habitos` como layout e
+`/content`, pela faixa). Sem isso, o Router Cache do Next 14 guarda por ~30s a tela baixada
+antes da marcação: a pessoa marca, vai para a Trilha, volta pelo menu e vê o hábito
+desmarcado, embora o banco tenha o registro. Foram as primeiras actions do projeto a
+revalidar; outra tela otimista que mostre o mesmo sintoma (Objetivos, por exemplo) pede o
+mesmo remédio. `app/actions/habitos.test.ts` trava isso.
+
 **Segurar ~0,5s para marcar** (`TEMPO_SEGURAR_MS` em `CirculoHabito`), não tocar. O
 círculo é grande e fica onde o polegar rola a tela: toque simples marcaria sem querer.
 E a espera, com o círculo enchendo de verde, faz parte da recompensa. Toque curto mostra

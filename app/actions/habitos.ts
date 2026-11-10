@@ -1,11 +1,22 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { diaDeHoje, podeCriarHabito, LIMITE_HABITOS_ATIVOS } from '@/lib/habitos'
 import { habitoSchema, type HabitoData, type HabitoInput } from '@/lib/validations'
 import type { Habito } from '@/types'
 
 type Resultado<T> = { error: string } | { redirectTo: string } | T
+
+// Toda escrita de hábito invalida as telas que mostram hábitos. Sem isso o Router
+// Cache do Next 14 reaproveita, por ~30s, a tela baixada antes da marcação: a
+// pessoa marca, vai para a Trilha, volta para Hábitos e vê o hábito desmarcado,
+// embora o banco já tenha o registro. 'layout' cobre /habitos, /habitos/progresso
+// e /habitos/[id]; /content tem a faixa "Hábitos de hoje".
+function revalidarTelasDeHabitos() {
+  revalidatePath('/habitos', 'layout')
+  revalidatePath('/content')
+}
 
 function validar(input: HabitoInput): { ok: true; data: HabitoData } | { ok: false; error: string } {
   const r = habitoSchema.safeParse(input)
@@ -40,6 +51,7 @@ export async function criarHabito(input: HabitoInput): Promise<Resultado<{ data:
     .single()
 
   if (error || !data) return { error: 'Não foi possível criar o hábito. Tente novamente.' }
+  revalidarTelasDeHabitos()
   return { data: data as Habito }
 }
 
@@ -64,6 +76,7 @@ export async function editarHabito(id: string, input: HabitoInput): Promise<Resu
     .single()
 
   if (error || !data) return { error: 'Não foi possível salvar o hábito. Tente novamente.' }
+  revalidarTelasDeHabitos()
   return { data: data as Habito }
 }
 
@@ -84,6 +97,7 @@ export async function arquivarHabito(id: string): Promise<Resultado<{ data: Habi
     .single()
 
   if (error || !data) return { error: 'Não foi possível arquivar o hábito. Tente novamente.' }
+  revalidarTelasDeHabitos()
   return { data: data as Habito }
 }
 
@@ -111,6 +125,7 @@ export async function definirHabitoHoje(
       .eq('user_id', user.id)
       .eq('dia', dia)
     if (error) return { error: 'Não foi possível desmarcar. Tente novamente.' }
+    revalidarTelasDeHabitos()
     return { data: { dia, feito: false } }
   }
 
@@ -132,5 +147,6 @@ export async function definirHabitoHoje(
       { onConflict: 'habito_id,dia', ignoreDuplicates: true }
     )
   if (error) return { error: 'Não foi possível marcar. Tente novamente.' }
+  revalidarTelasDeHabitos()
   return { data: { dia, feito: true } }
 }
