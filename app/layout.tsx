@@ -6,8 +6,11 @@ export const metadata: Metadata = {
     default: "MindTrail — Construa seu sistema de organização pessoal",
     template: "%s · MindTrail",
   },
+  // `apple` explícito: com `icons` declarado aqui, o Next deixa de gerar sozinho o
+  // link do app/apple-icon.png, e o iPhone usaria uma captura da página como ícone.
   icons: {
     icon: '/favicon.png',
+    apple: '/apple-icon.png',
   },
   // App instalável no iPhone: abre sem a barra do Safari, com o nome curto.
   appleWebApp: {

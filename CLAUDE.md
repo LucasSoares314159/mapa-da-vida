@@ -132,12 +132,12 @@ uma página que só se defende com `getUser()` funciona, mas perde esse refresh.
   /ui             shadcn/ui
   /admin          Kpi · Funil · PainelMetricas · TabelaAlunos · Dedicacao · DistribuicaoModulos
   /mapa           MapaFlow · RevelacaoMapa · RevelacaoDiagnostico · AreaDestaqueOverlay
-  /               AuthLayout · Header · Sidebar · NavInferior · MenuConta · RegistroServiceWorker (e o resto)
+  /               AuthLayout · Header · Sidebar · NavInferior · MenuConta · RegistroServiceWorker · PassosInstalacao (e o resto)
   /habitos        HabitosHoje · FaixaHabitos · CirculoHabito · FormularioHabito · ProgressoHabitos · ConviteInstalar · iconesHabito
   /lp
 /lib              ver tabela abaixo
 /emails           6 templates react-email
-/hooks            useMetaPixel · useUTMForward · useCelebracao · useMarcarHabitos
+/hooks            useMetaPixel · useUTMForward · useCelebracao · useMarcarHabitos · useInstalacaoApp
 /types/index.ts   tipos + PILARES + ESTACOES + COR_STATUS
 ```
 
@@ -521,10 +521,19 @@ Desde **novembro/2026** a plataforma é instalável no celular como **"Trilha"**
 - **Registro só em produção e só nas telas autenticadas** (`RegistroServiceWorker` dentro
   do `AuthLayout`): no `next dev` atrapalharia o recarregamento, e a LP e o quiz não
   precisam dele para nada.
-- **Convite de instalação só na tela de hábitos e só no celular** (`ConviteInstalar`).
-  Android usa o diálogo nativo (`beforeinstallprompt`); o Safari do iPhone não tem diálogo,
-  então o convite mostra o passo a passo pelo botão Compartilhar. "Agora não" esconde por
-  14 dias (`localStorage`). Quem já abriu pelo app instalado nunca vê o convite.
+- **Dois caminhos para instalar, só no celular:** o convite no topo de `/habitos`
+  (`ConviteInstalar`, "Agora não" esconde por 14 dias) e o item fixo **"Instalar o app"** no
+  menu "Mais" (`MenuConta`), para quem dispensou o convite ou nunca passou por `/habitos`.
+  Quem já abriu pelo app instalado não vê nenhum dos dois. Os dois usam `useInstalacaoApp`.
+- **O diálogo nativo do Chrome não é garantido.** O `beforeinstallprompt` sai uma vez por
+  carregamento de página, quando o Chrome decide — às vezes não na primeira visita. Por isso
+  o evento é capturado no `AuthLayout` (via `RegistroServiceWorker`) e guardado no módulo do
+  hook, e o Android **sem** o evento mostra o passo a passo "menu ⋮ → Instalar app" em vez
+  de esconder o convite. O Safari do iPhone nunca tem diálogo: lá é sempre o passo a passo
+  pelo Compartilhar (`PassosInstalacao`).
+- **`icons.apple` declarado à mão em `app/layout.tsx`.** Com `icons` definido no metadata, o
+  Next deixa de gerar o link do `app/apple-icon.png`: em produção o HTML saiu sem
+  `apple-touch-icon` e o iPhone usaria uma captura da página como ícone.
 - **Ícones gerados do símbolo da marca** (verde sobre off-white): `public/icons/` (192, 512
   e o *maskable*, com o símbolo menor para caber na zona segura) e `app/apple-icon.png`.
 - Sem notificações nesta leva. Lembrete por push fica para depois; no iPhone ele só
