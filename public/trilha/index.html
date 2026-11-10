@@ -383,6 +383,8 @@
   }
 
   .btn-cta:hover { opacity: 0.9; }
+  /* Enviando: o POST leva ~3s ate o 303; o botao avisa e nao aceita novo clique. */
+  .checkout-form[data-enviando] .btn-cta { cursor: progress; opacity: 0.85; pointer-events: none; }
   .btn-cta:active { transform: translateY(1px); opacity: 0.85; }
   /* Foco visível por teclado: o botão não tinha outline. Offset de 3px para
      o contorno não encostar na borda arredondada. */
@@ -4170,17 +4172,33 @@ formsCheckout.forEach(function (form) {
   form.addEventListener('submit', function (event) {
     if (form.dataset.enviando) { event.preventDefault(); return; }
     preencherAtribuicao(form);
-    if (!window.trackMetaAntesDeSair) return; // Pixel bloqueado: segue o submit normal
-    event.preventDefault();
     form.dataset.enviando = '1';
-    trackMetaAntesDeSair('InitiateCheckout', EVENTO_META_TRILHA, function () { form.submit(); });
+    var botao = form.querySelector('button[type="submit"]');
+    if (botao) {
+      botao.dataset.rotulo = botao.textContent;
+      botao.textContent = 'ABRINDO O PAGAMENTO...';
+      botao.setAttribute('aria-busy', 'true');
+    }
+    // Sem preventDefault e sem espera: o POST sai junto com o evento. A pagina so
+    // descarrega quando o 303 chega (~3s depois), e e nesse intervalo que o
+    // beacon do Pixel sai. Esperar o fbevents.js aqui custava de 0,35s a 1,5s
+    // antes de o POST comecar. Se a contagem de InitiateCheckout cair frente ao
+    // click_checkout do GA4, o evento esta se perdendo: ver CLAUDE.md.
+    if (window.trackMeta) trackMeta('InitiateCheckout', EVENTO_META_TRILHA);
   });
 });
 
 // Voltar do checkout pelo botao do navegador restaura a pagina do bfcache com
 // o form ainda marcado como enviando.
 window.addEventListener('pageshow', function () {
-  formsCheckout.forEach(function (form) { delete form.dataset.enviando; });
+  formsCheckout.forEach(function (form) {
+    delete form.dataset.enviando;
+    var botao = form.querySelector('button[type="submit"]');
+    if (botao && botao.dataset.rotulo) {
+      botao.textContent = botao.dataset.rotulo;
+      botao.removeAttribute('aria-busy');
+    }
+  });
 });
 
 // Carrossel de depoimentos: duplica os cards para o loop contínuo. Quem pede

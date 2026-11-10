@@ -1022,9 +1022,16 @@ lado da Meta; não é a LP reescrevendo a URL (o `<base href>` só afeta links r
 
 **LP `/trilha`:** PageView + `ViewContent` ao carregar; `InitiateCheckout` no submit dos
 dois forms "ENTRAR NA TRILHA". O valor dos eventos vem de `TRILHA_PRECO` no `<head>` da
-página. O submit é segurado por `trackMetaAntesDeSair` (espera o fbevents carregar, até
-1,5s, + 300ms) porque o POST redireciona com `303` e cancelaria a requisição do Pixel. O
-`gtag('click_checkout')` inline continua no `onclick` do botão.
+página. **O submit não espera o Pixel** (novembro/2026): o evento sai junto com o POST e o
+botão mostra "Abrindo o pagamento...". Antes ele era segurado por `trackMetaAntesDeSair`
+(0,35s com o Pixel carregado, 1,5s com ele bloqueado — o stub do `fbq` existe mesmo sem o
+`fbevents.js`, então `callMethod` nunca aparece e a espera ia até o teto). O POST leva ~3s
+até o `303`, e a página só descarrega aí: é nessa janela que o beacon sai. **Risco aceito:**
+se o `fbevents.js` carregar depois do `303`, o `InitiateCheckout` se perde. Confira a razão
+`InitiateCheckout` (Meta) ÷ `click_checkout` (GA4) por alguns dias; se cair, voltar à versão
+híbrida (submete na hora se `callMethod` existe, senão espera até ~500ms) ou mandar o evento
+pela CAPI com o mesmo `eventID`. `trackMetaAntesDeSair` segue em `rastreio-meta.js`, sem uso.
+O `gtag('click_checkout')` inline continua no `onclick` do botão.
 
 **UTMs da `/trilha` viajam até a cobrança.** Os forms postavam sem corpo, então a venda pela
 LP chegava sem origem. Agora o submit injeta `utm_*`, `fbp` e `fbc` como campos ocultos
