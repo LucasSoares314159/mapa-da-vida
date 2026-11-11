@@ -57,8 +57,33 @@ export async function salvarPerfilOnboarding(
   }
 
   if (!data) {
-    console.error('[perfil-onboarding] Update não afetou nenhuma linha para', user.id)
-    return { error: 'Não encontramos seu perfil. Entre em contato com o suporte.' }
+    // Conta autenticada sem linha em `profiles` (cadastro que falhou no meio ou
+    // perfil removido). Travar aqui trancaria a pessoa fora do primeiro mapa,
+    // que é obrigatório — então o perfil é criado agora, a partir da própria
+    // conta logada. Nunca é reconciliação em massa: só quem está de fato
+    // preenchendo o onboarding.
+    console.error('[perfil-onboarding] Perfil ausente; criando para', user.id)
+    const meta = (user.user_metadata ?? {}) as { nome?: unknown }
+    const nome =
+      (typeof meta.nome === 'string' && meta.nome.trim()) ||
+      user.email?.split('@')[0] ||
+      'Aluno'
+
+    const { error: insertError } = await admin.from('profiles').upsert(
+      {
+        id: user.id,
+        nome,
+        data_nascimento,
+        profissao,
+        profissao_outro: profissao === 'Outro' ? profissao_outro ?? null : null,
+      },
+      { onConflict: 'id' }
+    )
+
+    if (insertError) {
+      console.error('[perfil-onboarding] Falha ao criar perfil ausente:', insertError)
+      return { error: 'Não foi possível salvar. Tente novamente.' }
+    }
   }
 
   return { ok: true }
