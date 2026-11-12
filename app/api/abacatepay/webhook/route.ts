@@ -4,6 +4,7 @@ import { assinaturaWebhookValida, compararSegredo } from '@/lib/abacatepay'
 import { enviarLinkAcessoCompra, normalizarEmail } from '@/lib/acesso-compra'
 import { buscarAtribuicaoCheckout } from '@/lib/checkout/atribuicao-checkout'
 import { createAdminSupabaseClient } from '@/lib/supabase-admin'
+import { PARAMS_UTM } from '@/lib/tracking/atribuicao'
 import { capiConfigurada, enviarEventoCapi } from '@/lib/tracking/capi'
 import {
   CONTEUDO_TRILHA,
@@ -203,6 +204,12 @@ async function registrarPurchase(
     const source = atribuicao?.source ?? metadataString(metadata, 'source') ?? 'lp-trilha'
     const quizSlug = metadataString(metadata, 'quiz_slug')
     const resultProfile = metadataString(metadata, 'result_profile')
+    // UTMs da cobranca (metadata do provider) -> ROAS por campanha no Purchase.
+    const utm = Object.fromEntries(
+      PARAMS_UTM.map((chave) => [chave, metadataString(metadata, chave)]).filter(
+        ([, valor]) => valor
+      )
+    )
 
     const enviado = await enviarEventoCapi({
       nome: 'Purchase',
@@ -227,6 +234,7 @@ async function registrarPurchase(
       customData: {
         ...CONTEUDO_TRILHA,
         source,
+        ...utm,
         ...(quizSlug ? { quiz_slug: quizSlug } : {}),
         ...(resultProfile ? { result_profile: resultProfile } : {}),
       },
