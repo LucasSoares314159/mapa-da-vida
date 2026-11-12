@@ -10,6 +10,17 @@ import {
   lerProgressoVsl,
 } from '@/lib/quiz/progresso-vsl'
 
+/**
+ * Por que o CTA foi liberado, capturado no momento da liberacao. So
+ * instrumentacao: nao muda QUANDO nem SE o botao aparece.
+ *   assistiu            -> a fronteira assistida alcancou a oferta nesta sessao
+ *   localstorage        -> progresso salvo ja passava da oferta na leitura inicial
+ *   fallback_sem_video  -> sem videoId/contaId
+ * (fallback_15s entra na TelaResultado, no caminho de onFalharCarga.)
+ */
+export type OrigemLiberacaoCta = 'assistiu' | 'localstorage' | 'fallback_sem_video'
+export type LiberacaoCta = { origem: OrigemLiberacaoCta; fronteiraS: number }
+
 // Player da VSL em formato de adapter.
 //
 // A tela do resultado nao sabe qual provider esta em uso: passa a config e
@@ -23,9 +34,9 @@ import {
 type Props = {
   vsl: ConfigVsl
   /** Chamado uma vez, no primeiro play real (nunca no autoplay mudo). */
-  onPlay?: () => void
-  /** Chamado quando a reproducao continua alcanca ctaAtSeconds. */
-  onLiberarCta?: () => void
+  onPlay?: (fronteiraS: number) => void
+  /** Chamado quando o botao e liberado: por que, e a fronteira ja assistida. */
+  onLiberarCta?: (info: LiberacaoCta) => void
   /**
    * O player nao carregou (script com erro, bloqueador, rede) em
    * ESPERA_MAXIMA_PLAYER_MS. Quem chama libera o botao com um aviso.
@@ -108,16 +119,16 @@ export function VslPlayer({ vsl, onPlay, onLiberarCta, onFalharCarga, onRecupera
   const temVideo = vslTemVideo(vsl)
 
   // vsl_play uma vez por tela: pausar e retomar emite video:play de novo.
-  const registrarPlay = useCallback(() => {
+  const registrarPlay = useCallback((fronteiraS: number) => {
     if (jaDeuPlay.current) return
     jaDeuPlay.current = true
-    onPlay?.()
+    onPlay?.(fronteiraS)
   }, [onPlay])
 
   // Sem video o player nao e montado. Libera o CTA de imediato: um retangulo
   // quebrado seguido de botao escondido deixaria a tela de compra sem saida.
   useEffect(() => {
-    if (!temVideo) onLiberarCta?.()
+    if (!temVideo) onLiberarCta?.({ origem: 'fallback_sem_video', fronteiraS: 0 })
   }, [temVideo, onLiberarCta])
 
   if (!temVideo) {
@@ -188,37 +199,50 @@ export function PreloadVsl({ vsl }: { vsl: ConfigVsl }) {
  * Fronteira assistida -> liberacao do CTA. Devolve a funcao que recebe cada
  * segundo informado pelo player. Ver lib/quiz/progresso-vsl.ts.
  */
-function useLiberacaoPorTempo(videoId: string, segundos: number, onLiberarCta?: () => void) {
+function useLiberacaoPorTempo(
+  videoId: string,
+  segundos: number,
+  onLiberarCta?: (info: LiberacaoCta) => void
+) {
   const aoLiberar = useRef(onLiberarCta)
   aoLiberar.current = onLiberarCta
   const estado = useRef({ fronteira: 0, liberado: false })
 
-  const liberarSeAlcancou = useCallback(() => {
-    const atual = estado.current
-    if (atual.liberado || atual.fronteira < segundos) return
-    atual.liberado = true
-    aoLiberar.current?.()
-  }, [segundos])
+  const liberarSeAlcancou = useCallback(
+    (origem: OrigemLiberacaoCta) => {
+      const atual = estado.current
+      if (atual.liberado || atual.fronteira < segundos) return
+      atual.liberado = true
+      aoLiberar.current?.({ origem, fronteiraS: atual.fronteira })
+    },
+    [segundos]
+  )
 
   // Quem ja tinha passado da oferta e voltou (recarregou, fechou a aba) ve o
   // botao direto: ja viu a oferta, e obriga-lo a dar play de novo so para
   // poder comprar seria atrito sem motivo. E o mesmo que o `persist` da VTurb.
+  // Se o progresso salvo ja passou da oferta, a liberacao veio do localStorage,
+  // nao de uma reproducao desta sessao.
   useEffect(() => {
     estado.current = { fronteira: lerProgressoVsl(videoId), liberado: false }
-    liberarSeAlcancou()
+    liberarSeAlcancou('localstorage')
   }, [videoId, liberarSeAlcancou])
 
-  return useCallback(
+  const registrarTempo = useCallback(
     (tempo: number) => {
       const atual = estado.current
       const nova = avancarFronteira(atual.fronteira, tempo)
       if (nova === atual.fronteira) return
       atual.fronteira = nova
       gravarProgressoVsl(videoId, nova)
-      liberarSeAlcancou()
+      liberarSeAlcancou('assistiu')
     },
     [videoId, liberarSeAlcancou]
   )
+
+  const lerFronteira = useCallback(() => estado.current.fronteira, [])
+
+  return { registrarTempo, lerFronteira }
 }
 
 /**
@@ -241,7 +265,11 @@ function VturbPlayer({ vsl, onPlay, onLiberarCta, onFalharCarga, onRecuperarCarg
   const caixa = useRef<HTMLDivElement>(null)
   const aoDarPlay = useRef(onPlay)
   aoDarPlay.current = onPlay
-  const registrarTempo = useLiberacaoPorTempo(vsl.videoId, vsl.ctaAtSeconds, onLiberarCta)
+  const { registrarTempo, lerFronteira } = useLiberacaoPorTempo(
+    vsl.videoId,
+    vsl.ctaAtSeconds,
+    onLiberarCta
+  )
   const { falhar, sinalDeVida } = useVigiaCarga(onFalharCarga, onRecuperarCarga)
 
   const tag = tagEmbedVturb(vsl)
@@ -269,7 +297,7 @@ function VturbPlayer({ vsl, onPlay, onLiberarCta, onFalharCarga, onRecuperarCarg
     }
     const aoTocar = () => {
       sinalDeVida()
-      aoDarPlay.current?.()
+      aoDarPlay.current?.(lerFronteira())
     }
     // player:ready e o sinal oficial de que o player montou; o autoplay mudo
     // conta como vida tambem (o video esta la, so sem som).
@@ -283,7 +311,7 @@ function VturbPlayer({ vsl, onPlay, onLiberarCta, onFalharCarga, onRecuperarCarg
       player.removeEventListener('video:play', aoTocar)
       eventosDeVida.forEach((e) => player.removeEventListener(e, sinalDeVida))
     }
-  }, [registrarTempo, sinalDeVida])
+  }, [registrarTempo, lerFronteira, sinalDeVida])
 
   return (
     // Sem aspect-ratio proprio: o placeholder do embed ja reserva o 9:16.
@@ -346,7 +374,11 @@ function useVigiaCarga(onFalhar?: () => void, onRecuperar?: () => void) {
 /** Fallback com <video> nativo: usado em teste local e se a VTurb sair. */
 function Html5Player({ vsl, onPlay, onLiberarCta }: Props) {
   const ref = useRef<HTMLVideoElement>(null)
-  const registrarTempo = useLiberacaoPorTempo(vsl.videoId, vsl.ctaAtSeconds, onLiberarCta)
+  const { registrarTempo, lerFronteira } = useLiberacaoPorTempo(
+    vsl.videoId,
+    vsl.ctaAtSeconds,
+    onLiberarCta
+  )
 
   return (
     <video
@@ -355,7 +387,7 @@ function Html5Player({ vsl, onPlay, onLiberarCta }: Props) {
       controls
       playsInline
       className={`${CAIXA_9_16} bg-black`}
-      onPlay={onPlay}
+      onPlay={() => onPlay?.(lerFronteira())}
       onTimeUpdate={() => registrarTempo(Math.floor(ref.current?.currentTime ?? 0))}
     />
   )

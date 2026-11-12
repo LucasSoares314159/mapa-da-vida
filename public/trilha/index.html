@@ -4184,7 +4184,7 @@ formsCheckout.forEach(function (form) {
     // beacon do Pixel sai. Esperar o fbevents.js aqui custava de 0,35s a 1,5s
     // antes de o POST comecar. Se a contagem de InitiateCheckout cair frente ao
     // click_checkout do GA4, o evento esta se perdendo: ver CLAUDE.md.
-    if (window.trackMeta) trackMeta('InitiateCheckout', EVENTO_META_TRILHA);
+    if (window.trackMeta) trackMeta('InitiateCheckout', Object.assign({}, EVENTO_META_TRILHA, { cta_origem: 'lp_tradicional' }));
   });
 });
 

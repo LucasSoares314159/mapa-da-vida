@@ -20,6 +20,7 @@ export type EventoQuiz =
   | 'quiz_answer'
   | 'quiz_complete'
   | 'vsl_play'
+  | 'cta_visivel'
   | 'cta_click'
 
 export type ParamsEvento = Record<string, string | number | boolean | undefined>

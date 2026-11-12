@@ -928,7 +928,21 @@ por passo. No GA4 o evento entra numa fila e só sai depois da primeira resposta
 `gtag.js` é baixado — ver [Entrada sem abertura](#entrada-sem-abertura-novembro2026-branch-featquiz-sem-intro).
 
 Eventos: `quiz_view` · `quiz_start` · `quiz_answer` (com etapa) · `quiz_complete` (com
-perfil, regra e pontuações) · `vsl_play` · `cta_click`.
+perfil, regra e pontuações) · `vsl_play` · `cta_visivel` · `cta_click`.
+
+**`cta_origem` e `vsl_fronteira_s` medem o vazamento do gate da VSL.** O botão de compra é
+liberado por quatro caminhos (ver [VSL](#vsl-da-vturb-e-o-botão-de-compra)), e só um é
+"assistiu de verdade". `cta_origem` registra qual, **capturado no momento da liberação, não
+no clique**: `assistiu` (fronteira alcançou a oferta), `localstorage` (progresso salvo já
+passava da oferta na leitura inicial), `fallback_15s` (player não deu sinal em 15s),
+`fallback_sem_video` (sem `videoId`/`contaId`) e `ja_clicou` (clique repetido na mesma tela
+— o 1º guarda a origem real). `vsl_fronteira_s` é a fronteira assistida em segundos (a de
+`useLiberacaoPorTempo`), e separa quem viu até a oferta de quem clicou por fallback dentro
+da mesma origem. Os dois viajam em `cta_click`, `cta_visivel` e no `InitiateCheckout`.
+`cta_visivel` dispara quando o botão **aparece**: é o denominador (liberações por origem)
+contra os cliques. A LP `/trilha` manda `InitiateCheckout` com `cta_origem='lp_tradicional'`.
+Como vão em custom_data, o corte se lê na segmentação por evento do Gerenciador, sem join de
+GA4/BigQuery. Nada disso muda quando/se o botão libera — é só instrumentação.
 
 São **eventos customizados**, não padrão da Meta: mapeá-los a `Lead` ou `ViewContent`
 misturaria o funil do quiz com o da lista de espera no mesmo relatório. Para virarem

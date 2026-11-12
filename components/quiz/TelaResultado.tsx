@@ -1,9 +1,10 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { Check } from 'lucide-react'
 import type { ConfigQuiz, Paragrafo, ResultadoQuiz } from '@/lib/quiz/tipos'
 import { track, trackInicioCheckout } from '@/lib/tracking/eventos'
+import type { LiberacaoCta, OrigemLiberacaoCta } from './VslPlayer'
 import { iniciarCheckoutDoQuiz } from '@/lib/quiz/checkout-cliente'
 import { BlocoGarantia } from './BlocoGarantia'
 import { BlocoTexto } from './BlocoTexto'
@@ -95,31 +96,78 @@ export function TelaResultado({ config, resultado }: Props) {
   return <TelaVsl config={config} resultado={resultado} />
 }
 
+// 'fallback_15s' nao vem do VslPlayer: e o caminho onFalharCarga desta tela.
+type OrigemCtaRegistrada = OrigemLiberacaoCta | 'fallback_15s'
+
 function TelaVsl({ config, resultado }: Props) {
   const [ctaLiberado, setCtaLiberado] = useState(false)
   const [videoFalhou, setVideoFalhou] = useState(false)
   const [indoParaCheckout, setIndoParaCheckout] = useState(false)
   const [erro, setErro] = useState(false)
 
-  const liberarCta = useCallback(() => setCtaLiberado(true), [])
-  // Sem player nao ha oferta a esperar: o botao sai na hora, com aviso. Se o
-  // video chegar depois, o aviso some e o botao fica.
+  // Por que o botao apareceu + quanto da VSL ja fora assistido, capturado no
+  // momento da liberacao (nao no clique). O primeiro caminho a liberar vence.
+  const liberacao = useRef<{ origem: OrigemCtaRegistrada; fronteiraS: number } | null>(null)
+  // Cliques nesta tela: o 1o guarda a origem real; os seguintes sao ja_clicou.
+  const cliques = useRef(0)
+
+  const registrarLiberacao = useCallback(
+    (info: { origem: OrigemCtaRegistrada; fronteiraS: number }) => {
+      if (liberacao.current) return // o primeiro caminho a liberar vence
+      liberacao.current = info
+      setCtaLiberado(true)
+      // Denominador: liberacoes por origem, contra cliques.
+      track('cta_visivel', {
+        quiz_slug: config.slug,
+        result_profile: resultado.perfil,
+        cta_origem: info.origem,
+        vsl_fronteira_s: info.fronteiraS,
+      })
+    },
+    [config.slug, resultado.perfil]
+  )
+
+  const liberarCta = useCallback(
+    (info: LiberacaoCta) => registrarLiberacao(info),
+    [registrarLiberacao]
+  )
+  // Sem player / fallback de 15s: o botao sai na hora, com aviso. Se o video
+  // chegar depois, o aviso some e o botao fica.
   const falharVideo = useCallback(() => {
     setVideoFalhou(true)
-    setCtaLiberado(true)
-  }, [])
+    registrarLiberacao({ origem: 'fallback_15s', fronteiraS: 0 })
+  }, [registrarLiberacao])
   const recuperarVideo = useCallback(() => setVideoFalhou(false), [])
-  const registrarPlay = useCallback(() => {
-    track('vsl_play', { quiz_slug: config.slug, result_profile: resultado.perfil })
-  }, [config.slug, resultado.perfil])
+  const registrarPlay = useCallback(
+    (fronteiraS: number) => {
+      track('vsl_play', {
+        quiz_slug: config.slug,
+        result_profile: resultado.perfil,
+        vsl_fronteira_s: fronteiraS,
+      })
+    },
+    [config.slug, resultado.perfil]
+  )
 
   async function comprar() {
     setIndoParaCheckout(true)
     setErro(false)
-    track('cta_click', { quiz_slug: config.slug, result_profile: resultado.perfil })
+    const registro = liberacao.current
+    // O botao so fica clicavel com ctaLiberado, que registrarLiberacao sempre
+    // seta: registro nunca e nulo no 1o clique. O ?? e so guarda de tipo.
+    const ctaOrigem: OrigemCtaRegistrada | 'ja_clicou' =
+      cliques.current > 0 ? 'ja_clicou' : registro?.origem ?? 'fallback_sem_video'
+    cliques.current += 1
+    const paramsCta = {
+      quiz_slug: config.slug,
+      result_profile: resultado.perfil,
+      cta_origem: ctaOrigem,
+      vsl_fronteira_s: registro?.fronteiraS ?? 0,
+    }
+    track('cta_click', paramsCta)
     // Dispara antes do fetch do checkout: a criacao da cobranca leva tempo
     // suficiente para o beacon sair antes do redirect.
-    trackInicioCheckout({ quiz_slug: config.slug, result_profile: resultado.perfil })
+    trackInicioCheckout(paramsCta)
 
     try {
       window.location.href = await iniciarCheckoutDoQuiz({
