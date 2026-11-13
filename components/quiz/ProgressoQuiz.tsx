@@ -37,7 +37,7 @@ export function ProgressoQuiz({ fracao, rotulo, tema = 'claro' }: Props) {
       </div>
       {rotulo && (
         <p
-          className={`mt-1.5 font-editorial text-sm lowercase ${escuro ? 'text-mt-off-white/70' : 'text-mt-apoio'}`}
+          className={`mt-1.5 font-editorial text-sm lowercase ${escuro ? 'text-mt-off-white/70' : 'text-mt-apoio-forte'}`}
         >
           {rotulo}
         </p>

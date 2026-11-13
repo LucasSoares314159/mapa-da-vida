@@ -156,11 +156,13 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
   // gesto — sem ele o quiz_answer sairia com a opcao anterior. As telas de copy
   // chamam sem argumento.
   //
-  // Sem tela de abertura, a primeira chamada e a primeira resposta: o
-  // quiz_start sai nela, imediatamente antes do quiz_answer da etapa 1.
+  // O quiz_start sai na PRIMEIRA RESPOSTA (passo de pergunta), imediatamente
+  // antes do quiz_answer da etapa 1 — nao no toque do COMECAR da abertura.
+  // "comecar o quiz" e responder, nao abrir a landing: a condicao por tipo
+  // garante que avancar a abertura nao conte como inicio nem baixe o gtag.js.
   const avancar = useCallback(
     (opcaoEscolhida?: string) => {
-      if (!estado.comecou) {
+      if (!estado.comecou && passo?.tipo === 'pergunta') {
         dispatch({ tipo: 'comecou' })
         track('quiz_start', { quiz_slug: config.slug })
         // A entrada ja cumpriu seu papel: agora o gtag.js pode baixar, e
@@ -186,14 +188,24 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
   if (!passo) return null
 
   const totalPerguntas = config.perguntas.length
-  const mostrarProgresso = passo.tipo !== 'resultado'
-  const podeVoltar = estado.indice > 0 && passo.tipo !== 'processando' && passo.tipo !== 'resultado'
+  const mostrarProgresso = passo.tipo !== 'abertura' && passo.tipo !== 'resultado'
+  // A seta nao leva de volta a abertura: a primeira pergunta nao tem "voltar"
+  // (quem chega do anuncio cai nela). Sem a seta, o cabecalho da pergunta 1
+  // alinha com o conteudo, sem espaco reservado. Da pergunta 2 em diante, sim.
+  const passoAnterior = passos[estado.indice - 1]
+  const podeVoltar =
+    estado.indice > 0 &&
+    passo.tipo !== 'processando' &&
+    passo.tipo !== 'resultado' &&
+    passoAnterior?.tipo !== 'abertura'
 
-  // A ponte vive no verde escuro, como a virada da LP /trilha; perguntas,
-  // processando e resultado no off-white, onde as opcoes sao cards brancos. A
-  // troca de fundo marca a troca de "voz" — a mesma alternancia de secoes
-  // escuras e claras da LP. A VSL tem o proprio fundo (fixed) em TelaResultado.
-  const tema: TemaQuiz = passo.tipo === 'interstituicao' ? 'escuro' : 'claro'
+  // Abertura e ponte vivem no verde escuro, como o hero e a virada da LP
+  // /trilha; perguntas, processando e resultado no off-white, onde as opcoes
+  // sao cards brancos. A troca de fundo marca a troca de "voz" — a mesma
+  // alternancia de secoes escuras e claras da LP. A VSL tem o proprio fundo
+  // (fixed) em TelaResultado.
+  const tema: TemaQuiz =
+    passo.tipo === 'abertura' || passo.tipo === 'interstituicao' ? 'escuro' : 'claro'
   const escuro = tema === 'escuro'
 
   return (
@@ -215,13 +227,20 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
               : 'border-mt-border bg-mt-off-white/95'
           }`}
         >
-          <div className="mx-auto flex max-w-2xl items-center gap-4">
-            {podeVoltar ? (
+          {/* Sem seta de voltar (pergunta 1), a barra e o rotulo comecam
+              alinhados com o conteudo: nada de espaco reservado para um botao
+              que nao existe. Com a seta, o gap volta e a barra retoma a posicao
+              de antes. */}
+          <div className={`mx-auto flex max-w-2xl items-center ${podeVoltar ? 'gap-4' : ''}`}>
+            {podeVoltar && (
               <button
                 type="button"
                 onClick={() => dispatch({ tipo: 'voltar' })}
                 aria-label="Voltar para a pergunta anterior"
-                className={`-ml-1 shrink-0 rounded-full p-2 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-mt-green ${
+                // Area de toque de 44x44 (before) sobre o botao de 36px, sem
+                // aumentar o icone nem deslocar a barra: o pseudo cresce para
+                // fora do fluxo (absolute), o botao mantem o -ml-1 p-2 de antes.
+                className={`relative -ml-1 shrink-0 rounded-full p-2 transition-colors before:absolute before:left-1/2 before:top-1/2 before:h-11 before:w-11 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] focus-visible:outline focus-visible:outline-2 focus-visible:outline-mt-green ${
                   escuro
                     ? 'text-mt-off-white/70 hover:bg-white/10 hover:text-mt-off-white'
                     : 'text-mt-apoio hover:bg-mt-green-sup hover:text-mt-green-dark'
@@ -229,8 +248,6 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
               >
                 <ArrowLeft className="h-5 w-5" aria-hidden="true" />
               </button>
-            ) : (
-              <span className="w-9 shrink-0" aria-hidden="true" />
             )}
 
             <ProgressoQuiz
@@ -248,6 +265,10 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
           curto ainda. */}
       <main className="flex flex-1 flex-col px-5 pb-8 pt-5 celular-baixo:pt-3 celular-minimo:pt-2 sm:px-8 sm:py-12">
         <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col">
+          {passo.tipo === 'abertura' && (
+            <TelaTexto tela={passo.tela} onAvancar={avancar} variante="abertura" />
+          )}
+
           {passo.tipo === 'interstituicao' && (
             <TelaTexto tela={passo.tela} onAvancar={avancar} />
           )}
@@ -261,9 +282,6 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
                 dispatch({ tipo: 'responder', idPergunta: passo.pergunta.id, idOpcao })
               }
               onAvancar={avancar}
-              // A última pergunta avança para o processando: transição de peso,
-              // por botão, não por toque na opção.
-              confirmaComBotao={passo.indice === totalPerguntas - 1}
             />
           )}
 

@@ -26,28 +26,39 @@ export const SEGUNDO_DA_OFERTA_NA_VSL = 4 * 60 + 42
 
 export const quiz1: ConfigQuiz = {
   slug: 'quiz-1',
-  // 2: a abertura saiu e o índice do rascunho deslocou uma tela.
-  versao: 2,
+  // 3: a abertura voltou ao fluxo (revisão de copy v2) e o índice posicional do
+  // rascunho deslocou uma tela de novo. 2 foi quando a abertura saiu.
+  versao: 3,
   tituloPagina: 'Descubra por que você continua adiando seus objetivos',
   descricaoPagina:
     'Responda a 6 perguntas rápidas e descubra o que pode estar fazendo você deixar seus objetivos pessoais sempre para depois.',
 
-  // TELA 01 (abertura) saiu do fluxo em novembro/2026: quem chega do anúncio
-  // cai direto na pergunta 1. O anúncio já promete as 6 perguntas; a abertura
-  // repetia a promessa e pedia um toque sem entregar nada. Ver CLAUDE.md.
+  // TELA 01 — abertura (landing). Sem mascote: a abertura voltou na revisão de
+  // copy v2, mas a imagem priority (que pesava na entrada, pior no Android) não.
+  // O quiz_start não sai aqui: só na primeira resposta (ver QuizConversa).
+  abertura: {
+    id: 'abertura',
+    // *…* marca o destaque do título (Satoshi 700 em --verde, como o <em> do
+    // H1 da LP /trilha). Só marcação: a redação é a do doc. TextoQuiz a remove.
+    titulo: 'Você termina o dia cansado, mas *sente que não fez nada por você*?',
+    paragrafos: [
+      'Em 2 minutos, descubra o que está te fazendo adiar seus objetivos pessoais e qual é o primeiro passo pra sair disso.',
+      '**6 perguntas rápidas · sem cadastro**',
+    ],
+    rotuloBotao: 'COMEÇAR MEU DIAGNÓSTICO',
+  },
 
   perguntas: [
     // TELA 02
     {
       id: 'q1',
-      enunciado: 'Você termina o dia cansado, mas com a sensação de que não fez nada por você?',
-      apoio: 'Qual destas situações mais parece com sua rotina?',
+      enunciado: 'Como é a sua rotina hoje?',
       rotuloBotao: 'CONTINUAR',
       opcoes: [
-        { id: 'A', texto: 'Passo o dia resolvendo coisas do trabalho.', peso: { C: 2 } },
-        { id: 'B', texto: 'Tenho tantas responsabilidades que mal sobra tempo para mim.', peso: { C: 2 } },
-        { id: 'C', texto: 'Minha rotina é imprevisível. Sempre aparece alguma coisa.', peso: { C: 1, B: 1 } },
-        { id: 'D', texto: 'Até tenho momentos livres, mas não consigo aproveitá-los como gostaria.', peso: { B: 2 } },
+        { id: 'A', texto: 'Só trabalho, o dia inteiro.', peso: { C: 2 } },
+        { id: 'B', texto: 'Responsabilidades demais, sem tempo pra mim.', peso: { C: 2 } },
+        { id: 'C', texto: 'Imprevisível, sempre surge alguma coisa.', peso: { C: 1, B: 1 } },
+        { id: 'D', texto: 'Até tenho tempo livre, mas não aproveito.', peso: { B: 2 } },
       ],
     },
     // TELA 03 — não pontua
@@ -70,8 +81,7 @@ export const quiz1: ConfigQuiz = {
     {
       id: 'q3',
       contexto: [
-        'Agora, uma pergunta importante.',
-        'Imagine que, amanhã, você ganhasse duas horas livres, sem reuniões, compromissos ou cobranças.',
+        'Imagine que amanhã você ganhasse duas horas livres, sem reuniões nem cobranças.',
       ],
       enunciado: 'O que provavelmente aconteceria?',
       rotuloBotao: 'CONTINUAR',
@@ -90,7 +100,7 @@ export const quiz1: ConfigQuiz = {
       rotuloBotao: 'CONTINUAR',
       opcoes: [
         { id: 'A', texto: 'Tento fazer várias coisas ao mesmo tempo, porque todas parecem importantes.', peso: { A: 3 } },
-        { id: 'B', texto: 'Escolho objetivos que fazem sentido, mas tenho dificuldade para colocá-los em prática.', peso: { B: 3 } },
+        { id: 'B', texto: 'Escolho objetivos que fazem sentido, mas travo na hora de colocar em prática.', peso: { B: 3 } },
         { id: 'C', texto: 'Acabo perseguindo coisas que sinto que já deveria ter conquistado.', peso: { A: 3 } },
         { id: 'D', texto: 'Considero minha rotina e meu momento de vida antes de decidir.', peso: {} },
       ],
@@ -130,16 +140,15 @@ export const quiz1: ConfigQuiz = {
       depoisDaPergunta: 'q3',
       tela: {
         id: 'ponte',
-        titulo: 'Talvez exista uma diferença entre não ter tempo e *não conseguir avançar*.',
-        // Os ** marcam enfase (negrito) nas tres expressoes-pivo que o texto
-        // contrapoe — escaneabilidade dentro do card. As palavras sao as mesmas
-        // do doc aprovado; so foi adicionada enfase, nenhuma alteracao de
-        // redacao. TextoQuiz converte ** em <strong>.
+        // *…* marca o destaque do titulo (ver TextoQuiz); so marcacao, a
+        // redacao e a do doc v2. O ** nos paragrafos marca a expressao-pivo de
+        // cada possibilidade — escaneabilidade dentro do card, sem mudar texto.
+        titulo: 'Talvez o problema não seja *SÓ falta de tempo*, e sim não ter direcionamento e priorização.',
         paragrafos: [
-          'Porque uma coisa é ter uma **rotina realmente sobrecarregada**.',
-          'Outra é conseguir algum tempo livre, mas **não saber como transformá-lo em progresso**.',
-          'E existe uma terceira possibilidade: estar tentando realizar objetivos que **simplesmente não cabem na vida que você tem hoje**.',
-          'Vamos descobrir qual dessas situações mais se aproxima da sua.',
+          'Uma coisa é ter uma **rotina sobrecarregada de verdade**.',
+          'Outra é ter algum tempo livre e **não saber como virar isso em progresso**.',
+          'E tem uma terceira: estar perseguindo objetivos que **não cabem na vida que você tem hoje**.',
+          'Qual dessas mais parece com a sua?',
         ],
         rotuloBotao: 'QUERO DESCOBRIR',
       },
@@ -162,48 +171,45 @@ export const quiz1: ConfigQuiz = {
     A: {
       titulo: 'Você pode estar tentando viver várias fases da vida ao mesmo tempo.',
       paragrafos: [
-        'Suas respostas sugerem que você tem diferentes objetivos competindo pela sua atenção.',
-        'Talvez você queira cuidar melhor da saúde, avançar profissionalmente, desenvolver projetos pessoais e ainda encontrar tempo para aproveitar a vida.',
-        'O problema é que nem sempre todos esses objetivos cabem na mesma fase.',
-        'E quando tudo parece igualmente importante, pode ficar difícil decidir por onde começar.',
-        '**Talvez o próximo passo não seja encontrar espaço para fazer tudo.**',
-        'Mas descobrir o que realmente faz sentido para a vida que você está vivendo agora.',
-        'Preparamos um vídeo curto para mostrar como escolher objetivos mais coerentes com sua realidade e começar a transformá-los em ações concretas.',
+        'Pelo que você respondeu, tem vários objetivos disputando a sua atenção de uma vez.',
+        'Você quer cuidar da saúde, crescer no trabalho, tirar projetos do papel e ainda ter tempo pra viver.',
+        'O problema é que nem sempre tudo isso cabe na mesma fase.',
+        'E quando tudo parece igualmente importante, fica difícil decidir por onde começar.',
+        '**O próximo passo talvez não seja arrumar espaço pra fazer tudo, e sim descobrir o que faz sentido pra vida que você vive hoje.**',
+        'Preparei um vídeo curto mostrando como escolher objetivos mais coerentes com a sua realidade e começar a tirar do papel.',
       ],
       rotuloBotao: 'ASSISTIR À MINHA ANÁLISE',
     },
     B: {
-      titulo: 'Você sabe o que quer. O difícil é fazer isso acontecer com consistência.',
+      titulo: 'Você sabe o que quer. O difícil é fazer acontecer com consistência.',
       paragrafos: [
-        'Suas respostas sugerem que você tem objetivos importantes, mas encontra dificuldades para transformá-los em ações que se mantenham ao longo do tempo.',
-        'Talvez você já tenha tentado montar uma rotina perfeita.',
-        ['Comprou uma agenda.', 'Baixou aplicativos.', 'Fez listas.', 'Prometeu que, dessa vez, seria diferente.'],
-        'Mas bastou uma semana complicada para tudo começar a sair do lugar.',
-        '**Talvez você não precise de mais um planejamento que funciona apenas quando tudo está sob controle.**',
-        'Talvez precise de uma forma de organização que considere como sua vida realmente funciona.',
-        'Preparamos um vídeo curto para explicar por que tantos planejamentos acabam sendo abandonados e como construir uma estrutura mais viável para seus objetivos.',
+        'Pelo que você respondeu, você tem objetivos importantes, mas tem dificuldade de manter de pé ao longo do tempo.',
+        'Você já tentou montar a rotina perfeita.',
+        ['Comprou uma agenda.', 'Baixou aplicativo.', 'Fez listas.', 'Prometeu que dessa vez ia ser diferente.'],
+        'Aí bastou uma semana complicada pra tudo sair do lugar.',
+        '**Talvez você não precise de mais um plano que só funciona quando está tudo sob controle, e sim de uma forma de organização que leve em conta como a sua vida funciona de verdade.**',
+        'Preparei um vídeo curto explicando por que tanto planejamento acaba abandonado e como montar uma estrutura mais viável pros seus objetivos.',
       ],
       rotuloBotao: 'ASSISTIR À MINHA ANÁLISE',
     },
     C: {
       titulo: 'Sua rotina pode estar ocupando o espaço que deveria ser seu.',
       paragrafos: [
-        'Suas respostas sugerem que suas responsabilidades estão consumindo boa parte do seu tempo ou da sua energia.',
-        ['Você resolve problemas.', 'Cumpre compromissos.', 'Atende às demandas do trabalho e das pessoas ao seu redor.'],
-        'Mas, quando chega a hora de fazer algo por você, muitas vezes já não sobra disposição.',
-        '**Talvez a resposta não seja adicionar ainda mais tarefas à sua agenda.**',
-        'Pode ser necessário reconsiderar prioridades, reconhecer limites e descobrir o que realmente cabe na sua rotina atual.',
-        'Preparamos um vídeo curto para mostrar como começar a organizar objetivos de maneira mais realista, sem depender de uma rotina perfeita.',
+        'Pelo que você respondeu, suas responsabilidades estão consumindo boa parte do seu tempo e da sua energia.',
+        ['Você resolve problema.', 'Cumpre compromisso.', 'Atende o trabalho e as pessoas ao seu redor.'],
+        'Mas quando chega a hora de fazer algo por você, já não sobra disposição.',
+        '**Talvez a resposta não seja colocar mais tarefa na agenda, e sim rever prioridades, reconhecer limites e descobrir o que realmente cabe na sua rotina de hoje.**',
+        'Preparei um vídeo curto mostrando como organizar objetivos de um jeito mais realista, sem depender de uma rotina perfeita.',
       ],
       rotuloBotao: 'ASSISTIR À MINHA ANÁLISE',
     },
     geral: {
-      titulo: 'Seus objetivos e sua rotina merecem uma análise mais cuidadosa.',
+      titulo: 'Seus objetivos e sua rotina merecem um olhar mais de perto.',
       paragrafos: [
-        'Suas respostas não apontam para uma única dificuldade predominante.',
-        'Isso pode acontecer porque seus objetivos, sua disponibilidade e sua forma de organização já funcionam bem em algumas áreas, mas ainda existem pontos que você gostaria de melhorar.',
-        'O próximo passo é compreender como essas dimensões se relacionam.',
-        'Preparamos um vídeo curto para apresentar uma forma de pensar seus objetivos e sua rotina de maneira integrada.',
+        'Suas respostas não apontam pra uma só dificuldade.',
+        'Isso costuma acontecer quando seus objetivos, seu tempo e sua forma de se organizar já funcionam em algumas áreas, mas ainda tem pontos que você quer melhorar.',
+        'O próximo passo é entender como essas três coisas se conectam.',
+        'Preparei um vídeo curto com uma forma de pensar seus objetivos e sua rotina de maneira integrada.',
       ],
       rotuloBotao: 'ASSISTIR À MINHA ANÁLISE',
     },

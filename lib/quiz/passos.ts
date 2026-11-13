@@ -4,21 +4,24 @@ import type { ConfigQuiz, Interstituicao, Pergunta } from './tipos'
 // renderizam o passo que recebem. Mesmo padrao de lib/onboarding.ts.
 
 export type Passo =
+  | { tipo: 'abertura'; tela: Interstituicao }
   | { tipo: 'pergunta'; pergunta: Pergunta; indice: number }
   | { tipo: 'interstituicao'; tela: Interstituicao }
   | { tipo: 'processando' }
   | { tipo: 'resultado' }
 
 /**
- * Monta o fluxo: perguntas, com as telas de copy intercaladas onde a config
- * manda → processando → resultado.
+ * Monta o fluxo: abertura (quando a config tem) → perguntas, com as telas de
+ * copy intercaladas onde a config manda → processando → resultado.
  *
- * Nao ha abertura: o primeiro passo e a pergunta 1. Quem chega do anuncio ja
- * leu ali que sao 6 perguntas; uma tela repetindo isso so pedia um toque a
- * mais antes de qualquer coisa acontecer.
+ * A abertura e opcional: um quiz sem `config.abertura` comeca direto na pergunta
+ * 1. Ela nao conta como etapa na barra de progresso (progressoDoPasso) e o
+ * quiz_start so sai na primeira resposta, nao no toque dela (ver QuizConversa).
  */
 export function montarPassos(config: ConfigQuiz): Passo[] {
-  const passos: Passo[] = []
+  const passos: Passo[] = config.abertura
+    ? [{ tipo: 'abertura', tela: config.abertura }]
+    : []
 
   config.perguntas.forEach((pergunta, indice) => {
     passos.push({ tipo: 'pergunta', pergunta, indice })
@@ -48,6 +51,7 @@ export function montarPassos(config: ConfigQuiz): Passo[] {
 export function progressoDoPasso(passos: Passo[], indiceAtual: number, total: number): number {
   const passo = passos[indiceAtual]
   if (!passo) return 0
+  if (passo.tipo === 'abertura') return 0
   if (passo.tipo === 'processando' || passo.tipo === 'resultado') return 1
 
   // Quantas perguntas ja foram deixadas para tras, incluindo a atual.
