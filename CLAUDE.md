@@ -809,15 +809,28 @@ A primeira campanha rodou 21h: 83 `quiz_view`, 8 `quiz_start`, 6 `quiz_complete`
 começava terminava; a perda estava na entrada, e era pior no Android (3% de início,
 contra 24% no iPhone). Daí três mudanças, e uma hipótese descartada.
 
-**Não há tela de abertura: quem chega cai na pergunta 1.** O anúncio já promete as 6
-perguntas; a abertura repetia a promessa e pedia um toque sem entregar nada — e num
-Android de 360×600 o botão dela ficava a 23px da borda de baixo. A copy da TELA 01 dos
-docs saiu da config. Por isso `quiz-1` está na `versao` 2.
+**Naquele momento a tela de abertura saiu: quem chegava caía na pergunta 1.** O anúncio
+já promete as 6 perguntas; a abertura repetia a promessa e pedia um toque sem entregar
+nada — e num Android de 360×600 o botão dela ficava a 23px da borda de baixo. A copy da
+TELA 01 saiu da config, e `quiz-1` foi para a `versao` 2.
 
-**O `quiz_start` sai na primeira resposta**, imediatamente antes do `quiz_answer` da
-etapa 1 — antes saía no toque de "Começar meu diagnóstico". **A taxa de início antes e
-depois desta mudança não é comparável** (o denominador também mudou, abaixo): compare
-começos por real gasto.
+**A abertura voltou na revisão de copy v2 (novembro/2026), sem reverter o resto.** Na
+prática a remoção não tinha mexido nas taxas da campanha, e a TELA 01 passou a carregar a
+frase mais forte do quiz ("você termina o dia cansado…") como headline. Ela volta **sem o
+mascote** — a imagem `priority` (`cerebro-540.png`) era o peso que derrubava a entrada no
+Android, então a abertura é agora puramente tipográfica (`TelaTexto` variante `abertura`,
+`config.abertura` opcional). Medição de carregamento: o First Load JS de `/quiz/[slug]`
+ficou em **102 kB antes e depois** (sem imagem nova, GA segue adiado) — o custo é um toque
+a mais, não bytes. `quiz-1` foi para a `versao` 3 (o índice posicional do rascunho
+deslocou de novo).
+
+**O `quiz_start` continua saindo na primeira resposta**, imediatamente antes do
+`quiz_answer` da etapa 1 — nunca no toque de "Começar meu diagnóstico". Com a abertura de
+volta isso deixou de ser automático: `avancar` em `QuizConversa` só dispara o `quiz_start`
+(e baixa o `gtag.js`) quando `passo.tipo === 'pergunta'`, então avançar a abertura não
+conta como início. "Começar o quiz" é responder, não abrir a landing. **A taxa de início
+antes e depois dessas mudanças não é comparável** (o denominador também mudou, abaixo):
+compare começos por real gasto.
 
 **`quiz_view` só com a página visível** (`lib/tracking/visibilidade.ts`). Carga em
 segundo plano — aba de trás, pré-renderização, pré-carregamento do navegador de um app —
@@ -884,9 +897,10 @@ um pouco: o container ganha `pb-40` com a barra.
 Quem chega do anúncio vê o quiz, a VSL e a LP como uma página só. Desde novembro/2026
 o sistema da LP é o da plataforma inteira — ver [Sistema visual](#sistema-visual--o-da-lp-trilha).
 
-- **Ponte em verde escuro**, como a virada da LP; perguntas, processando e resultado
-  no off-white. `QuizConversa` troca o fundo por passo. (A abertura, que era o hero
-  escuro com o mascote, saiu do fluxo — ver [Entrada sem abertura](#entrada-sem-abertura-novembro2026-branch-featquiz-sem-intro).)
+- **Abertura e ponte em verde escuro**, como o hero e a virada da LP; perguntas,
+  processando e resultado no off-white. `QuizConversa` troca o fundo por passo. (A
+  abertura voltou na copy v2, como hero tipográfico **sem o mascote** — ver [Entrada sem
+  abertura](#entrada-sem-abertura-novembro2026-branch-featquiz-sem-intro).)
 - **`*trecho*` na config é o `<em>` da LP** (Satoshi 700, `--verde` no escuro). É só
   marcação: a redação dos docs não muda, e `TextoQuiz` a remove.
 - **Botão é `BotaoQuiz`** (pílula `--verde`, texto branco). Branco sobre verde é

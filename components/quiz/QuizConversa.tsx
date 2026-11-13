@@ -156,11 +156,13 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
   // gesto — sem ele o quiz_answer sairia com a opcao anterior. As telas de copy
   // chamam sem argumento.
   //
-  // Sem tela de abertura, a primeira chamada e a primeira resposta: o
-  // quiz_start sai nela, imediatamente antes do quiz_answer da etapa 1.
+  // O quiz_start sai na PRIMEIRA RESPOSTA (passo de pergunta), imediatamente
+  // antes do quiz_answer da etapa 1 — nao no toque do COMECAR da abertura.
+  // "comecar o quiz" e responder, nao abrir a landing: a condicao por tipo
+  // garante que avancar a abertura nao conte como inicio nem baixe o gtag.js.
   const avancar = useCallback(
     (opcaoEscolhida?: string) => {
-      if (!estado.comecou) {
+      if (!estado.comecou && passo?.tipo === 'pergunta') {
         dispatch({ tipo: 'comecou' })
         track('quiz_start', { quiz_slug: config.slug })
         // A entrada ja cumpriu seu papel: agora o gtag.js pode baixar, e
@@ -186,14 +188,16 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
   if (!passo) return null
 
   const totalPerguntas = config.perguntas.length
-  const mostrarProgresso = passo.tipo !== 'resultado'
+  const mostrarProgresso = passo.tipo !== 'abertura' && passo.tipo !== 'resultado'
   const podeVoltar = estado.indice > 0 && passo.tipo !== 'processando' && passo.tipo !== 'resultado'
 
-  // A ponte vive no verde escuro, como a virada da LP /trilha; perguntas,
-  // processando e resultado no off-white, onde as opcoes sao cards brancos. A
-  // troca de fundo marca a troca de "voz" — a mesma alternancia de secoes
-  // escuras e claras da LP. A VSL tem o proprio fundo (fixed) em TelaResultado.
-  const tema: TemaQuiz = passo.tipo === 'interstituicao' ? 'escuro' : 'claro'
+  // Abertura e ponte vivem no verde escuro, como o hero e a virada da LP
+  // /trilha; perguntas, processando e resultado no off-white, onde as opcoes
+  // sao cards brancos. A troca de fundo marca a troca de "voz" — a mesma
+  // alternancia de secoes escuras e claras da LP. A VSL tem o proprio fundo
+  // (fixed) em TelaResultado.
+  const tema: TemaQuiz =
+    passo.tipo === 'abertura' || passo.tipo === 'interstituicao' ? 'escuro' : 'claro'
   const escuro = tema === 'escuro'
 
   return (
@@ -248,6 +252,10 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
           curto ainda. */}
       <main className="flex flex-1 flex-col px-5 pb-8 pt-5 celular-baixo:pt-3 celular-minimo:pt-2 sm:px-8 sm:py-12">
         <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col">
+          {passo.tipo === 'abertura' && (
+            <TelaTexto tela={passo.tela} onAvancar={avancar} variante="abertura" />
+          )}
+
           {passo.tipo === 'interstituicao' && (
             <TelaTexto tela={passo.tela} onAvancar={avancar} />
           )}

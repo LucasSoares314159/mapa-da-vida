@@ -145,6 +145,8 @@ export type ConfigQuiz = {
   versao: number
   tituloPagina: string
   descricaoPagina: string
+  /** Tela de abertura (landing), antes da pergunta 1. Opcional: um quiz sem ela cai direto na pergunta 1. */
+  abertura?: Interstituicao
   perguntas: Pergunta[]
   /** Telas de copy no meio do fluxo, indexadas pela pergunta que as precede. */
   interstituicoes: { depoisDaPergunta: string; tela: Interstituicao }[]
