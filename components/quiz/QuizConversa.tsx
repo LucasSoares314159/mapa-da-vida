@@ -189,7 +189,15 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
 
   const totalPerguntas = config.perguntas.length
   const mostrarProgresso = passo.tipo !== 'abertura' && passo.tipo !== 'resultado'
-  const podeVoltar = estado.indice > 0 && passo.tipo !== 'processando' && passo.tipo !== 'resultado'
+  // A seta nao leva de volta a abertura: a primeira pergunta nao tem "voltar"
+  // (quem chega do anuncio cai nela). Sem a seta, o cabecalho da pergunta 1
+  // alinha com o conteudo, sem espaco reservado. Da pergunta 2 em diante, sim.
+  const passoAnterior = passos[estado.indice - 1]
+  const podeVoltar =
+    estado.indice > 0 &&
+    passo.tipo !== 'processando' &&
+    passo.tipo !== 'resultado' &&
+    passoAnterior?.tipo !== 'abertura'
 
   // Abertura e ponte vivem no verde escuro, como o hero e a virada da LP
   // /trilha; perguntas, processando e resultado no off-white, onde as opcoes
@@ -219,13 +227,20 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
               : 'border-mt-border bg-mt-off-white/95'
           }`}
         >
-          <div className="mx-auto flex max-w-2xl items-center gap-4">
-            {podeVoltar ? (
+          {/* Sem seta de voltar (pergunta 1), a barra e o rotulo comecam
+              alinhados com o conteudo: nada de espaco reservado para um botao
+              que nao existe. Com a seta, o gap volta e a barra retoma a posicao
+              de antes. */}
+          <div className={`mx-auto flex max-w-2xl items-center ${podeVoltar ? 'gap-4' : ''}`}>
+            {podeVoltar && (
               <button
                 type="button"
                 onClick={() => dispatch({ tipo: 'voltar' })}
                 aria-label="Voltar para a pergunta anterior"
-                className={`-ml-1 shrink-0 rounded-full p-2 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-mt-green ${
+                // Area de toque de 44x44 (before) sobre o botao de 36px, sem
+                // aumentar o icone nem deslocar a barra: o pseudo cresce para
+                // fora do fluxo (absolute), o botao mantem o -ml-1 p-2 de antes.
+                className={`relative -ml-1 shrink-0 rounded-full p-2 transition-colors before:absolute before:left-1/2 before:top-1/2 before:h-11 before:w-11 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] focus-visible:outline focus-visible:outline-2 focus-visible:outline-mt-green ${
                   escuro
                     ? 'text-mt-off-white/70 hover:bg-white/10 hover:text-mt-off-white'
                     : 'text-mt-apoio hover:bg-mt-green-sup hover:text-mt-green-dark'
@@ -233,8 +248,6 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
               >
                 <ArrowLeft className="h-5 w-5" aria-hidden="true" />
               </button>
-            ) : (
-              <span className="w-9 shrink-0" aria-hidden="true" />
             )}
 
             <ProgressoQuiz
@@ -269,9 +282,6 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
                 dispatch({ tipo: 'responder', idPergunta: passo.pergunta.id, idOpcao })
               }
               onAvancar={avancar}
-              // A última pergunta avança para o processando: transição de peso,
-              // por botão, não por toque na opção.
-              confirmaComBotao={passo.indice === totalPerguntas - 1}
             />
           )}
 

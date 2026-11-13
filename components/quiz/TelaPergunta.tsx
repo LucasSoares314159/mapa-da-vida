@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react'
 import { Check, MessageCircle } from 'lucide-react'
 import type { Pergunta } from '@/lib/quiz/tipos'
-import { BotaoQuiz } from './BotaoQuiz'
 
 // Tela de uma pergunta. Uma por vez, mobile-first.
 //
@@ -12,25 +11,25 @@ import { BotaoQuiz } from './BotaoQuiz'
 // leitor de tela anunciaria quatro acoes independentes sem dizer que escolher
 // uma descarta as outras. Mesmo padrao das 3 opcoes do Mapa conversacional.
 //
-// Escolher avanca sozinho (auto-advance). As perguntas sao de escolha unica, e
-// um botao "Continuar" fixo abaixo das opcoes obrigava, no mobile, a rolar ate
-// ele depois de ja ter escolhido — dois gestos por pergunta e uma rolagem so
-// para confirmar. Tocar na opcao e a propria confirmacao, como nos quizzes de
-// funil que convertem. O id escolhido vai explicito para onAvancar: o estado do
-// React ainda nao atualizou no mesmo gesto, e sem isso o evento quiz_answer
-// sairia com a opcao anterior (ou vazia).
+// Escolher avanca sozinho (auto-advance), em TODAS as perguntas, inclusive a
+// ultima. As perguntas sao de escolha unica, e um botao "Continuar" fixo abaixo
+// das opcoes obrigava, no mobile, a rolar ate ele depois de ja ter escolhido —
+// dois gestos por pergunta e uma rolagem so para confirmar. Tocar na opcao e a
+// propria confirmacao, como nos quizzes de funil que convertem. O id escolhido
+// vai explicito para onAvancar: o estado do React ainda nao atualizou no mesmo
+// gesto, e sem isso o evento quiz_answer sairia com a opcao anterior (ou vazia).
 //
-// A ultima pergunta e a excecao e mantem botao: ela avanca para o
-// processando/resultado, e uma transicao de peso nao deve disparar no toque de
-// uma opcao sem a pessoa perceber. Quem controla isso e `confirmaComBotao`.
+// A pausa de ~320ms antes do avanco e a protecao contra toque duplo: cada toque
+// reagenda o timer, entao toques rapidos viram um unico avanco (e quiz_answer,
+// deduplicado por etapa em QuizConversa, sai uma vez so). Na ultima pergunta o
+// avanco leva ao processando; o quiz_complete nao sai daqui — dispara ao montar
+// a tela de resultado, em QuizConversa.
 
 type Props = {
   pergunta: Pergunta
   selecionada: string | undefined
   onSelecionar: (idOpcao: string) => void
   onAvancar: (idOpcao: string) => void
-  /** Última pergunta: avança por botão, não por auto-advance. */
-  confirmaComBotao?: boolean
 }
 
 export function TelaPergunta({
@@ -38,7 +37,6 @@ export function TelaPergunta({
   selecionada,
   onSelecionar,
   onAvancar,
-  confirmaComBotao = false,
 }: Props) {
   const refs = useRef<(HTMLButtonElement | null)[]>([])
   const timerAvanco = useRef<ReturnType<typeof setTimeout>>()
@@ -52,17 +50,16 @@ export function TelaPergunta({
   // um clique seguido de "voltar" dispararia o avanco da tela antiga.
   useEffect(() => () => clearTimeout(timerAvanco.current), [])
 
-  // Auto-advance: escolher avanca, exceto na ultima pergunta. O id vai
-  // explicito porque o estado do React ainda nao refletiu a escolha.
+  // Auto-advance: escolher avanca em qualquer pergunta. O id vai explicito
+  // porque o estado do React ainda nao refletiu a escolha.
   //
   // O avanco espera ~320ms para a opcao acender verde antes de a tela trocar:
   // sem a pausa, o auto-advance era tao imediato que a selecao nunca era vista,
   // e a pessoa ficava sem o retorno de "registrou minha escolha". A pausa e o
-  // proprio feedback de confirmacao.
+  // proprio feedback de confirmacao — e o clearTimeout faz toques rapidos
+  // reagendarem um unico avanco (protecao contra toque duplo).
   function escolher(idOpcao: string) {
     onSelecionar(idOpcao)
-    if (confirmaComBotao) return
-
     clearTimeout(timerAvanco.current)
     timerAvanco.current = setTimeout(() => onAvancar(idOpcao), 320)
   }
@@ -88,15 +85,18 @@ export function TelaPergunta({
     refs.current[proximo]?.focus()
     // Seta navega e seleciona, mas NAO auto-avanca: quem percorre as opcoes por
     // teclado ainda esta comparando. O avanco e no Enter/Espaco (clique do
-    // radio) ou, na ultima pergunta, no botao.
+    // radio), que passa por escolher().
     onSelecionar(pergunta.opcoes[proximo].id)
   }
 
   return (
-    // No mobile a pergunta começa no topo, não centralizada: centralizar
-    // empurrava o enunciado para baixo nas perguntas curtas e, nas longas, não
-    // sobrava espaço para centralizar de qualquer jeito.
-    <div className="flex flex-1 flex-col justify-start sm:justify-center">
+    // Centraliza o bloco (título + opções) na vertical quando há altura de
+    // sobra, mas volta ao topo em tela baixa (celular-baixo, ≤700px de altura):
+    // ali centralizar empurrava o enunciado para baixo nas perguntas curtas e,
+    // nas longas, não sobrava espaço para centralizar de qualquer jeito. Acima
+    // de 700px sobram 160–280px vazios embaixo, então o conteúdo sobe para o
+    // centro óptico.
+    <div className="flex flex-1 flex-col justify-center celular-baixo:justify-start">
       {pergunta.contexto && pergunta.contexto.length > 0 && (
         // O contexto e uma observacao/insight antes da pergunta ("E curioso
         // como sempre encontramos tempo para as obrigacoes...") — tem funcao
@@ -140,7 +140,7 @@ export function TelaPergunta({
       </h1>
 
       {pergunta.apoio && (
-        <p className="mt-3 font-editorial text-[17px] lowercase leading-[1.6] text-mt-apoio celular-baixo:mt-1.5 celular-baixo:text-[15px] celular-baixo:leading-[1.45]">
+        <p className="mt-3 font-editorial text-[17px] lowercase leading-[1.6] text-mt-apoio-forte celular-baixo:mt-1.5 celular-baixo:text-[15px] celular-baixo:leading-[1.45]">
           {pergunta.apoio}
         </p>
       )}
@@ -195,30 +195,6 @@ export function TelaPergunta({
           )
         })}
       </div>
-
-      {/* Botão só na última pergunta (auto-advance cobre as demais).
-
-          No mobile ele gruda no rodapé (sticky): só o espaçamento não garante
-          que caiba — a pergunta 6 tem contexto, enunciado de 4 linhas e opções
-          de 2 linhas, e o navegador do WhatsApp mostra ainda menos tela. Rolar
-          para achar o botão depois de escolher era exatamente o atrito que o
-          auto-advance eliminou nas outras perguntas. O degradê no topo deixa as
-          opções sumirem por baixo sem corte seco — e tem 20px, a mesma margem
-          acima da barra: maior que ela, cobria a base da opção d mesmo com a
-          barra parada no fluxo. No desktop cabe: volta ao fluxo. */}
-      {confirmaComBotao && (
-        <div className="sticky bottom-0 z-10 -mx-5 mt-5 celular-minimo:mt-3 bg-mt-off-white px-5 pb-4 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-5 before:h-5 celular-baixo:pt-2 celular-minimo:pb-2 celular-minimo:before:-top-3 celular-minimo:before:h-3 before:bg-gradient-to-t before:from-mt-off-white before:to-mt-off-white/0 sm:static sm:mx-0 sm:mt-8 sm:bg-transparent sm:px-0 sm:pb-2 sm:pt-0 sm:before:hidden">
-          <BotaoQuiz
-            onClick={() => selecionada && onAvancar(selecionada)}
-            disabled={!selecionada}
-            // Em tela baixa o degrade do rodape cobria a base da opcao d (ate
-            // 17px em 360x560): botao e barra mais baixos devolvem esse espaco.
-            className="celular-baixo:py-3"
-          >
-            {pergunta.rotuloBotao}
-          </BotaoQuiz>
-        </div>
-      )}
     </div>
   )
 }

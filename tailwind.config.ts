@@ -113,6 +113,10 @@ const config: Config = {
         // Texto de apoio sobre fundo claro. O mt-muted dá ~3.4:1 e reprova no
         // AA como cor de texto; este dá 4.7:1 no off-white e 5.3:1 no branco.
         'mt-apoio':      '#5B6F73',
+        // Apoio com contraste reforçado (AAA): 7.5:1 no off-white, abaixo do
+        // título (mt-green-dark, ~9.8:1) para manter a hierarquia. Usado nos
+        // textos de apoio das telas claras do quiz (contador e subtítulo).
+        'mt-apoio-forte': '#3E5054',
         'mt-green-sup':  '#E8F5F1',
         // Linha e contorno sobre o verde escuro (a hairline do fundo claro some ali).
         'mt-linha-escura': '#3d5a62',
