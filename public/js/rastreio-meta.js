@@ -26,6 +26,24 @@
 
   var PIXEL_ID = '2130218701193734'
 
+  // ?qa=1: nada sai. Nao carrega o fbevents.js (que mandaria eventos
+  // automaticos por conta propria) e expoe as funcoes como no-op. Sem o
+  // parametro, o arquivo se comporta exatamente como antes.
+  var modoQa = /(?:^|[?&])qa=1(?:&|$)/.test(w.location.search)
+  if (modoQa) {
+    var nada = function () {
+      return false
+    }
+    w.trackMeta = nada
+    w.trackMetaCustom = nada
+    w.pageViewMeta = nada
+    w.trackMetaAntesDeSair = function (evento, params, continuar) {
+      continuar()
+    }
+    w.__mtPixel = { id: PIXEL_ID, qa: true }
+    return
+  }
+
   /* eslint-disable */
   !function(f,b,e,v,n,t,s)
   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?

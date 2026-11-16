@@ -1,15 +1,15 @@
 // GA4 do funil de quiz, com o carregamento adiado.
 //
-// O gtag.js pesa ~177 kB, quase um quarto da entrada do quiz, e nao serve a
-// nada na primeira tela, cujo unico objetivo e um toque. Ele so e baixado na
-// primeira resposta (carregarGa(), chamado por QuizConversa).
+// O gtag.js pesa ~177 kB, quase um quarto da entrada do quiz. Ate nov/2026 so
+// era baixado na primeira resposta; desde a instrumentacao do quiz_accept
+// (abertura v3) QuizConversa chama carregarGa() ja na entrada, para que quem
+// sai na abertura tambem apareca no GA4. O custo (bytes na entrada) foi aceito.
 //
-// Os eventos de antes disso nao se perdem: a fila do gtag (dataLayer + stub) e
-// montada no primeiro evento, e o gtag.js processa a fila inteira ao chegar, na
-// ordem — o mesmo mecanismo do snippet oficial, que tambem enfileira antes de a
-// biblioteca existir. O custo aceito: quem sai sem responder nunca baixa o
-// gtag.js, entao o quiz_view dessa pessoa nao chega ao GA4. A taxa de entrada
-// se le no Pixel da Meta, que segue carregando na entrada (ver CLAUDE.md).
+// A fila do gtag (dataLayer + stub) continua montada no primeiro evento, e o
+// gtag.js processa a fila inteira ao chegar, na ordem — o mesmo mecanismo do
+// snippet oficial. carregarGa() e idempotente.
+
+import { modoQa } from './qa'
 
 declare global {
   interface Window {
@@ -29,6 +29,8 @@ let bibliotecaPedida = false
  */
 function prepararFila(): boolean {
   if (!GA_ID || typeof window === 'undefined') return false
+  // ?qa=1: nem fila, nem gtag.js, nem o page_view automatico (ver ./qa.ts).
+  if (modoQa()) return false
   if (filaPronta) return true
   filaPronta = true
 

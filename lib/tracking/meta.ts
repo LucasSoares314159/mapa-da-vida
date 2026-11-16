@@ -5,6 +5,8 @@
 // /trilha, que nao tem bundle do Next. Aqui so ha o caminho para ele e a espera
 // pelo carregamento.
 
+import { modoQa } from './qa'
+
 /** Caminho publico do carregador unico do Pixel. */
 export const SCRIPT_PIXEL_META = '/js/rastreio-meta.js'
 
@@ -41,6 +43,8 @@ declare global {
  */
 export function aoCarregarPixel(fn: () => void): void {
   if (typeof window === 'undefined') return
+  // ?qa=1: nada sai (ver ./qa.ts). Barrar aqui cobre os tres envios abaixo.
+  if (modoQa()) return
   if (window.__mtPixel) return fn()
 
   let tentativas = 0
