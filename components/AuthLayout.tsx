@@ -8,7 +8,8 @@ import { MenuConta } from './MenuConta'
 import { RegistroServiceWorker } from './RegistroServiceWorker'
 
 type Props = {
-  titulo: string
+  /** Título no Header. Vazio/ausente quando a própria tela já traz o título. */
+  titulo?: string
   nomeUsuario: string
   /** Total de cadastrados, exibido no rodapé da sidebar. */
   totalMembros?: number | null
@@ -20,7 +21,7 @@ type Props = {
 //
 // h-dvh, não h-screen: no iPhone, 100vh inclui a barra do Safari e o menu
 // inferior nasceria escondido atrás dela.
-export function AuthLayout({ titulo, nomeUsuario, totalMembros, children }: Props) {
+export function AuthLayout({ titulo = '', nomeUsuario, totalMembros, children }: Props) {
   const [menuAberto, setMenuAberto] = useState(false)
 
   return (

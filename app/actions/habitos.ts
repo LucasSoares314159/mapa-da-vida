@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { diaDeHoje, podeCriarHabito, LIMITE_HABITOS_ATIVOS } from '@/lib/habitos'
+import { diaDeHoje, existiaNoDia, podeCriarHabito, LIMITE_HABITOS_ATIVOS } from '@/lib/habitos'
 import { habitoSchema, type HabitoData, type HabitoInput } from '@/lib/validations'
 import type { Habito } from '@/types'
 
@@ -148,5 +148,53 @@ export async function definirHabitoHoje(
     )
   if (error) return { error: 'Não foi possível marcar. Tente novamente.' }
   revalidarTelasDeHabitos()
+  return { data: { dia, feito: true } }
+}
+
+/**
+ * Marca ou desmarca o hábito num dia específico (passado ou hoje).
+ * Não permite marcar dias futuros nem dias anteriores à criação do hábito.
+ */
+export async function definirHabitoDia(
+  habitoId: string,
+  feito: boolean,
+  dia: string
+): Promise<Resultado<{ data: { dia: string; feito: boolean } }>> {
+  const supabase = createServerSupabaseClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { redirectTo: '/auth/login' }
+
+  if (dia > diaDeHoje()) return { error: 'Não é possível marcar dias futuros.' }
+
+  if (!feito) {
+    const { error } = await supabase
+      .from('habito_registros')
+      .delete()
+      .eq('habito_id', habitoId)
+      .eq('user_id', user.id)
+      .eq('dia', dia)
+    if (error) return { error: 'Não foi possível desmarcar. Tente novamente.' }
+    return { data: { dia, feito: false } }
+  }
+
+  const { data: habito } = await supabase
+    .from('habitos')
+    .select('id, criado_em, arquivado_em')
+    .eq('id', habitoId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (!habito) return { error: 'Hábito não encontrado.' }
+
+  if (!existiaNoDia(habito as Habito, dia)) {
+    return { error: 'O hábito não existia nesse dia.' }
+  }
+
+  const { error } = await supabase
+    .from('habito_registros')
+    .upsert(
+      { habito_id: habitoId, user_id: user.id, dia, status: 'feito' },
+      { onConflict: 'habito_id,dia', ignoreDuplicates: true }
+    )
+  if (error) return { error: 'Não foi possível marcar. Tente novamente.' }
   return { data: { dia, feito: true } }
 }

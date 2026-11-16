@@ -20,7 +20,6 @@ type HabitoEditavel = {
   icone: IconeHabito
   area: NomeArea
   meta_semanal: number
-  ancora: string | null
 }
 
 type Props = {
@@ -30,9 +29,9 @@ type Props = {
   statusPorArea: Partial<Record<NomeArea, StatusArea>>
 }
 
-type Campo = 'nome' | 'icone' | 'area' | 'meta_semanal' | 'ancora'
+type Campo = 'nome' | 'icone' | 'area' | 'meta_semanal'
 
-const MAX_NOME = 24
+const MAX_NOME = 48
 const ICONES = Object.keys(ICONES_HABITO) as IconeHabito[]
 const METAS = [1, 2, 3, 4, 5, 6, 7]
 
@@ -67,7 +66,6 @@ export function FormularioHabito({ habito, statusPorArea }: Props) {
   const [icone, setIcone] = useState<IconeHabito | null>(habito?.icone ?? null)
   const [area, setArea] = useState<NomeArea | null>(habito?.area ?? null)
   const [meta, setMeta] = useState(habito?.meta_semanal ?? 3)
-  const [ancora, setAncora] = useState(habito?.ancora ?? '')
 
   const [erros, setErros] = useState<Partial<Record<Campo, string>>>({})
   const [erroServidor, setErroServidor] = useState('')
@@ -84,7 +82,7 @@ export function FormularioHabito({ habito, statusPorArea }: Props) {
   function salvar(e: React.FormEvent) {
     e.preventDefault()
     setErroServidor('')
-    const entrada = { nome, icone: icone ?? '', area: area ?? '', meta_semanal: meta, ancora }
+    const entrada = { nome, icone: icone ?? '', area: area ?? '', meta_semanal: meta }
     const r = habitoSchema.safeParse(entrada)
     if (!r.success) {
       const porCampo: Partial<Record<Campo, string>> = {}
@@ -96,7 +94,7 @@ export function FormularioHabito({ habito, statusPorArea }: Props) {
       return
     }
     // O servidor valida de novo: a action é um endpoint público.
-    const dados = { ...r.data, ancora: r.data.ancora ?? undefined }
+    const dados = { ...r.data, ancora: undefined }
     startSalvar(async () => {
       const resultado = editando ? await editarHabito(habito.id, dados) : await criarHabito(dados)
       if ('redirectTo' in resultado) return router.push(resultado.redirectTo)
@@ -288,28 +286,6 @@ export function FormularioHabito({ habito, statusPorArea }: Props) {
             })}
           </div>
           <span className="text-sm text-mt-apoio">{textoMeta(meta)}</span>
-        </div>
-
-        {/* Âncora */}
-        <div className="flex flex-col gap-2">
-          <label htmlFor="habito-ancora" className="text-base font-semibold text-mt-green-dark">
-            Quando? <span className="font-normal text-mt-apoio">(opcional)</span>
-          </label>
-          <div className="flex min-h-11 items-center rounded-elemento border border-mt-border bg-white pl-4 focus-within:border-mt-green focus-within:ring-[3px] focus-within:ring-mt-green/25">
-            <span className="whitespace-nowrap text-base text-mt-apoio">Depois de</span>
-            <input
-              id="habito-ancora"
-              value={ancora}
-              maxLength={60}
-              placeholder="almoçar"
-              aria-describedby="habito-ancora-ajuda"
-              onChange={(e) => setAncora(e.target.value)}
-              className="min-w-0 flex-1 bg-transparent px-2 py-2.5 text-base text-mt-black outline-none placeholder:text-mt-apoio/70"
-            />
-          </div>
-          <span id="habito-ancora-ajuda" className={cn('text-sm', erros.ancora ? 'text-mt-red' : 'text-mt-apoio')}>
-            {erros.ancora ?? 'Amarrar o hábito a algo que você já faz ajuda a lembrar dele.'}
-          </span>
         </div>
 
         {erroServidor && (

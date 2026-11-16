@@ -40,7 +40,6 @@ export default async function EditarHabitoPage({ params }: { params: { id: strin
           icone: habito.icone,
           area: habito.area,
           meta_semanal: habito.meta_semanal,
-          ancora: habito.ancora ?? null,
         }}
       />
     </AuthLayout>

@@ -2,12 +2,13 @@ import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { contarMembros } from '@/lib/membros'
 import {
-  calendario,
+  calendario30Dias,
   constancia,
+  constanciaUltimos7Dias,
   diaDeHoje,
   diaEmBrasilia,
-  diasCompletos,
   inicioDaSemana,
+  melhorSequencia,
   placarDoHabito,
   somarDias,
   SEMANAS_CONSTANCIA,
@@ -33,7 +34,7 @@ export default async function ProgressoHabitosPage() {
   const hoje = diaDeHoje()
   const desdeRecorte = somarDias(inicioDaSemana(hoje), -7 * SEMANAS_CONSTANCIA * 2)
 
-  const [{ data: profile }, { data: habitosRaw }, { data: registrosRaw }, { count: repeticoes }, statusPorArea, totalMembros] =
+  const [{ data: profile }, { data: habitosRaw }, { data: registrosRaw }, { data: registrosTodosRaw }, { count: repeticoes }, statusPorArea, totalMembros] =
     await Promise.all([
       supabase.from('profiles').select('nome').eq('id', user.id).single(),
       // Arquivados também: o histórico deles segue contando na constância e no calendário.
@@ -44,6 +45,8 @@ export default async function ProgressoHabitosPage() {
         .order('ordem', { ascending: true, nullsFirst: false })
         .order('criado_em', { ascending: true }),
       supabase.from('habito_registros').select('*').eq('user_id', user.id).gte('dia', desdeRecorte),
+      // Todos os registros para calcular a melhor sequência histórica.
+      supabase.from('habito_registros').select('habito_id, dia, status').eq('user_id', user.id).eq('status', 'feito'),
       // Repetições são desde sempre, fora do recorte de 8 semanas: o número só cresce.
       supabase
         .from('habito_registros')
@@ -56,18 +59,37 @@ export default async function ProgressoHabitosPage() {
 
   const todos = (habitosRaw ?? []) as Habito[]
   const registros = (registrosRaw ?? []) as RegistroHabito[]
+  const registrosTodos = (registrosTodosRaw ?? []) as RegistroHabito[]
   const primeiro = todos.reduce<string | null>((min, h) => (min === null || h.criado_em < min ? h.criado_em : min), null)
-  const cal = calendario(todos, registros, hoje)
+  const cal30 = calendario30Dias(todos, registros, hoje)
+  const totalDiasCompletos = cal30.filter((d) => d.completo).length
 
-  const habitos: HabitoNoProgresso[] = todos
-    .filter((h) => !h.arquivado_em)
+  const ativos = todos.filter((h) => !h.arquivado_em)
+
+  const habitos: HabitoNoProgresso[] = ativos
     .map((h) => ({
       id: h.id,
       nome: h.nome,
+      icone: h.icone,
       areaLabel: `${pilarDaArea(h.area)} · ${h.area}`,
       status: statusPorArea[h.area],
       placar: placarDoHabito(h, registros, hoje),
+      criado_em: h.criado_em,
+      arquivado_em: h.arquivado_em ?? null,
     }))
+
+  const feitosSet = registros
+    .filter((r) => r.status === 'feito')
+    .map((r) => `${r.habito_id}|${r.dia}`)
+
+  const feitosSetObj = new Set(feitosSet)
+  // Hábitos feitos hoje
+  const feitosHoje = ativos.filter((h) => feitosSetObj.has(`${h.id}|${hoje}`)).length
+  // Checks este mês (1º dia do mês até hoje)
+  const inicioMes = `${hoje.slice(0, 7)}-01`
+  const checksEsteMes = registros.filter(
+    (r) => r.status === 'feito' && r.dia >= inicioMes && r.dia <= hoje
+  ).length
 
   return (
     <AuthLayout titulo="Meus Hábitos" nomeUsuario={profile?.nome ?? user.email ?? ''} totalMembros={totalMembros}>
@@ -75,9 +97,16 @@ export default async function ProgressoHabitosPage() {
         repeticoes={repeticoes ?? 0}
         desde={primeiro ? formatoDesde.format(new Date(`${diaEmBrasilia(primeiro)}T12:00:00Z`)) : null}
         constancia={constancia(todos, registros, hoje)}
-        calendario={cal}
-        diasCompletos={diasCompletos(cal)}
+        constancia7Dias={constanciaUltimos7Dias(todos, registros, hoje)}
+        calendario={cal30}
+        diasCompletos={totalDiasCompletos}
+        melhorSequencia={melhorSequencia(todos, registrosTodos, hoje)}
         habitos={habitos}
+        feitosSet={feitosSet}
+        hoje={hoje}
+        totalHabitos={ativos.length}
+        feitosHoje={feitosHoje}
+        checksEsteMes={checksEsteMes}
       />
     </AuthLayout>
   )

@@ -184,6 +184,27 @@ export function repeticoesTotais(registros: RegistroHabito[]): number {
   return registros.filter((r) => r.status === 'feito').length
 }
 
+/**
+ * Constância dos últimos 7 dias corridos (incluindo hoje): dias em que pelo menos
+ * um hábito foi feito, dividido pelos dias em que pelo menos um hábito existia.
+ * Usado como fallback enquanto ainda não há semana completa de calendário.
+ * Retorna null se nenhum hábito existia nos últimos 7 dias.
+ */
+export function constanciaUltimos7Dias(habitos: Habito[], registros: RegistroHabito[], hoje: string): number | null {
+  const feitos = indiceFeitos(registros)
+  let diasComHabito = 0
+  let diasComAlgumFeito = 0
+  for (let i = 6; i >= 0; i--) {
+    const dia = somarDias(hoje, -i)
+    const existentes = habitos.filter((h) => existiaNoDia(h, dia))
+    if (existentes.length === 0) continue
+    diasComHabito++
+    const fezAlgum = existentes.some((h) => feitos.has(`${h.id}|${dia}`))
+    if (fezAlgum) diasComAlgumFeito++
+  }
+  return diasComHabito > 0 ? Math.round((100 * diasComAlgumFeito) / diasComHabito) : null
+}
+
 export type DiaCalendario = {
   dia: string
   futuro: boolean
@@ -268,4 +289,63 @@ export function habitosDoDia(habitos: Habito[], registros: RegistroHabito[], hoj
         feitoHoje: p.feitoHoje,
       }
     })
+}
+
+/**
+ * Últimos N dias corridos (do mais antigo ao mais recente), terminando em hoje.
+ * Mesmo critério do calendário: cada dia conta só os hábitos que existiam nele.
+ */
+export function calendario30Dias(
+  habitos: Habito[],
+  registros: RegistroHabito[],
+  hoje: string,
+  dias: number = 30
+): DiaCalendario[] {
+  const feitos = indiceFeitos(registros)
+  const out: DiaCalendario[] = []
+  for (let k = dias - 1; k >= 0; k--) {
+    const dia = somarDias(hoje, -k)
+    const futuro = dia > hoje
+    const ativos = habitos.filter((h) => existiaNoDia(h, dia))
+    const n = futuro ? 0 : ativos.filter((h) => feitos.has(`${h.id}|${dia}`)).length
+    const existentes = ativos.length
+    const nivel = (existentes ? Math.round((3 * n) / existentes) : 0) as DiaCalendario['nivel']
+    out.push({
+      dia,
+      futuro,
+      hoje: dia === hoje,
+      feitos: n,
+      existentes,
+      nivel,
+      completo: !futuro && existentes > 0 && n === existentes,
+    })
+  }
+  return out
+}
+
+/**
+ * Maior número de dias consecutivos em que pelo menos 1 hábito foi cumprido,
+ * calculado sobre todos os registros disponíveis.
+ */
+export function melhorSequencia(habitos: Habito[], registros: RegistroHabito[], hoje: string): number {
+  if (habitos.length === 0 || registros.length === 0) return 0
+  const feitos = indiceFeitos(registros)
+  // Encontra o dia mais antigo com registro
+  const diasComFeito = Array.from(feitos).map((k) => k.split('|')[1]).filter(Boolean)
+  if (diasComFeito.length === 0) return 0
+  const maisAntigo = diasComFeito.reduce((min, d) => (d < min ? d : min), diasComFeito[0])
+
+  let melhor = 0
+  let atual = 0
+  for (let d = maisAntigo; d <= hoje; d = somarDias(d, 1)) {
+    const ativos = habitos.filter((h) => existiaNoDia(h, d))
+    const temFeito = ativos.some((h) => feitos.has(`${h.id}|${d}`))
+    if (temFeito) {
+      atual++
+      if (atual > melhor) melhor = atual
+    } else {
+      atual = 0
+    }
+  }
+  return melhor
 }

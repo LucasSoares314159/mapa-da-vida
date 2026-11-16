@@ -57,16 +57,16 @@ export function ModuloAula({
 
   return (
     <div className="flex flex-col">
-    <div className="mx-auto w-full max-w-6xl px-6 py-8 pb-28">
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-      <div className="flex flex-1 flex-col gap-6 min-w-0">
+    <div className="mx-auto w-full max-w-6xl px-4 py-5 pb-28 sm:px-6 sm:py-8">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+      <div className="flex flex-1 flex-col gap-4 min-w-0 sm:gap-6">
         {/* Cabeçalho com navegação */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex flex-col gap-1">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-col gap-0.5 sm:gap-1">
             <span className="text-sm text-mt-apoio">
               Aula {index} de {total}
             </span>
-            <h1 className="font-heading text-titulo font-medium text-mt-green-dark">
+            <h1 className="font-heading text-subtitulo font-medium text-mt-green-dark sm:text-titulo">
               {modulo.titulo}
             </h1>
           </div>
@@ -75,7 +75,7 @@ export function ModuloAula({
             <button
               onClick={() => anteriorId && router.push(`/content/modulo/${anteriorId}`)}
               disabled={!anteriorId}
-              className="flex size-11 items-center justify-center rounded-full border border-mt-border text-mt-green-dark transition-colors hover:border-mt-green disabled:cursor-default disabled:opacity-35"
+              className="flex size-10 items-center justify-center rounded-full border border-mt-border text-mt-green-dark transition-colors hover:border-mt-green disabled:cursor-default disabled:opacity-35 sm:size-11"
               aria-label="Aula anterior"
             >
               <ChevronLeft className="size-4" />
@@ -83,7 +83,7 @@ export function ModuloAula({
             <button
               onClick={() => proximoId && router.push(`/content/modulo/${proximoId}`)}
               disabled={!proximoId}
-              className="flex size-11 items-center justify-center rounded-full border border-mt-border text-mt-green-dark transition-colors hover:border-mt-green disabled:cursor-default disabled:opacity-35"
+              className="flex size-10 items-center justify-center rounded-full border border-mt-border text-mt-green-dark transition-colors hover:border-mt-green disabled:cursor-default disabled:opacity-35 sm:size-11"
               aria-label="Próxima aula"
             >
               <ChevronRight className="size-4" />

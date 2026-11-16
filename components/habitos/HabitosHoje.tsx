@@ -6,6 +6,7 @@ import { Check, ChevronRight, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useMarcarHabitos, type HabitoDoDia } from '@/hooks/useMarcarHabitos'
 import { cn } from '@/lib/utils'
+import { somarDias, inicioDaSemana } from '@/lib/habitos'
 import { CirculoHabito } from './CirculoHabito'
 import { ConviteInstalar } from './ConviteInstalar'
 
@@ -13,9 +14,11 @@ type Props = {
   /** Ex.: "quinta-feira, 12 de novembro". */
   dataLabel: string
   habitos: HabitoDoDia[]
-  /** Constância das 4 semanas completas; null antes da primeira. */
-  constancia: number | null
   podeCriar: boolean
+  /** Dias desta semana (YYYY-MM-DD) em que pelo menos 1 hábito foi feito. */
+  diasFeitos: string[]
+  /** Hoje em Brasília (YYYY-MM-DD). */
+  hoje: string
 }
 
 // Rotações das partículas da tela de dia completo (classes literais para o Tailwind).
@@ -28,7 +31,9 @@ const CORES_FESTA = ['bg-mt-green', 'bg-mt-off-white', 'bg-mt-yellow']
 
 export type { HabitoDoDia }
 
-export function HabitosHoje({ dataLabel, habitos, constancia, podeCriar }: Props) {
+const DIAS_SEMANA_LABEL = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom']
+
+export function HabitosHoje({ dataLabel, habitos, podeCriar, diasFeitos, hoje }: Props) {
   const [festa, setFesta] = useState(false)
   const { feitos, celebrando, aviso, avisar, alternar, jaMarcou, depois } = useMarcarHabitos(habitos, {
     onDiaCompleto: () => {
@@ -67,25 +72,7 @@ export function HabitosHoje({ dataLabel, habitos, constancia, podeCriar }: Props
         </div>
       ) : (
         <>
-          <Link
-            href="/habitos/progresso"
-            className="card-mt flex items-center gap-4 p-card transition-[box-shadow,transform] duration-150 hover:shadow-mt-2 active:scale-[0.99] motion-reduce:transition-none focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-mt-green-dark"
-          >
-            <span className="flex flex-1 flex-col gap-0.5">
-              <span className="text-sm text-mt-apoio">
-                {constancia === null
-                  ? 'Sua constância aparece depois da primeira semana completa'
-                  : 'Sua constância nas últimas 4 semanas'}
-              </span>
-              <span className="text-sm font-semibold text-mt-green-dark">Ver seu progresso</span>
-            </span>
-            {constancia !== null && (
-              <span className="font-heading text-titulo font-medium text-mt-green-dark">{constancia}%</span>
-            )}
-            <ChevronRight className="size-5 shrink-0 text-mt-green-dark" aria-hidden />
-          </Link>
-
-          <ul className="mt-10 grid grid-cols-2 justify-items-center gap-x-3 gap-y-9 sm:grid-cols-3 lg:grid-cols-4">
+          <ul className="mt-6 grid grid-cols-2 justify-items-center gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4">
             {habitos.map((h) => (
               <li key={h.id}>
                 <CirculoHabito
@@ -103,7 +90,7 @@ export function HabitosHoje({ dataLabel, habitos, constancia, podeCriar }: Props
             ))}
             {podeCriar && (
               <li className="flex flex-col items-center gap-3">
-                <div className="flex size-[140px] items-center justify-center">
+                <div className="flex size-[120px] items-center justify-center">
                   <Link
                     href="/habitos/novo"
                     aria-label="Novo hábito"
@@ -120,6 +107,53 @@ export function HabitosHoje({ dataLabel, habitos, constancia, podeCriar }: Props
           {!jaMarcou && feitosHoje === 0 && (
             <p className="mt-10 text-center text-sm text-mt-apoio">Segure o círculo para marcar.</p>
           )}
+
+          {/* Card da semana — mini-calendário + acesso à consistência mensal */}
+          {(() => {
+            const seg = inicioDaSemana(hoje)
+            const diasSemana = Array.from({ length: 7 }, (_, i) => somarDias(seg, i))
+            const feitosSet = new Set(diasFeitos)
+            return (
+              <Link
+                href="/habitos/progresso"
+                className="mt-8 card-mt flex items-center justify-between gap-4 p-card transition-shadow hover:shadow-mt-2 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-[3px] focus-visible:outline-mt-green-dark"
+                aria-label={`Semana: ${diasFeitos.length} ${diasFeitos.length === 1 ? 'dia feito' : 'dias feitos'}. Ver consistência.`}
+              >
+                <span className="flex flex-1 flex-col gap-3">
+                  {/* Bolinhas dos 7 dias */}
+                  <span className="flex items-center justify-between gap-2" aria-hidden>
+                    {diasSemana.map((dia, i) => {
+                      const feito = feitosSet.has(dia)
+                      const futuro = dia > hoje
+                      const ehHoje = dia === hoje
+                      return (
+                        <span key={dia} className="flex flex-col items-center gap-1.5">
+                          <span
+                            className={cn(
+                              'flex size-9 items-center justify-center rounded-full transition-colors sm:size-10',
+                              feito
+                                ? 'bg-mt-green text-mt-green-dark'
+                                : futuro
+                                  ? 'border border-dashed border-mt-border'
+                                  : 'bg-mt-green-sup',
+                              ehHoje && 'outline outline-2 outline-offset-1 outline-mt-green-dark'
+                            )}
+                          >
+                            {feito && <Check className="size-4 sm:size-5" strokeWidth={2.8} />}
+                          </span>
+                          <span className={cn('text-[11px] leading-none', ehHoje ? 'font-semibold text-mt-green-dark' : 'text-mt-apoio')}>{DIAS_SEMANA_LABEL[i]}</span>
+                        </span>
+                      )
+                    })}
+                  </span>
+                  <span className="text-xs text-mt-apoio">
+                    {diasFeitos.length} {diasFeitos.length === 1 ? 'dia' : 'dias'} esta semana
+                  </span>
+                </span>
+                <ChevronRight className="size-5 shrink-0 text-mt-green-dark" aria-hidden />
+              </Link>
+            )
+          })()}
         </>
       )}
 

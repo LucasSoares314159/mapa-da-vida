@@ -119,7 +119,7 @@ export const habitoSchema = z.object({
     .string()
     .trim()
     .min(3, 'Escreva o que você vai fazer')
-    .max(24, 'Use até 24 caracteres: o nome aparece dentro do círculo'),
+    .max(48, 'Use até 48 caracteres'),
   icone: z.enum(ICONES_VALIDOS, { message: 'Escolha um ícone' }),
   area: z.enum(AREAS_HABITO, { message: 'Escolha a área do Mapa que esse hábito cuida' }),
   meta_semanal: z.number().int().min(1, 'Escolha de 1 a 7 vezes').max(7, 'Escolha de 1 a 7 vezes'),

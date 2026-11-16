@@ -190,7 +190,7 @@ as novas migrações versionadas em `supabase/migrations`.
 | `momentos_vida` | `estacao`, `frase`, `duracao`, `data_revisao`, `ativo` — 1 ativo por usuário |
 | `progresso_aulas` | `user_id`, `modulo_id`, `concluido_em`, `data_confiavel` |
 | `modulos_conteudo` | `modulo_id` (PK, texto), `blocos` (jsonb), `atualizado_em` |
-| `habitos` | `nome` (3–24), `icone`, `area`, `meta_semanal` (1–7), `ancora`, `ordem`, `criado_em`, `arquivado_em` |
+| `habitos` | `nome` (3–48), `icone`, `area`, `meta_semanal` (1–7), `ancora`, `ordem`, `criado_em`, `arquivado_em` |
 | `habito_registros` | PK `(habito_id, dia)`, `user_id`, `dia` (date, Brasília), `status` (`feito`/`pulado`) |
 | `compras` | provedor/checkout, `external_id`, e-mail, status, `user_id`, método, parcelas, datas do funil e `meta_purchase_enviado_em` |
 | `checkout_atribuicao` | `external_id` (PK), `fbp`, `fbc`, `client_ip`, `client_user_agent`, `source_url`, `source` — gravada na criação da cobrança |

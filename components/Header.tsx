@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { Mail, Menu, MessageCircle, Youtube } from 'lucide-react'
 
 type Props = {
-  titulo: React.ReactNode
+  /** Vazio quando a própria tela já traz o título — o Header não o repete. */
+  titulo?: React.ReactNode
   nomeUsuario: string
   /** Celular: o ≡ e o avatar abrem o menu "Mais". No computador nenhum dos dois aparece como botão. */
   onMenuClick?: () => void
@@ -17,7 +18,7 @@ export function Header({ titulo, nomeUsuario, onMenuClick }: Props) {
     <header
       className="flex min-h-14 shrink-0 items-center justify-between border-b-linha border-mt-border bg-white px-5 pt-[env(safe-area-inset-top)]"
     >
-      <div className="flex items-center gap-1">
+      <div className="flex min-w-0 flex-1 items-center gap-1">
         {/* O ≡ é o gesto que todo mundo reconhece; só o avatar como gatilho deixava
             Momento de Vida e Rotina escondidos para quem vinha da gaveta antiga. */}
         {onMenuClick && (
@@ -25,15 +26,15 @@ export function Header({ titulo, nomeUsuario, onMenuClick }: Props) {
             type="button"
             onClick={onMenuClick}
             aria-label="Abrir menu"
-            className="-ml-2.5 flex size-11 items-center justify-center rounded-full text-mt-green-dark transition-colors hover:bg-mt-off-white focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-mt-green-dark lg:hidden"
+            className="-ml-2.5 flex size-11 shrink-0 items-center justify-center rounded-full text-mt-green-dark transition-colors hover:bg-mt-off-white focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-mt-green-dark lg:hidden"
           >
             <Menu className="size-5" aria-hidden />
           </button>
         )}
-        <h1 className="font-heading text-[17px] font-medium text-mt-green-dark">{titulo}</h1>
+        {titulo && <h1 className="truncate font-heading text-[17px] font-medium text-mt-green-dark">{titulo}</h1>}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         {/* Ordem crescente de destaque, da esquerda para a direita: o grupo é
             a ação de comunidade (entra uma vez e fica), então vem sólido e por
             último, encostado no avatar. Canal e newsletter são visita
