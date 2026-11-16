@@ -85,6 +85,11 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
 
     capturarAtribuicao()
 
+    // GA4 ja na abertura: quem sai sem clicar tambem precisa aparecer no funil.
+    // Idempotente: as chamadas da restauracao e da 1a resposta nao duplicam o
+    // script. Depois da atribuicao, para o quiz_view sair com UTM.
+    carregarGa()
+
     const rascunho = lerRascunho(config)
     if (rascunho && rascunho.indice > 0) {
       dispatch({ tipo: 'restaurar', indice: rascunho.indice, respostas: rascunho.respostas })
@@ -185,6 +190,20 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
     [estado.comecou, estado.respostas, passo, config.slug]
   )
 
+  // Clique no COMECAR da abertura. quiz_accept marca "aceitou o convite" e e
+  // distinto do quiz_start (1a resposta): separa quem viu a abertura e nao
+  // clicou de quem clicou e nao respondeu. Vive so aqui, nunca no `avancar`
+  // generico. A trava vem antes do track: duplo clique nao repete o evento, e
+  // rascunho restaurado (comecou) nem chega a abertura.
+  const aceitouAbertura = useRef(false)
+  const aceitar = useCallback(() => {
+    if (!aceitouAbertura.current && !estado.comecou && passo?.tipo === 'abertura') {
+      aceitouAbertura.current = true
+      track('quiz_accept', { quiz_slug: config.slug, versao: config.versao })
+    }
+    avancar()
+  }, [estado.comecou, passo?.tipo, config.slug, config.versao, avancar])
+
   if (!passo) return null
 
   const totalPerguntas = config.perguntas.length
@@ -266,7 +285,7 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
       <main className="flex flex-1 flex-col px-5 pb-8 pt-5 celular-baixo:pt-3 celular-minimo:pt-2 sm:px-8 sm:py-12">
         <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col">
           {passo.tipo === 'abertura' && (
-            <TelaTexto tela={passo.tela} onAvancar={avancar} variante="abertura" />
+            <TelaTexto tela={passo.tela} onAvancar={aceitar} variante="abertura" />
           )}
 
           {passo.tipo === 'interstituicao' && (

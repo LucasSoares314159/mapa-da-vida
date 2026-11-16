@@ -839,12 +839,11 @@ executa o JavaScript sem ninguém ver a tela. No diagnóstico o Pixel contou 58
 foi possível confirmar que a Meta pré-carrega a página, mas esse filtro tira a dúvida
 do denominador. O `PageView` do Pixel continua na carga: o Pixel não foi tocado.
 
-**O GA4 só é baixado na primeira resposta** (`lib/tracking/ga.ts`). Eram 177 kB de
-`gtag.js` numa tela cujo único trabalho é um toque. Os eventos anteriores não se perdem:
-ficam na fila do `dataLayer` e saem quando a biblioteca chega. O custo aceito: **quem sai
-sem responder nunca baixa o `gtag.js`, e o `quiz_view` dela não chega ao GA4.** A taxa de
-entrada se lê no Pixel; no GA4, o funil começa de fato no `quiz_start`. O Pixel ficou na
-entrada de propósito — adiá-lo mudaria o denominador da campanha de novo.
+**O GA4 foi adiado até a primeira resposta, e voltou à entrada em nov/2026**
+(`lib/tracking/ga.ts`). Eram 177 kB de `gtag.js` numa tela cujo único trabalho é um toque, e
+quem saía na abertura nunca aparecia no GA4. Com o `quiz_accept` (abaixo), `QuizConversa` chama
+`carregarGa()` já na entrada: custo aceito de ~177 kB a mais na primeira tela, em troca do funil
+completo no GA4. `carregarGa()` é idempotente. O Pixel ficou na entrada de propósito.
 
 **O preload da VTurb não estava na entrada** e ficou onde estava, na tela do
 diagnóstico. A hipótese de que ele pesava na primeira tela era falsa: a entrada baixava 0
@@ -938,11 +937,20 @@ aparece na aba Rede (Timing). Não há dado pessoal nem segredo nessa linha.
 `track()` em `lib/tracking/eventos.ts` manda cada evento para o **Pixel e o GA4** na
 mesma chamada: o Pixel alimenta a otimização da campanha, o GA4 dá o relatório de funil
 com abandono por etapa — que no Gerenciador da Meta exigiria uma conversão personalizada
-por passo. No GA4 o evento entra numa fila e só sai depois da primeira resposta, quando o
-`gtag.js` é baixado — ver [Entrada sem abertura](#entrada-sem-abertura-novembro2026-branch-featquiz-sem-intro).
+por passo. No GA4 o evento entra numa fila e sai quando o `gtag.js` chega, que agora é na
+entrada — ver [Entrada sem abertura](#entrada-sem-abertura-novembro2026-branch-featquiz-sem-intro).
 
-Eventos: `quiz_view` · `quiz_start` · `quiz_answer` (com etapa) · `quiz_complete` (com
-perfil, regra e pontuações) · `vsl_play` · `cta_visivel` · `cta_click`.
+Eventos: `quiz_view` · `quiz_accept` · `quiz_start` · `quiz_answer` (com etapa) ·
+`quiz_complete` (com perfil, regra e pontuações) · `vsl_play` · `cta_visivel` · `cta_click`.
+
+**`quiz_accept`** (`quiz_slug`, `versao`) sai no toque do COMEÇAR da abertura, 1× por carga.
+Fica separado do `quiz_start` (1ª resposta) de propósito: `quiz_view − quiz_accept` é quem
+viu a abertura e não clicou; `quiz_accept − quiz_start` é quem clicou e não respondeu a q1.
+Rascunho restaurado não o dispara.
+
+**`?qa=1` na URL desliga todo o rastreio** (`lib/tracking/qa.ts`): `track()`, Pixel (o
+`rastreio-meta.js` nem carrega o `fbevents.js`) e GA4 (nem fila, nem `gtag.js`). Serve para
+navegar em produção sem registrar evento real. Não é persistido: vale enquanto estiver na URL.
 
 **`cta_origem` e `vsl_fronteira_s` medem o vazamento do gate da VSL.** O botão de compra é
 liberado por quatro caminhos (ver [VSL](#vsl-da-vturb-e-o-botão-de-compra)), e só um é

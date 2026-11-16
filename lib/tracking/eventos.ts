@@ -16,6 +16,7 @@ import { trackMeta, trackMetaCustom } from './meta'
 
 export type EventoQuiz =
   | 'quiz_view'
+  | 'quiz_accept'
   | 'quiz_start'
   | 'quiz_answer'
   | 'quiz_complete'
