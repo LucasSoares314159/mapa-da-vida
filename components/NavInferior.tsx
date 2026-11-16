@@ -24,7 +24,7 @@ const ABAS: Aba[] = [
     icone: CircleCheck,
     ativa: (p) => p.startsWith('/habitos') && !p.startsWith('/habitos/progresso'),
   },
-  { href: '/habitos/progresso', label: 'Progresso', icone: BarChart3, ativa: (p) => p.startsWith('/habitos/progresso') },
+  { href: '/habitos/progresso', label: 'Consistência', icone: BarChart3, ativa: (p) => p.startsWith('/habitos/progresso') },
   { href: '/content', label: 'Trilha', icone: BookOpen, ativa: (p) => p.startsWith('/content') },
   { href: '/objetivos', label: 'Objetivos', icone: Target, ativa: (p) => p.startsWith('/objetivos') },
   {

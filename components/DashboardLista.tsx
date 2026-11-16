@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, FileText, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Eye, FileText, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { Mapa } from '@/types'
 
@@ -87,7 +87,7 @@ export function DashboardLista({ mapas }: Props) {
       >
         <p className="text-muted-foreground">Você ainda não tem nenhum mapa.</p>
         <Button asChild>
-          <Link href="/mapa/preparacao">Criar meu primeiro mapa</Link>
+          <Link href="/mapa/novo">Criar meu primeiro mapa</Link>
         </Button>
       </div>
     )
@@ -218,6 +218,18 @@ export function DashboardLista({ mapas }: Props) {
           </button>
         </div>
       )}
+
+      {/* FAB de novo mapa — padrão de app, fixo no canto inferior. Só no celular:
+          no computador a Sidebar já tem o acesso a criar mapa. Acima do menu
+          inferior (bottom-24) e respeitando a safe area do iPhone. */}
+      <Link
+        href="/mapa/novo"
+        aria-label="Novo mapa"
+        className="fixed bottom-24 left-5 z-30 flex size-14 items-center justify-center rounded-full bg-mt-green-dark text-mt-off-white shadow-mt-2 transition-transform active:scale-95 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-mt-green-dark lg:hidden"
+        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <Plus className="size-6" aria-hidden />
+      </Link>
     </div>
   )
 }

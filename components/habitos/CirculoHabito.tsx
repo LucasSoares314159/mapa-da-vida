@@ -58,8 +58,8 @@ type Props = {
   celebrando: TipoCelebracao | null
   onAlternar: () => void
   onToqueCurto?: () => void
-  /** compacto: a faixa de hábitos no topo da Trilha. */
-  tamanho?: 'normal' | 'compacto'
+  /** compacto: a faixa de hábitos no topo da Trilha. medio: tamanho intermediário. */
+  tamanho?: 'normal' | 'medio' | 'compacto'
   /** Só desenha (prévia do formulário): sem segurar, sem foco, sem leitor de tela. */
   estatico?: boolean
   /** O nome abaixo do círculo vira link para editar. O círculo continua só marcando. */
@@ -90,6 +90,7 @@ export function CirculoHabito({
 
   const Icone = ICONE_HABITO[icone]
   const compacto = tamanho === 'compacto'
+  const medio = tamanho === 'medio'
   const cumpriu = feitosSemana >= meta
   // Enquanto segura um hábito feito, o círculo esvazia: é a prévia do desmarcar.
   const cheio = feito !== segurando
@@ -135,8 +136,11 @@ export function CirculoHabito({
       : `${feitosSemana} de ${meta} na semana`
 
   return (
-    <div className={cn('flex flex-col items-center', compacto ? 'gap-2' : 'gap-3')}>
-      <div className={cn('relative', compacto ? 'size-[72px]' : 'size-[140px]')}>
+    <div
+      className={cn('flex flex-col items-center select-none [-webkit-user-select:none] [user-select:none]', compacto ? 'gap-2' : 'gap-3')}
+      onContextMenu={(e) => e.preventDefault()}
+    >
+      <div className={cn('relative', compacto ? 'size-[72px]' : medio ? 'size-[120px]' : 'size-[120px]')}>
         {celebrando && (
           <div
             aria-hidden
@@ -162,7 +166,7 @@ export function CirculoHabito({
             aria-hidden
             className="absolute inset-[10%] flex items-center justify-center overflow-hidden rounded-full border-linha border-mt-border bg-white"
           >
-            <Icone className={cn('text-mt-green-dark', compacto ? 'size-6' : 'size-11')} strokeWidth={1.8} />
+            <Icone className={cn('text-mt-green-dark', compacto ? 'size-6' : 'size-10')} strokeWidth={1.8} />
           </div>
         ) : (
         <button
@@ -193,14 +197,14 @@ export function CirculoHabito({
             aria-hidden
             className={cn('relative flex', celebrando && 'animate-habito-pop motion-reduce:animate-none')}
           >
-            <Icone className={cn('text-mt-green-dark', compacto ? 'size-6' : 'size-11')} strokeWidth={1.8} />
+            <Icone className={cn('text-mt-green-dark', compacto ? 'size-6' : 'size-10')} strokeWidth={1.8} />
           </span>
         </button>
         )}
 
         {celebrando && (
           <div aria-hidden className="pointer-events-none absolute inset-0 motion-reduce:hidden">
-            {!compacto &&
+            {!compacto && !medio &&
               PARTICULAS.map((p, i) => (
                 <div key={i} className={cn('absolute left-1/2 top-1/2 size-0', p.giro)}>
                   <div className={cn('absolute -ml-[4.5px] -mt-[4.5px] size-[9px] animate-habito-particula', p.cor, p.forma)} />
@@ -218,6 +222,7 @@ export function CirculoHabito({
           <Link
             href={hrefEditar}
             aria-label={`Editar ${nome}`}
+            onContextMenu={(e) => e.preventDefault()}
             className={cn(
               'rounded-sm font-semibold leading-snug text-mt-black underline-offset-4 hover:underline hover:decoration-mt-green focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-mt-green-dark',
               compacto ? 'text-xs' : 'text-sm'
@@ -228,8 +233,13 @@ export function CirculoHabito({
         ) : (
           <span className={cn('font-semibold leading-snug text-mt-black', compacto ? 'text-xs' : 'text-sm')}>{nome}</span>
         )}
-        {!compacto && (
+        {!compacto && !medio && (
           <span className={cn('text-sm', cumpriu ? 'font-semibold text-mt-green-dark' : 'text-mt-apoio')}>
+            {rotuloSemana}
+          </span>
+        )}
+        {medio && (
+          <span className={cn('text-xs', cumpriu ? 'font-semibold text-mt-green-dark' : 'text-mt-apoio')}>
             {rotuloSemana}
           </span>
         )}

@@ -2,13 +2,11 @@ import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { contarMembros } from '@/lib/membros'
 import {
-  constancia,
   diaDeHoje,
   habitosDoDia,
   inicioDaSemana,
   podeCriarHabito,
   somarDias,
-  SEMANAS_CONSTANCIA,
 } from '@/lib/habitos'
 import { AuthLayout } from '@/components/AuthLayout'
 import { HabitosHoje } from '@/components/habitos/HabitosHoje'
@@ -29,20 +27,17 @@ export default async function HabitosPage() {
   if (!user) redirect('/auth/login')
 
   const hoje = diaDeHoje()
-  // A constância compara as 4 semanas fechadas com as 4 anteriores: 8 semanas
-  // inteiras mais a atual cobrem tudo o que a tela calcula.
-  const desde = somarDias(inicioDaSemana(hoje), -7 * SEMANAS_CONSTANCIA * 2)
 
   const [{ data: profile }, { data: habitosRaw }, { data: registrosRaw }, totalMembros] = await Promise.all([
     supabase.from('profiles').select('nome').eq('id', user.id).single(),
-    // Arquivados também: o histórico deles segue contando na constância.
     supabase
       .from('habitos')
       .select('*')
       .eq('user_id', user.id)
       .order('ordem', { ascending: true, nullsFirst: false })
       .order('criado_em', { ascending: true }),
-    supabase.from('habito_registros').select('*').eq('user_id', user.id).gte('dia', desde),
+    // Desde o início da semana: cobre a semana corrente (progressoSemanal e diasFeitos).
+    supabase.from('habito_registros').select('*').eq('user_id', user.id).gte('dia', inicioDaSemana(hoje)),
     contarMembros(),
   ])
 
@@ -52,13 +47,21 @@ export default async function HabitosPage() {
 
   const habitos = habitosDoDia(todos, registros, hoje)
 
+  // Dias desta semana (seg–hoje) em que pelo menos 1 hábito foi feito
+  const seg = inicioDaSemana(hoje)
+  const diasFeitos: string[] = []
+  for (let d = seg; d <= hoje; d = somarDias(d, 1)) {
+    if (registros.some((r) => r.dia === d && r.status === 'feito')) diasFeitos.push(d)
+  }
+
   return (
     <AuthLayout titulo="Meus Hábitos" nomeUsuario={profile?.nome ?? user.email ?? ''} totalMembros={totalMembros}>
       <HabitosHoje
         dataLabel={formatoData.format(new Date(`${hoje}T12:00:00Z`))}
         habitos={habitos}
-        constancia={constancia(todos, registros, hoje).atual}
         podeCriar={podeCriarHabito(ativos.length)}
+        diasFeitos={diasFeitos}
+        hoje={hoje}
       />
     </AuthLayout>
   )

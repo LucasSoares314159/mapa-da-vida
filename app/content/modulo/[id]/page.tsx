@@ -33,7 +33,7 @@ export default async function ModuloPage({ params }: { params: { id: string } })
   const proximo = MODULOS[index + 1] ?? null
 
   return (
-    <AuthLayout titulo={modulo.titulo} nomeUsuario={nomeUsuario} totalMembros={totalMembros}>
+    <AuthLayout nomeUsuario={nomeUsuario} totalMembros={totalMembros}>
       <ModuloAula
         modulo={modulo}
         index={index + 1}
