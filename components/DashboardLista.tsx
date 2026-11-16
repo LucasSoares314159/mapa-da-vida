@@ -118,27 +118,16 @@ export function DashboardLista({ mapas }: Props) {
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Dropdown de período */}
-          <select
-            value={periodo}
-            onChange={(e) => setPeriodoReset(e.target.value as Periodo)}
-            className="cursor-pointer rounded-full border-linha border-mt-border bg-white px-3 py-1.5 text-sm text-mt-green-dark outline-none focus-visible:ring-[3px] focus-visible:ring-mt-green/25"
-          >
-            {PERIODOS.map((p) => (
-              <option key={p.value} value={p.value}>{p.label}</option>
-            ))}
-          </select>
-
-          {/* Novo mapa */}
-          <Link
-            href="/mapa/novo"
-            aria-label="Novo mapa"
-            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-mt-green-dark text-mt-off-white transition-colors hover:bg-mt-green focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-mt-green-dark"
-          >
-            <Plus className="size-5" aria-hidden />
-          </Link>
-        </div>
+        {/* Dropdown de período */}
+        <select
+          value={periodo}
+          onChange={(e) => setPeriodoReset(e.target.value as Periodo)}
+          className="cursor-pointer rounded-full border-linha border-mt-border bg-white px-3 py-1.5 text-sm text-mt-green-dark outline-none focus-visible:ring-[3px] focus-visible:ring-mt-green/25"
+        >
+          {PERIODOS.map((p) => (
+            <option key={p.value} value={p.value}>{p.label}</option>
+          ))}
+        </select>
       </div>
 
       {/* Lista */}
@@ -229,6 +218,18 @@ export function DashboardLista({ mapas }: Props) {
           </button>
         </div>
       )}
+
+      {/* FAB de novo mapa — padrão de app, fixo no canto inferior. Só no celular:
+          no computador a Sidebar já tem o acesso a criar mapa. Acima do menu
+          inferior (bottom-24) e respeitando a safe area do iPhone. */}
+      <Link
+        href="/mapa/novo"
+        aria-label="Novo mapa"
+        className="fixed bottom-24 left-5 z-30 flex size-14 items-center justify-center rounded-full bg-mt-green-dark text-mt-off-white shadow-mt-2 transition-transform active:scale-95 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-mt-green-dark lg:hidden"
+        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <Plus className="size-6" aria-hidden />
+      </Link>
     </div>
   )
 }

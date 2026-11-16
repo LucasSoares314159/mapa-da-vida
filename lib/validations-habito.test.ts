@@ -4,11 +4,11 @@ import { habitoSchema } from './validations'
 const valido = { nome: 'Caminhar 20 min', icone: 'caminhar', area: 'Exercícios Físicos', meta_semanal: 4 }
 
 describe('habitoSchema', () => {
-  it('apara o nome e aceita de 3 a 24 caracteres', () => {
+  it('apara o nome e aceita de 3 a 48 caracteres', () => {
     expect(habitoSchema.parse({ ...valido, nome: '  Ler  ' }).nome).toBe('Ler')
     expect(habitoSchema.safeParse({ ...valido, nome: 'ab' }).success).toBe(false)
-    expect(habitoSchema.safeParse({ ...valido, nome: 'x'.repeat(25) }).success).toBe(false)
-    expect(habitoSchema.safeParse({ ...valido, nome: 'x'.repeat(24) }).success).toBe(true)
+    expect(habitoSchema.safeParse({ ...valido, nome: 'x'.repeat(49) }).success).toBe(false)
+    expect(habitoSchema.safeParse({ ...valido, nome: 'x'.repeat(48) }).success).toBe(true)
   })
 
   it('âncora vazia ou só com espaços vira null', () => {
