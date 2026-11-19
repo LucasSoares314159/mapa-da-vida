@@ -48,6 +48,20 @@ export const quiz1: ConfigQuiz = {
     rotuloBotao: 'COMEÇAR MEU DIAGNÓSTICO',
   },
 
+  // TELA 01, braco 'b' do teste A/B 50/50 (18/11/2026, aprovado pelo Lucas).
+  // So texto; fonte: mt-OS copy/anuncios/quiz-tela01-promessa-2026-11-18.md.
+  // Remover este bloco encerra o teste (a pagina volta so ao controle). Ao
+  // encerrar, a copy vencedora vira `abertura` e o bloco sai.
+  aberturaB: {
+    id: 'abertura',
+    titulo: 'Você dá conta do trabalho. *Por que os seus objetivos pessoais ficam pra depois?*',
+    paragrafos: [
+      'Responda 6 perguntas sobre a sua rotina e veja o que está travando os seus objetivos e por onde começar.',
+      '**2 minutos · sem cadastro · começa pela sua rotina**',
+    ],
+    rotuloBotao: 'QUERO ENTENDER',
+  },
+
   perguntas: [
     // TELA 02
     {

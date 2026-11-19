@@ -10,6 +10,7 @@
 // ganhar par server-side sem mudar quem o dispara.
 
 import { TRILHA_PRECO_VALOR } from '@/lib/empresa'
+import { bracoAtual } from '@/lib/quiz/braco'
 import { lerAtribuicao } from './atribuicao'
 import { eventoGa } from './ga'
 import { trackMeta, trackMetaCustom } from './meta'
@@ -61,6 +62,10 @@ export function track(evento: EventoQuiz, params: ParamsEvento = {}): string {
   const payload = limpar({
     ...atribuicao?.utm,
     ...params,
+    // Teste A/B da Tela 01 (lib/quiz/braco.ts): todo evento do quiz carrega o
+    // braco, para o GA4 (dimensao `braco`) quebrar qualquer etapa por copy.
+    // Vem por ultimo: nenhum chamador sobrescreve.
+    braco: bracoAtual(),
   })
 
   dispararPixel(evento, payload, eventId)

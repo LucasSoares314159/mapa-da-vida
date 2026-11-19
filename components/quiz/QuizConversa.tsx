@@ -284,8 +284,21 @@ export function QuizConversa({ config }: { config: ConfigQuiz }) {
           curto ainda. */}
       <main className="flex flex-1 flex-col px-5 pb-8 pt-5 celular-baixo:pt-3 celular-minimo:pt-2 sm:px-8 sm:py-12">
         <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col">
-          {passo.tipo === 'abertura' && (
+          {/* Teste A/B da Tela 01: as duas copies vao no HTML e o CSS mostra uma
+              (data-braco vem do script do layout; sem ele, o controle). So um
+              botao fica visivel, entao aceitar dispara 1x. */}
+          {passo.tipo === 'abertura' && !config.aberturaB && (
             <TelaTexto tela={passo.tela} onAvancar={aceitar} variante="abertura" />
+          )}
+          {passo.tipo === 'abertura' && config.aberturaB && (
+            <>
+              <div className="flex flex-1 flex-col group-data-[braco=b]/braco:hidden">
+                <TelaTexto tela={passo.tela} onAvancar={aceitar} variante="abertura" />
+              </div>
+              <div className="hidden flex-1 flex-col group-data-[braco=b]/braco:flex">
+                <TelaTexto tela={config.aberturaB} onAvancar={aceitar} variante="abertura" />
+              </div>
+            </>
           )}
 
           {passo.tipo === 'interstituicao' && (
