@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { MetaPixel } from '@/components/MetaPixel'
+import { SCRIPT_SORTEIO_BRACO } from '@/lib/quiz/braco'
 
 // Layout proprio do funil de quiz: sem Header, sem Sidebar, sem rodape.
 //
@@ -33,7 +34,18 @@ export default function QuizLayout({ children }: { children: React.ReactNode }) 
     <>
       <MetaPixel />
 
-      <div className="pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">{children}</div>
+      {/* Teste A/B da Tela 01 (lib/quiz/braco.ts). O script e o PRIMEIRO filho:
+          roda durante o parse, antes de qualquer conteudo abaixo dele pintar, e
+          poe data-braco neste div. O atributo nao vem do servidor, por isso o
+          suppressHydrationWarning. group/braco deixa o CSS da abertura (ver
+          QuizConversa) esconder a copy do outro braco sem JS no render. */}
+      <div
+        className="group/braco pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]"
+        suppressHydrationWarning
+      >
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_SORTEIO_BRACO }} />
+        {children}
+      </div>
     </>
   )
 }

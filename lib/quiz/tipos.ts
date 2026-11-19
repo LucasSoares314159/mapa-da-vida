@@ -147,6 +147,11 @@ export type ConfigQuiz = {
   descricaoPagina: string
   /** Tela de abertura (landing), antes da pergunta 1. Opcional: um quiz sem ela cai direto na pergunta 1. */
   abertura?: Interstituicao
+  /**
+   * Copy do braco 'b' do teste A/B da Tela 01 (ver lib/quiz/braco.ts). So texto:
+   * mesmo fluxo, mesmas telas. Ausente = sem teste, so a `abertura` e mostrada.
+   */
+  aberturaB?: Interstituicao
   perguntas: Pergunta[]
   /** Telas de copy no meio do fluxo, indexadas pela pergunta que as precede. */
   interstituicoes: { depoisDaPergunta: string; tela: Interstituicao }[]

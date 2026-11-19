@@ -948,6 +948,16 @@ Fica separado do `quiz_start` (1ª resposta) de propósito: `quiz_view − quiz_
 viu a abertura e não clicou; `quiz_accept − quiz_start` é quem clicou e não respondeu a q1.
 Rascunho restaurado não o dispara.
 
+**Teste A/B 50/50 da Tela 01 (`braco`, desde 19/11/2026).** Dois braços só de texto: `a` =
+controle (`config.abertura`), `b` = copy nova (`config.aberturaB`). Um script inline no
+`app/quiz/layout.tsx` sorteia antes do 1º paint, grava o cookie `mt_quiz_braco` (30 dias) e
+põe `data-braco` no wrapper; a abertura renderiza as duas copies e o CSS esconde a outra. A
+página continua estática (sem middleware). `track()` injeta `braco` ('a'|'b', default 'a')
+em **todo** evento do quiz — nenhum evento novo; no GA4 é a dimensão `braco` (escopo de
+evento). Override de QA: `?qa=1&braco=a|b` (não grava cookie; sem `qa=1` é ignorado). Para
+encerrar: a copy vencedora vira `abertura`, `aberturaB` sai e o braço deixa de existir (o
+`braco` no `track()` pode ficar). Código em `lib/quiz/braco.ts` (testado em `braco.test.ts`).
+
 **`?qa=1` na URL desliga todo o rastreio** (`lib/tracking/qa.ts`): `track()`, Pixel (o
 `rastreio-meta.js` nem carrega o `fbevents.js`) e GA4 (nem fila, nem `gtag.js`). Serve para
 navegar em produção sem registrar evento real. Não é persistido: vale enquanto estiver na URL.
